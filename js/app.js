@@ -115,6 +115,7 @@ const BOAT_RADIUS = 14;
 const BEAM_ROTATE_SPEED = 0.04;
 const WAKE_MAX = 30;
 const ROCK_SAFE_ZONE = 120;
+const ROCK_SPAWN_RADIUS = 400; // max distance from lighthouse where rocks can spawn
 const ARRIVAL_RADIUS = 55;
 const MAX_LIVES = 10;
 const WIN_SCORE = 10;
@@ -132,6 +133,7 @@ let BEAM_ORIGIN_OFFSET_X = 0;
 let BEAM_ORIGIN_OFFSET_Y = -64;
 const CAM_OFFSET = 100;
 const CAM_EASE = 0.04;
+const CAM_BEAM_OFFSET = 160; // how far camera shifts toward beam direction
 
 // Lamp burnout
 const LAMP_FULL_ANGLE = 0.3;
@@ -328,6 +330,12 @@ function updateDebug() {
   debugGfx.lineStyle(1, 0x88ff88, 0.3);
   debugGfx.drawCircle(lhX, lhY, ARRIVAL_RADIUS);
 
+  // Rock spawn zone (safe zone inner, max radius outer)
+  debugGfx.lineStyle(1, 0xffaa00, 0.4);
+  debugGfx.drawCircle(lhX, lhY, ROCK_SAFE_ZONE);
+  debugGfx.lineStyle(1, 0xffaa00, 0.25);
+  debugGfx.drawCircle(lhX, lhY, ROCK_SPAWN_RADIUS);
+
   // Rock colliders
   for (const rock of rockColliders) {
     debugGfx.lineStyle(2, 0xff2222, 0.8);
@@ -424,6 +432,7 @@ function generateRocks() {
     } while (
       tries < 50 &&
       (Math.hypot(x - lhX, y - lhY) < ROCK_SAFE_ZONE ||
+        Math.hypot(x - lhX, y - lhY) > ROCK_SPAWN_RADIUS ||
         rockDefs.some((r) => Math.hypot(x - r.x, y - r.y) < 60))
     );
 
@@ -1375,9 +1384,9 @@ function gameLoop(delta) {
     spr.y = spr._baseY + Math.sin(rockTime * 1.4 + spr._floatPhase) * 4;
   }
 
-  // Камера всегда центрируется на маяке
-  const targetCamX = gameW / 2 - lhX;
-  const targetCamY = gameH / 2 - lhY;
+  // Камера центрируется на маяке со смещением в сторону луча
+  const targetCamX = gameW / 2 - lhX - Math.cos(beamAngle) * CAM_BEAM_OFFSET;
+  const targetCamY = gameH / 2 - lhY - Math.sin(beamAngle) * CAM_BEAM_OFFSET;
   camX += (targetCamX - camX) * CAM_EASE * delta;
   camY += (targetCamY - camY) * CAM_EASE * delta;
   // Camera shake
@@ -1734,6 +1743,10 @@ function playFailSound() {
 }
 
 function showGameOver() {
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.visible = true;
+    overlayLayer.keySpace.visible = true;
+  }
   playFailSound();
   txtMessage.text = `💀 Game Over — ${score}/${WIN_SCORE} boats saved`;
   overlayLayer.visible = true;
