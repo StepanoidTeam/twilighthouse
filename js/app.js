@@ -8,6 +8,7 @@ async function showBoatGameOver() {
   gameOver = true;
   txtMessage.text = '💀 Game Over — 3 boats sunk!';
   overlayLayer.visible = true;
+  playFailSound();
   // Сделать текст поверх splash
   txtMessage.style = new PIXI.TextStyle({
     ...UI_STYLE,
@@ -50,6 +51,48 @@ async function showBoatGameOver() {
   repositionUI();
   // Скрыть splashMermaid если был
   if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
+}
+
+// ===== Game Over by Police =====
+function showPoliceGameOver() {
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.visible = true;
+    overlayLayer.keySpace.visible = true;
+  }
+  gameOver = true;
+  txtMessage.text = '🚔 Арест! Полиция захватила маяк!';
+  overlayLayer.visible = true;
+  playFailSound();
+  txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 38,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtMessage.position.set(gameW / 2, gameH / 2 - 40);
+  txtMessage.visible = true;
+  txtRestart.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 22,
+    fontWeight: 'normal',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 6,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
+  txtRestart.visible = true;
 }
 import { analytics, logEvent } from '../firebase.init.js';
 
@@ -132,6 +175,7 @@ const MERMAID_FRAME_DURATION = 8; // ticks per frame at 60fps
 // ===== Game State =====
 let app;
 let gameW, gameH, lhX, lhY;
+let bgMusic;
 let lighthouseContainer, lighthouseSprite;
 let textures = {};
 let darknessGfx, wakeGfx, lhGlow;
@@ -141,6 +185,7 @@ let beamAngle = -Math.PI / 2;
 let gameOver = false;
 let boats = [];
 let mermaids = [];
+let policeBoats = [];
 let rocks = [];
 let rockColliders = [];
 let rockSprites = [];
@@ -148,6 +193,7 @@ let score = 0;
 let lives = MAX_LIVES;
 let boatsSunk = 0;
 let mermaidsArrived = 0;
+let policeArrived = 0;
 let nextSpawnTime = 0;
 let lampTimer = 0;
 let lampFlicker = 1;
@@ -564,12 +610,64 @@ function spawnMermaid() {
   boatLayer.addChild(spr);
   mermaids.push({
     spr,
-    speed: BOAT_SPEED * 1.25 + Math.random() * 0.4, // скорость увеличена
+    speed: BOAT_SPEED + Math.random() * 0.4, // скорость как у лодок
     gone: false,
     wavePhase: Math.random() * Math.PI * 2, // для колебания
     beamTimer: 0, // сколько времени в луче
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION, // offset фазы
+  });
+}
+
+// ===== Police Boats =====
+function spawnPoliceBoat() {
+  const side = Math.floor(Math.random() * 4);
+  let x, y;
+  if (side === 0) {
+    x = Math.random() * gameW;
+    y = -SPAWN_MARGIN;
+  } else if (side === 1) {
+    x = gameW + SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  } else if (side === 2) {
+    x = Math.random() * gameW;
+    y = gameH + SPAWN_MARGIN;
+  } else {
+    x = -SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  }
+
+  const spr = new PIXI.Sprite(textures.boat);
+  spr.anchor.set(0.5);
+  spr.scale.set(BOAT_SCALE);
+  spr.tint = 0xaaccff;
+  spr.position.set(x, y);
+  boatLayer.addChild(spr);
+
+  const beacon = new PIXI.Graphics();
+  beacon.beginFill(0x0044ff, 1);
+  beacon.drawCircle(0, 0, BEACON_RADIUS);
+  beacon.endFill();
+  beacon.beginFill(0x2266ff, 0.4);
+  beacon.drawCircle(0, 0, BEACON_RADIUS * 2.5);
+  beacon.endFill();
+  beacon.blendMode = PIXI.BLEND_MODES.ADD;
+  beacon.position.set(x, y);
+  beaconLayer.addChild(beacon);
+
+  const angle = Math.atan2(lhY - y, lhX - x);
+  spr.rotation = angle + Math.PI / 2;
+
+  policeBoats.push({
+    spr,
+    beacon,
+    speed: BOAT_SPEED * 1.1 + Math.random() * 0.3,
+    sinkTimer: 0,
+    sinking: false,
+    arrived: false,
+    beaconPhase: Math.random() * Math.PI * 2,
+    beaconBlue: true,
+    wake: [],
   });
 }
 
@@ -733,6 +831,142 @@ function drawWakes() {
     while (b.wake.length > 0 && b.wake[b.wake.length - 1].age > WAKE_MAX) {
       b.wake.pop();
     }
+  }
+  for (const p of policeBoats) {
+    for (const w of p.wake) {
+      w.age++;
+      const t = w.age / WAKE_MAX;
+      if (t >= 1) continue;
+      wakeGfx.beginFill(C.wake, (1 - t) * 0.15);
+      wakeGfx.drawCircle(w.x, w.y, 2 + t * 4);
+      wakeGfx.endFill();
+    }
+    while (p.wake.length > 0 && p.wake[p.wake.length - 1].age > WAKE_MAX) {
+      p.wake.pop();
+    }
+  }
+}
+
+// ===== Update Police Boats =====
+function updatePoliceBoats(delta) {
+  for (let i = policeBoats.length - 1; i >= 0; i--) {
+    const p = policeBoats[i];
+    if (p.arrived) continue;
+
+    const { spr } = p;
+    const toX = lhX - spr.x;
+    const toY = lhY - spr.y;
+    const dist = Math.hypot(toX, toY);
+
+    if (dist < ARRIVAL_RADIUS && !p.sinking) {
+      p.arrived = true;
+      policeArrived++;
+      console.log(
+        `🚔 Полицейский катер добрался до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
+      );
+      spawnTooltip(spr.x, spr.y - 20, '🚔', TOOLTIP_STYLE_FAIL);
+      shakeTime = 0.5;
+      shakeIntensity = 18;
+      if (policeArrived >= 3 && !gameOver) {
+        showPoliceGameOver();
+      }
+      const fadeOut = () => {
+        spr.alpha -= 0.02;
+        p.beacon.alpha = spr.alpha;
+        if (spr.alpha <= 0) {
+          app.ticker.remove(fadeOut);
+          boatLayer.removeChild(spr);
+          beaconLayer.removeChild(p.beacon);
+          policeBoats.splice(policeBoats.indexOf(p), 1);
+        }
+      };
+      app.ticker.add(fadeOut);
+      continue;
+    }
+
+    if (p.sinking) {
+      p.sinkTimer += delta;
+      spr.alpha = Math.max(0, 1 - p.sinkTimer / 60);
+      spr.rotation += 0.03 * delta;
+      spr.scale.set(BOAT_SCALE * (1 - p.sinkTimer / 80));
+      if (spr.alpha <= 0) {
+        boatLayer.removeChild(spr);
+        beaconLayer.removeChild(p.beacon);
+        policeBoats.splice(i, 1);
+      }
+      continue;
+    }
+
+    // Police move like regular boats — slower when dark, faster when lit
+    const lit = isInBeam(spr.x, spr.y);
+    const speedMult = lit ? 1.5 : 0.6;
+    const nx = toX / dist;
+    const ny = toY / dist;
+
+    // Wander when not lit
+    let wx = 0,
+      wy = 0;
+    if (!lit) {
+      const wander = Math.sin(Date.now() * 0.001 + i * 13) * 0.5;
+      wx = -ny * wander;
+      wy = nx * wander;
+    }
+
+    const moveX = (nx + wx) * p.speed * speedMult * delta;
+    const moveY = (ny + wy) * p.speed * speedMult * delta;
+    spr.x += moveX;
+    spr.y += moveY;
+
+    // Face movement direction
+    const targetRot = Math.atan2(moveY, moveX) + Math.PI / 2;
+    let rDiff = targetRot - spr.rotation;
+    while (rDiff > Math.PI) rDiff -= Math.PI * 2;
+    while (rDiff < -Math.PI) rDiff += Math.PI * 2;
+    spr.rotation += rDiff * 0.08 * delta;
+
+    // Rock collision — sink when not lit (no penalty), push away when lit
+    if (checkRockCollision(spr.x, spr.y)) {
+      if (!lit) {
+        p.sinking = true;
+        p.sinkTimer = 0;
+        console.log(
+          `🚔 Полицейский катер разбился о камни (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
+        );
+      } else {
+        for (const rock of rockColliders) {
+          const rd = Math.hypot(spr.x - rock.x, spr.y - rock.y);
+          if (rd < rock.radius + BOAT_RADIUS && rd > 0) {
+            spr.x =
+              rock.x + ((spr.x - rock.x) / rd) * (rock.radius + BOAT_RADIUS);
+            spr.y =
+              rock.y + ((spr.y - rock.y) / rd) * (rock.radius + BOAT_RADIUS);
+          }
+        }
+      }
+    }
+
+    // Wake trail
+    p.wake.unshift({ x: spr.x - nx * 14, y: spr.y - ny * 14, age: 0 });
+    if (p.wake.length > WAKE_MAX) p.wake.pop();
+
+    // Pulse beacon: same sine as regular boats, color alternates by sign
+    const t = Math.sin(Date.now() * BEACON_PULSE_SPEED + p.beaconPhase);
+    const isBlue = t >= 0;
+    if (isBlue !== p.beaconBlue) {
+      p.beaconBlue = isBlue;
+      const col = isBlue ? 0x0044ff : 0xff2200;
+      const glow = isBlue ? 0x2266ff : 0xff4400;
+      p.beacon.clear();
+      p.beacon.beginFill(col, 1);
+      p.beacon.drawCircle(0, 0, BEACON_RADIUS);
+      p.beacon.endFill();
+      p.beacon.beginFill(glow, 0.4);
+      p.beacon.drawCircle(0, 0, BEACON_RADIUS * 2.5);
+      p.beacon.endFill();
+      p.beacon.blendMode = PIXI.BLEND_MODES.ADD;
+    }
+    p.beacon.alpha = Math.abs(t);
+    p.beacon.position.set(spr.x, spr.y);
   }
 }
 
@@ -1085,11 +1319,14 @@ function gameLoop(delta) {
   // Spawn boats
   const now = performance.now();
   if (now > nextSpawnTime) {
-    // 50% chance to spawn a mermaid instead of a boat
-    if (Math.random() < 0.5) {
+    // Spawn: 40% boat, 40% mermaid, 20% police
+    const roll = Math.random();
+    if (roll < 0.4) {
       spawnBoat();
-    } else {
+    } else if (roll < 0.8) {
       spawnMermaid();
+    } else {
+      spawnPoliceBoat();
     }
     nextSpawnTime =
       now +
@@ -1099,6 +1336,7 @@ function gameLoop(delta) {
 
   updateBoats(delta);
   updateMermaids(delta);
+  updatePoliceBoats(delta);
   drawWakes();
   updateDarkness();
   updateTooltips(delta);
@@ -1192,6 +1430,7 @@ function updateMermaids(delta) {
       gameOver = true;
       txtMessage.text = '💀 Game Over — 3 mermaids reached the lighthouse!';
       overlayLayer.visible = true;
+      playFailSound();
       // Сделать текст поверх splash
       txtMessage.style = new PIXI.TextStyle({
         ...UI_STYLE,
@@ -1243,7 +1482,13 @@ function updateMermaids(delta) {
 }
 
 // ===== Win / Restart =====
+function playFailSound() {
+  const snd = new Audio('audio/fail-1.mp3');
+  snd.play().catch(() => {});
+}
+
 function showGameOver() {
+  playFailSound();
   txtMessage.text = `💀 Game Over — ${score}/${WIN_SCORE} boats saved`;
   overlayLayer.visible = true;
 }
@@ -1266,9 +1511,17 @@ function restart() {
   }
   boats = [];
 
+  // Remove all police boats
+  for (const p of policeBoats) {
+    boatLayer.removeChild(p.spr);
+    beaconLayer.removeChild(p.beacon);
+  }
+  policeBoats = [];
+
   score = 0;
   lives = MAX_LIVES;
   mermaidsArrived = 0;
+  policeArrived = 0;
   lampTimer = 0;
   lampFlicker = 1;
   BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
@@ -1357,6 +1610,19 @@ async function init() {
   updateHUD();
   nextSpawnTime = performance.now() + 1000;
   app.ticker.add(gameLoop);
+
+  // ===== Background Music =====
+  bgMusic = new Audio('audio/ocean-sea-soft-waves.mp3');
+  bgMusic.loop = true;
+  bgMusic.volume = 0.05;
+  // Autoplay requires a user gesture — start on first interaction
+  const startMusic = () => {
+    bgMusic.play().catch(() => {});
+    window.removeEventListener('pointerdown', startMusic);
+    window.removeEventListener('keydown', startMusic);
+  };
+  window.addEventListener('pointerdown', startMusic);
+  window.addEventListener('keydown', startMusic);
 
   if (analytics) {
     logEvent(analytics, 'game_start', {
