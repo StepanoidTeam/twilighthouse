@@ -1,3 +1,56 @@
+// ===== Game Over by Boats (Iceberg) =====
+async function showBoatGameOver() {
+  // Показать спрайты-кнопки
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.visible = true;
+    overlayLayer.keySpace.visible = true;
+  }
+  gameOver = true;
+  txtMessage.text = '💀 Game Over — 3 boats sunk!';
+  overlayLayer.visible = true;
+  // Сделать текст поверх splash
+  txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 38,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
+  txtMessage.visible = true;
+  txtRestart.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 22,
+    fontWeight: 'normal',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 6,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
+  txtRestart.visible = true;
+  // Загрузить splash-iceberg.png, если не загружен
+  if (!textures.splashIceberg) {
+    textures.splashIceberg = await PIXI.Assets.load(
+      'sprites/splash-iceberg.png',
+    );
+  }
+  overlayLayer.splashIceberg.texture = textures.splashIceberg;
+  overlayLayer.splashIceberg.visible = true;
+  repositionUI();
+  // Скрыть splashMermaid если был
+  if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
+}
 import { analytics, logEvent } from '../firebase.init.js';
 
 const PIXI = globalThis.PIXI;
@@ -84,6 +137,7 @@ let rockColliders = [];
 let rockSprites = [];
 let score = 0;
 let lives = MAX_LIVES;
+let boatsSunk = 0;
 let mermaidsArrived = 0;
 let nextSpawnTime = 0;
 let lampTimer = 0;
@@ -91,6 +145,9 @@ let lampFlicker = 1;
 let rockLayer, boatLayer, beaconLayer, tooltipLayer, worldContainer;
 let camX = 0,
   camY = 0;
+// Camera shake state
+let shakeTime = 0;
+let shakeIntensity = 0;
 
 // ===== Debug =====
 let debugMode = false;
@@ -330,8 +387,7 @@ function buildRocks(parent) {
     rockSprites.push(spr);
 
     const avgW = textures[r.tex].width;
-    const avgH = textures[r.tex].heig;
-
+    const avgH = textures[r.tex].height;
     const avgSize = (avgW + avgH) / 2;
     rockColliders.push({ x: r.x, y: r.y, radius: avgSize * r.sc * 0.3 });
   }
@@ -610,13 +666,17 @@ function updateBoats(delta) {
         b.sinking = true;
         b.sinkTimer = 0;
         lives--;
+        boatsSunk++;
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
         // 🛥️ Корабль затонул
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
-        if (lives <= 0) {
+        // Если три корабля затонуло — проигрыш
+        if (boatsSunk >= 3 && !gameOver) {
+          showBoatGameOver();
+        } else if (lives <= 0) {
           gameOver = true;
           showGameOver();
         }
@@ -902,12 +962,18 @@ function buildUI() {
   txtRestart.anchor.set(0.5);
   overlayLayer.addChild(txtRestart);
 
+  // Iceberg splash image (hidden by default)
+  overlayLayer.splashIceberg = new PIXI.Sprite();
+  overlayLayer.splashIceberg.anchor.set(0.5);
+  overlayLayer.splashIceberg.visible = false;
+  overlayLayer.addChildAt(overlayLayer.splashIceberg, 0);
+
   // Mermaid splash image (hidden by default)
   overlayLayer.splashMermaid = new PIXI.Sprite();
   overlayLayer.splashMermaid.anchor.set(0.5);
   overlayLayer.splashMermaid.visible = false;
-  // Добавляем splash-картинку на задний план (индекс 0)
-  overlayLayer.addChildAt(overlayLayer.splashMermaid, 0);
+  // Добавляем splash-картинку на задний план (индекс 1, после iceberg)
+  overlayLayer.addChildAt(overlayLayer.splashMermaid, 1);
 
   app.stage.addChild(overlayLayer);
 
@@ -915,11 +981,11 @@ function buildUI() {
 }
 
 function repositionUI() {
-    // Позиционирование спрайтов-кнопок на экране поражения
-    if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-      overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 120);
-      overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 120);
-    }
+  // Позиционирование спрайтов-кнопок на экране поражения
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 120);
+    overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 120);
+  }
   txtLives.position.set(gameW / 2 - 50, 16);
   txtScore.position.set(gameW / 2 + 50, 16);
   // Move buttons if present
@@ -935,23 +1001,26 @@ function repositionUI() {
 
   txtMessage.position.set(gameW / 2, gameH / 2 - 20);
   txtRestart.position.set(gameW / 2, gameH / 2 + 30);
-  if (overlayLayer.splashMermaid) {
-    // Splash на весь экран, с сохранением пропорций
-    overlayLayer.splashMermaid.position.set(gameW / 2, gameH / 2);
-    if (
-      overlayLayer.splashMermaid.texture &&
-      overlayLayer.splashMermaid.texture.baseTexture
-    ) {
-      const tex = overlayLayer.splashMermaid.texture;
-      const tw = tex.width,
-        th = tex.height;
-      const scale = Math.min(gameW / tw, gameH / th);
-      overlayLayer.splashMermaid.width = tw * scale;
-      overlayLayer.splashMermaid.height = th * scale;
-    } else {
-      overlayLayer.splashMermaid.width = gameW;
-      overlayLayer.splashMermaid.height = gameH;
-    }
+
+  positionSplashSprite(overlayLayer.splashIceberg);
+  positionSplashSprite(overlayLayer.splashMermaid);
+}
+
+function positionSplashSprite(sprite) {
+  if (!sprite) return;
+
+  sprite.position.set(gameW / 2, gameH / 2);
+
+  if (sprite.texture && sprite.texture.baseTexture) {
+    const tex = sprite.texture;
+    const tw = tex.width;
+    const th = tex.height;
+    const scale = Math.min(gameW / tw, gameH / th);
+    sprite.width = tw * scale;
+    sprite.height = th * scale;
+  } else {
+    sprite.width = gameW;
+    sprite.height = gameH;
   }
 }
 
@@ -982,7 +1051,20 @@ function gameLoop(delta) {
   const targetCamY = gameH / 2 - lhY;
   camX += (targetCamX - camX) * CAM_EASE * delta;
   camY += (targetCamY - camY) * CAM_EASE * delta;
-  worldContainer.position.set(camX, camY);
+  // Camera shake
+  let shakeOffsetX = 0,
+    shakeOffsetY = 0;
+  if (shakeTime > 0) {
+    shakeTime -= delta / 60;
+    const power = shakeIntensity * (shakeTime > 0 ? Math.max(0, shakeTime) : 0);
+    shakeOffsetX = (Math.random() - 0.5) * 2 * power;
+    shakeOffsetY = (Math.random() - 0.5) * 2 * power;
+    if (shakeTime <= 0) {
+      shakeTime = 0;
+      shakeIntensity = 0;
+    }
+  }
+  worldContainer.position.set(camX + shakeOffsetX, camY + shakeOffsetY);
   // Lighthouse position is set only on resize/init, not every frame
 
   // Lamp burnout — flicker and narrow over time
@@ -1039,8 +1121,8 @@ function updateMermaids(delta) {
     // Если русалка в луче — увеличиваем beamTimer, иначе сбрасываем
     if (isInBeam(m.spr.x, m.spr.y)) {
       m.beamTimer += delta / 60; // delta ~1..2, переводим в секунды
-      // Если держим в луче 2+ сек — исчезает
-      if (m.beamTimer >= 2 && !m.gone) {
+      // Если держим в луче 1+ сек — исчезает
+      if (m.beamTimer >= 1 && !m.gone) {
         m.gone = true;
         // 🧜‍♀️ Русалка исчезла в луче
         console.log(
@@ -1074,6 +1156,9 @@ function updateMermaids(delta) {
       console.log(
         `🧜‍♀️ Русалка добралась до маяка (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`,
       );
+      // Эффект тряски камеры
+      shakeTime = 0.5; // секунд
+      shakeIntensity = 18; // пикселей
       m.gone = true;
       mermaidsArrived++;
       // Если три русалки добрались — проигрыш
@@ -1094,11 +1179,11 @@ function updateMermaids(delta) {
     }
     // ===== Game Over by Mermaids =====
     async function showMermaidGameOver() {
-        // Показать спрайты-кнопки
-        if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-          overlayLayer.keyEnter.visible = true;
-          overlayLayer.keySpace.visible = true;
-        }
+      // Показать спрайты-кнопки
+      if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+        overlayLayer.keyEnter.visible = true;
+        overlayLayer.keySpace.visible = true;
+      }
       gameOver = true;
       txtMessage.text = '💀 Game Over — 3 mermaids reached the lighthouse!';
       overlayLayer.visible = true;
@@ -1164,8 +1249,8 @@ function showWin() {
 }
 
 function restart() {
-    if (overlayLayer.keyEnter) overlayLayer.keyEnter.visible = false;
-    if (overlayLayer.keySpace) overlayLayer.keySpace.visible = false;
+  if (overlayLayer.keyEnter) overlayLayer.keyEnter.visible = false;
+  if (overlayLayer.keySpace) overlayLayer.keySpace.visible = false;
   overlayLayer.visible = false;
   if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
 
