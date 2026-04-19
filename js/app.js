@@ -935,6 +935,9 @@ function updatePoliceBoats(delta) {
       spr.texture = textures[BOAT_FRAMES[p.frameIndex]];
     }
 
+    // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо
+    const lit = isInBeam(spr.x, spr.y);
+
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
       policeArrived++;
@@ -976,7 +979,6 @@ function updatePoliceBoats(delta) {
     }
 
     // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо
-    const lit = isInBeam(spr.x, spr.y);
     const nx = toX / dist;
     const ny = toY / dist;
 
