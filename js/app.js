@@ -1,3 +1,12 @@
+import { analytics, logEvent } from '../firebase.init.js';
+
+const PIXI = globalThis.PIXI;
+const $gameContainer = document.getElementById('$gameContainer');
+
+if (!PIXI) {
+  throw new Error('PIXI not loaded — include pixi.min.js before app.js.');
+}
+
 // ===== Lighthouse Demo Game =====
 // Player controls the lighthouse beam. Boats approach from all sides.
 // Illuminate boats to guide them safely — if they hit rocks, they sink.
@@ -853,7 +862,7 @@ async function init() {
   debugText.position.set(10, 10);
   app.stage.addChild(debugText);
 
-  buildGlow(worldContainer);
+  buildGlow(worldContainer); 
 
   buildUI();
 
@@ -861,6 +870,14 @@ async function init() {
   updateHUD();
   nextSpawnTime = performance.now() + 1000;
   app.ticker.add(gameLoop);
+
+  if (analytics) {
+    logEvent(analytics, 'game_start', {
+      game_name: 'lighthouse',
+      viewport_w: gameW,
+      viewport_h: gameH,
+    });
+  }
 
   console.log('🔦 Lighthouse game initialized');
 }

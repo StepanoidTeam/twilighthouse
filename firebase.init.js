@@ -1,0 +1,16 @@
+import { firebaseConfig } from './firebase.config.js';
+import {
+  getAnalytics,
+  getFirestore,
+  isSupported,
+  logEvent,
+  initializeApp,
+} from './firebase.js';
+
+const app = initializeApp(firebaseConfig);
+export const db = getFirestore(app);
+
+/** null if Analytics is not supported in this environment (e.g. some private modes). */
+export const analytics = (await isSupported()) ? getAnalytics(app) : null;
+
+export { logEvent };

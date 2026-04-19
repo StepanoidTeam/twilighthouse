@@ -1,0 +1,7 @@
+{
+  "name": "demo-lighthouse",
+  "private": true,
+  "scripts": {
+    "start": "npx --yes serve@14 . -l 8080"
+  }
+}
