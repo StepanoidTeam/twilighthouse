@@ -20,6 +20,8 @@ const BEAM_LEN = 1400;
 const DARK_ALPHA = 0.82;
 const LH_GLOW_RADIUS = 55;
 const BEAM_ORIGIN_OFFSET_Y = -30;
+const CAM_OFFSET = 100;
+const CAM_EASE = 0.04;
 
 // ===== Color Palette =====
 const C = {
@@ -61,7 +63,8 @@ let rockColliders = [];
 let score = 0;
 let lives = 3;
 let nextSpawnTime = 0;
-let rockLayer, boatLayer, beaconLayer;
+let rockLayer, boatLayer, beaconLayer, worldContainer;
+let camX = 0, camY = 0;
 
 // ===== UI State =====
 let hudLayer, overlayLayer;
@@ -77,7 +80,7 @@ function resize() {
   app.renderer.resize(gameW, gameH);
 
   // Resize darkness render texture
-  const pad = 40;
+  const pad = CAM_OFFSET + 40;
   darkRT.resize(gameW + pad * 2, gameH + pad * 2);
 }
 
@@ -161,7 +164,7 @@ function buildGlow(parent) {
 
 // ===== Darkness Overlay =====
 function buildDarkness(parent) {
-  const pad = 40;
+  const pad = CAM_OFFSET + 40;
   darkRT = PIXI.RenderTexture.create({
     width: gameW + pad * 2,
     height: gameH + pad * 2,
@@ -178,7 +181,7 @@ function buildDarkness(parent) {
 }
 
 function updateDarkness() {
-  const pad = 40;
+  const pad = CAM_OFFSET + 40;
   const bLen = Math.max(gameW, gameH) * 2;
   const cx = lhX + pad;
   const cy = lhY + BEAM_ORIGIN_OFFSET_Y + pad;
@@ -387,7 +390,10 @@ function updateBoats(delta) {
     if (b.wake.length > WAKE_MAX) b.wake.pop();
 
     // Pulse beacon and follow boat
-    const pulse = Math.max(0, Math.sin(Date.now() * BEACON_PULSE_SPEED + b.beaconPhase));
+    const pulse = Math.max(
+      0,
+      Math.sin(Date.now() * BEACON_PULSE_SPEED + b.beaconPhase),
+    );
     b.beacon.alpha = pulse;
     b.beacon.position.set(spr.x, spr.y);
   }
@@ -535,6 +541,13 @@ function gameLoop(delta) {
   if (keys['KeyD'] || keys['ArrowRight'])
     beamAngle += BEAM_ROTATE_SPEED * delta;
 
+  // Camera follows beam direction with easing
+  const targetCamX = -Math.cos(beamAngle) * CAM_OFFSET;
+  const targetCamY = -Math.sin(beamAngle) * CAM_OFFSET;
+  camX += (targetCamX - camX) * CAM_EASE * delta;
+  camY += (targetCamY - camY) * CAM_EASE * delta;
+  worldContainer.position.set(camX, camY);
+
   // Spawn boats
   const now = performance.now();
   if (now > nextSpawnTime) {
@@ -602,25 +615,29 @@ async function init() {
   // Load individual sprites
   await loadTextures();
 
-  // Layer order: wake → rocks → beam → boats → lighthouse → darkness → HUD
+  // World container holds all game elements (camera moves this)
+  worldContainer = new PIXI.Container();
+  app.stage.addChild(worldContainer);
+
+  // Layer order: wake → rocks → boats → lighthouse → darkness → beacons → glow
   wakeGfx = new PIXI.Graphics();
-  app.stage.addChild(wakeGfx);
+  worldContainer.addChild(wakeGfx);
 
   rockLayer = new PIXI.Container();
   buildRocks(rockLayer);
-  app.stage.addChild(rockLayer);
+  worldContainer.addChild(rockLayer);
 
   boatLayer = new PIXI.Container();
-  app.stage.addChild(boatLayer);
+  worldContainer.addChild(boatLayer);
 
-  buildLighthouse(app.stage);
+  buildLighthouse(worldContainer);
 
-  buildDarkness(app.stage);
+  buildDarkness(worldContainer);
 
   beaconLayer = new PIXI.Container();
-  app.stage.addChild(beaconLayer);
+  worldContainer.addChild(beaconLayer);
 
-  buildGlow(app.stage);
+  buildGlow(worldContainer);
 
   buildUI();
 
