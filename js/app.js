@@ -612,8 +612,8 @@ function spawnMermaid() {
     spr,
     speed: BOAT_SPEED + Math.random() * 0.4, // скорость как у лодок
     gone: false,
+    fleeing: false,
     wavePhase: Math.random() * Math.PI * 2, // для колебания
-    beamTimer: 0, // сколько времени в луче
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION, // offset фазы
   });
@@ -1357,21 +1357,40 @@ function updateMermaids(delta) {
       m.spr.texture = textures[MERMAID_FRAMES[m.frameIndex]];
     }
 
-    // Swim toward lighthouse
-    const toX = lhX - m.spr.x;
-    const toY = lhY - m.spr.y;
-    const dist = Math.hypot(toX, toY);
-    // Если русалка в луче — увеличиваем beamTimer, иначе сбрасываем
-    if (isInBeam(m.spr.x, m.spr.y)) {
-      m.beamTimer += delta / 60; // delta ~1..2, переводим в секунды
-      // Если держим в луче 1+ сек — исчезает
-      if (m.beamTimer >= 1 && !m.gone) {
-        m.gone = true;
-        // 🧜‍♀️ Русалка исчезла в луче
+    const lit = isInBeam(m.spr.x, m.spr.y);
+
+    // Если луч попал — русалка убегает обратно за экран
+    if (lit) {
+      m.fleeing = true;
+    }
+
+    let nx, ny, speedMult;
+    if (m.fleeing) {
+      // Бежит от маяка в 2 раза быстрее
+      const awayX = m.spr.x - lhX;
+      const awayY = m.spr.y - lhY;
+      const awayDist = Math.hypot(awayX, awayY) || 1;
+      nx = awayX / awayDist;
+      ny = awayY / awayDist;
+      speedMult = 2;
+    } else {
+      // Плывёт к маяку
+      const toX = lhX - m.spr.x;
+      const toY = lhY - m.spr.y;
+      const dist = Math.hypot(toX, toY);
+
+      // Достигла маяка
+      if (dist < ARRIVAL_RADIUS) {
         console.log(
-          `🧜‍♀️ Русалка исчезла в луче на (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`,
+          `🧜‍♀️ Русалка добралась до маяка (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`,
         );
-        // Fade out
+        shakeTime = 0.5;
+        shakeIntensity = 18;
+        m.gone = true;
+        mermaidsArrived++;
+        if (mermaidsArrived >= 3 && !gameOver) {
+          showMermaidGameOver();
+        }
         const fadeOut = () => {
           m.spr.alpha -= 0.04 * delta;
           if (m.spr.alpha <= 0) {
@@ -1383,95 +1402,36 @@ function updateMermaids(delta) {
         app.ticker.add(fadeOut);
         continue;
       }
-    } else {
-      m.beamTimer = 0;
+
+      nx = toX / dist;
+      ny = toY / dist;
+      speedMult = 1;
     }
-    // Move toward lighthouse + волна по X
-    const nx = toX / dist;
-    const ny = toY / dist;
-    // Синусоидальное колебание по X (амплитуда 24px, период ~2.5с)
+
+    // Синусоидальное колебание по X (только когда не убегает)
     m.wavePhase += 0.04 * delta;
-    const waveOffset = Math.sin(performance.now() * 0.002 + m.wavePhase) * 24;
-    m.spr.x += nx * m.speed * delta + waveOffset * 0.04 * delta;
-    m.spr.y += ny * m.speed * delta;
-    // Если русалка добралась до маяка (ARRIVAL_RADIUS)
-    if (dist < ARRIVAL_RADIUS) {
-      console.log(
-        `🧜‍♀️ Русалка добралась до маяка (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`,
-      );
-      // Эффект тряски камеры
-      shakeTime = 0.5; // секунд
-      shakeIntensity = 18; // пикселей
+    const waveOffset = m.fleeing
+      ? 0
+      : Math.sin(performance.now() * 0.002 + m.wavePhase) * 24;
+
+    m.spr.x += nx * m.speed * speedMult * delta + waveOffset * 0.04 * delta;
+    m.spr.y += ny * m.speed * speedMult * delta;
+
+    // Удалить если уплыла за пределы экрана
+    if (
+      m.fleeing &&
+      (m.spr.x < -SPAWN_MARGIN * 2 ||
+        m.spr.x > gameW + SPAWN_MARGIN * 2 ||
+        m.spr.y < -SPAWN_MARGIN * 2 ||
+        m.spr.y > gameH + SPAWN_MARGIN * 2)
+    ) {
       m.gone = true;
-      mermaidsArrived++;
-      // Если три русалки добрались — проигрыш
-      if (mermaidsArrived >= 3 && !gameOver) {
-        showMermaidGameOver();
-      }
-      // Мягко исчезает
-      const fadeOut = () => {
-        m.spr.alpha -= 0.04 * delta;
-        if (m.spr.alpha <= 0) {
-          boatLayer.removeChild(m.spr);
-          mermaids.splice(i, 1);
-          app.ticker.remove(fadeOut);
-        }
-      };
-      app.ticker.add(fadeOut);
+      console.log(`🧜‍♀️ Русалка уплыла за экран`);
+      boatLayer.removeChild(m.spr);
+      mermaids.splice(i, 1);
       continue;
     }
-    // ===== Game Over by Mermaids =====
-    async function showMermaidGameOver() {
-      // Показать спрайты-кнопки
-      if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-        overlayLayer.keyEnter.visible = true;
-        overlayLayer.keySpace.visible = true;
-      }
-      gameOver = true;
-      txtMessage.text = '💀 Game Over — 3 mermaids reached the lighthouse!';
-      overlayLayer.visible = true;
-      playFailSound();
-      // Сделать текст поверх splash
-      txtMessage.style = new PIXI.TextStyle({
-        ...UI_STYLE,
-        fontSize: 38,
-        fontWeight: 'bold',
-        fill: '#fff',
-        stroke: '#000',
-        strokeThickness: 6,
-        dropShadow: true,
-        dropShadowColor: '#000',
-        dropShadowBlur: 8,
-        dropShadowDistance: 0,
-        align: 'center',
-      });
-      txtMessage.position.set(gameW / 2, gameH / 2 - 60);
-      txtMessage.visible = true;
-      txtRestart.style = new PIXI.TextStyle({
-        ...UI_STYLE,
-        fontSize: 22,
-        fontWeight: 'normal',
-        fill: '#fff',
-        stroke: '#000',
-        strokeThickness: 4,
-        dropShadow: true,
-        dropShadowColor: '#000',
-        dropShadowBlur: 6,
-        dropShadowDistance: 0,
-        align: 'center',
-      });
-      txtRestart.position.set(gameW / 2, gameH / 2 + 60);
-      txtRestart.visible = true;
-      // Загрузить splash-mermaid.png, если не загружен
-      if (!textures.splashMermaid) {
-        textures.splashMermaid = await PIXI.Assets.load(
-          'sprites/splash-mermaid.png',
-        );
-      }
-      overlayLayer.splashMermaid.texture = textures.splashMermaid;
-      overlayLayer.splashMermaid.visible = true;
-      repositionUI(); // чтобы сразу растянуть на весь экран
-    }
+
     // Face movement direction
     const targetRot = Math.atan2(ny, nx) + Math.PI / 2;
     let rDiff = targetRot - m.spr.rotation;
@@ -1481,9 +1441,61 @@ function updateMermaids(delta) {
   }
 }
 
+// ===== Game Over by Mermaids =====
+async function showMermaidGameOver() {
+  // Показать спрайты-кнопки
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.visible = true;
+    overlayLayer.keySpace.visible = true;
+  }
+  gameOver = true;
+  txtMessage.text = '💀 Game Over — 3 mermaids reached the lighthouse!';
+  overlayLayer.visible = true;
+  playFailSound();
+  txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 38,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
+  txtMessage.visible = true;
+  txtRestart.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 22,
+    fontWeight: 'normal',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 6,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
+  txtRestart.visible = true;
+  if (!textures.splashMermaid) {
+    textures.splashMermaid = await PIXI.Assets.load(
+      'sprites/splash-mermaid.png',
+    );
+  }
+  overlayLayer.splashMermaid.texture = textures.splashMermaid;
+  overlayLayer.splashMermaid.visible = true;
+  repositionUI();
+}
+
 // ===== Win / Restart =====
 function playFailSound() {
   const snd = new Audio('audio/fail-1.mp3');
+  snd.volume = 0.5;
   snd.play().catch(() => {});
 }
 
