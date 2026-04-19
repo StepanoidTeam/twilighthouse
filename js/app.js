@@ -1,3 +1,5 @@
+// import * as PIXI from "../../pixi/pixi.js";
+// https://cdn.jsdelivr.net/npm/pixi.js@8.12.0/dist/pixi.mjs
 // ===== Game Over by Boats (Iceberg) =====
 async function showBoatGameOver() {
   // Показать спрайты-кнопки
@@ -150,15 +152,18 @@ const C = {
 
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
-  mermaid: 'sprites/mermaid.png',
-  mermaid1: 'sprites/mermaid-1.png',
-  mermaid2: 'sprites/mermaid-2.png',
-  mermaid3: 'sprites/mermaid-3.png',
+  kraken: 'sprites/mermaid/1.png',
+  mermaid1: 'sprites/mermaid/1.png',
+  mermaid2: 'sprites/mermaid/2.png',
+  mermaid3: 'sprites/mermaid/3.png',
+  boat: 'sprites/boat/1.png', // todo(vmyshko): delete
+  boat1: 'sprites/boat/1.png',
+  boat2: 'sprites/boat/2.png',
+  boat3: 'sprites/boat/3.png',
   button: 'sprites/button.png',
   buttonEnter: 'sprites/button-enter.png',
   buttonSpace: 'sprites/button-space.png',
   lighthouse: 'sprites/lighthouse.png',
-  boat: 'sprites/boat.png',
   rock1: 'sprites/rock1.png',
   rock2: 'sprites/rock2.png',
   rock3: 'sprites/rock3.png',
@@ -171,6 +176,9 @@ const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 // Ping-pong frame sequence: 1→2→3→2→1→...
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8; // ticks per frame at 60fps
+
+const BOAT_FRAMES = ['boat1', 'boat2', 'boat3', 'boat2'];
+const BOAT_FRAME_DURATION = 10; // ticks per frame at 60fps
 
 // ===== Game State =====
 let app;
@@ -186,6 +194,7 @@ let gameOver = false;
 let boats = [];
 let mermaids = [];
 let policeBoats = [];
+let krakens = [];
 let rocks = [];
 let rockColliders = [];
 let rockSprites = [];
@@ -194,6 +203,7 @@ let lives = MAX_LIVES;
 let boatsSunk = 0;
 let mermaidsArrived = 0;
 let policeArrived = 0;
+let krakensArrived = 0;
 let nextSpawnTime = 0;
 let lampTimer = 0;
 let lampFlicker = 1;
@@ -551,7 +561,7 @@ function spawnBoat() {
     y = Math.random() * gameH;
   }
 
-  const spr = new PIXI.Sprite(textures.boat);
+  const spr = new PIXI.Sprite(textures.boat1);
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE);
   spr.position.set(x, y);
@@ -589,6 +599,8 @@ function spawnBoat() {
     sinking: false,
     arrived: false,
     wake: [],
+    frameIndex: 0,
+    frameTick: Math.random() * BOAT_FRAME_DURATION,
   });
 }
 
@@ -626,6 +638,37 @@ function spawnMermaid() {
   });
 }
 
+// ===== Krakens =====
+function spawnKraken() {
+  const side = Math.floor(Math.random() * 4);
+  let x, y;
+  if (side === 0) {
+    x = Math.random() * gameW;
+    y = -SPAWN_MARGIN;
+  } else if (side === 1) {
+    x = gameW + SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  } else if (side === 2) {
+    x = Math.random() * gameW;
+    y = gameH + SPAWN_MARGIN;
+  } else {
+    x = -SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  }
+  const spr = new PIXI.Sprite(textures.kraken); // placeholder — replace with textures.kraken
+  spr.anchor.set(0.5);
+  spr.scale.set(BOAT_SCALE * 1.5); // крупнее чем русалка
+  spr.tint = 0x880055;
+  spr.position.set(x, y);
+  boatLayer.addChild(spr);
+  krakens.push({
+    spr,
+    speed: BOAT_SPEED * 0.6 + Math.random() * 0.3,
+    gone: false,
+    fleeing: false,
+  });
+}
+
 // ===== Police Boats =====
 function spawnPoliceBoat() {
   const side = Math.floor(Math.random() * 4);
@@ -644,7 +687,7 @@ function spawnPoliceBoat() {
     y = Math.random() * gameH;
   }
 
-  const spr = new PIXI.Sprite(textures.boat);
+  const spr = new PIXI.Sprite(textures.boat1);
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE);
   spr.tint = 0xaaccff;
@@ -675,6 +718,8 @@ function spawnPoliceBoat() {
     beaconPhase: Math.random() * Math.PI * 2,
     beaconBlue: true,
     wake: [],
+    frameIndex: 0,
+    frameTick: Math.random() * BOAT_FRAME_DURATION,
   });
 }
 
@@ -704,6 +749,14 @@ function updateBoats(delta) {
     const { spr } = b;
     const lit = isInBeam(spr.x, spr.y);
     b.lit = lit;
+
+    // Frame animation
+    b.frameTick += delta;
+    if (b.frameTick >= BOAT_FRAME_DURATION) {
+      b.frameTick -= BOAT_FRAME_DURATION;
+      b.frameIndex = (b.frameIndex + 1) % BOAT_FRAMES.length;
+      spr.texture = textures[BOAT_FRAMES[b.frameIndex]];
+    }
 
     // Steer toward lighthouse
     const toX = lhX - spr.x;
@@ -864,6 +917,14 @@ function updatePoliceBoats(delta) {
     const toX = lhX - spr.x;
     const toY = lhY - spr.y;
     const dist = Math.hypot(toX, toY);
+
+    // Frame animation (same as friendly boats)
+    p.frameTick += delta;
+    if (p.frameTick >= BOAT_FRAME_DURATION) {
+      p.frameTick -= BOAT_FRAME_DURATION;
+      p.frameIndex = (p.frameIndex + 1) % BOAT_FRAMES.length;
+      spr.texture = textures[BOAT_FRAMES[p.frameIndex]];
+    }
 
     if (dist < ARRIVAL_RADIUS && !p.sinking) {
       p.arrived = true;
@@ -1226,6 +1287,12 @@ function buildUI() {
   // Добавляем splash-картинку на задний план (индекс 1, после iceberg)
   overlayLayer.addChildAt(overlayLayer.splashMermaid, 1);
 
+  // Kraken splash image (hidden by default)
+  overlayLayer.splashKraken = new PIXI.Sprite();
+  overlayLayer.splashKraken.anchor.set(0.5);
+  overlayLayer.splashKraken.visible = false;
+  overlayLayer.addChildAt(overlayLayer.splashKraken, 2);
+
   app.stage.addChild(overlayLayer);
 
   repositionUI();
@@ -1258,6 +1325,7 @@ function repositionUI() {
 
   positionSplashSprite(overlayLayer.splashIceberg);
   positionSplashSprite(overlayLayer.splashMermaid);
+  positionSplashSprite(overlayLayer.splashKraken);
 }
 
 function positionSplashSprite(sprite) {
@@ -1351,14 +1419,16 @@ function gameLoop(delta) {
   // Spawn boats
   const now = performance.now();
   if (now > nextSpawnTime) {
-    // Spawn: 40% boat, 40% mermaid, 20% police
+    // Spawn: 40% boat, 20% mermaid, 30% police, 10% kraken
     const roll = Math.random();
     if (roll < 0.4) {
       spawnBoat();
-    } else if (roll < 0.8) {
+    } else if (roll < 0.6) {
       spawnMermaid();
-    } else {
+    } else if (roll < 0.9) {
       spawnPoliceBoat();
+    } else {
+      spawnKraken();
     }
     nextSpawnTime =
       now +
@@ -1368,6 +1438,7 @@ function gameLoop(delta) {
 
   updateBoats(delta);
   updateMermaids(delta);
+  updateKrakens(delta);
   updatePoliceBoats(delta);
   drawWakes();
   updateDarkness();
@@ -1391,8 +1462,8 @@ function updateMermaids(delta) {
 
     const lit = isInBeam(m.spr.x, m.spr.y);
 
-    // Убегает пока в луче, возвращается к маяку когда луч ушёл
-    m.fleeing = lit;
+    // Однажды засвечена — убегает навсегда
+    if (lit) m.fleeing = true;
 
     let nx, ny, speedMult;
     if (m.fleeing) {
@@ -1472,6 +1543,88 @@ function updateMermaids(delta) {
   }
 }
 
+// ===== Update Krakens =====
+function updateKrakens(delta) {
+  for (let i = krakens.length - 1; i >= 0; i--) {
+    const k = krakens[i];
+    if (k.gone) continue;
+
+    const lit = isInBeam(k.spr.x, k.spr.y);
+    // Динамически: убегает пока в луче, возвращается когда луч ушёл
+    k.fleeing = lit;
+
+    let nx, ny, speedMult;
+    if (k.fleeing) {
+      // Бежит от маяка
+      const awayX = k.spr.x - lhX;
+      const awayY = k.spr.y - lhY;
+      const awayDist = Math.hypot(awayX, awayY) || 1;
+      nx = awayX / awayDist;
+      ny = awayY / awayDist;
+      speedMult = 2;
+    } else {
+      // Плывёт к маяку
+      const toX = lhX - k.spr.x;
+      const toY = lhY - k.spr.y;
+      const dist = Math.hypot(toX, toY);
+
+      // Достиг маяка
+      if (dist < ARRIVAL_RADIUS) {
+        console.log(
+          `🦑 Кракен добрался до маяка (${k.spr.x.toFixed(0)}, ${k.spr.y.toFixed(0)})`,
+        );
+        shakeTime = 0.7;
+        shakeIntensity = 28;
+        k.gone = true;
+        krakensArrived++;
+        spawnTooltip(k.spr.x, k.spr.y - 20, '🦑', TOOLTIP_STYLE_FAIL);
+        if (krakensArrived >= 3 && !gameOver) {
+          showKrakenGameOver();
+        }
+        const fadeOut = () => {
+          k.spr.alpha -= 0.04 * delta;
+          if (k.spr.alpha <= 0) {
+            boatLayer.removeChild(k.spr);
+            krakens.splice(i, 1);
+            app.ticker.remove(fadeOut);
+          }
+        };
+        app.ticker.add(fadeOut);
+        continue;
+      }
+
+      nx = toX / dist;
+      ny = toY / dist;
+      speedMult = 1;
+    }
+
+    k.spr.x += nx * k.speed * speedMult * delta;
+    k.spr.y += ny * k.speed * speedMult * delta;
+
+    // Удалить если уплыл за пределы экрана (только убегая)
+    if (
+      k.fleeing &&
+      (k.spr.x < -SPAWN_MARGIN * 2 ||
+        k.spr.x > gameW + SPAWN_MARGIN * 2 ||
+        k.spr.y < -SPAWN_MARGIN * 2 ||
+        k.spr.y > gameH + SPAWN_MARGIN * 2)
+    ) {
+      k.gone = true;
+      console.log(`🦑 Кракен уплыл за экран`);
+      boatLayer.removeChild(k.spr);
+      krakens.splice(i, 1);
+      continue;
+    }
+
+    // Face movement direction
+    const targetRot = Math.atan2(ny, nx) + Math.PI / 2;
+    let rDiff = targetRot - k.spr.rotation;
+    while (rDiff > Math.PI) rDiff -= Math.PI * 2;
+    while (rDiff < -Math.PI) rDiff += Math.PI * 2;
+    k.spr.rotation += rDiff * 0.08 * delta;
+  }
+}
+
 // ===== Game Over by Mermaids =====
 async function showMermaidGameOver() {
   // Показать спрайты-кнопки
@@ -1523,6 +1676,56 @@ async function showMermaidGameOver() {
   repositionUI();
 }
 
+// ===== Game Over by Krakens =====
+async function showKrakenGameOver() {
+  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
+    overlayLayer.keyEnter.visible = true;
+    overlayLayer.keySpace.visible = true;
+  }
+  gameOver = true;
+  txtMessage.text = '🦑 Кракены захватили маяк!';
+  overlayLayer.visible = true;
+  playFailSound();
+  txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 38,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
+  txtMessage.visible = true;
+  txtRestart.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 22,
+    fontWeight: 'normal',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 6,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
+  txtRestart.visible = true;
+  if (!textures.splashKraken) {
+    textures.splashKraken = await PIXI.Assets.load('sprites/splash-kraken.png');
+  }
+  overlayLayer.splashKraken.texture = textures.splashKraken;
+  overlayLayer.splashKraken.visible = true;
+  if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
+  if (overlayLayer.splashIceberg) overlayLayer.splashIceberg.visible = false;
+  repositionUI();
+}
+
 // ===== Win / Restart =====
 function playFailSound() {
   const snd = new Audio('audio/fail-1.mp3');
@@ -1546,6 +1749,7 @@ function restart() {
   if (overlayLayer.keySpace) overlayLayer.keySpace.visible = false;
   overlayLayer.visible = false;
   if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
+  if (overlayLayer.splashKraken) overlayLayer.splashKraken.visible = false;
 
   // Remove all boats
   for (const b of boats) {
@@ -1561,10 +1765,17 @@ function restart() {
   }
   policeBoats = [];
 
+  // Remove all krakens
+  for (const k of krakens) {
+    boatLayer.removeChild(k.spr);
+  }
+  krakens = [];
+
   score = 0;
   lives = MAX_LIVES;
   mermaidsArrived = 0;
   policeArrived = 0;
+  krakensArrived = 0;
   lampTimer = 0;
   lampFlicker = 1;
   BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
