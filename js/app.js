@@ -17,6 +17,7 @@ const BEAM_HALF_ANGLE = 0.3;
 const BEAM_LEN = 1400;
 const DARK_ALPHA = 0.82;
 const LH_GLOW_RADIUS = 55;
+const BEAM_ORIGIN_OFFSET_Y = -30;
 
 // ===== Color Palette =====
 const C = {
@@ -34,7 +35,6 @@ const SPRITE_FILES = {
   lighthouse: 'sprites/lighthouse.png',
   dock: 'sprites/bridge.png',
   boat: 'sprites/boat.png',
-  light: 'sprites/light.png',
   rock1: 'sprites/rock1.png',
   rock2: 'sprites/rock2.png',
   rock3: 'sprites/rock3.png',
@@ -48,7 +48,8 @@ const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 let app;
 let gameW, gameH, lhX, lhY;
 let textures = {};
-let beamCont, darknessGfx, wakeGfx;
+let darknessGfx, wakeGfx, lhGlow;
+let darkRT, darkFill, beamErase;
 let keys = {};
 let beamAngle = -Math.PI / 2;
 let gameOver = false;
@@ -72,6 +73,10 @@ function resize() {
   lhX = gameW / 2;
   lhY = gameH / 2;
   app.renderer.resize(gameW, gameH);
+
+  // Resize darkness render texture
+  const pad = 40;
+  darkRT.resize(gameW + pad * 2, gameH + pad * 2);
 }
 
 // ===== Generate Rocks =====
@@ -98,7 +103,7 @@ function generateRocks() {
     const texKey =
       ROCK_TEX_KEYS[Math.floor(Math.random() * ROCK_TEX_KEYS.length)];
     const sc = 0.08 + Math.random() * 0.12;
-    rockDefs.push({ x, y, tex: texKey, sc, r: Math.random() * Math.PI * 2 });
+    rockDefs.push({ x, y, tex: texKey, sc });
   }
   return rockDefs;
 }
@@ -110,7 +115,6 @@ function buildRocks(parent) {
     spr.anchor.set(0.5);
     spr.position.set(r.x, r.y);
     spr.scale.set(r.sc);
-    spr.rotation = r.r;
     parent.addChild(spr);
 
     const avgW = textures[r.tex].width;
@@ -139,70 +143,72 @@ function buildLighthouse(parent) {
   parent.addChild(cont);
 }
 
-// ===== Build Beam =====
-function buildBeam(parent) {
-  beamCont = new PIXI.Container();
-  beamCont.position.set(lhX, lhY);
-
-  // Light sprite from sprites/light.png
-  const lightSpr = new PIXI.Sprite(textures.light);
-  lightSpr.anchor.set(0.42, 0);
-  lightSpr.blendMode = PIXI.BLEND_MODES.ADD;
-  lightSpr.alpha = 0.6;
-  const beamScale = (Math.max(gameW, gameH) * 0.8) / lightSpr.texture.height;
-  lightSpr.scale.set(beamScale);
-  beamCont.addChild(lightSpr);
-
-  // Glow at source
-  const glow = new PIXI.Graphics();
-  glow.blendMode = PIXI.BLEND_MODES.ADD;
-  glow.beginFill(C.lhLight, 0.12);
-  glow.drawCircle(0, 0, 40);
-  glow.endFill();
-  glow.beginFill(C.lhLight, 0.18);
-  glow.drawCircle(0, 0, 18);
-  glow.endFill();
-  beamCont.addChild(glow);
-
-  parent.addChild(beamCont);
+// ===== Lighthouse Glow =====
+function buildGlow(parent) {
+  lhGlow = new PIXI.Graphics();
+  lhGlow.blendMode = PIXI.BLEND_MODES.ADD;
+  lhGlow.beginFill(C.lhLight, 0.12);
+  lhGlow.drawCircle(0, 0, 40);
+  lhGlow.endFill();
+  lhGlow.beginFill(C.lhLight, 0.18);
+  lhGlow.drawCircle(0, 0, 18);
+  lhGlow.endFill();
+  lhGlow.position.set(lhX, lhY + BEAM_ORIGIN_OFFSET_Y);
+  parent.addChild(lhGlow);
 }
 
 // ===== Darkness Overlay =====
 function buildDarkness(parent) {
-  darknessGfx = new PIXI.Graphics();
+  const pad = 40;
+  darkRT = PIXI.RenderTexture.create({
+    width: gameW + pad * 2,
+    height: gameH + pad * 2,
+  });
+
+  darknessGfx = new PIXI.Sprite(darkRT);
+  darknessGfx.position.set(-pad, -pad);
   darknessGfx.filters = [new PIXI.BlurFilter(20)];
   parent.addChild(darknessGfx);
+
+  darkFill = new PIXI.Graphics();
+  beamErase = new PIXI.Graphics();
+  beamErase.blendMode = PIXI.BLEND_MODES.ERASE;
 }
 
 function updateDarkness() {
-  darknessGfx.clear();
-
   const pad = 40;
-  const bLen = Math.hypot(gameW / 2 + pad, gameH / 2 + pad);
+  const bLen = Math.max(gameW, gameH) * 2;
+  const cx = lhX + pad;
+  const cy = lhY + BEAM_ORIGIN_OFFSET_Y + pad;
 
-  darknessGfx.beginFill(0x000000, DARK_ALPHA);
-  darknessGfx.drawRect(-pad, -pad, gameW + pad * 2, gameH + pad * 2);
+  // Dark fill
+  darkFill.clear();
+  darkFill.beginFill(0x000000, DARK_ALPHA);
+  darkFill.drawRect(0, 0, gameW + pad * 2, gameH + pad * 2);
+  darkFill.endFill();
 
-  // Cut beam-shaped triangle hole — BEFORE endFill
-  darknessGfx.beginHole();
-  darknessGfx.moveTo(lhX, lhY);
-  darknessGfx.lineTo(
-    lhX + Math.cos(beamAngle - BEAM_HALF_ANGLE) * bLen,
-    lhY + Math.sin(beamAngle - BEAM_HALF_ANGLE) * bLen,
+  app.renderer.render(darkFill, { renderTexture: darkRT, clear: true });
+
+  // Erase beam cone + lighthouse circle
+  beamErase.clear();
+  beamErase.beginFill(0xffffff, 1);
+  beamErase.moveTo(cx, cy);
+  beamErase.lineTo(
+    cx + Math.cos(beamAngle - BEAM_HALF_ANGLE) * bLen,
+    cy + Math.sin(beamAngle - BEAM_HALF_ANGLE) * bLen,
   );
-  darknessGfx.lineTo(
-    lhX + Math.cos(beamAngle + BEAM_HALF_ANGLE) * bLen,
-    lhY + Math.sin(beamAngle + BEAM_HALF_ANGLE) * bLen,
+  beamErase.lineTo(
+    cx + Math.cos(beamAngle + BEAM_HALF_ANGLE) * bLen,
+    cy + Math.sin(beamAngle + BEAM_HALF_ANGLE) * bLen,
   );
-  darknessGfx.closePath();
-  darknessGfx.endHole();
+  beamErase.closePath();
+  beamErase.endFill();
 
-  // Cut circular hole around lighthouse
-  darknessGfx.beginHole();
-  darknessGfx.drawCircle(lhX, lhY, LH_GLOW_RADIUS);
-  darknessGfx.endHole();
+  beamErase.beginFill(0xffffff, 1);
+  beamErase.drawCircle(cx, cy, LH_GLOW_RADIUS);
+  beamErase.endFill();
 
-  darknessGfx.endFill();
+  app.renderer.render(beamErase, { renderTexture: darkRT, clear: false });
 }
 
 // ===== Boats =====
@@ -246,7 +252,7 @@ function spawnBoat() {
 
 function isInBeam(x, y) {
   const dx = x - lhX;
-  const dy = y - lhY;
+  const dy = y - (lhY + BEAM_ORIGIN_OFFSET_Y);
   let angle = Math.atan2(dy, dx);
   let diff = angle - beamAngle;
   while (diff > Math.PI) diff -= Math.PI * 2;
@@ -398,7 +404,7 @@ function bindEvents() {
 
   window.addEventListener('resize', () => {
     resize();
-    beamCont.position.set(lhX, lhY);
+    lhGlow.position.set(lhX, lhY + BEAM_ORIGIN_OFFSET_Y);
     repositionUI();
   });
 }
@@ -505,8 +511,6 @@ function gameLoop(delta) {
   if (keys['KeyD'] || keys['ArrowRight'])
     beamAngle += BEAM_ROTATE_SPEED * delta;
 
-  beamCont.rotation = beamAngle;
-
   // Spawn boats
   const now = performance.now();
   if (now > nextSpawnTime) {
@@ -579,14 +583,14 @@ async function init() {
   buildRocks(rockLayer);
   app.stage.addChild(rockLayer);
 
-  buildBeam(app.stage);
-
   boatLayer = new PIXI.Container();
   app.stage.addChild(boatLayer);
 
   buildLighthouse(app.stage);
 
   buildDarkness(app.stage);
+
+  buildGlow(app.stage);
 
   buildUI();
 
