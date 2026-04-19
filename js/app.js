@@ -112,6 +112,7 @@ if (!PIXI) {
 // ===== Constants =====
 const BOAT_SPEED = 0.8;
 const BOAT_RADIUS = 14;
+const KRAKEN_RADIUS = 36;
 const BEAM_ROTATE_SPEED = 0.04;
 const WAKE_MAX = 30;
 const ROCK_SAFE_ZONE = 120;
@@ -175,6 +176,44 @@ const SPRITE_FILES = {
 
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 
+// Cargo types for friendly boats
+const BOAT_CARGO_TYPES = ['💡', '🛢️', '📦'];
+
+function parseCargo(cargoStr) {
+  const result = {};
+  for (const type of BOAT_CARGO_TYPES) {
+    const idx = cargoStr.indexOf(type);
+    if (idx !== -1) {
+      const after = cargoStr.slice(idx + type.length);
+      const m = after.match(/^\d+/);
+      result[type] = m ? parseInt(m[0]) : 0;
+    } else {
+      result[type] = 0;
+    }
+  }
+  return result;
+}
+
+function addCargo(cargoStr) {
+  const parsed = parseCargo(cargoStr);
+  for (const type of BOAT_CARGO_TYPES) {
+    deliveredCargo[type] += parsed[type] || 0;
+  }
+}
+
+function randomCargo() {
+  const cargo = [];
+  const numTypes = 1 + Math.floor(Math.random() * BOAT_CARGO_TYPES.length);
+  const types = [...BOAT_CARGO_TYPES]
+    .sort(() => Math.random() - 0.5)
+    .slice(0, numTypes);
+  for (const type of types) {
+    const count = Math.floor(Math.random() * 6); // 0–5
+    if (count > 0) cargo.push(`${type}${count}`);
+  }
+  return cargo.length > 0 ? cargo.join(' ') : '📦×0';
+}
+
 // Ping-pong frame sequence: 1→2→3→2→1→...
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8; // ticks per frame at 60fps
@@ -201,6 +240,7 @@ let rocks = [];
 let rockColliders = [];
 let rockSprites = [];
 let score = 0;
+let deliveredCargo = { '💡': 0, '🛢️': 0, '📦': 0 };
 let lives = MAX_LIVES;
 let boatsSunk = 0;
 let mermaidsArrived = 0;
@@ -335,6 +375,34 @@ function updateDebug() {
   debugGfx.drawCircle(lhX, lhY, ROCK_SAFE_ZONE);
   debugGfx.lineStyle(1, 0xffaa00, 0.25);
   debugGfx.drawCircle(lhX, lhY, ROCK_SPAWN_RADIUS);
+
+  // Boat colliders (green)
+  for (const b of boats) {
+    if (b.arrived || b.sinking) continue;
+    debugGfx.lineStyle(1, 0x00ff88, 0.8);
+    debugGfx.drawCircle(b.spr.x, b.spr.y, BOAT_RADIUS);
+  }
+
+  // Mermaid colliders (yellow)
+  for (const m of mermaids) {
+    if (m.gone) continue;
+    debugGfx.lineStyle(1, 0xffee00, 0.8);
+    debugGfx.drawCircle(m.spr.x, m.spr.y, BOAT_RADIUS);
+  }
+
+  // Police colliders (blue)
+  for (const p of policeBoats) {
+    if (p.arrived || p.sinking) continue;
+    debugGfx.lineStyle(1, 0x44aaff, 0.8);
+    debugGfx.drawCircle(p.spr.x, p.spr.y, BOAT_RADIUS);
+  }
+
+  // Kraken colliders (purple, larger)
+  for (const k of krakens) {
+    if (k.gone) continue;
+    debugGfx.lineStyle(2, 0xcc44ff, 0.9);
+    debugGfx.drawCircle(k.spr.x, k.spr.y, KRAKEN_RADIUS);
+  }
 
   // Rock colliders
   for (const rock of rockColliders) {
@@ -604,12 +672,14 @@ function spawnBoat() {
     beaconPhase: Math.random() * Math.PI * 2,
     speed: BOAT_SPEED + Math.random() * 0.4,
     lit: false,
+    wasLit: false,
     sinkTimer: 0,
     sinking: false,
     arrived: false,
     wake: [],
     frameIndex: 0,
     frameTick: Math.random() * BOAT_FRAME_DURATION,
+    cargo: randomCargo(),
   });
 }
 
@@ -641,6 +711,7 @@ function spawnMermaid() {
     speed: BOAT_SPEED + Math.random() * 0.4, // скорость как у лодок
     gone: false,
     fleeing: false,
+    wasLit: false,
     wavePhase: Math.random() * Math.PI * 2, // для колебания
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION, // offset фазы
@@ -728,7 +799,8 @@ function spawnPoliceBoat() {
     wake: [],
     frameIndex: 0,
     frameTick: Math.random() * BOAT_FRAME_DURATION,
-    driftDir: Math.random() < 0.5 ? 1 : -1, // направление дрейфа мимо маяка
+    driftDir: Math.random() < 0.5 ? 1 : -1,
+    wasLit: false,
   });
 }
 
@@ -757,6 +829,11 @@ function updateBoats(delta) {
 
     const { spr } = b;
     const lit = isInBeam(spr.x, spr.y);
+    // Show cargo tooltip on beam entry
+    if (lit && !b.wasLit) {
+      spawnTooltip(spr.x, spr.y - 30, b.cargo, TOOLTIP_STYLE_OK);
+    }
+    b.wasLit = lit;
     b.lit = lit;
 
     // Frame animation
@@ -776,8 +853,9 @@ function updateBoats(delta) {
       // Arrived safely
       b.arrived = true;
       score++;
+      addCargo(b.cargo);
       updateHUD();
-      spawnTooltip(spr.x, spr.y - 20, '+1 ⛵', TOOLTIP_STYLE_OK);
+      spawnTooltip(spr.x, spr.y - 20, b.cargo, TOOLTIP_STYLE_OK);
       // Restore lamp on boat arrival
       lampTimer = 0;
       if (score >= WIN_SCORE) {
@@ -937,6 +1015,13 @@ function updatePoliceBoats(delta) {
 
     // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо
     const lit = isInBeam(spr.x, spr.y);
+    // Show cop tooltip on beam entry / exit
+    if (lit && !p.wasLit) {
+      spawnTooltip(spr.x, spr.y - 30, '‼️', TOOLTIP_STYLE_FAIL);
+    } else if (!lit && p.wasLit) {
+      spawnTooltip(spr.x, spr.y - 30, '❔', TOOLTIP_STYLE_OK);
+    }
+    p.wasLit = lit;
 
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
@@ -1152,7 +1237,7 @@ function buildUI() {
   txtLives.anchor.set(0.5, 0);
   hudLayer.addChild(txtLives);
 
-  txtScore = new PIXI.Text('⛵ 0', new PIXI.TextStyle(UI_STYLE));
+  txtScore = new PIXI.Text('📦×0', new PIXI.TextStyle(UI_STYLE));
   txtScore.anchor.set(0.5, 0);
   hudLayer.addChild(txtScore);
 
@@ -1362,7 +1447,12 @@ function positionSplashSprite(sprite) {
 
 // ===== HUD =====
 function updateHUD() {
-  txtScore.text = `⛵ ${score}`;
+  const cargoStr = BOAT_CARGO_TYPES.map((t) =>
+    deliveredCargo[t] > 0 ? `${t}${deliveredCargo[t]}` : null,
+  )
+    .filter(Boolean)
+    .join(' ');
+  txtScore.text = cargoStr || '📦×0';
   txtLives.text = '❤️'.repeat(Math.max(0, lives));
   txtMermaids.text = `🧜 ${mermaidsArrived}/3`;
   txtPolice.text = `🚔 ${policeArrived}/3`;
@@ -1477,6 +1567,10 @@ function updateMermaids(delta) {
     const lit = isInBeam(m.spr.x, m.spr.y);
 
     // Однажды засвечена — убегает навсегда
+    if (lit && !m.wasLit) {
+      spawnTooltip(m.spr.x, m.spr.y - 30, '🙈', TOOLTIP_STYLE_OK);
+    }
+    m.wasLit = lit;
     if (lit) m.fleeing = true;
 
     let nx, ny, speedMult;
@@ -1583,7 +1677,7 @@ function updateKrakens(delta) {
       const dist = Math.hypot(toX, toY);
 
       // Достиг маяка
-      if (dist < ARRIVAL_RADIUS) {
+      if (dist < ARRIVAL_RADIUS + KRAKEN_RADIUS) {
         console.log(
           `🦑 Кракен добрался до маяка (${k.spr.x.toFixed(0)}, ${k.spr.y.toFixed(0)})`,
         );
@@ -1785,6 +1879,7 @@ function restart() {
   krakens = [];
 
   score = 0;
+  deliveredCargo = { '💡': 0, '🛢️': 0, '📦': 0 };
   lives = MAX_LIVES;
   mermaidsArrived = 0;
   policeArrived = 0;
