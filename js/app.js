@@ -138,7 +138,7 @@ const CAM_BEAM_OFFSET = 160; // how far camera shifts toward beam direction
 // Lamp burnout
 const LAMP_FULL_ANGLE = 0.3;
 const LAMP_MIN_ANGLE = 0.08;
-const LAMP_BURNOUT_TIME = 600;
+const LAMP_BURNOUT_TIME = 1200;
 const LAMP_FLICKER_START = 0.5;
 
 // ===== Color Palette =====
@@ -154,7 +154,7 @@ const C = {
 
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
-  kraken: 'sprites/mermaid/1.png',
+  kraken: 'sprites/kraken2.png',
   mermaid1: 'sprites/mermaid/1.png',
   mermaid2: 'sprites/mermaid/2.png',
   mermaid3: 'sprites/mermaid/3.png',
@@ -667,7 +667,6 @@ function spawnKraken() {
   const spr = new PIXI.Sprite(textures.kraken); // placeholder — replace with textures.kraken
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE * 1.5); // крупнее чем русалка
-  spr.tint = 0x880055;
   spr.position.set(x, y);
   boatLayer.addChild(spr);
   krakens.push({
@@ -729,6 +728,7 @@ function spawnPoliceBoat() {
     wake: [],
     frameIndex: 0,
     frameTick: Math.random() * BOAT_FRAME_DURATION,
+    driftDir: Math.random() < 0.5 ? 1 : -1, // направление дрейфа мимо маяка
   });
 }
 
@@ -852,7 +852,7 @@ function updateBoats(delta) {
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
         // Если три корабля затонуло — проигрыш
-        if (boatsSunk >= 3 && !gameOver) {
+        if (boatsSunk >= 6 && !gameOver) {
           showBoatGameOver();
         } else if (lives <= 0) {
           gameOver = true;
@@ -935,7 +935,7 @@ function updatePoliceBoats(delta) {
       spr.texture = textures[BOAT_FRAMES[p.frameIndex]];
     }
 
-    if (dist < ARRIVAL_RADIUS && !p.sinking) {
+    if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
       policeArrived++;
       updateHUD();
@@ -975,23 +975,26 @@ function updatePoliceBoats(delta) {
       continue;
     }
 
-    // Police move like regular boats — slower when dark, faster when lit
+    // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо
     const lit = isInBeam(spr.x, spr.y);
-    const speedMult = lit ? 1.5 : 0.6;
     const nx = toX / dist;
     const ny = toY / dist;
 
-    // Wander when not lit
-    let wx = 0,
-      wy = 0;
-    if (!lit) {
-      const wander = Math.sin(Date.now() * 0.001 + i * 13) * 0.5;
-      wx = -ny * wander;
-      wy = nx * wander;
+    let moveNx, moveNy, speedMult;
+    if (lit) {
+      // Направление к маяку
+      moveNx = nx;
+      moveNy = ny;
+      speedMult = 1.5;
+    } else {
+      // Тангенциальный дрейф мимо маяка
+      moveNx = -ny * p.driftDir;
+      moveNy = nx * p.driftDir;
+      speedMult = 0.9;
     }
 
-    const moveX = (nx + wx) * p.speed * speedMult * delta;
-    const moveY = (ny + wy) * p.speed * speedMult * delta;
+    const moveX = moveNx * p.speed * speedMult * delta;
+    const moveY = moveNy * p.speed * speedMult * delta;
     spr.x += moveX;
     spr.y += moveY;
 
@@ -1025,7 +1028,7 @@ function updatePoliceBoats(delta) {
     }
 
     // Wake trail
-    p.wake.unshift({ x: spr.x - nx * 14, y: spr.y - ny * 14, age: 0 });
+    p.wake.unshift({ x: spr.x - moveNx * 14, y: spr.y - moveNy * 14, age: 0 });
     if (p.wake.length > WAKE_MAX) p.wake.pop();
 
     // Pulse beacon: same sine as regular boats, color alternates by sign
@@ -1437,7 +1440,7 @@ function gameLoop(delta) {
     } else if (roll < 0.9) {
       spawnPoliceBoat();
     } else {
-      spawnKraken();
+      if (krakens.length < 1) spawnKraken();
     }
     nextSpawnTime =
       now +
@@ -1587,7 +1590,7 @@ function updateKrakens(delta) {
         k.gone = true;
         krakensArrived++;
         spawnTooltip(k.spr.x, k.spr.y - 20, '🦑', TOOLTIP_STYLE_FAIL);
-        if (krakensArrived >= 3 && !gameOver) {
+        if (!gameOver) {
           showKrakenGameOver();
         }
         const fadeOut = () => {
@@ -1625,12 +1628,7 @@ function updateKrakens(delta) {
       continue;
     }
 
-    // Face movement direction
-    const targetRot = Math.atan2(ny, nx) + Math.PI / 2;
-    let rDiff = targetRot - k.spr.rotation;
-    while (rDiff > Math.PI) rDiff -= Math.PI * 2;
-    while (rDiff < -Math.PI) rDiff += Math.PI * 2;
-    k.spr.rotation += rDiff * 0.08 * delta;
+    // Кракен не вращается
   }
 }
 
