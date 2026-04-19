@@ -54,8 +54,8 @@ const C = {
 
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
+    button: 'sprites/button.png',
   lighthouse: 'sprites/lighthouse.png',
-  dock: 'sprites/bridge.png',
   boat: 'sprites/boat.png',
   rock1: 'sprites/rock1.png',
   rock2: 'sprites/rock2.png',
@@ -94,7 +94,8 @@ let debugGfx, debugText;
 
 // ===== UI State =====
 let hudLayer, overlayLayer;
-let txtLives, txtScore, txtHint, txtMessage, txtRestart;
+let txtLives, txtScore, txtMessage, txtRestart;
+let btnLeft, btnRight;
 let overlayBg;
 
 // ===== Tooltips =====
@@ -285,11 +286,6 @@ function buildLighthouse(parent) {
   lighthouseContainer = new PIXI.Container();
   lighthouseContainer.position.set(lhX, lhY);
 
-  const dockSpr = new PIXI.Sprite(textures.dock);
-  dockSpr.anchor.set(0.5, 0);
-  dockSpr.scale.set(0.32);
-  dockSpr.position.set(0, 20);
-  lighthouseContainer.addChild(dockSpr);
 
   lighthouseSprite = new PIXI.Sprite(textures.lighthouse);
   lighthouseSprite.anchor.set(0.5, 0.75);
@@ -582,7 +578,7 @@ function drawWakes() {
 function bindEvents() {
   window.addEventListener('keydown', (e) => {
     keys[e.code] = true;
-    if (txtHint.visible) txtHint.visible = false;
+    // (txtHint removed)
 
     // Toggle debug mode
     if (e.code === 'F1') {
@@ -634,6 +630,7 @@ const UI_STYLE = {
 };
 
 function buildUI() {
+
   // HUD layer (always on top)
   hudLayer = new PIXI.Container();
 
@@ -645,18 +642,100 @@ function buildUI() {
   txtScore.anchor.set(0.5, 0);
   hudLayer.addChild(txtScore);
 
-  // Hint at bottom
-  txtHint = new PIXI.Text(
-    '← → to rotate the beam',
-    new PIXI.TextStyle({
-      ...UI_STYLE,
-      fontSize: 15,
-      fontWeight: 'normal',
-      fill: 'rgba(200, 216, 232, 0.6)',
-    }),
-  );
-  txtHint.anchor.set(0.5, 1);
-  hudLayer.addChild(txtHint);
+  // Arrow buttons at bottom
+  const BTN_BOTTOM_MARGIN = 24;
+  const btnY = () => gameH - BTN_BOTTOM_MARGIN;
+  const btnSpacing = 110; // increase gap
+  const btnScale = 0.5;   // make buttons smaller
+  // Left button
+  btnLeft = new PIXI.Container();
+  const sprLeft = new PIXI.Sprite(textures.button);
+  sprLeft.anchor.set(0.5);
+  sprLeft.scale.set(btnScale);
+  btnLeft.addChild(sprLeft);
+  // Add left arrow symbol, raised up
+  const txtArrowLeft = new PIXI.Text('←', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 32,
+    fill: '#fff',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 4,
+    dropShadowDistance: 0,
+  });
+  txtArrowLeft.anchor.set(0.5);
+  txtArrowLeft.y = -6; // raise symbol up
+  btnLeft.addChild(txtArrowLeft);
+  // Add 'A' label above
+  const txtALabel = new PIXI.Text('A', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 18,
+    fill: '#fff',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 3,
+    dropShadowDistance: 0,
+  });
+  txtALabel.anchor.set(0.5);
+  txtALabel.y = -32;
+  btnLeft.addChild(txtALabel);
+  btnLeft.position.set(gameW / 2 - btnSpacing, btnY());
+  btnLeft.interactive = true;
+  btnLeft.buttonMode = true;
+  btnLeft.on('pointerdown', () => {
+    keys['ArrowLeft'] = true;
+    setTimeout(() => (keys['ArrowLeft'] = false), 100);
+  });
+  hudLayer.addChild(btnLeft);
+
+  // Right button
+  btnRight = new PIXI.Container();
+  const sprRight = new PIXI.Sprite(textures.button);
+  sprRight.anchor.set(0.5);
+  sprRight.scale.set(btnScale);
+  btnRight.addChild(sprRight);
+  // Add right arrow symbol, raised up
+  const txtArrowRight = new PIXI.Text('→', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 32,
+    fill: '#fff',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 4,
+    dropShadowDistance: 0,
+  });
+  txtArrowRight.anchor.set(0.5);
+  txtArrowRight.y = -6; // raise symbol up
+  btnRight.addChild(txtArrowRight);
+  // Add 'D' label above
+  const txtDLabel = new PIXI.Text('D', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 18,
+    fill: '#fff',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 3,
+    dropShadowDistance: 0,
+  });
+  txtDLabel.anchor.set(0.5);
+  txtDLabel.y = -32;
+  btnRight.addChild(txtDLabel);
+  btnRight.position.set(gameW / 2 + btnSpacing, btnY());
+  btnRight.interactive = true;
+  btnRight.buttonMode = true;
+  btnRight.on('pointerdown', () => {
+    keys['ArrowRight'] = true;
+    setTimeout(() => (keys['ArrowRight'] = false), 100);
+  });
+  hudLayer.addChild(btnRight);
 
   app.stage.addChild(hudLayer);
 
@@ -697,7 +776,10 @@ function buildUI() {
 function repositionUI() {
   txtLives.position.set(gameW / 2 - 50, 16);
   txtScore.position.set(gameW / 2 + 50, 16);
-  txtHint.position.set(gameW / 2, gameH - 20);
+  // Move buttons if present
+  const BTN_BOTTOM_MARGIN = 24;
+  if (btnLeft) btnLeft.position.set(gameW / 2 - 110, gameH - BTN_BOTTOM_MARGIN);
+  if (btnRight) btnRight.position.set(gameW / 2 + 110, gameH - BTN_BOTTOM_MARGIN);
 
   overlayBg.clear();
   overlayBg.beginFill(0x0a1020, 0.8);
