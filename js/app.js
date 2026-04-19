@@ -54,6 +54,8 @@ const C = {
 
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
+    // Placeholder for mermaid (use boat sprite for now)
+    mermaid: 'sprites/boat.png',
   button: 'sprites/button.png',
   lighthouse: 'sprites/lighthouse.png',
   boat: 'sprites/boat.png',
@@ -66,6 +68,7 @@ const SPRITE_FILES = {
 
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 
+
 // ===== Game State =====
 let app;
 let gameW, gameH, lhX, lhY;
@@ -77,6 +80,7 @@ let keys = {};
 let beamAngle = -Math.PI / 2;
 let gameOver = false;
 let boats = [];
+let mermaids = [];
 let rocks = [];
 let rockColliders = [];
 let rockSprites = [];
@@ -281,7 +285,9 @@ function buildRocks(parent) {
     rockSprites.push(spr);
 
     const avgW = textures[r.tex].width;
-    const avgH = textures[r.tex].height;
+    const avgH = textures[r.tex].heig
+    
+    
     const avgSize = (avgW + avgH) / 2;
     rockColliders.push({ x: r.x, y: r.y, radius: avgSize * r.sc * 0.3 });
   }
@@ -424,6 +430,38 @@ function spawnBoat() {
   });
 }
 
+// ===== Mermaids =====
+function spawnMermaid() {
+  // Same spawn logic as boats
+  const side = Math.floor(Math.random() * 4);
+  let x, y;
+  if (side === 0) {
+    x = Math.random() * gameW;
+    y = -SPAWN_MARGIN;
+  } else if (side === 1) {
+    x = gameW + SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  } else if (side === 2) {
+    x = Math.random() * gameW;
+    y = gameH + SPAWN_MARGIN;
+  } else {
+    x = -SPAWN_MARGIN;
+    y = Math.random() * gameH;
+  }
+  // Placeholder: use boat sprite, but tint blue
+  const spr = new PIXI.Sprite(textures.mermaid);
+  spr.anchor.set(0.5);
+  spr.scale.set(BOAT_SCALE * 0.9);
+  spr.position.set(x, y);
+  spr.tint = 0x66ccff;
+  boatLayer.addChild(spr);
+  mermaids.push({
+    spr,
+    speed: BOAT_SPEED * 0.8 + Math.random() * 0.3,
+    gone: false,
+  });
+}
+
 function isInBeam(x, y) {
   const dx = x - lhX;
   const dy = y - (lhY + BEAM_ORIGIN_OFFSET_Y);
@@ -530,6 +568,8 @@ function updateBoats(delta) {
         lives--;
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
+        // 🛥️ Корабль затонул
+        console.log(`🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`);
         if (lives <= 0) {
           gameOver = true;
           showGameOver();
@@ -765,7 +805,7 @@ function buildUI() {
   overlayLayer.addChild(txtMessage);
 
   txtRestart = new PIXI.Text(
-    'Press ENTER to play again',
+    'Press SPACEBAR or ENTER to play again',
     new PIXI.TextStyle({
       ...UI_STYLE,
       fontSize: 18,
@@ -851,7 +891,12 @@ function gameLoop(delta) {
   // Spawn boats
   const now = performance.now();
   if (now > nextSpawnTime) {
-    spawnBoat();
+    // 50% chance to spawn a mermaid instead of a boat
+    if (Math.random() < 0.5) {
+      spawnBoat();
+    } else {
+      spawnMermaid();
+    }
     nextSpawnTime =
       now +
       SPAWN_INTERVAL_MIN +
@@ -859,10 +904,67 @@ function gameLoop(delta) {
   }
 
   updateBoats(delta);
+  updateMermaids(delta);
   drawWakes();
   updateDarkness();
   updateTooltips(delta);
   if (debugMode) updateDebug();
+}
+
+// ===== Update Mermaids =====
+function updateMermaids(delta) {
+  for (let i = mermaids.length - 1; i >= 0; i--) {
+    const m = mermaids[i];
+    if (m.gone) continue;
+    // Swim toward lighthouse
+    const toX = lhX - m.spr.x;
+    const toY = lhY - m.spr.y;
+    const dist = Math.hypot(toX, toY);
+    // If illuminated by beam, disappear
+    if (isInBeam(m.spr.x, m.spr.y)) {
+      m.gone = true;
+      // 🧜‍♀️ Русалка исчезла в луче
+      console.log(`🧜‍♀️ Русалка исчезла в луче на (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`);
+      // Fade out
+      const fadeOut = () => {
+        m.spr.alpha -= 0.04 * delta;
+        if (m.spr.alpha <= 0) {
+          boatLayer.removeChild(m.spr);
+          mermaids.splice(i, 1);
+          app.ticker.remove(fadeOut);
+        }
+      };
+      app.ticker.add(fadeOut);
+      continue;
+    }
+    // Move toward lighthouse
+    const nx = toX / dist;
+    const ny = toY / dist;
+    m.spr.x += nx * m.speed * delta;
+    m.spr.y += ny * m.speed * delta;
+    // Если русалка добралась до маяка (ARRIVAL_RADIUS)
+    if (dist < ARRIVAL_RADIUS) {
+      console.log(`🧜‍♀️ Русалка добралась до маяка (${m.spr.x.toFixed(0)}, ${m.spr.y.toFixed(0)})`);
+      m.gone = true;
+      // Мягко исчезает
+      const fadeOut = () => {
+        m.spr.alpha -= 0.04 * delta;
+        if (m.spr.alpha <= 0) {
+          boatLayer.removeChild(m.spr);
+          mermaids.splice(i, 1);
+          app.ticker.remove(fadeOut);
+        }
+      };
+      app.ticker.add(fadeOut);
+      continue;
+    }
+    // Face movement direction
+    const targetRot = Math.atan2(ny, nx) + Math.PI / 2;
+    let rDiff = targetRot - m.spr.rotation;
+    while (rDiff > Math.PI) rDiff -= Math.PI * 2;
+    while (rDiff < -Math.PI) rDiff += Math.PI * 2;
+    m.spr.rotation += rDiff * 0.08 * delta;
+  }
 }
 
 // ===== Win / Restart =====
@@ -1005,5 +1107,6 @@ async function init() {
     });
   }
 }
+
 
 init();
