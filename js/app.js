@@ -54,7 +54,7 @@ const C = {
 
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
-    button: 'sprites/button.png',
+  button: 'sprites/button.png',
   lighthouse: 'sprites/lighthouse.png',
   boat: 'sprites/boat.png',
   rock1: 'sprites/rock1.png',
@@ -79,6 +79,7 @@ let gameOver = false;
 let boats = [];
 let rocks = [];
 let rockColliders = [];
+let rockSprites = [];
 let score = 0;
 let lives = MAX_LIVES;
 let nextSpawnTime = 0;
@@ -274,6 +275,11 @@ function buildRocks(parent) {
     spr.scale.set(r.sc);
     parent.addChild(spr);
 
+    // Store original position for animation
+    spr._baseY = r.y;
+    spr._floatPhase = Math.random() * Math.PI * 2;
+    rockSprites.push(spr);
+
     const avgW = textures[r.tex].width;
     const avgH = textures[r.tex].height;
     const avgSize = (avgW + avgH) / 2;
@@ -285,7 +291,6 @@ function buildRocks(parent) {
 function buildLighthouse(parent) {
   lighthouseContainer = new PIXI.Container();
   lighthouseContainer.position.set(lhX, lhY);
-
 
   lighthouseSprite = new PIXI.Sprite(textures.lighthouse);
   lighthouseSprite.anchor.set(0.5, 0.75);
@@ -630,7 +635,6 @@ const UI_STYLE = {
 };
 
 function buildUI() {
-
   // HUD layer (always on top)
   hudLayer = new PIXI.Container();
 
@@ -643,17 +647,17 @@ function buildUI() {
   hudLayer.addChild(txtScore);
 
   // Arrow buttons at bottom
-  const BTN_BOTTOM_MARGIN = 24;
+  const BTN_BOTTOM_MARGIN = 80; // raise buttons higher
   const btnY = () => gameH - BTN_BOTTOM_MARGIN;
-  const btnSpacing = 110; // increase gap
-  const btnScale = 0.5;   // make buttons smaller
+  const btnSpacing = 110;
+  const btnScale = 0.32; // make buttons even smaller
   // Left button
   btnLeft = new PIXI.Container();
   const sprLeft = new PIXI.Sprite(textures.button);
   sprLeft.anchor.set(0.5);
   sprLeft.scale.set(btnScale);
   btnLeft.addChild(sprLeft);
-  // Add left arrow symbol, raised up
+  // Add left arrow symbol on the left side
   const txtArrowLeft = new PIXI.Text('←', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 32,
@@ -666,10 +670,11 @@ function buildUI() {
     dropShadowDistance: 0,
   });
   txtArrowLeft.anchor.set(0.5);
-  txtArrowLeft.y = -6; // raise symbol up
+  txtArrowLeft.x = -24; // move arrow to the left edge of button
+  txtArrowLeft.y = -2;
   btnLeft.addChild(txtArrowLeft);
-  // Add 'A' label above
-  const txtALabel = new PIXI.Text('A', {
+  // Add 'D' label on the opposite (top-right) corner
+  const txtDLabelOnLeft = new PIXI.Text('D', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 18,
     fill: '#fff',
@@ -680,9 +685,10 @@ function buildUI() {
     dropShadowBlur: 3,
     dropShadowDistance: 0,
   });
-  txtALabel.anchor.set(0.5);
-  txtALabel.y = -32;
-  btnLeft.addChild(txtALabel);
+  txtDLabelOnLeft.anchor.set(0.5);
+  txtDLabelOnLeft.x = 22;
+  txtDLabelOnLeft.y = -28;
+  btnLeft.addChild(txtDLabelOnLeft);
   btnLeft.position.set(gameW / 2 - btnSpacing, btnY());
   btnLeft.interactive = true;
   btnLeft.buttonMode = true;
@@ -698,7 +704,7 @@ function buildUI() {
   sprRight.anchor.set(0.5);
   sprRight.scale.set(btnScale);
   btnRight.addChild(sprRight);
-  // Add right arrow symbol, raised up
+  // Add right arrow symbol on the right side
   const txtArrowRight = new PIXI.Text('→', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 32,
@@ -711,10 +717,11 @@ function buildUI() {
     dropShadowDistance: 0,
   });
   txtArrowRight.anchor.set(0.5);
-  txtArrowRight.y = -6; // raise symbol up
+  txtArrowRight.x = 24; // move arrow to the right edge of button
+  txtArrowRight.y = -2;
   btnRight.addChild(txtArrowRight);
-  // Add 'D' label above
-  const txtDLabel = new PIXI.Text('D', {
+  // Add 'A' label on the opposite (top-left) corner
+  const txtALabelOnRight = new PIXI.Text('A', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 18,
     fill: '#fff',
@@ -725,9 +732,10 @@ function buildUI() {
     dropShadowBlur: 3,
     dropShadowDistance: 0,
   });
-  txtDLabel.anchor.set(0.5);
-  txtDLabel.y = -32;
-  btnRight.addChild(txtDLabel);
+  txtALabelOnRight.anchor.set(0.5);
+  txtALabelOnRight.x = -22;
+  txtALabelOnRight.y = -28;
+  btnRight.addChild(txtALabelOnRight);
   btnRight.position.set(gameW / 2 + btnSpacing, btnY());
   btnRight.interactive = true;
   btnRight.buttonMode = true;
@@ -777,9 +785,10 @@ function repositionUI() {
   txtLives.position.set(gameW / 2 - 50, 16);
   txtScore.position.set(gameW / 2 + 50, 16);
   // Move buttons if present
-  const BTN_BOTTOM_MARGIN = 24;
+  const BTN_BOTTOM_MARGIN = 80;
   if (btnLeft) btnLeft.position.set(gameW / 2 - 110, gameH - BTN_BOTTOM_MARGIN);
-  if (btnRight) btnRight.position.set(gameW / 2 + 110, gameH - BTN_BOTTOM_MARGIN);
+  if (btnRight)
+    btnRight.position.set(gameW / 2 + 110, gameH - BTN_BOTTOM_MARGIN);
 
   overlayBg.clear();
   overlayBg.beginFill(0x0a1020, 0.8);
@@ -804,6 +813,13 @@ function gameLoop(delta) {
   if (keys['KeyA'] || keys['ArrowLeft']) beamAngle -= BEAM_ROTATE_SPEED * delta;
   if (keys['KeyD'] || keys['ArrowRight'])
     beamAngle += BEAM_ROTATE_SPEED * delta;
+
+  // Animate rocks (ice floes) gently up and down
+  const rockTime = performance.now() * 0.001;
+  for (const spr of rockSprites) {
+    // Gentle float: amplitude 4px, period ~3-5s, phase offset
+    spr.y = spr._baseY + Math.sin(rockTime * 0.7 + spr._floatPhase) * 4;
+  }
 
   // Камера всегда центрируется на маяке
   const targetCamX = gameW / 2 - lhX;
@@ -952,7 +968,7 @@ async function init() {
   debugText.position.set(10, 10);
   app.stage.addChild(debugText);
 
-  buildGlow(worldContainer); 
+  buildGlow(worldContainer);
 
   buildUI();
 
