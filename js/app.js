@@ -108,7 +108,12 @@ const C = {
 // ===== Sprite Files (from sprites/ folder) =====
 const SPRITE_FILES = {
   mermaid: 'sprites/mermaid.png',
+  mermaid1: 'sprites/mermaid-1.png',
+  mermaid2: 'sprites/mermaid-2.png',
+  mermaid3: 'sprites/mermaid-3.png',
   button: 'sprites/button.png',
+  buttonEnter: 'sprites/button-enter.png',
+  buttonSpace: 'sprites/button-space.png',
   lighthouse: 'sprites/lighthouse.png',
   boat: 'sprites/boat.png',
   rock1: 'sprites/rock1.png',
@@ -119,6 +124,10 @@ const SPRITE_FILES = {
 };
 
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
+
+// Ping-pong frame sequence: 1→2→3→2→1→...
+const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
+const MERMAID_FRAME_DURATION = 8; // ticks per frame at 60fps
 
 // ===== Game State =====
 let app;
@@ -548,7 +557,7 @@ function spawnMermaid() {
     x = -SPAWN_MARGIN;
     y = Math.random() * gameH;
   }
-  const spr = new PIXI.Sprite(textures.mermaid);
+  const spr = new PIXI.Sprite(textures.mermaid1);
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE);
   spr.position.set(x, y);
@@ -559,6 +568,8 @@ function spawnMermaid() {
     gone: false,
     wavePhase: Math.random() * Math.PI * 2, // для колебания
     beamTimer: 0, // сколько времени в луче
+    frameIndex: 0,
+    frameTick: Math.random() * MERMAID_FRAME_DURATION, // offset фазы
   });
 }
 
@@ -780,46 +791,41 @@ const UI_STYLE = {
   dropShadowDistance: 0,
 };
 
+function bindTurnButton(button, keyCode) {
+  button.interactive = true;
+  button.buttonMode = true;
+  button.cursor = 'pointer';
+  button.hitArea = new PIXI.Circle(0, 0, 44);
+
+  const press = () => {
+    keys[keyCode] = true;
+  };
+
+  const release = () => {
+    keys[keyCode] = false;
+  };
+
+  button.on('pointerdown', press);
+  button.on('pointerup', release);
+  button.on('pointerupoutside', release);
+  button.on('pointercancel', release);
+  button.on('pointerout', release);
+}
+
 function buildUI() {
   // Overlay layer (game over)
   overlayLayer = new PIXI.Container();
   overlayLayer.visible = false;
 
   // Кнопки Enter и Spacebar для экрана поражения
-  overlayLayer.keyEnter = new PIXI.Container();
+  overlayLayer.keyEnter = new PIXI.Sprite(textures.buttonEnter);
+  overlayLayer.keyEnter.anchor.set(0.5);
   overlayLayer.keyEnter.visible = false;
-  const keyEnterBg = new PIXI.Graphics();
-  keyEnterBg.beginFill(0xffffff, 0.85);
-  keyEnterBg.drawRoundedRect(-38, -22, 76, 44, 12);
-  keyEnterBg.endFill();
-  overlayLayer.keyEnter.addChild(keyEnterBg);
-  const keyEnterText = new PIXI.Text('Enter', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 22,
-    fill: '#222',
-    fontWeight: 'bold',
-    align: 'center',
-  });
-  keyEnterText.anchor.set(0.5);
-  overlayLayer.keyEnter.addChild(keyEnterText);
   overlayLayer.addChild(overlayLayer.keyEnter);
 
-  overlayLayer.keySpace = new PIXI.Container();
+  overlayLayer.keySpace = new PIXI.Sprite(textures.buttonSpace);
+  overlayLayer.keySpace.anchor.set(0.5);
   overlayLayer.keySpace.visible = false;
-  const keySpaceBg = new PIXI.Graphics();
-  keySpaceBg.beginFill(0xffffff, 0.85);
-  keySpaceBg.drawRoundedRect(-60, -22, 120, 44, 12);
-  keySpaceBg.endFill();
-  overlayLayer.keySpace.addChild(keySpaceBg);
-  const keySpaceText = new PIXI.Text('Space', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 22,
-    fill: '#222',
-    fontWeight: 'bold',
-    align: 'center',
-  });
-  keySpaceText.anchor.set(0.5);
-  overlayLayer.keySpace.addChild(keySpaceText);
   overlayLayer.addChild(overlayLayer.keySpace);
   // HUD layer (always on top)
   hudLayer = new PIXI.Container();
@@ -876,12 +882,7 @@ function buildUI() {
   txtDLabelOnLeft.y = -28;
   btnLeft.addChild(txtDLabelOnLeft);
   btnLeft.position.set(gameW / 2 - btnSpacing, btnY());
-  btnLeft.interactive = true;
-  btnLeft.buttonMode = true;
-  btnLeft.on('pointerdown', () => {
-    keys['ArrowLeft'] = true;
-    setTimeout(() => (keys['ArrowLeft'] = false), 100);
-  });
+  bindTurnButton(btnLeft, 'ArrowLeft');
   hudLayer.addChild(btnLeft);
 
   // Right button
@@ -923,12 +924,7 @@ function buildUI() {
   txtALabelOnRight.y = -28;
   btnRight.addChild(txtALabelOnRight);
   btnRight.position.set(gameW / 2 + btnSpacing, btnY());
-  btnRight.interactive = true;
-  btnRight.buttonMode = true;
-  btnRight.on('pointerdown', () => {
-    keys['ArrowRight'] = true;
-    setTimeout(() => (keys['ArrowRight'] = false), 100);
-  });
+  bindTurnButton(btnRight, 'ArrowRight');
   hudLayer.addChild(btnRight);
 
   app.stage.addChild(hudLayer);
@@ -951,7 +947,7 @@ function buildUI() {
   overlayLayer.addChild(txtMessage);
 
   txtRestart = new PIXI.Text(
-    'Press SPACEBAR or ENTER to play again',
+    'Press to play again',
     new PIXI.TextStyle({
       ...UI_STYLE,
       fontSize: 18,
@@ -983,8 +979,8 @@ function buildUI() {
 function repositionUI() {
   // Позиционирование спрайтов-кнопок на экране поражения
   if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 120);
-    overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 120);
+    overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 105);
+    overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 105);
   }
   txtLives.position.set(gameW / 2 - 50, 16);
   txtScore.position.set(gameW / 2 + 50, 16);
@@ -1000,7 +996,7 @@ function repositionUI() {
   overlayBg.endFill();
 
   txtMessage.position.set(gameW / 2, gameH / 2 - 20);
-  txtRestart.position.set(gameW / 2, gameH / 2 + 30);
+  txtRestart.position.set(gameW / 2, gameH / 2 + 50);
 
   positionSplashSprite(overlayLayer.splashIceberg);
   positionSplashSprite(overlayLayer.splashMermaid);
@@ -1042,8 +1038,8 @@ function gameLoop(delta) {
   // Animate rocks (ice floes) gently up and down
   const rockTime = performance.now() * 0.001;
   for (const spr of rockSprites) {
-    // Gentle float: amplitude 4px, period ~3-5s, phase offset
-    spr.y = spr._baseY + Math.sin(rockTime * 0.7 + spr._floatPhase) * 4;
+    // Gentle float: amplitude 4px, period ~1.5-2.5s, phase offset
+    spr.y = spr._baseY + Math.sin(rockTime * 1.4 + spr._floatPhase) * 4;
   }
 
   // Камера всегда центрируется на маяке
@@ -1114,6 +1110,15 @@ function updateMermaids(delta) {
   for (let i = mermaids.length - 1; i >= 0; i--) {
     const m = mermaids[i];
     if (m.gone) continue;
+
+    // Frame animation
+    m.frameTick += delta;
+    if (m.frameTick >= MERMAID_FRAME_DURATION) {
+      m.frameTick -= MERMAID_FRAME_DURATION;
+      m.frameIndex = (m.frameIndex + 1) % MERMAID_FRAMES.length;
+      m.spr.texture = textures[MERMAID_FRAMES[m.frameIndex]];
+    }
+
     // Swim toward lighthouse
     const toX = lhX - m.spr.x;
     const toY = lhY - m.spr.y;
