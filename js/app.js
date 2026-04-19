@@ -13,6 +13,8 @@ const SPAWN_MARGIN = 60;
 const SPAWN_INTERVAL_MIN = 2500;
 const SPAWN_INTERVAL_MAX = 5000;
 const BOAT_SCALE = 0.18;
+const BEACON_RADIUS = 4;
+const BEACON_PULSE_SPEED = 0.003;
 const BEAM_HALF_ANGLE = 0.3;
 const BEAM_LEN = 1400;
 const DARK_ALPHA = 0.82;
@@ -59,7 +61,7 @@ let rockColliders = [];
 let score = 0;
 let lives = 3;
 let nextSpawnTime = 0;
-let rockLayer, boatLayer;
+let rockLayer, boatLayer, beaconLayer;
 
 // ===== UI State =====
 let hudLayer, overlayLayer;
@@ -236,11 +238,25 @@ function spawnBoat() {
   spr.position.set(x, y);
   boatLayer.addChild(spr);
 
+  // Red beacon light (placed in separate layer above darkness)
+  const beacon = new PIXI.Graphics();
+  beacon.beginFill(0xff2200, 1);
+  beacon.drawCircle(0, 0, BEACON_RADIUS);
+  beacon.endFill();
+  beacon.beginFill(0xff4400, 0.4);
+  beacon.drawCircle(0, 0, BEACON_RADIUS * 2.5);
+  beacon.endFill();
+  beacon.blendMode = PIXI.BLEND_MODES.ADD;
+  beacon.position.set(x, y);
+  beaconLayer.addChild(beacon);
+
   const angle = Math.atan2(lhY - y, lhX - x);
   spr.rotation = angle + Math.PI / 2;
 
   boats.push({
     spr,
+    beacon,
+    beaconPhase: Math.random() * Math.PI * 2,
     speed: BOAT_SPEED + Math.random() * 0.4,
     lit: false,
     sinkTimer: 0,
@@ -290,9 +306,11 @@ function updateBoats(delta) {
       // Fade out
       const fadeOut = () => {
         spr.alpha -= 0.02;
+        b.beacon.alpha = spr.alpha;
         if (spr.alpha <= 0) {
           app.ticker.remove(fadeOut);
           boatLayer.removeChild(spr);
+          beaconLayer.removeChild(b.beacon);
           boats.splice(boats.indexOf(b), 1);
         }
       };
@@ -307,6 +325,7 @@ function updateBoats(delta) {
       spr.scale.set(BOAT_SCALE * (1 - b.sinkTimer / 80));
       if (spr.alpha <= 0) {
         boatLayer.removeChild(spr);
+        beaconLayer.removeChild(b.beacon);
         boats.splice(i, 1);
       }
       continue;
@@ -366,6 +385,11 @@ function updateBoats(delta) {
     // Wake trail
     b.wake.unshift({ x: spr.x - nx * 14, y: spr.y - ny * 14, age: 0 });
     if (b.wake.length > WAKE_MAX) b.wake.pop();
+
+    // Pulse beacon and follow boat
+    const pulse = Math.max(0, Math.sin(Date.now() * BEACON_PULSE_SPEED + b.beaconPhase));
+    b.beacon.alpha = pulse;
+    b.beacon.position.set(spr.x, spr.y);
   }
 }
 
@@ -536,7 +560,10 @@ function restart() {
   overlayLayer.visible = false;
 
   // Remove all boats
-  for (const b of boats) boatLayer.removeChild(b.spr);
+  for (const b of boats) {
+    boatLayer.removeChild(b.spr);
+    beaconLayer.removeChild(b.beacon);
+  }
   boats = [];
 
   score = 0;
@@ -589,6 +616,9 @@ async function init() {
   buildLighthouse(app.stage);
 
   buildDarkness(app.stage);
+
+  beaconLayer = new PIXI.Container();
+  app.stage.addChild(beaconLayer);
 
   buildGlow(app.stage);
 
