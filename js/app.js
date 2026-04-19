@@ -210,7 +210,7 @@ let debugGfx, debugText;
 
 // ===== UI State =====
 let hudLayer, overlayLayer;
-let txtLives, txtScore, txtMessage, txtRestart;
+let txtLives, txtScore, txtMermaids, txtPolice, txtLamp, txtMessage, txtRestart;
 let btnLeft, btnRight;
 let overlayBg;
 
@@ -861,6 +861,7 @@ function updatePoliceBoats(delta) {
     if (dist < ARRIVAL_RADIUS && !p.sinking) {
       p.arrived = true;
       policeArrived++;
+      updateHUD();
       console.log(
         `🚔 Полицейский катер добрался до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
       );
@@ -1072,6 +1073,18 @@ function buildUI() {
   txtScore.anchor.set(0.5, 0);
   hudLayer.addChild(txtScore);
 
+  txtMermaids = new PIXI.Text('🧜 0/3', new PIXI.TextStyle(UI_STYLE));
+  txtMermaids.anchor.set(0, 0);
+  hudLayer.addChild(txtMermaids);
+
+  txtPolice = new PIXI.Text('🚔 0/3', new PIXI.TextStyle(UI_STYLE));
+  txtPolice.anchor.set(1, 0);
+  hudLayer.addChild(txtPolice);
+
+  txtLamp = new PIXI.Text('💡💡💡💡💡', new PIXI.TextStyle(UI_STYLE));
+  txtLamp.anchor.set(0.5, 0);
+  hudLayer.addChild(txtLamp);
+
   // Arrow buttons at bottom
   const BTN_BOTTOM_MARGIN = 80; // raise buttons higher
   const btnY = () => gameH - BTN_BOTTOM_MARGIN;
@@ -1216,8 +1229,11 @@ function repositionUI() {
     overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 105);
     overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 105);
   }
-  txtLives.position.set(gameW / 2 - 50, 16);
-  txtScore.position.set(gameW / 2 + 50, 16);
+  txtMermaids.position.set(12, 16);
+  txtLives.position.set(gameW / 2 - 55, 16);
+  txtScore.position.set(gameW / 2 + 55, 16);
+  txtPolice.position.set(gameW - 12, 16);
+  txtLamp.position.set(gameW / 2, 44);
   // Move buttons if present
   const BTN_BOTTOM_MARGIN = 80;
   if (btnLeft) btnLeft.position.set(gameW / 2 - 110, gameH - BTN_BOTTOM_MARGIN);
@@ -1258,6 +1274,13 @@ function positionSplashSprite(sprite) {
 function updateHUD() {
   txtScore.text = `⛵ ${score}`;
   txtLives.text = '❤️'.repeat(Math.max(0, lives));
+  txtMermaids.text = `🧜 ${mermaidsArrived}/3`;
+  txtPolice.text = `🚔 ${policeArrived}/3`;
+  const bulbs = Math.max(
+    0,
+    Math.round((1 - lampTimer / LAMP_BURNOUT_TIME) * 5),
+  );
+  txtLamp.text = bulbs > 0 ? '💡'.repeat(bulbs) : '🔦';
 }
 
 // ===== Game Loop =====
@@ -1315,6 +1338,7 @@ function gameLoop(delta) {
     lampFlicker = 1;
   }
   lhGlow.alpha = lampFlicker;
+  updateHUD();
 
   // Spawn boats
   const now = performance.now();
@@ -1386,6 +1410,7 @@ function updateMermaids(delta) {
         shakeIntensity = 18;
         m.gone = true;
         mermaidsArrived++;
+        updateHUD();
         if (mermaidsArrived >= 3 && !gameOver) {
           showMermaidGameOver();
         }
