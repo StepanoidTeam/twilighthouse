@@ -30,6 +30,7 @@ let BEAM_HALF_ANGLE = 0.3;
 const BEAM_LEN = 1400;
 const DARK_ALPHA = 0.82;
 let LH_GLOW_RADIUS = 55;
+let BEAM_ORIGIN_OFFSET_X = 0;
 let BEAM_ORIGIN_OFFSET_Y = -64;
 const CAM_OFFSET = 100;
 const CAM_EASE = 0.04;
@@ -68,6 +69,7 @@ const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 // ===== Game State =====
 let app;
 let gameW, gameH, lhX, lhY;
+let lighthouseContainer, lighthouseSprite;
 let textures = {};
 let darknessGfx, wakeGfx, lhGlow;
 let darkRT, darkFill, beamErase;
@@ -146,7 +148,7 @@ function updateTooltips(delta) {
 
 // ===== Debug =====
 function updateDebug() {
-  const ox = lhX;
+  const ox = lhX + BEAM_ORIGIN_OFFSET_X;
   const oy = lhY + BEAM_ORIGIN_OFFSET_Y;
   const bLen = 300;
 
@@ -228,7 +230,6 @@ function resize() {
   lhX = gameW / 2;
   lhY = gameH / 2;
   app.renderer.resize(gameW, gameH);
-
   // Resize darkness render texture
   const pad = CAM_OFFSET + 40;
   darkRT.resize(gameW + pad * 2, gameH + pad * 2);
@@ -281,21 +282,22 @@ function buildRocks(parent) {
 
 // ===== Build Lighthouse =====
 function buildLighthouse(parent) {
-  const cont = new PIXI.Container();
-  cont.position.set(lhX, lhY);
+  lighthouseContainer = new PIXI.Container();
+  lighthouseContainer.position.set(lhX, lhY);
 
   const dockSpr = new PIXI.Sprite(textures.dock);
   dockSpr.anchor.set(0.5, 0);
   dockSpr.scale.set(0.32);
   dockSpr.position.set(0, 20);
-  cont.addChild(dockSpr);
+  lighthouseContainer.addChild(dockSpr);
 
-  const lhSpr = new PIXI.Sprite(textures.lighthouse);
-  lhSpr.anchor.set(0.5, 0.75);
-  lhSpr.scale.set(0.27);
-  cont.addChild(lhSpr);
+  lighthouseSprite = new PIXI.Sprite(textures.lighthouse);
+  lighthouseSprite.anchor.set(0.5, 0.75);
+  lighthouseSprite.scale.set(0.27);
+  lighthouseContainer.addChild(lighthouseSprite);
 
-  parent.addChild(cont);
+  // Add lighthouse to worldContainer (so it moves with the map)
+  parent.addChild(lighthouseContainer);
 }
 
 // ===== Lighthouse Glow =====
@@ -308,8 +310,9 @@ function buildGlow(parent) {
   lhGlow.beginFill(C.lhLight, 0.18);
   lhGlow.drawCircle(0, 0, 18);
   lhGlow.endFill();
-  lhGlow.position.set(lhX, lhY + BEAM_ORIGIN_OFFSET_Y);
-  parent.addChild(lhGlow);
+  // Attach glow to lighthouseContainer, so it follows the sprite
+  lhGlow.position.set(0, BEAM_ORIGIN_OFFSET_Y);
+  lighthouseContainer.addChild(lhGlow);
 }
 
 // ===== Darkness Overlay =====
@@ -333,7 +336,8 @@ function buildDarkness(parent) {
 function updateDarkness() {
   const pad = CAM_OFFSET + 40;
   const bLen = Math.max(gameW, gameH) * 2;
-  const cx = lhX + pad;
+  // cx/cy — мировые координаты маяка + pad (без camX/camY)
+  const cx = lhX + BEAM_ORIGIN_OFFSET_X + pad;
   const cy = lhY + BEAM_ORIGIN_OFFSET_Y + pad;
 
   // Dark fill
@@ -716,23 +720,30 @@ function gameLoop(delta) {
 
   // Beam rotation via keyboard (no easing)
   if (keys['KeyA'] || keys['ArrowLeft']) beamAngle -= BEAM_ROTATE_SPEED * delta;
-  if (keys['KeyD'] || keys['ArrowRight']) beamAngle += BEAM_ROTATE_SPEED * delta;
+  if (keys['KeyD'] || keys['ArrowRight'])
+    beamAngle += BEAM_ROTATE_SPEED * delta;
 
-  // Camera follows beam direction with easing
-  const targetCamX = -Math.cos(beamAngle) * CAM_OFFSET;
-  const targetCamY = -Math.sin(beamAngle) * CAM_OFFSET;
+  // Камера всегда центрируется на маяке
+  const targetCamX = gameW / 2 - lhX;
+  const targetCamY = gameH / 2 - lhY;
   camX += (targetCamX - camX) * CAM_EASE * delta;
   camY += (targetCamY - camY) * CAM_EASE * delta;
   worldContainer.position.set(camX, camY);
+  // Lighthouse position is set only on resize/init, not every frame
 
   // Lamp burnout — flicker and narrow over time
   lampTimer = Math.min(lampTimer + delta, LAMP_BURNOUT_TIME);
   const burnout = lampTimer / LAMP_BURNOUT_TIME;
-  BEAM_HALF_ANGLE = LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
+  BEAM_HALF_ANGLE =
+    LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
 
   if (burnout > LAMP_FLICKER_START) {
-    const flickerIntensity = (burnout - LAMP_FLICKER_START) / (1 - LAMP_FLICKER_START);
-    const flick = Math.sin(Date.now() * 0.02) * Math.sin(Date.now() * 0.037) * Math.sin(Date.now() * 0.007);
+    const flickerIntensity =
+      (burnout - LAMP_FLICKER_START) / (1 - LAMP_FLICKER_START);
+    const flick =
+      Math.sin(Date.now() * 0.02) *
+      Math.sin(Date.now() * 0.037) *
+      Math.sin(Date.now() * 0.007);
     lampFlicker = 1 - flickerIntensity * 0.7 * Math.max(0, flick);
   } else {
     lampFlicker = 1;
@@ -801,7 +812,6 @@ async function init() {
   gameH = window.innerHeight;
   lhX = gameW / 2;
   lhY = gameH / 2;
-
   app = new PIXI.Application({
     width: gameW,
     height: gameH,
@@ -810,9 +820,7 @@ async function init() {
     resolution: window.devicePixelRatio || 1,
     autoDensity: true,
   });
-
   $gameContainer.appendChild(app.view);
-
   // Load individual sprites
   await loadTextures();
 
@@ -880,6 +888,24 @@ async function init() {
   }
 
   console.log('🔦 Lighthouse game initialized');
+
+  // ===== Beam Controls (Sliders) =====
+  const $sliderOffsetX = document.getElementById('sliderOffsetX');
+  const $valOffsetX = document.getElementById('valOffsetX');
+  const $sliderOffsetY = document.getElementById('sliderOffsetY');
+  const $valOffsetY = document.getElementById('valOffsetY');
+  if ($sliderOffsetX && $valOffsetX) {
+    $sliderOffsetX.addEventListener('input', (e) => {
+      BEAM_ORIGIN_OFFSET_X = parseInt($sliderOffsetX.value, 10);
+      $valOffsetX.textContent = $sliderOffsetX.value;
+    });
+  }
+  if ($sliderOffsetY && $valOffsetY) {
+    $sliderOffsetY.addEventListener('input', (e) => {
+      BEAM_ORIGIN_OFFSET_Y = parseInt($sliderOffsetY.value, 10);
+      $valOffsetY.textContent = $sliderOffsetY.value;
+    });
+  }
 }
 
 init();
