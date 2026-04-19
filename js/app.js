@@ -557,12 +557,19 @@ function spawnBoat() {
   spr.position.set(x, y);
   boatLayer.addChild(spr);
 
-  // Red beacon light (placed in separate layer above darkness)
+  // Green beacon light (placed in separate layer above darkness)
   const beacon = new PIXI.Graphics();
-  beacon.beginFill(0xff2200, 1);
+  // // Red beacon (original):
+  // beacon.beginFill(0xff2200, 1);
+  // beacon.drawCircle(0, 0, BEACON_RADIUS);
+  // beacon.endFill();
+  // beacon.beginFill(0xff4400, 0.4);
+  // beacon.drawCircle(0, 0, BEACON_RADIUS * 2.5);
+  // beacon.endFill();
+  beacon.beginFill(0x00dd44, 1);
   beacon.drawCircle(0, 0, BEACON_RADIUS);
   beacon.endFill();
-  beacon.beginFill(0xff4400, 0.4);
+  beacon.beginFill(0x44ff88, 0.4);
   beacon.drawCircle(0, 0, BEACON_RADIUS * 2.5);
   beacon.endFill();
   beacon.blendMode = PIXI.BLEND_MODES.ADD;
@@ -930,6 +937,7 @@ function updatePoliceBoats(delta) {
       if (!lit) {
         p.sinking = true;
         p.sinkTimer = 0;
+        spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
         console.log(
           `🚔 Полицейский катер разбился о камни (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
