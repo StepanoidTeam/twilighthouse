@@ -8,49 +8,6 @@
   </head>
   <body>
     <div id="$gameContainer"></div>
-    <div
-      id="beamControls"
-      style="
-        position: absolute;
-        left: 16px;
-        top: 16px;
-        z-index: 10;
-        background: rgba(10, 16, 32, 0.85);
-        padding: 12px 16px;
-        border-radius: 10px;
-        box-shadow: 0 2px 8px #0008;
-        user-select: none;
-      "
-    >
-      <label
-        style="color: #fff; font-size: 14px; display: block; margin-bottom: 6px"
-        >Beam X Offset
-        <input
-          id="sliderOffsetX"
-          type="range"
-          min="-200"
-          max="200"
-          value="0"
-          step="1"
-          style="width: 180px"
-        />
-        <span id="valOffsetX" style="margin-left: 8px">0</span>
-      </label>
-      <label
-        style="color: #fff; font-size: 14px; display: block; margin-bottom: 0"
-        >Beam Y Offset
-        <input
-          id="sliderOffsetY"
-          type="range"
-          min="-200"
-          max="100"
-          value="-64"
-          step="1"
-          style="width: 180px"
-        />
-        <span id="valOffsetY" style="margin-left: 8px">-64</span>
-      </label>
-    </div>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/pixi.js/7.3.2/pixi.min.js"></script>
     <script type="module" src="js/app.js"></script>
   </body>

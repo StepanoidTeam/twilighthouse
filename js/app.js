@@ -1359,10 +1359,8 @@ function updateMermaids(delta) {
 
     const lit = isInBeam(m.spr.x, m.spr.y);
 
-    // Если луч попал — русалка убегает обратно за экран
-    if (lit) {
-      m.fleeing = true;
-    }
+    // Убегает пока в луче, возвращается к маяку когда луч ушёл
+    m.fleeing = lit;
 
     let nx, ny, speedMult;
     if (m.fleeing) {
@@ -1495,7 +1493,7 @@ async function showMermaidGameOver() {
 // ===== Win / Restart =====
 function playFailSound() {
   const snd = new Audio('audio/fail-1.mp3');
-  snd.volume = 0.5;
+  snd.volume = 0.1;
   snd.play().catch(() => {});
 }
 
