@@ -207,7 +207,9 @@ async function trySubmitScore() {
   S.scoreSubmitted = true;
   const survivalMs = S.runSurvivalMs || performance.now() - S.runStartTime;
   if (!currentUser) {
-    console.log(`🏁 Run: ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`);
+    console.log(
+      `🏁 Run: ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`,
+    );
     return;
   }
   try {
@@ -215,7 +217,9 @@ async function trySubmitScore() {
     if (res && res.written) {
       console.log(`🏆 New best saved: ${Math.round(res.best / 1000)}s`);
     } else if (res) {
-      console.log(`🏁 Run: ${Math.round(survivalMs / 1000)}s (best remains ${Math.round(res.best / 1000)}s)`);
+      console.log(
+        `🏁 Run: ${Math.round(survivalMs / 1000)}s (best remains ${Math.round(res.best / 1000)}s)`,
+      );
     }
   } catch (e) {
     console.warn('submitScore failed', e);
@@ -438,7 +442,10 @@ async function init() {
   // ===== Waves Sound =====
   const wavesAudio = new Audio('audio/ocean-sea-soft-waves.mp3');
   wavesAudio.loop = true;
-  wavesAudio.volume = Math.max(0, Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 1)));
+  wavesAudio.volume = Math.max(
+    0,
+    Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 1)),
+  );
   S.wavesSound = wavesAudio;
   const startWaves = () => {
     S.wavesSound.play().catch(() => {});
