@@ -280,6 +280,12 @@ export function buildOverlay() {
   S.overlayLayer.splashKraken.visible = false;
   S.overlayLayer.addChildAt(S.overlayLayer.splashKraken, 2);
 
+  // Police splash image (hidden by default)
+  S.overlayLayer.splashPolice = new PIXI.Sprite();
+  S.overlayLayer.splashPolice.anchor.set(0.5);
+  S.overlayLayer.splashPolice.visible = false;
+  S.overlayLayer.addChildAt(S.overlayLayer.splashPolice, 3);
+
   // Кнопки Enter и Spacebar для экрана поражения
   S.overlayLayer.keyEnter = new PIXI.Sprite(S.textures.buttonEnter);
   S.overlayLayer.keyEnter.anchor.set(0.5);
@@ -366,6 +372,7 @@ export function repositionUI() {
   positionSplashSprite(S.overlayLayer.splashIceberg);
   positionSplashSprite(S.overlayLayer.splashMermaid);
   positionSplashSprite(S.overlayLayer.splashKraken);
+  positionSplashSprite(S.overlayLayer.splashPolice);
 }
 
 export function buildUI() {
@@ -425,15 +432,21 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
   if (S.overlayLayer.keySpace) S.overlayLayer.keySpace.visible = true;
 
   // Hide all splash sprites, then show the requested one
-  for (const key of ['splashIceberg', 'splashMermaid', 'splashKraken']) {
+  for (const key of [
+    'splashIceberg',
+    'splashMermaid',
+    'splashKraken',
+    'splashPolice',
+  ]) {
     if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
   }
 
   if (splashKey) {
     const spriteFile = {
-      splashIceberg: 'sprites/splash-iceberg.png',
-      splashMermaid: 'sprites/splash-mermaid.png',
-      splashKraken: 'sprites/splash-kraken.png',
+      splashIceberg: 'sprites/wasted/iceberg.png',
+      splashMermaid: 'sprites/wasted/mermaid.png',
+      splashKraken: 'sprites/wasted/kraken.png',
+      splashPolice: 'sprites/wasted/police.png',
     }[splashKey];
     if (!S.textures[splashKey]) {
       S.textures[splashKey] = await PIXI.Assets.load(spriteFile);
@@ -455,8 +468,7 @@ export function showBoatGameOver() {
 export function showPoliceGameOver() {
   return showGameOverScreen({
     message: '🚔 Арест! Полиция захватила маяк!',
-    splashKey: null,
-    msgOffsetY: -40,
+    splashKey: 'splashPolice',
   });
 }
 

@@ -88,8 +88,10 @@ function restart() {
   if (S.overlayLayer.keySpace) S.overlayLayer.keySpace.visible = false;
   S.overlayLayer.visible = false;
   S.overlayLayer.alpha = 1;
-  if (S.overlayLayer.splashMermaid) S.overlayLayer.splashMermaid.visible = false;
+  if (S.overlayLayer.splashMermaid)
+    S.overlayLayer.splashMermaid.visible = false;
   if (S.overlayLayer.splashKraken) S.overlayLayer.splashKraken.visible = false;
+  if (S.overlayLayer.splashPolice) S.overlayLayer.splashPolice.visible = false;
 
   cleanupBoats();
   cleanupPolice();
@@ -105,8 +107,10 @@ function gameLoop(delta) {
   if (S.gameOver) return;
 
   // Beam rotation via keyboard (no easing)
-  if (S.keys['KeyA'] || S.keys['ArrowLeft']) S.beamAngle -= BEAM_ROTATE_SPEED * delta;
-  if (S.keys['KeyD'] || S.keys['ArrowRight']) S.beamAngle += BEAM_ROTATE_SPEED * delta;
+  if (S.keys['KeyA'] || S.keys['ArrowLeft'])
+    S.beamAngle -= BEAM_ROTATE_SPEED * delta;
+  if (S.keys['KeyD'] || S.keys['ArrowRight'])
+    S.beamAngle += BEAM_ROTATE_SPEED * delta;
 
   // Animate rocks (ice floes)
   updateRocks();
