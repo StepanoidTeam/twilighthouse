@@ -25,6 +25,7 @@ import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
 import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
+import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
 
 const $gameContainer = document.getElementById('$gameContainer');
 
@@ -64,8 +65,19 @@ function bindEvents() {
       S.LH_GLOW_RADIUS = Math.max(5, S.LH_GLOW_RADIUS - 5);
     if (S.debugMode && e.code === 'Equal') S.LH_GLOW_RADIUS += 5;
 
+    // Escape → back to menu (during gameplay)
+    if (e.code === 'Escape' && !S.gameOver && !isMenuVisible()) {
+      if (S.btnEsc) S.btnEsc.visible = false;
+      showMenu();
+      return;
+    }
+
     // Restart on Enter/Space when game over
-    if (S.gameOver && (e.code === 'Enter' || e.code === 'Space')) {
+    if (
+      S.gameOver &&
+      !isMenuVisible() &&
+      (e.code === 'Enter' || e.code === 'Space')
+    ) {
       restart();
     }
   });
@@ -78,6 +90,7 @@ function bindEvents() {
     resize();
     S.lhGlow.position.set(S.lhX, S.lhY + S.BEAM_ORIGIN_OFFSET_Y);
     repositionUI();
+    repositionMenu();
   });
 }
 
@@ -100,11 +113,21 @@ function restart() {
 
   S.reset();
   updateHUD();
+  showMenu();
+}
+
+// ===== Start Game (called from menu) =====
+function startGame() {
+  S.reset();
+  updateHUD();
+  S.nextSpawnTime = performance.now() + 1000;
+  if (S.btnEsc) S.btnEsc.visible = true;
 }
 
 // ===== Game Loop =====
 function gameLoop(delta) {
   if (S.gameOver) return;
+  if (isMenuVisible()) return;
 
   // Beam rotation via keyboard (no easing)
   if (S.keys['KeyA'] || S.keys['ArrowLeft'])
@@ -190,6 +213,7 @@ async function init() {
     autoDensity: true,
   });
   $gameContainer.appendChild(S.app.view);
+  S.app.stage.interactive = true;
   await loadTextures();
 
   // World container holds all game elements (camera moves this)
@@ -225,11 +249,23 @@ async function init() {
   buildGlow();
 
   buildUI();
+  S.btnEsc.visible = false; // hidden until game starts
+
+  // Wire Escape button click to show menu
+  S.btnEsc.on('pointerdown', () => {
+    if (!S.gameOver && !isMenuVisible()) {
+      S.btnEsc.visible = false;
+      showMenu();
+    }
+  });
 
   bindEvents();
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
   S.app.ticker.add(gameLoop);
+
+  // Build menu (on top of everything) and show it
+  await buildMenu(S.app, startGame);
 
   // ===== Background Music =====
   S.bgMusic = new Audio('audio/ocean-sea-soft-waves.mp3');

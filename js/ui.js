@@ -230,6 +230,40 @@ export function buildButtons() {
   );
   bindTurnButton(S.btnRight, 'ArrowRight');
   S.hudLayer.addChild(S.btnRight);
+
+  // Escape button (top-left)
+  S.btnEsc = new PIXI.Container();
+  const sprEsc = new PIXI.Sprite(S.textures.button);
+  sprEsc.anchor.set(0.5);
+  sprEsc.scale.set(0.22);
+  S.btnEsc.addChild(sprEsc);
+  const txtEsc = new PIXI.Text('Esc', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 16,
+    fill: '#c8d8e8',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 3,
+    dropShadowDistance: 0,
+  });
+  txtEsc.anchor.set(0.5);
+  txtEsc.y = -4;
+  S.btnEsc.addChild(txtEsc);
+  S.btnEsc.position.set(44, 28);
+  S.btnEsc.interactive = true;
+  S.btnEsc.buttonMode = true;
+  S.btnEsc.cursor = 'pointer';
+  S.btnEsc.hitArea = new PIXI.Circle(0, 0, 30);
+  S.btnEsc.alpha = 0.7;
+  S.btnEsc.on('pointerover', () => {
+    S.btnEsc.alpha = 1;
+  });
+  S.btnEsc.on('pointerout', () => {
+    S.btnEsc.alpha = 0.7;
+  });
+  S.hudLayer.addChild(S.btnEsc);
 }
 
 // ===== Overlay =====
@@ -360,6 +394,7 @@ export function repositionUI() {
     S.btnLeft.position.set(S.gameW / 2 - 110, S.gameH - BTN_BOTTOM_MARGIN);
   if (S.btnRight)
     S.btnRight.position.set(S.gameW / 2 + 110, S.gameH - BTN_BOTTOM_MARGIN);
+  if (S.btnEsc) S.btnEsc.position.set(44, 28);
 
   S.overlayBg.clear();
   S.overlayBg.beginFill(0x0a1020, 0.8);
@@ -453,6 +488,8 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
     }
     S.overlayLayer[splashKey].texture = S.textures[splashKey];
     S.overlayLayer[splashKey].visible = true;
+    // Splash covers full screen — hide dark overlay behind it
+    S.overlayBg.visible = false;
   }
 
   repositionUI();
@@ -481,7 +518,7 @@ export function showMermaidGameOver() {
 
 export function showKrakenGameOver() {
   return showGameOverScreen({
-    message: '🦑 Кракены захватили маяк!',
+    message: '🦑 Кракен захватил маяк!',
     splashKey: 'splashKraken',
   });
 }
