@@ -35,6 +35,8 @@ import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
 import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
+import { submitScore } from './leaderboard.js';
+import { currentUser } from './auth.js';
 
 const $gameContainer = document.getElementById('$gameContainer');
 
@@ -56,6 +58,17 @@ function resize() {
 // ===== Input =====
 function bindEvents() {
   window.addEventListener('keydown', (e) => {
+    // Ignore keys while typing in an input (e.g. auth modal)
+    const ae = document.activeElement;
+    if (
+      ae &&
+      (ae.tagName === 'INPUT' ||
+        ae.tagName === 'TEXTAREA' ||
+        ae.isContentEditable)
+    ) {
+      return;
+    }
+
     S.keys[e.code] = true;
 
     // Toggle debug mode
@@ -177,9 +190,37 @@ function startGame() {
   if (S.btnEsc) S.btnEsc.visible = true;
 }
 
+// ===== Submit Score =====
+async function trySubmitScore() {
+  if (S.scoreSubmitted) return;
+  S.scoreSubmitted = true;
+  const survivalMs = S.runSurvivalMs || performance.now() - S.runStartTime;
+  if (!currentUser) {
+    console.log(`🏁 Run: ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`);
+    return;
+  }
+  try {
+    const res = await submitScore(survivalMs);
+    if (res && res.written) {
+      console.log(`🏆 New best saved: ${Math.round(res.best / 1000)}s`);
+    } else if (res) {
+      console.log(`🏁 Run: ${Math.round(survivalMs / 1000)}s (best remains ${Math.round(res.best / 1000)}s)`);
+    }
+  } catch (e) {
+    console.warn('submitScore failed', e);
+  }
+}
+
 // ===== Game Loop =====
 function gameLoop(delta) {
-  if (S.gameOver) return;
+  // Detect a fresh game-over transition: freeze survival time and submit once
+  if (S.gameOver) {
+    if (!S.scoreSubmitted) {
+      S.runSurvivalMs = performance.now() - S.runStartTime;
+      trySubmitScore();
+    }
+    return;
+  }
   if (isMenuVisible()) return;
   if (S.exitConfirm) return;
 

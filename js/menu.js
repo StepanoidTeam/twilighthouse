@@ -2,6 +2,9 @@ import { PIXI, UI_STYLE, C, scaleToWidth } from './config.js';
 import { playSound } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
+import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
+import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
+import { currentUser } from './auth.js';
 
 // ===== Menu State =====
 let menuContainer = null;
@@ -127,19 +130,6 @@ const MAIN_MENU = [
   { label: '🚪  Выход', action: 'exit' },
 ];
 
-// ===== Mock Leaderboard =====
-const MOCK_LEADERBOARD = [
-  { name: 'Captain_Nemo', score: '12:34' },
-  { name: 'LightKeeper', score: '10:22' },
-  { name: 'SeaWolf', score: '09:15' },
-  { name: 'OceanBreeze', score: '08:47' },
-  { name: 'StormChaser', score: '07:33' },
-  { name: 'WaveRider', score: '06:58' },
-  { name: 'AnchorMan', score: '05:44' },
-  { name: 'SaltySailor', score: '05:12' },
-  { name: 'CoralHunter', score: '04:30' },
-  { name: 'TideWatcher', score: '03:15' },
-];
 
 // ===== Credits Text =====
 const CREDITS_TEXT = `
@@ -338,12 +328,27 @@ export async function buildMenu(app, startGameCb) {
 
   currentScreen = 'main';
 
+  // Account widget (DOM overlay, top-right)
+  showAuthWidget();
+
   // Keyboard
   window.addEventListener('keydown', handleMenuKey);
 }
 
 function handleMenuKey(e) {
   if (!menuContainer || !menuContainer.visible) return;
+
+  // Don't intercept keys while typing in the auth modal or other inputs
+  const ae = document.activeElement;
+  if (
+    ae &&
+    (ae.tagName === 'INPUT' ||
+      ae.tagName === 'TEXTAREA' ||
+      ae.isContentEditable ||
+      ae.closest('.auth-modal-backdrop'))
+  ) {
+    return;
+  }
 
   if (currentScreen === 'main') {
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
@@ -429,7 +434,7 @@ function createBackHint() {
 }
 
 // ===== Leaderboard =====
-function showLeaderboard() {
+async function showLeaderboard() {
   hideMainItems();
   clearSubScreen();
   currentScreen = 'leaderboard';
@@ -441,14 +446,76 @@ function showLeaderboard() {
   heading.position.set(S.gameW / 2, S.gameH * 0.12);
   sub.addChild(heading);
 
-  const startY = S.gameH * 0.24;
-  for (let i = 0; i < MOCK_LEADERBOARD.length; i++) {
-    const entry = MOCK_LEADERBOARD[i];
-    const style = i < 3 ? LEADERBOARD_HIGHLIGHT_STYLE : LEADERBOARD_STYLE;
+  const subtitle = new PIXI.Text(
+    'Топ смотрителей маяка — кто продержался дольше',
+    HINT_STYLE,
+  );
+  subtitle.anchor.set(0.5);
+  subtitle.position.set(S.gameW / 2, S.gameH * 0.18);
+  sub.addChild(subtitle);
+
+  // Loading placeholder
+  const loading = new PIXI.Text('Загрузка...', LEADERBOARD_STYLE);
+  loading.anchor.set(0.5);
+  loading.position.set(S.gameW / 2, S.gameH * 0.5);
+  sub.addChild(loading);
+
+  sub.addChild(createBackHint());
+  menuContainer.addChild(sub);
+  menuContainer._subScreen = sub;
+
+  // Fetch and render
+  let rows = [];
+  let error = null;
+  try {
+    rows = await fetchTopLeaderboard(10);
+  } catch (e) {
+    console.warn('Failed to load leaderboard', e);
+    error = e;
+  }
+
+  // User navigated away while loading
+  if (currentScreen !== 'leaderboard' || menuContainer._subScreen !== sub) {
+    return;
+  }
+
+  sub.removeChild(loading);
+  loading.destroy();
+
+  if (error) {
+    const err = new PIXI.Text(
+      'Не удалось загрузить лидерборд',
+      LEADERBOARD_STYLE,
+    );
+    err.anchor.set(0.5);
+    err.position.set(S.gameW / 2, S.gameH * 0.5);
+    sub.addChild(err);
+    return;
+  }
+
+  if (rows.length === 0) {
+    const empty = new PIXI.Text(
+      'Пока никто не попал в топ — стань первым!',
+      LEADERBOARD_STYLE,
+    );
+    empty.anchor.set(0.5);
+    empty.position.set(S.gameW / 2, S.gameH * 0.5);
+    sub.addChild(empty);
+    return;
+  }
+
+  const myUid = currentUser ? currentUser.uid : null;
+  const startY = S.gameH * 0.26;
+  for (let i = 0; i < rows.length; i++) {
+    const entry = rows[i];
+    const isMe = myUid && entry.uid === myUid;
+    const style =
+      i < 3 || isMe ? LEADERBOARD_HIGHLIGHT_STYLE : LEADERBOARD_STYLE;
     const medal =
       i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+    const label = isMe ? `${entry.displayName}  (вы)` : entry.displayName;
     const txt = new PIXI.Text(
-      `${medal}  ${entry.name}  —  ${entry.score}`,
+      `${medal}  ${label}  —  ${formatSurvivalTime(entry.bestTimeMs)}`,
       style,
     );
     txt.anchor.set(0.5);
@@ -456,9 +523,15 @@ function showLeaderboard() {
     sub.addChild(txt);
   }
 
-  sub.addChild(createBackHint());
-  menuContainer.addChild(sub);
-  menuContainer._subScreen = sub;
+  if (!currentUser) {
+    const note = new PIXI.Text(
+      'Войдите, чтобы попасть в лидерборд',
+      HINT_STYLE,
+    );
+    note.anchor.set(0.5);
+    note.position.set(S.gameW / 2, S.gameH - 60);
+    sub.addChild(note);
+  }
 }
 
 // ===== Settings =====
@@ -666,6 +739,7 @@ function hideMenu() {
   if (menuContainer) menuContainer.visible = false;
   clearSubScreen();
   currentScreen = null;
+  hideAuthWidget();
 }
 
 export function showMenu() {
@@ -675,6 +749,7 @@ export function showMenu() {
   showMainMenu();
   currentScreen = 'main';
   repositionMenu();
+  showAuthWidget();
 }
 
 export function isMenuVisible() {

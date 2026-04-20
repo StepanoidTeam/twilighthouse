@@ -53,6 +53,11 @@ const State = {
   gameOverPending: false,
   exitConfirm: false,
 
+  // Run timing (survival)
+  runStartTime: 0,
+  runSurvivalMs: 0,
+  scoreSubmitted: false,
+
   // Entities
   boats: [],
   mermaids: [],
@@ -131,6 +136,9 @@ const State = {
     this.exitConfirm = false;
     this.boatsSunk = 0;
     this.nextSpawnTime = performance.now() + 1000;
+    this.runStartTime = performance.now();
+    this.runSurvivalMs = 0;
+    this.scoreSubmitted = false;
   },
 };
 
