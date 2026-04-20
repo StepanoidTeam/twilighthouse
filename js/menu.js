@@ -153,13 +153,13 @@ const CREDITS_TEXT = `
 💻 Программисты
 
 @bobanko
-@nuclme
+@noki_a
 @claude
 
 
 🎲 Геймдизайнеры
 
-@nuclme
+@noki_a
 @stepastepa
 @adriana
 @bobanko
