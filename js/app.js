@@ -8,102 +8,20 @@ function scheduleGameOver(fn) {
   setTimeout(fn, GAME_OVER_DELAY);
 }
 
-// ===== Game Over by Boats (Iceberg) =====
-async function showBoatGameOver() {
-  // Показать спрайты-кнопки
-  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.visible = true;
-    overlayLayer.keySpace.visible = true;
-  }
-  gameOver = true;
-  txtMessage.text = '💀 Game Over — 3 boats sunk!';
+const OVERLAY_FADE_DURATION = 600; // ms
+
+function fadeInOverlay() {
+  overlayLayer.alpha = 0;
   overlayLayer.visible = true;
-  playFailSound();
-  // Сделать текст поверх splash
-  txtMessage.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 38,
-    fontWeight: 'bold',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 6,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 8,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
-  txtMessage.visible = true;
-  txtRestart.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 22,
-    fontWeight: 'normal',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 6,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
-  txtRestart.visible = true;
-  // Загрузить splash-iceberg.png, если не загружен
-  if (!textures.splashIceberg) {
-    textures.splashIceberg = await PIXI.Assets.load(
-      'sprites/splash-iceberg.png',
-    );
-  }
-  overlayLayer.splashIceberg.texture = textures.splashIceberg;
-  overlayLayer.splashIceberg.visible = true;
-  repositionUI();
-  // Скрыть splashMermaid если был
-  if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
+  const start = performance.now();
+  const tick = () => {
+    const t = Math.min(1, (performance.now() - start) / OVERLAY_FADE_DURATION);
+    overlayLayer.alpha = t;
+    if (t < 1) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
 }
 
-// ===== Game Over by Police =====
-function showPoliceGameOver() {
-  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.visible = true;
-    overlayLayer.keySpace.visible = true;
-  }
-  gameOver = true;
-  txtMessage.text = '🚔 Арест! Полиция захватила маяк!';
-  overlayLayer.visible = true;
-  playFailSound();
-  txtMessage.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 38,
-    fontWeight: 'bold',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 6,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 8,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtMessage.position.set(gameW / 2, gameH / 2 - 40);
-  txtMessage.visible = true;
-  txtRestart.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 22,
-    fontWeight: 'normal',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 6,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
-  txtRestart.visible = true;
-}
 import { analytics, logEvent } from '../firebase.init.js';
 
 const PIXI = globalThis.PIXI;
@@ -129,7 +47,8 @@ const ARRIVAL_RADIUS = 55;
 const MAX_LIVES = 10;
 const WIN_SCORE = 10;
 const SPAWN_MARGIN = 60;
-const MOB_SPAWN_RADIUS = 560; // radius around lighthouse where mobs spawn and beam is capped
+const DARKNESS_RADIUS = 560; // radius where beam/darkness is capped
+const MOB_SPAWN_RING = 680; // radius where mobs actually spawn (beyond darkness)
 const SPAWN_INTERVAL_MIN = 2500;
 const SPAWN_INTERVAL_MAX = 5000;
 const BOAT_SCALE = 0.18;
@@ -142,6 +61,7 @@ let LH_GLOW_RADIUS = 55;
 let BEAM_ORIGIN_OFFSET_X = 0;
 let BEAM_ORIGIN_OFFSET_Y = -64;
 const CAM_OFFSET = 100;
+const DARKNESS_PAD = CAM_OFFSET + 200; // extra padding so darkness mask edge is never visible on screen
 const CAM_EASE = 0.04;
 const CAM_BEAM_OFFSET = 160; // how far camera shifts toward beam direction
 
@@ -220,7 +140,13 @@ function randomCargo() {
     const count = Math.floor(Math.random() * 6); // 0–5
     if (count > 0) cargo.push(`${type}${count}`);
   }
-  return cargo.length > 0 ? cargo.join(' ') : '📦×0';
+  // Guarantee at least 1 item
+  if (cargo.length === 0) {
+    const type =
+      BOAT_CARGO_TYPES[Math.floor(Math.random() * BOAT_CARGO_TYPES.length)];
+    cargo.push(`${type}1`);
+  }
+  return cargo.join(' ');
 }
 
 // Ping-pong frame sequence: 1→2→3→2→1→...
@@ -358,7 +284,7 @@ function updateTooltips(delta) {
   }
 }
 
-// ===== Debug =====
+// ===== Debug Overlay =====
 function updateDebug() {
   const ox = lhX + BEAM_ORIGIN_OFFSET_X;
   const oy = lhY + BEAM_ORIGIN_OFFSET_Y;
@@ -421,7 +347,11 @@ function updateDebug() {
 
   // Mob spawn / beam cap radius
   debugGfx.lineStyle(2, 0xffffff, 0.35);
-  debugGfx.drawCircle(lhX, lhY, MOB_SPAWN_RADIUS);
+  debugGfx.drawCircle(lhX, lhY, DARKNESS_RADIUS);
+
+  // Mob spawn ring
+  debugGfx.lineStyle(2, 0xaaaaff, 0.35);
+  debugGfx.drawCircle(lhX, lhY, MOB_SPAWN_RING);
 
   // Boat colliders (green)
   for (const b of boats) {
@@ -464,52 +394,6 @@ function updateDebug() {
     debugGfx.endFill();
   }
 
-  // Debug: кнопки управления (позиция и текст)
-  if (btnLeft && btnRight) {
-    // Кнопка влево
-    debugGfx.lineStyle(2, 0x00ff00, 0.7);
-    debugGfx.drawRect(
-      btnLeft.x - btnLeft.width / 2,
-      btnLeft.y - btnLeft.height / 2,
-      btnLeft.width,
-      btnLeft.height,
-    );
-    // Кнопка вправо
-    debugGfx.lineStyle(2, 0x0000ff, 0.7);
-    debugGfx.drawRect(
-      btnRight.x - btnRight.width / 2,
-      btnRight.y - btnRight.height / 2,
-      btnRight.width,
-      btnRight.height,
-    );
-
-    // Текстовые элементы на кнопках
-    // btnLeft
-    btnLeft.children.forEach((child) => {
-      if (child.text) {
-        debugGfx.lineStyle(1, 0xffff00, 0.8);
-        debugGfx.drawRect(
-          btnLeft.x + child.x - child.width / 2,
-          btnLeft.y + child.y - child.height / 2,
-          child.width,
-          child.height,
-        );
-      }
-    });
-    // btnRight
-    btnRight.children.forEach((child) => {
-      if (child.text) {
-        debugGfx.lineStyle(1, 0xff00ff, 0.8);
-        debugGfx.drawRect(
-          btnRight.x + child.x - child.width / 2,
-          btnRight.y + child.y - child.height / 2,
-          child.width,
-          child.height,
-        );
-      }
-    });
-  }
-
   // Update glow position live
   lhGlow.position.set(lhX, lhY + BEAM_ORIGIN_OFFSET_Y);
 
@@ -527,7 +411,7 @@ function resize() {
   lhY = gameH / 2;
   app.renderer.resize(gameW, gameH);
   // Resize darkness render texture
-  const pad = CAM_OFFSET + 40;
+  const pad = DARKNESS_PAD;
   darkRT.resize(gameW + pad * 2, gameH + pad * 2);
 }
 
@@ -613,7 +497,7 @@ function buildGlow(parent) {
 
 // ===== Darkness Overlay =====
 function buildDarkness(parent) {
-  const pad = CAM_OFFSET + 40;
+  const pad = DARKNESS_PAD;
   darkRT = PIXI.RenderTexture.create({
     width: gameW + pad * 2,
     height: gameH + pad * 2,
@@ -631,7 +515,7 @@ function buildDarkness(parent) {
 }
 
 function updateDarkness() {
-  const pad = CAM_OFFSET + 40;
+  const pad = DARKNESS_PAD;
   const bLen = Math.max(gameW, gameH) * 2;
   // cx/cy — мировые координаты маяка + pad (без camX/camY)
   const cx = lhX + BEAM_ORIGIN_OFFSET_X + pad;
@@ -671,7 +555,7 @@ function updateDarkness() {
   outerDark.beginFill(0x000000, 1);
   outerDark.drawRect(0, 0, gameW + pad * 2, gameH + pad * 2);
   outerDark.beginHole();
-  outerDark.drawCircle(lhX + pad, lhY + pad, MOB_SPAWN_RADIUS);
+  outerDark.drawCircle(lhX + pad, lhY + pad, DARKNESS_RADIUS);
   outerDark.endHole();
   outerDark.endFill();
   app.renderer.render(outerDark, { renderTexture: darkRT, clear: false });
@@ -680,8 +564,8 @@ function updateDarkness() {
 function spawnOnRing() {
   const angle = Math.random() * Math.PI * 2;
   return {
-    x: lhX + Math.cos(angle) * MOB_SPAWN_RADIUS,
-    y: lhY + Math.sin(angle) * MOB_SPAWN_RADIUS,
+    x: lhX + Math.cos(angle) * MOB_SPAWN_RING,
+    y: lhY + Math.sin(angle) * MOB_SPAWN_RING,
   };
 }
 
@@ -1239,22 +1123,7 @@ function bindTurnButton(button, keyCode) {
   button.on('pointerout', release);
 }
 
-function buildUI() {
-  // Overlay layer (game over)
-  overlayLayer = new PIXI.Container();
-  overlayLayer.visible = false;
-
-  // Кнопки Enter и Spacebar для экрана поражения
-  overlayLayer.keyEnter = new PIXI.Sprite(textures.buttonEnter);
-  overlayLayer.keyEnter.anchor.set(0.5);
-  overlayLayer.keyEnter.visible = false;
-  overlayLayer.addChild(overlayLayer.keyEnter);
-
-  overlayLayer.keySpace = new PIXI.Sprite(textures.buttonSpace);
-  overlayLayer.keySpace.anchor.set(0.5);
-  overlayLayer.keySpace.visible = false;
-  overlayLayer.addChild(overlayLayer.keySpace);
-  // HUD layer (always on top)
+function buildHUD() {
   hudLayer = new PIXI.Container();
 
   txtLives = new PIXI.Text('❤️❤️❤️', new PIXI.TextStyle(UI_STYLE));
@@ -1281,11 +1150,14 @@ function buildUI() {
   txtSunk.anchor.set(1, 0);
   hudLayer.addChild(txtSunk);
 
-  // Arrow buttons at bottom
-  const BTN_BOTTOM_MARGIN = 80; // raise buttons higher
-  const btnY = () => gameH - BTN_BOTTOM_MARGIN;
+  app.stage.addChild(hudLayer);
+}
+
+function buildButtons() {
   const btnSpacing = 110;
   const btnScale = 0.32; // make buttons even smaller
+  const BTN_BOTTOM_MARGIN = 80; // raise buttons higher
+
   // Left button
   btnLeft = new PIXI.Container();
   const sprLeft = new PIXI.Sprite(textures.button);
@@ -1324,7 +1196,7 @@ function buildUI() {
   txtDLabelOnLeft.x = 22;
   txtDLabelOnLeft.y = -28;
   btnLeft.addChild(txtDLabelOnLeft);
-  btnLeft.position.set(gameW / 2 - btnSpacing, btnY());
+  btnLeft.position.set(gameW / 2 - btnSpacing, gameH - BTN_BOTTOM_MARGIN);
   bindTurnButton(btnLeft, 'ArrowLeft');
   hudLayer.addChild(btnLeft);
 
@@ -1366,13 +1238,12 @@ function buildUI() {
   txtALabelOnRight.x = -22;
   txtALabelOnRight.y = -28;
   btnRight.addChild(txtALabelOnRight);
-  btnRight.position.set(gameW / 2 + btnSpacing, btnY());
+  btnRight.position.set(gameW / 2 + btnSpacing, gameH - BTN_BOTTOM_MARGIN);
   bindTurnButton(btnRight, 'ArrowRight');
   hudLayer.addChild(btnRight);
+}
 
-  app.stage.addChild(hudLayer);
-
-  // Overlay layer (game over)
+function buildOverlay() {
   overlayLayer = new PIXI.Container();
   overlayLayer.visible = false;
 
@@ -1420,16 +1291,53 @@ function buildUI() {
   overlayLayer.splashKraken.visible = false;
   overlayLayer.addChildAt(overlayLayer.splashKraken, 2);
 
-  app.stage.addChild(overlayLayer);
+  // Кнопки Enter и Spacebar для экрана поражения
+  overlayLayer.keyEnter = new PIXI.Sprite(textures.buttonEnter);
+  overlayLayer.keyEnter.anchor.set(0.5);
+  overlayLayer.keyEnter.scale.set(0.5);
+  overlayLayer.keyEnter.visible = false;
+  overlayLayer.addChild(overlayLayer.keyEnter);
 
+  overlayLayer.txtOr = new PIXI.Text(
+    'OR',
+    new PIXI.TextStyle({
+      fontFamily: 'Segoe UI, system-ui, sans-serif',
+      fontSize: 18,
+      fontWeight: 'bold',
+      fill: '#6a8a9a',
+      dropShadow: true,
+      dropShadowColor: '#000',
+      dropShadowBlur: 4,
+      dropShadowDistance: 0,
+    }),
+  );
+  overlayLayer.txtOr.anchor.set(0.5);
+  overlayLayer.txtOr.visible = false;
+  overlayLayer.addChild(overlayLayer.txtOr);
+
+  overlayLayer.keySpace = new PIXI.Sprite(textures.buttonSpace);
+  overlayLayer.keySpace.anchor.set(0.5);
+  overlayLayer.keySpace.scale.set(0.5);
+  overlayLayer.keySpace.visible = false;
+  overlayLayer.addChild(overlayLayer.keySpace);
+
+  app.stage.addChild(overlayLayer);
+}
+
+function buildUI() {
+  buildHUD();
+  buildButtons();
+  buildOverlay();
   repositionUI();
 }
 
 function repositionUI() {
   // Позиционирование спрайтов-кнопок на экране поражения
   if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 105);
-    overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 105);
+    const keyY = gameH - 80;
+    overlayLayer.keyEnter.position.set(gameW / 2 - 130, keyY);
+    if (overlayLayer.txtOr) overlayLayer.txtOr.position.set(gameW / 2, keyY);
+    overlayLayer.keySpace.position.set(gameW / 2 + 130, keyY);
   }
   const HUD_RIGHT = gameW - 12;
   const HUD_LINE = 28;
@@ -1662,7 +1570,7 @@ function updateMermaids(delta) {
     // Удалить если уплыла за пределы зоны
     if (
       m.fleeing &&
-      Math.hypot(m.spr.x - lhX, m.spr.y - lhY) > MOB_SPAWN_RADIUS + SPAWN_MARGIN
+      Math.hypot(m.spr.x - lhX, m.spr.y - lhY) > MOB_SPAWN_RING + SPAWN_MARGIN
     ) {
       m.gone = true;
       console.log(`🧜‍♀️ Русалка уплыла за экран`);
@@ -1817,7 +1725,7 @@ function updateKrakens(delta) {
     // Удалить если уплыл за пределы зоны (только убегая)
     if (
       k.fleeing &&
-      Math.hypot(k.spr.x - lhX, k.spr.y - lhY) > MOB_SPAWN_RADIUS + SPAWN_MARGIN
+      Math.hypot(k.spr.x - lhX, k.spr.y - lhY) > MOB_SPAWN_RING + SPAWN_MARGIN
     ) {
       k.gone = true;
       console.log(`🦑 Кракен уплыл за экран`);
@@ -1830,133 +1738,131 @@ function updateKrakens(delta) {
   }
 }
 
-// ===== Game Over by Mermaids =====
-async function showMermaidGameOver() {
-  // Показать спрайты-кнопки
-  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.visible = true;
-    overlayLayer.keySpace.visible = true;
-  }
-  gameOver = true;
-  txtMessage.text = '💀 Game Over — 3 mermaids reached the lighthouse!';
-  overlayLayer.visible = true;
-  playFailSound();
-  txtMessage.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 38,
-    fontWeight: 'bold',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 6,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 8,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
-  txtMessage.visible = true;
-  txtRestart.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 22,
-    fontWeight: 'normal',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 6,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
-  txtRestart.visible = true;
-  if (!textures.splashMermaid) {
-    textures.splashMermaid = await PIXI.Assets.load(
-      'sprites/splash-mermaid.png',
-    );
-  }
-  overlayLayer.splashMermaid.texture = textures.splashMermaid;
-  overlayLayer.splashMermaid.visible = true;
-  repositionUI();
-}
+// ===== Game Over / Win =====
 
-// ===== Game Over by Krakens =====
-async function showKrakenGameOver() {
-  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.visible = true;
-    overlayLayer.keySpace.visible = true;
-  }
-  gameOver = true;
-  txtMessage.text = '🦑 Кракены захватили маяк!';
-  overlayLayer.visible = true;
-  playFailSound();
-  txtMessage.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 38,
-    fontWeight: 'bold',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 6,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 8,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtMessage.position.set(gameW / 2, gameH / 2 - 60);
-  txtMessage.visible = true;
-  txtRestart.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 22,
-    fontWeight: 'normal',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 4,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 6,
-    dropShadowDistance: 0,
-    align: 'center',
-  });
-  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
-  txtRestart.visible = true;
-  if (!textures.splashKraken) {
-    textures.splashKraken = await PIXI.Assets.load('sprites/splash-kraken.png');
-  }
-  overlayLayer.splashKraken.texture = textures.splashKraken;
-  overlayLayer.splashKraken.visible = true;
-  if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
-  if (overlayLayer.splashIceberg) overlayLayer.splashIceberg.visible = false;
-  repositionUI();
-}
-
-// ===== Win / Restart =====
 function playFailSound() {
   const snd = new Audio('audio/fail-1.mp3');
   snd.volume = 0.1;
   snd.play().catch(() => {});
 }
 
-function showGameOver() {
-  if (overlayLayer.keyEnter && overlayLayer.keySpace) {
-    overlayLayer.keyEnter.visible = true;
-    overlayLayer.keySpace.visible = true;
+async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
+  gameOver = true;
+  txtMessage.text = message;
+  fadeInOverlay();
+  playFailSound();
+
+  txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 38,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtMessage.position.set(gameW / 2, gameH / 2 + msgOffsetY);
+  txtMessage.visible = true;
+
+  txtRestart.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 22,
+    fontWeight: 'normal',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 4,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 6,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  txtRestart.position.set(gameW / 2, gameH / 2 + 60);
+  txtRestart.visible = true;
+
+  if (overlayLayer.keyEnter) overlayLayer.keyEnter.visible = true;
+  if (overlayLayer.txtOr) overlayLayer.txtOr.visible = true;
+  if (overlayLayer.keySpace) overlayLayer.keySpace.visible = true;
+
+  // Hide all splash sprites, then show the requested one
+  for (const key of ['splashIceberg', 'splashMermaid', 'splashKraken']) {
+    if (overlayLayer[key]) overlayLayer[key].visible = false;
   }
+
+  if (splashKey) {
+    const spriteFile = {
+      splashIceberg: 'sprites/splash-iceberg.png',
+      splashMermaid: 'sprites/splash-mermaid.png',
+      splashKraken: 'sprites/splash-kraken.png',
+    }[splashKey];
+    if (!textures[splashKey]) {
+      textures[splashKey] = await PIXI.Assets.load(spriteFile);
+    }
+    overlayLayer[splashKey].texture = textures[splashKey];
+    overlayLayer[splashKey].visible = true;
+  }
+
+  repositionUI();
+}
+
+// ===== Game Over by Boats (Iceberg) =====
+function showBoatGameOver() {
+  return showGameOverScreen({
+    message: '💀 Game Over — 3 boats sunk!',
+    splashKey: 'splashIceberg',
+  });
+}
+
+// ===== Game Over by Police =====
+function showPoliceGameOver() {
+  return showGameOverScreen({
+    message: '🚔 Арест! Полиция захватила маяк!',
+    splashKey: null,
+    msgOffsetY: -40,
+  });
+}
+
+// ===== Game Over by Mermaids =====
+function showMermaidGameOver() {
+  return showGameOverScreen({
+    message: '💀 Game Over — 3 mermaids reached the lighthouse!',
+    splashKey: 'splashMermaid',
+  });
+}
+
+// ===== Game Over by Krakens =====
+function showKrakenGameOver() {
+  return showGameOverScreen({
+    message: '🦑 Кракены захватили маяк!',
+    splashKey: 'splashKraken',
+  });
+}
+
+function showGameOver() {
+  if (overlayLayer.keyEnter) overlayLayer.keyEnter.visible = true;
+  if (overlayLayer.txtOr) overlayLayer.txtOr.visible = true;
+  if (overlayLayer.keySpace) overlayLayer.keySpace.visible = true;
   playFailSound();
   txtMessage.text = `💀 Game Over — ${score}/${WIN_SCORE} boats saved`;
-  overlayLayer.visible = true;
+  fadeInOverlay();
 }
 
 function showWin() {
   txtMessage.text = `🎉 You Win! All ${WIN_SCORE} boats saved!`;
-  overlayLayer.visible = true;
+  fadeInOverlay();
 }
 
+// ===== Win / Restart =====
 function restart() {
   if (overlayLayer.keyEnter) overlayLayer.keyEnter.visible = false;
+  if (overlayLayer.txtOr) overlayLayer.txtOr.visible = false;
   if (overlayLayer.keySpace) overlayLayer.keySpace.visible = false;
   overlayLayer.visible = false;
+  overlayLayer.alpha = 1;
   if (overlayLayer.splashMermaid) overlayLayer.splashMermaid.visible = false;
   if (overlayLayer.splashKraken) overlayLayer.splashKraken.visible = false;
 
