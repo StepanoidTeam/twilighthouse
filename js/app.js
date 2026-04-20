@@ -228,6 +228,7 @@ function gameLoop(delta) {
   if (S.gameOver) {
     if (!S.scoreSubmitted) {
       S.runSurvivalMs = performance.now() - S.runStartTime;
+      updateHUD();
       trySubmitScore();
     }
     return;

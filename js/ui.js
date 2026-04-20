@@ -19,6 +19,7 @@ import {
 } from './sound.js';
 import S from './state.js';
 import { t } from './i18n.js';
+import { formatSurvivalTime } from './leaderboard.js';
 
 // ===== Tooltips =====
 export function playCrashSound() {
@@ -103,6 +104,12 @@ export function updateHUD() {
   );
   S.txtLamp.text = bulbs > 0 ? '💡'.repeat(bulbs) : '🔦';
   S.txtSunk.text = `⛵💥 ${S.boatsSunk}/6`;
+  if (S.txtTime) {
+    const ms = S.gameOver
+      ? S.runSurvivalMs
+      : performance.now() - (S.runStartTime || performance.now());
+    S.txtTime.text = `⏱ ${formatSurvivalTime(ms)}`;
+  }
 }
 
 // ===== Build HUD =====
@@ -132,6 +139,10 @@ export function buildHUD() {
   S.txtSunk = new PIXI.Text('⛵💥 0/6', new PIXI.TextStyle(UI_STYLE));
   S.txtSunk.anchor.set(1, 0);
   S.hudLayer.addChild(S.txtSunk);
+
+  S.txtTime = new PIXI.Text('⏱ 0:00', new PIXI.TextStyle(UI_STYLE));
+  S.txtTime.anchor.set(1, 0);
+  S.hudLayer.addChild(S.txtTime);
 
   S.app.stage.addChild(S.hudLayer);
 }
@@ -465,6 +476,7 @@ export function repositionUI() {
   S.txtPolice.position.set(HUD_RIGHT, 12 + HUD_LINE * 3);
   S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
   S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
+  if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 6);
   // Move buttons if present
   const BTN_BOTTOM_MARGIN = 80;
   if (S.btnLeft)

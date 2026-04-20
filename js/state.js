@@ -131,6 +131,7 @@ const State = {
   txtPolice: null,
   txtLamp: null,
   txtSunk: null,
+  txtTime: null,
   txtMessage: null,
   txtRestart: null,
   btnLeft: null,
