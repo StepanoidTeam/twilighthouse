@@ -77,8 +77,16 @@ export function spawnPoliceBoat() {
     frameTick: Math.random() * BOAT_FRAME_DURATION,
     driftDir: Math.random() < 0.5 ? 1 : -1,
     wasLit: false,
+    // Hysteresis: raw lit state + how long it's been stable (in frames).
+    // Prevents tooltip/sound spam when beam edge grazes the boat.
+    lastRawLit: false,
+    rawLitStableFor: 0,
   });
 }
+
+// Number of stable frames before the lit/unlit state is allowed to flip.
+// Prevents flicker on the beam edge (≈ 0.17 s at 60 fps).
+const LIT_HYSTERESIS_FRAMES = 10;
 
 export function updatePoliceBoats(delta) {
   for (let i = S.policeBoats.length - 1; i >= 0; i--) {
@@ -98,9 +106,23 @@ export function updatePoliceBoats(delta) {
       spr.texture = S.textures[BOAT_FRAMES[p.frameIndex]];
     }
 
-    // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо
-    const lit = isInBeam(spr.x, spr.y);
-    // Show cop tooltip on beam entry / exit
+    // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо.
+    // Применяем гистерезис: instantaneous isInBeam дрожит, когда луч идёт по
+    // краю катера. Меняем "рабочее" состояние lit только если сырое держится
+    // стабильно ≥ LIT_HYSTERESIS_FRAMES кадров — иначе тултипы и звуки спамятся.
+    const rawLit = isInBeam(spr.x, spr.y);
+    if (rawLit !== p.lastRawLit) {
+      p.lastRawLit = rawLit;
+      p.rawLitStableFor = 0;
+    }
+    p.rawLitStableFor += delta;
+
+    let lit = p.wasLit;
+    if (rawLit !== p.wasLit && p.rawLitStableFor >= LIT_HYSTERESIS_FRAMES) {
+      lit = rawLit;
+    }
+
+    // Show cop tooltip on beam entry / exit (edge-triggered on stable state)
     if (lit && !p.wasLit) {
       spawnTooltip(spr.x, spr.y - 30, '‼️', TOOLTIP_STYLE_FAIL);
       playCopLitSound();
