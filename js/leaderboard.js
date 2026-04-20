@@ -15,6 +15,22 @@ import { currentUser } from './auth.js';
 const COLLECTION = 'leaderboard';
 
 /**
+ * Подбирает отображаемое имя для записи в лидерборд.
+ * - Для email-юзеров: displayName, иначе часть email до @.
+ * - Для анонимных: "Гость-ABCD" (4 первых символа uid в верхнем регистре).
+ */
+function resolveDisplayName(user) {
+  if (user.displayName && user.displayName.trim()) {
+    return user.displayName.trim();
+  }
+  if (user.email) {
+    return user.email.split('@')[0];
+  }
+  const tag = (user.uid || '').slice(0, 4).toUpperCase() || 'XXXX';
+  return `Гость-${tag}`;
+}
+
+/**
  * Submit a run. Stores the user's best survival time in `leaderboard/{uid}`.
  * Only writes if the new time beats the previously stored best.
  * Returns { written: boolean, best: number } or null if not signed in.
@@ -41,9 +57,7 @@ export async function submitScore(survivalMs) {
     return { written: false, best: prevBest };
   }
 
-  const displayName =
-    (currentUser.displayName && currentUser.displayName.trim()) ||
-    (currentUser.email ? currentUser.email.split('@')[0] : 'Капитан');
+  const displayName = resolveDisplayName(currentUser);
 
   await setDoc(
     ref,

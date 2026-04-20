@@ -2,6 +2,7 @@ import { auth } from '../firebase.init.js';
 import {
   createUserWithEmailAndPassword,
   signInWithEmailAndPassword,
+  signInAnonymously,
   signOut as fbSignOut,
   onAuthStateChanged,
   updateProfile,
@@ -11,10 +12,21 @@ import { t } from './i18n.js';
 /**
  * Current signed-in user, or null.
  * Mutated by the onAuthStateChanged subscription below.
+ *
+ * Может быть анонимным (user.isAnonymous === true) — тогда у юзера есть uid
+ * для записи в Firestore, но нет email/displayName. Email/password-логин
+ * показывается как "настоящий" пользователь (см. isSignedInReal).
  */
 export let currentUser = null;
 
 const listeners = new Set();
+
+/** True если юзер реально залогинен (не аноним). */
+export function isSignedInReal(user = currentUser) {
+  return !!user && user.isAnonymous !== true;
+}
+
+let anonSignInTried = false;
 
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
@@ -24,6 +36,15 @@ onAuthStateChanged(auth, (user) => {
     } catch (e) {
       console.error('auth listener error', e);
     }
+  }
+
+  // Если юзера нет — один раз логинимся анонимно, чтобы у нас был uid
+  // для записи в Firestore (лидерборд и т.п.).
+  if (!user && !anonSignInTried) {
+    anonSignInTried = true;
+    signInAnonymously(auth).catch((e) => {
+      console.warn('Anonymous sign-in failed', e);
+    });
   }
 });
 
@@ -54,6 +75,13 @@ export async function signIn(email, password) {
 
 export async function signOut() {
   await fbSignOut(auth);
+  // После выхода сразу логинимся анонимно, чтобы оставалась возможность
+  // писать в Firestore (личный uid для будущих сабмитов).
+  try {
+    await signInAnonymously(auth);
+  } catch (e) {
+    console.warn('Re-auth as anonymous after sign-out failed', e);
+  }
 }
 
 /** Translate Firebase auth error codes into localized user-friendly messages. */

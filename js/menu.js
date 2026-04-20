@@ -4,7 +4,7 @@ import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
-import { currentUser } from './auth.js';
+import { currentUser, isSignedInReal } from './auth.js';
 import {
   t,
   getLanguage,
@@ -501,7 +501,7 @@ async function showLeaderboard() {
     sub.addChild(txt);
   }
 
-  if (!currentUser) {
+  if (!isSignedInReal(currentUser)) {
     const note = new PIXI.Text(t('leaderboard.signInPrompt'), HINT_STYLE);
     note.anchor.set(0.5);
     note.position.set(S.gameW / 2, S.gameH - 60);

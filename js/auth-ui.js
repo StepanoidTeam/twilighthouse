@@ -4,6 +4,7 @@ import {
   signOut,
   prettyAuthError,
   onAuthChange,
+  isSignedInReal,
 } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 
@@ -191,7 +192,10 @@ function buildWidget() {
   signoutBtn.addEventListener('click', () => doSignOut());
 
   onAuthChange((user) => {
-    if (user) {
+    // Анонимных юзеров не показываем в виджете — для пользователя они =
+    // "не залогинен". Кнопка "Войти" остаётся видна, но счёт за ним всё
+    // равно пишется в Firestore под его анонимным uid.
+    if (isSignedInReal(user)) {
       signinBtn.style.display = 'none';
       userEl.style.display = '';
       const label =
