@@ -33,23 +33,23 @@ const TITLE_STYLE = new PIXI.TextStyle({
 
 const MENU_ITEM_STYLE = new PIXI.TextStyle({
   fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 65, // увеличено в 2.5 раза
+  fontSize: 22,
   fontWeight: 'bold',
   fill: '#c8d8e8',
   dropShadow: true,
   dropShadowColor: '#000',
-  dropShadowBlur: 10,
+  dropShadowBlur: 4,
   dropShadowDistance: 0,
 });
 
 const MENU_ITEM_SELECTED_STYLE = new PIXI.TextStyle({
   fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 70, // увеличено в 2.5 раза
+  fontSize: 24,
   fontWeight: 'bold',
   fill: '#ffdd44',
   dropShadow: true,
   dropShadowColor: '#000',
-  dropShadowBlur: 15,
+  dropShadowBlur: 6,
   dropShadowDistance: 0,
 });
 
@@ -209,7 +209,7 @@ function createMenuBtn(label, textures, isSelected) {
 
   const btnSpr = new PIXI.Sprite(textures.buttonSpace);
   btnSpr.anchor.set(0.5);
-  scaleToWidth(btnSpr, 270); // увеличено в 2.5 раза
+  scaleToWidth(btnSpr, 320);
   container.addChild(btnSpr);
 
   const txt = new PIXI.Text(
