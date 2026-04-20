@@ -5,6 +5,12 @@ import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser } from './auth.js';
+import {
+  t,
+  getLanguage,
+  setLanguage,
+  onLanguageChange,
+} from './i18n.js';
 
 // ===== Menu State =====
 let menuContainer = null;
@@ -122,67 +128,26 @@ const HINT_STYLE = new PIXI.TextStyle({
 });
 
 // ===== Main Menu Items =====
-const MAIN_MENU = [
-  { label: '🎮  Новая игра', action: 'start' },
-  { label: '🏆  Лидерборд', action: 'leaderboard' },
-  { label: '⚙️  Настройки', action: 'settings' },
-  { label: '✍️  Авторы', action: 'authors' },
-  { label: '🚪  Выход', action: 'exit' },
+const MAIN_MENU_ACTIONS = [
+  { key: 'menu.newGame', action: 'start' },
+  { key: 'menu.leaderboard', action: 'leaderboard' },
+  { key: 'menu.settings', action: 'settings' },
+  { key: 'menu.authors', action: 'authors' },
+  { key: 'menu.exit', action: 'exit' },
 ];
+
+function getMenuLabels() {
+  return MAIN_MENU_ACTIONS.map((item) => ({
+    label: t(item.key),
+    action: item.action,
+  }));
+}
 
 
 // ===== Credits Text =====
-const CREDITS_TEXT = `
-🎨 Концепт-художники
-
-@adriana
-@r1m
-@lina
-
-
-💻 Программисты
-
-@bobanko
-@noki_a
-@claude
-
-
-🎲 Геймдизайнеры
-
-@noki_a
-@stepastepa
-@adriana
-@bobanko
-
-
-🤖 AI-инструменты
-
-GitHub Copilot
-ChatGPT
-Claude
-
-
-🎵 Музыка
-
-suno.com
-
-
-🔊 Звуки
-
-pixabay.com
-libsounds.com
-
-
-⚙️ Технологии
-
-PixiJS — 2D rendering engine
-Firebase — analytics & backend
-VS Code — code editor
-Photopea — image editor
-
-
-🌊 Спасибо за игру! 🌊
-`;
+function getCreditsText() {
+  return t('credits.text');
+}
 
 // ===== Sound Helpers =====
 function playMenuSelect() {
@@ -287,9 +252,10 @@ export async function buildMenu(app, startGameCb) {
   const startY = S.gameH * 0.35;
   const spacing = 120;
 
-  for (let i = 0; i < MAIN_MENU.length; i++) {
+  const labels = getMenuLabels();
+  for (let i = 0; i < labels.length; i++) {
     const item = createMenuBtn(
-      MAIN_MENU[i].label,
+      labels[i].label,
       S.textures,
       i === selectedIndex,
     );
@@ -317,10 +283,7 @@ export async function buildMenu(app, startGameCb) {
   updateSelection();
 
   // Hint
-  const hint = new PIXI.Text(
-    '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
-    HINT_STYLE,
-  );
+  const hint = new PIXI.Text(t('hint.main'), HINT_STYLE);
   hint.anchor.set(0.5);
   hint.position.set(S.gameW / 2, S.gameH - 30);
   menuContainer.addChild(hint);
@@ -333,6 +296,25 @@ export async function buildMenu(app, startGameCb) {
 
   // Keyboard
   window.addEventListener('keydown', handleMenuKey);
+
+  // Re-render current screen and static texts on language change
+  onLanguageChange(() => {
+    relabelMainMenu();
+    if (menuContainer && menuContainer._hint) {
+      menuContainer._hint.text = t('hint.main');
+    }
+    if (currentScreen === 'settings') showSettings();
+    else if (currentScreen === 'leaderboard') showLeaderboard();
+    else if (currentScreen === 'authors') showAuthors();
+  });
+}
+
+function relabelMainMenu() {
+  const labels = getMenuLabels();
+  for (let i = 0; i < menuItems.length && i < labels.length; i++) {
+    const txt = menuItems[i].children[1];
+    if (txt) txt.text = labels[i].label;
+  }
 }
 
 function handleMenuKey(e) {
@@ -351,12 +333,13 @@ function handleMenuKey(e) {
   }
 
   if (currentScreen === 'main') {
+    const n = MAIN_MENU_ACTIONS.length;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
-      selectedIndex = (selectedIndex - 1 + MAIN_MENU.length) % MAIN_MENU.length;
+      selectedIndex = (selectedIndex - 1 + n) % n;
       updateSelection();
       playMenuSelect();
     } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-      selectedIndex = (selectedIndex + 1) % MAIN_MENU.length;
+      selectedIndex = (selectedIndex + 1) % n;
       updateSelection();
       playMenuSelect();
     } else if (isConfirmKey(e.code)) {
@@ -373,7 +356,7 @@ function handleMenuKey(e) {
 }
 
 function activateMenuItem() {
-  const action = MAIN_MENU[selectedIndex].action;
+  const action = MAIN_MENU_ACTIONS[selectedIndex].action;
   switch (action) {
     case 'start':
       hideMenu();
@@ -427,7 +410,7 @@ function showMainMenu() {
 }
 
 function createBackHint() {
-  const hint = new PIXI.Text('Q / Escape — назад', HINT_STYLE);
+  const hint = new PIXI.Text(t('hint.back'), HINT_STYLE);
   hint.anchor.set(0.5);
   hint.position.set(S.gameW / 2, S.gameH - 30);
   return hint;
@@ -441,21 +424,18 @@ async function showLeaderboard() {
 
   const sub = new PIXI.Container();
 
-  const heading = new PIXI.Text('🏆 Лидерборд', SUB_HEADING_STYLE);
+  const heading = new PIXI.Text(t('leaderboard.title'), SUB_HEADING_STYLE);
   heading.anchor.set(0.5);
   heading.position.set(S.gameW / 2, S.gameH * 0.12);
   sub.addChild(heading);
 
-  const subtitle = new PIXI.Text(
-    'Топ смотрителей маяка — кто продержался дольше',
-    HINT_STYLE,
-  );
+  const subtitle = new PIXI.Text(t('leaderboard.subtitle'), HINT_STYLE);
   subtitle.anchor.set(0.5);
   subtitle.position.set(S.gameW / 2, S.gameH * 0.18);
   sub.addChild(subtitle);
 
   // Loading placeholder
-  const loading = new PIXI.Text('Загрузка...', LEADERBOARD_STYLE);
+  const loading = new PIXI.Text(t('leaderboard.loading'), LEADERBOARD_STYLE);
   loading.anchor.set(0.5);
   loading.position.set(S.gameW / 2, S.gameH * 0.5);
   sub.addChild(loading);
@@ -483,10 +463,7 @@ async function showLeaderboard() {
   loading.destroy();
 
   if (error) {
-    const err = new PIXI.Text(
-      'Не удалось загрузить лидерборд',
-      LEADERBOARD_STYLE,
-    );
+    const err = new PIXI.Text(t('leaderboard.loadError'), LEADERBOARD_STYLE);
     err.anchor.set(0.5);
     err.position.set(S.gameW / 2, S.gameH * 0.5);
     sub.addChild(err);
@@ -494,10 +471,7 @@ async function showLeaderboard() {
   }
 
   if (rows.length === 0) {
-    const empty = new PIXI.Text(
-      'Пока никто не попал в топ — стань первым!',
-      LEADERBOARD_STYLE,
-    );
+    const empty = new PIXI.Text(t('leaderboard.empty'), LEADERBOARD_STYLE);
     empty.anchor.set(0.5);
     empty.position.set(S.gameW / 2, S.gameH * 0.5);
     sub.addChild(empty);
@@ -513,7 +487,9 @@ async function showLeaderboard() {
       i < 3 || isMe ? LEADERBOARD_HIGHLIGHT_STYLE : LEADERBOARD_STYLE;
     const medal =
       i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
-    const label = isMe ? `${entry.displayName}  (вы)` : entry.displayName;
+    const label = isMe
+      ? `${entry.displayName}  ${t('leaderboard.you')}`
+      : entry.displayName;
     const txt = new PIXI.Text(
       `${medal}  ${label}  —  ${formatSurvivalTime(entry.bestTimeMs)}`,
       style,
@@ -524,10 +500,7 @@ async function showLeaderboard() {
   }
 
   if (!currentUser) {
-    const note = new PIXI.Text(
-      'Войдите, чтобы попасть в лидерборд',
-      HINT_STYLE,
-    );
+    const note = new PIXI.Text(t('leaderboard.signInPrompt'), HINT_STYLE);
     note.anchor.set(0.5);
     note.position.set(S.gameW / 2, S.gameH - 60);
     sub.addChild(note);
@@ -542,37 +515,32 @@ function showSettings() {
 
   const sub = new PIXI.Container();
 
-  const heading = new PIXI.Text('⚙️ Настройки', SUB_HEADING_STYLE);
+  const heading = new PIXI.Text(t('settings.title'), SUB_HEADING_STYLE);
   heading.anchor.set(0.5);
   heading.position.set(S.gameW / 2, S.gameH * 0.12);
   sub.addChild(heading);
 
   const cx = S.gameW / 2;
-  let y = S.gameH * 0.3;
+  let y = S.gameH * 0.26;
 
-  // Music volume
-  y = addSlider(sub, '🎵 Музыка', cx, y, 0.5, (val) => {
-    if (S.bgMusic) S.bgMusic.volume = val;
-  });
-
-  // SFX volume
-  y = addSlider(sub, '🔊 Звуки', cx, y + 20, 0.5, () => {
-    // placeholder — no SFX manager yet
-  });
-
-  // Language
-  y += 40;
-  const langLabel = new PIXI.Text('🌐 Язык', MENU_ITEM_STYLE);
+  // Language (first — so it's easy to reach)
+  const langLabel = new PIXI.Text(t('settings.language'), MENU_ITEM_STYLE);
   langLabel.anchor.set(0.5);
   langLabel.position.set(cx, y);
   sub.addChild(langLabel);
 
   y += 40;
-  const langs = ['Русский', 'English'];
-  let langIdx = 0;
+  const langs = [
+    { code: 'en', label: t('lang.english') },
+    { code: 'ru', label: t('lang.russian') },
+  ];
+  let langIdx = Math.max(
+    0,
+    langs.findIndex((l) => l.code === getLanguage()),
+  );
 
   const langTxt = new PIXI.Text(
-    `◀  ${langs[langIdx]}  ▶`,
+    `◀  ${langs[langIdx].label}  ▶`,
     MENU_ITEM_SELECTED_STYLE,
   );
   langTxt.anchor.set(0.5);
@@ -583,9 +551,22 @@ function showSettings() {
   langTxt.on('pointerdown', () => {
     playMenuClick();
     langIdx = (langIdx + 1) % langs.length;
-    langTxt.text = `◀  ${langs[langIdx]}  ▶`;
+    // setLanguage triggers onLanguageChange → rerenders this screen
+    setLanguage(langs[langIdx].code);
   });
   sub.addChild(langTxt);
+
+  y += 60;
+
+  // Music volume
+  y = addSlider(sub, t('settings.music'), cx, y, 0.5, (val) => {
+    if (S.bgMusic) S.bgMusic.volume = val;
+  });
+
+  // SFX volume
+  y = addSlider(sub, t('settings.sfx'), cx, y + 20, 0.5, () => {
+    // placeholder — no SFX manager yet
+  });
 
   sub.addChild(createBackHint());
   menuContainer.addChild(sub);
@@ -710,7 +691,7 @@ async function showAuthors() {
 
   // Credits text — starts below screen, scrolls up
   creditsContainer = new PIXI.Container();
-  const creditsTxt = new PIXI.Text(CREDITS_TEXT, CREDITS_STYLE);
+  const creditsTxt = new PIXI.Text(getCreditsText(), CREDITS_STYLE);
   creditsTxt.anchor.set(0.5, 0);
   creditsTxt.position.set(S.gameW / 2, 0);
   creditsContainer.addChild(creditsTxt);

@@ -6,6 +6,7 @@ import {
   onAuthStateChanged,
   updateProfile,
 } from '../firebase.js';
+import { t } from './i18n.js';
 
 /**
  * Current signed-in user, or null.
@@ -55,25 +56,25 @@ export async function signOut() {
   await fbSignOut(auth);
 }
 
-/** Translate Firebase auth error codes into user-friendly messages (RU). */
+/** Translate Firebase auth error codes into localized user-friendly messages. */
 export function prettyAuthError(err) {
   const code = err && err.code ? err.code : '';
   switch (code) {
     case 'auth/invalid-email':
-      return 'Некорректный email';
+      return t('err.invalidEmail');
     case 'auth/email-already-in-use':
-      return 'Этот email уже зарегистрирован';
+      return t('err.emailInUse');
     case 'auth/weak-password':
-      return 'Слишком простой пароль (минимум 6 символов)';
+      return t('err.weakPassword');
     case 'auth/user-not-found':
     case 'auth/wrong-password':
     case 'auth/invalid-credential':
-      return 'Неверный email или пароль';
+      return t('err.wrongCreds');
     case 'auth/too-many-requests':
-      return 'Слишком много попыток, попробуйте позже';
+      return t('err.tooManyRequests');
     case 'auth/network-request-failed':
-      return 'Проблема с сетью';
+      return t('err.network');
     default:
-      return err && err.message ? err.message : 'Неизвестная ошибка';
+      return err && err.message ? err.message : t('err.unknown');
   }
 }

@@ -5,6 +5,7 @@ import {
   prettyAuthError,
   onAuthChange,
 } from './auth.js';
+import { t, onLanguageChange } from './i18n.js';
 
 let modal = null;
 let mode = 'signin'; // 'signin' | 'signup'
@@ -16,27 +17,27 @@ function build() {
   modal.className = 'auth-modal-backdrop';
   modal.innerHTML = `
     <div class="auth-modal">
-      <button class="auth-close" title="Закрыть">×</button>
-      <h2 class="auth-title">Вход</h2>
+      <button class="auth-close" title="">×</button>
+      <h2 class="auth-title"></h2>
       <div class="auth-tabs">
-        <button class="auth-tab is-active" data-mode="signin">Войти</button>
-        <button class="auth-tab" data-mode="signup">Регистрация</button>
+        <button class="auth-tab is-active" data-mode="signin"></button>
+        <button class="auth-tab" data-mode="signup"></button>
       </div>
       <form class="auth-form">
         <label class="auth-field auth-field--name">
-          <span>Ник</span>
+          <span></span>
           <input name="name" type="text" autocomplete="nickname" maxlength="24" />
         </label>
         <label class="auth-field">
-          <span>Email</span>
+          <span></span>
           <input name="email" type="email" required autocomplete="email" />
         </label>
         <label class="auth-field">
-          <span>Пароль</span>
+          <span></span>
           <input name="password" type="password" required minlength="6" autocomplete="current-password" />
         </label>
         <div class="auth-error" role="alert"></div>
-        <button type="submit" class="auth-submit">Войти</button>
+        <button type="submit" class="auth-submit"></button>
       </form>
     </div>
   `;
@@ -48,6 +49,23 @@ function build() {
   const errorEl = modal.querySelector('.auth-error');
   const nameField = modal.querySelector('.auth-field--name');
   const tabs = modal.querySelectorAll('.auth-tab');
+  const closeBtn = modal.querySelector('.auth-close');
+  const [nameSpan, emailSpan, passwordSpan] = modal.querySelectorAll(
+    '.auth-field > span',
+  );
+
+  function applyStaticI18n() {
+    closeBtn.title = t('auth.close');
+    nameSpan.textContent = t('auth.fieldName');
+    emailSpan.textContent = t('auth.fieldEmail');
+    passwordSpan.textContent = t('auth.fieldPassword');
+    for (const tab of tabs) {
+      tab.textContent =
+        tab.dataset.mode === 'signin'
+          ? t('auth.tabSignIn')
+          : t('auth.tabSignUp');
+    }
+  }
 
   function setMode(next) {
     mode = next;
@@ -55,12 +73,12 @@ function build() {
       tab.classList.toggle('is-active', tab.dataset.mode === mode);
     }
     if (mode === 'signup') {
-      title.textContent = 'Регистрация';
-      submitBtn.textContent = 'Зарегистрироваться';
+      title.textContent = t('auth.signUp');
+      submitBtn.textContent = t('auth.submitSignUp');
       nameField.style.display = '';
     } else {
-      title.textContent = 'Вход';
-      submitBtn.textContent = 'Войти';
+      title.textContent = t('auth.signIn');
+      submitBtn.textContent = t('auth.submitSignIn');
       nameField.style.display = 'none';
     }
     errorEl.textContent = '';
@@ -69,6 +87,13 @@ function build() {
   for (const tab of tabs) {
     tab.addEventListener('click', () => setMode(tab.dataset.mode));
   }
+
+  // Rerender labels when language changes
+  onLanguageChange(() => {
+    applyStaticI18n();
+    setMode(mode);
+  });
+  applyStaticI18n();
 
   modal.querySelector('.auth-close').addEventListener('click', () => {
     hideAuthModal();
@@ -140,10 +165,10 @@ function buildWidget() {
   widget = document.createElement('div');
   widget.className = 'auth-widget';
   widget.innerHTML = `
-    <button class="auth-widget-btn auth-widget-btn--signin">👤 Войти</button>
+    <button class="auth-widget-btn auth-widget-btn--signin"></button>
     <div class="auth-widget-user" style="display:none">
       <span class="auth-widget-name"></span>
-      <button class="auth-widget-btn auth-widget-btn--signout" title="Выйти">Выйти</button>
+      <button class="auth-widget-btn auth-widget-btn--signout"></button>
     </div>
   `;
   document.body.appendChild(widget);
@@ -152,6 +177,15 @@ function buildWidget() {
   const signoutBtn = widget.querySelector('.auth-widget-btn--signout');
   const userEl = widget.querySelector('.auth-widget-user');
   const nameEl = widget.querySelector('.auth-widget-name');
+
+  function applyWidgetI18n() {
+    signinBtn.textContent = t('widget.signIn');
+    signoutBtn.textContent = t('widget.signOut');
+    signoutBtn.title = t('widget.signOut');
+  }
+
+  applyWidgetI18n();
+  onLanguageChange(applyWidgetI18n);
 
   signinBtn.addEventListener('click', () => showAuthModal('signin'));
   signoutBtn.addEventListener('click', () => doSignOut());

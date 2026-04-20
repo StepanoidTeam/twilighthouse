@@ -18,6 +18,7 @@ import {
   playRandomSound,
 } from './sound.js';
 import S from './state.js';
+import { t } from './i18n.js';
 
 // ===== Tooltips =====
 export function playCrashSound() {
@@ -296,7 +297,7 @@ export function buildOverlay() {
   S.overlayLayer.addChild(S.txtMessage);
 
   S.txtRestart = new PIXI.Text(
-    'Press to play again',
+    t('overlay.pressToPlayAgain'),
     new PIXI.TextStyle({
       ...UI_STYLE,
       fontSize: 18,
@@ -353,7 +354,7 @@ export function buildOverlay() {
   txtActionLeftKey.y = -4;
   S.overlayLayer.btnActionLeft.addChild(txtActionLeftKey);
   S.overlayLayer.btnActionLeft.txtLabel = new PIXI.Text(
-    'Заново',
+    t('overlay.restart'),
     new PIXI.TextStyle({
       fontFamily: 'Segoe UI, system-ui, sans-serif',
       fontSize: 16,
@@ -393,7 +394,7 @@ export function buildOverlay() {
   txtActionRightKey.y = -4;
   S.overlayLayer.btnActionRight.addChild(txtActionRightKey);
   S.overlayLayer.btnActionRight.txtLabel = new PIXI.Text(
-    'В меню',
+    t('overlay.toMenu'),
     new PIXI.TextStyle({
       fontFamily: 'Segoe UI, system-ui, sans-serif',
       fontSize: 16,
@@ -528,11 +529,11 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
   S.txtRestart.visible = true;
 
   if (S.overlayLayer.btnActionLeft) {
-    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.restart');
     S.overlayLayer.btnActionLeft.visible = true;
   }
   if (S.overlayLayer.btnActionRight) {
-    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.txtLabel.text = t('overlay.toMenu');
     S.overlayLayer.btnActionRight.visible = true;
   }
 
@@ -567,28 +568,28 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
 
 export function showBoatGameOver() {
   return showGameOverScreen({
-    message: `💀 Game Over — ${S.boatsSunk} boats sunk!`,
+    message: t('gameOver.boats', { n: S.boatsSunk }),
     splashKey: 'splashIceberg',
   });
 }
 
 export function showPoliceGameOver() {
   return showGameOverScreen({
-    message: '🚔 Арест! Полиция захватила маяк!',
+    message: t('gameOver.police'),
     splashKey: 'splashPolice',
   });
 }
 
 export function showMermaidGameOver() {
   return showGameOverScreen({
-    message: `💀 Game Over — ${S.mermaidsArrived} mermaids reached the lighthouse!`,
+    message: t('gameOver.mermaids', { n: S.mermaidsArrived }),
     splashKey: 'splashMermaid',
   });
 }
 
 export function showKrakenGameOver() {
   return showGameOverScreen({
-    message: '🦑 Кракен захватил маяк!',
+    message: t('gameOver.kraken'),
     splashKey: 'splashKraken',
   });
 }
@@ -600,21 +601,21 @@ export function showGameOver() {
   if (S.btnEsc) S.btnEsc.visible = false;
 
   if (S.overlayLayer.btnActionLeft) {
-    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.restart');
     S.overlayLayer.btnActionLeft.visible = true;
   }
   if (S.overlayLayer.btnActionRight) {
-    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.txtLabel.text = t('overlay.toMenu');
     S.overlayLayer.btnActionRight.visible = true;
   }
   playFailSound();
-  S.txtMessage.text = `💀 Game Over — ${S.score}/${WIN_SCORE} boats saved`;
+  S.txtMessage.text = t('gameOver.score', { score: S.score, total: WIN_SCORE });
   fadeInOverlay();
 }
 
 export function showWin() {
   S.gameOver = true;
-  S.txtMessage.text = `🎉 You Win! All ${WIN_SCORE} boats saved!`;
+  S.txtMessage.text = t('win.message', { total: WIN_SCORE });
   fadeInOverlay();
 
   // Hide gameplay buttons
@@ -650,11 +651,11 @@ export function showWin() {
   }
 
   if (S.overlayLayer.btnActionLeft) {
-    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.restart');
     S.overlayLayer.btnActionLeft.visible = true;
   }
   if (S.overlayLayer.btnActionRight) {
-    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.txtLabel.text = t('overlay.toMenu');
     S.overlayLayer.btnActionRight.visible = true;
   }
 
@@ -674,7 +675,7 @@ export function showExitConfirm() {
   S.overlayLayer.visible = true;
   S.overlayLayer.alpha = 1;
 
-  S.txtMessage.text = '⏸️ Выйти в меню?';
+  S.txtMessage.text = t('exit.confirm');
   S.txtMessage.style = new PIXI.TextStyle({
     ...UI_STYLE,
     fontSize: 36,
@@ -703,11 +704,11 @@ export function showExitConfirm() {
   }
 
   if (S.overlayLayer.btnActionLeft) {
-    S.overlayLayer.btnActionLeft.txtLabel.text = 'Выйти';
+    S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.exit');
     S.overlayLayer.btnActionLeft.visible = true;
   }
   if (S.overlayLayer.btnActionRight) {
-    S.overlayLayer.btnActionRight.txtLabel.text = 'Вернуться';
+    S.overlayLayer.btnActionRight.txtLabel.text = t('overlay.resume');
     S.overlayLayer.btnActionRight.visible = true;
   }
 
