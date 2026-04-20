@@ -1,4 +1,4 @@
-import { PIXI, UI_STYLE, C, scaleToWidth } from './config.js';
+import { PIXI } from './config.js';
 import { playSound, WAVES_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
@@ -20,8 +20,17 @@ let onStartGame = null;
 let backBtnEl = null;
 
 // ===== Menu Sprites =====
-const MENU_BG_FILE = 'sprites/favicon2.png';
+const MENU_BG_FILE = 'sprites/mainmenu.PNG';
 const CREDITS_BG_FILE = 'sprites/wasted/police.png';
+
+const MENU_BOX_WIDTH = 420;
+const MENU_BOX_HEIGHT = 78;
+const MENU_BOX_GAP = 18;
+const MENU_EDGE_MARGIN_X = 28;
+const MENU_EDGE_MARGIN_Y = 34;
+const MENU_BOX_COLOR = 0x143b5c;
+const MENU_BOX_SELECTED_COLOR = 0xc94a36;
+const MENU_BOX_ALPHA = 0.92;
 
 // ===== Styles =====
 const TITLE_STYLE = new PIXI.TextStyle({
@@ -155,50 +164,83 @@ function playMenuClick() {
 }
 
 // ===== Helpers =====
-function createMenuBtn(label, textures, isSelected) {
+function drawMenuBtnBg(bg, color) {
+  const { width, height } = getMenuMetrics();
+  bg.clear();
+  bg.beginFill(color, MENU_BOX_ALPHA);
+  bg.drawRoundedRect(0, 0, width, height, 10);
+  bg.endFill();
+}
+
+function createMenuBtn(label, isSelected) {
   const container = new PIXI.Container();
 
-  const btnSpr = new PIXI.Sprite(textures.buttonSpace);
-  btnSpr.anchor.set(0.5);
-  scaleToWidth(btnSpr, 320);
-  container.addChild(btnSpr);
+  const bg = new PIXI.Graphics();
+  container.addChild(bg);
 
   const txt = new PIXI.Text(
     label,
     isSelected ? MENU_ITEM_SELECTED_STYLE : MENU_ITEM_STYLE,
   );
-  txt.anchor.set(0.5);
-  txt.y = -20; // чуть больше отступ для крупных букв
+  txt.anchor.set(0, 0.5);
   container.addChild(txt);
+
+  container._bg = bg;
+  container._txt = txt;
+  container._isSelected = isSelected;
 
   container.interactive = true;
   container.buttonMode = true;
   container.cursor = 'pointer';
-  container.hitArea = new PIXI.Rectangle(
-    -btnSpr.width / 2,
-    -btnSpr.height / 2,
-    btnSpr.width,
-    btnSpr.height,
-  );
+
+  layoutMenuBtn(container);
 
   return container;
+}
+
+function getMenuMetrics() {
+  const width = Math.min(MENU_BOX_WIDTH, Math.max(280, S.gameW * 0.5));
+  const height = S.gameH < 760 ? 70 : MENU_BOX_HEIGHT;
+  const gap = S.gameH < 760 ? 14 : MENU_BOX_GAP;
+  return { width, height, gap };
+}
+
+function layoutMenuBtn(item) {
+  if (!item || !item._bg || !item._txt) return;
+  const { width, height } = getMenuMetrics();
+  drawMenuBtnBg(
+    item._bg,
+    item._isSelected ? MENU_BOX_SELECTED_COLOR : MENU_BOX_COLOR,
+  );
+
+  item._txt.x = 28;
+  item._txt.y = height / 2;
+  item.hitArea = new PIXI.Rectangle(0, 0, width, height);
+}
+
+function getMainMenuOrigin() {
+  const { width, height, gap } = getMenuMetrics();
+  const totalHeight =
+    menuItems.length * height + Math.max(0, menuItems.length - 1) * gap;
+  const x = MENU_EDGE_MARGIN_X;
+  const y = S.gameH - MENU_EDGE_MARGIN_Y - totalHeight;
+  return { x, y, width, height, gap };
 }
 
 function updateSelection() {
   for (let i = 0; i < menuItems.length; i++) {
     const item = menuItems[i];
-    const txt = item.children[1]; // text is second child
-    const btnSpr = item.children[0]; // sprite is first
+    const txt = item._txt;
+    const bg = item._bg;
 
     if (i === selectedIndex) {
+      item._isSelected = true;
       txt.style = MENU_ITEM_SELECTED_STYLE;
-      btnSpr.tint = 0xffffff;
-      item.scale.set(1.05);
     } else {
+      item._isSelected = false;
       txt.style = MENU_ITEM_STYLE;
-      btnSpr.tint = 0xaabbcc;
-      item.scale.set(1.0);
     }
+    drawMenuBtnBg(bg, item._isSelected ? MENU_BOX_SELECTED_COLOR : MENU_BOX_COLOR);
   }
 }
 
@@ -250,11 +292,7 @@ export async function buildMenu(app, startGameCb) {
 
   const labels = getMenuLabels();
   for (let i = 0; i < labels.length; i++) {
-    const item = createMenuBtn(
-      labels[i].label,
-      S.textures,
-      i === selectedIndex,
-    );
+    const item = createMenuBtn(labels[i].label, i === selectedIndex);
     item.position.set(S.gameW / 2, startY + i * spacing);
     menuContainer.addChild(item);
     menuItems.push(item);
@@ -277,6 +315,7 @@ export async function buildMenu(app, startGameCb) {
   }
 
   updateSelection();
+  repositionMenu();
 
   // Hint
   const hint = new PIXI.Text(t('hint.main'), HINT_STYLE);
@@ -312,7 +351,7 @@ export async function buildMenu(app, startGameCb) {
 function relabelMainMenu() {
   const labels = getMenuLabels();
   for (let i = 0; i < menuItems.length && i < labels.length; i++) {
-    const txt = menuItems[i].children[1];
+    const txt = menuItems[i]._txt;
     if (txt) txt.text = labels[i].label;
   }
 }
@@ -809,10 +848,10 @@ export function repositionMenu() {
   }
 
   // Buttons
-  const startY = S.gameH * 0.32;
-  const spacing = 110;
+  const { x, y, height, gap } = getMainMenuOrigin();
   for (let i = 0; i < menuItems.length; i++) {
-    menuItems[i].position.set(S.gameW / 2, startY + i * spacing);
+    layoutMenuBtn(menuItems[i]);
+    menuItems[i].position.set(x, y + i * (height + gap));
   }
 
   // Hint
