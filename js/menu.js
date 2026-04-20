@@ -1,17 +1,11 @@
 import { PIXI, UI_STYLE, C, scaleToWidth } from './config.js';
-import { playSound } from './sound.js';
+import { playSound, WAVES_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal } from './auth.js';
-import { showIntro } from './intro.js';
-import {
-  t,
-  getLanguage,
-  setLanguage,
-  onLanguageChange,
-} from './i18n.js';
+import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
 // ===== Menu State =====
 let menuContainer = null;
@@ -144,7 +138,6 @@ function getMenuLabels() {
     action: item.action,
   }));
 }
-
 
 // ===== Credits Text =====
 function getCreditsText() {
@@ -613,20 +606,12 @@ function showSettings() {
 
   y += 60;
 
-  // Music volume
-  const musicInit = S.musicVolume != null ? S.musicVolume : 0.05;
-  y = addSlider(sub, t('settings.music'), cx, y, musicInit, (val) => {
-    S.musicVolume = val;
-    if (S.bgMusic) S.bgMusic.volume = val;
-    try {
-      localStorage.setItem('lighthouse_music_vol', String(val));
-    } catch (_) {}
-  });
-
   // SFX volume
   const sfxInit = S.sfxVolume != null ? S.sfxVolume : 1.0;
-  y = addSlider(sub, t('settings.sfx'), cx, y + 20, sfxInit, (val) => {
+  y = addSlider(sub, t('settings.sfx'), cx, y, sfxInit, (val) => {
     S.sfxVolume = val;
+    if (S.wavesSound)
+      S.wavesSound.volume = Math.max(0, Math.min(1, WAVES_VOLUME * val));
     try {
       localStorage.setItem('lighthouse_sfx_vol', String(val));
     } catch (_) {}

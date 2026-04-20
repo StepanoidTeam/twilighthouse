@@ -23,14 +23,7 @@ const State = {
   worldScale: 1,
 
   // Audio
-  bgMusic: null,
-  musicVolume: (() => {
-    try {
-      const v = parseFloat(localStorage.getItem('lighthouse_music_vol'));
-      if (!Number.isNaN(v) && v >= 0 && v <= 1) return v;
-    } catch (_) {}
-    return 0.05;
-  })(),
+  wavesSound: null,
   sfxVolume: (() => {
     try {
       const v = parseFloat(localStorage.getItem('lighthouse_sfx_vol'));

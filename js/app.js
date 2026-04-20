@@ -13,7 +13,7 @@ import {
   SPAWN_INTERVAL_MAX,
   computeWorldScale,
 } from './config.js';
-import { playSound } from './sound.js';
+import { playSound, WAVES_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
@@ -435,17 +435,18 @@ async function init() {
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
 
-  // ===== Background Music =====
-  S.bgMusic = new Audio('audio/ocean-sea-soft-waves.mp3');
-  S.bgMusic.loop = true;
-  S.bgMusic.volume = S.musicVolume != null ? S.musicVolume : 0.05;
-  const startMusic = () => {
-    S.bgMusic.play().catch(() => {});
-    window.removeEventListener('pointerdown', startMusic);
-    window.removeEventListener('keydown', startMusic);
+  // ===== Waves Sound =====
+  const wavesAudio = new Audio('audio/ocean-sea-soft-waves.mp3');
+  wavesAudio.loop = true;
+  wavesAudio.volume = Math.max(0, Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 1)));
+  S.wavesSound = wavesAudio;
+  const startWaves = () => {
+    S.wavesSound.play().catch(() => {});
+    window.removeEventListener('pointerdown', startWaves);
+    window.removeEventListener('keydown', startWaves);
   };
-  window.addEventListener('pointerdown', startMusic);
-  window.addEventListener('keydown', startMusic);
+  window.addEventListener('pointerdown', startWaves);
+  window.addEventListener('keydown', startWaves);
 
   if (analytics) {
     logEvent(analytics, 'game_start', {
