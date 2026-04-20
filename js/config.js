@@ -99,7 +99,7 @@ const C = {
 
 // ===== Sprite Files =====
 const SPRITE_FILES = {
-  kraken: 'sprites/kraken2.png',
+  kraken: 'sprites/kraken/kraken2.png',
   mermaid1: 'sprites/mermaid/1.png',
   mermaid2: 'sprites/mermaid/2.png',
   mermaid3: 'sprites/mermaid/3.png',
