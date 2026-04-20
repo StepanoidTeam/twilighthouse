@@ -1,6 +1,7 @@
 import {
   PIXI,
   MAX_LIVES,
+  MAX_CRATES,
   LAMP_FULL_ANGLE,
   BOAT_CARGO_TYPES,
   BEAM_ORIGIN_OFFSET_X_DEFAULT,
@@ -89,6 +90,10 @@ const State = {
   mermaidsArrived: 0,
   policeArrived: 0,
   krakensArrived: 0,
+  // Колумбийский порошок — ящики, которые Паттисон прячет от Дефо.
+  // Каждый пропущенный (освещённый) коп забирает ящик.
+  // Ящиков 0 → Дефо выкидывает Паттисона со скалы.
+  crates: MAX_CRATES,
 
   // Spawning
   nextSpawnTime: 0,
@@ -141,6 +146,7 @@ const State = {
     this.mermaidsArrived = 0;
     this.policeArrived = 0;
     this.krakensArrived = 0;
+    this.crates = MAX_CRATES;
     this.lampTimer = 0;
     this.lampFlicker = 1;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;

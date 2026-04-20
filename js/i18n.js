@@ -102,6 +102,7 @@ Photopea — image editor
     'gameOver.mermaids': '💀 Game Over — {n} mermaids reached the lighthouse!',
     'gameOver.police': '🚔 Arrested! Police captured the lighthouse!',
     'gameOver.kraken': '🦑 The Kraken captured the lighthouse!',
+    'gameOver.pattinson': '📦 Out of powder! Lighthouse keeper threw intern off cliff!',
     'gameOver.score': '💀 Game Over — {score}/{total} boats saved',
     'win.message': '🎉 You Win! All {total} boats saved!',
 
@@ -218,6 +219,7 @@ Photopea — image editor
     'gameOver.mermaids': '💀 Game Over — русалки добрались до маяка: {n}!',
     'gameOver.police': '🚔 Арест! Полиция захватила маяк!',
     'gameOver.kraken': '🦑 Кракен захватил маяк!',
+    'gameOver.pattinson': '📦 Порошок закончился! Смотритель маяка сбросил стажера со скалы!',
     'gameOver.score': '💀 Game Over — спасено {score}/{total} кораблей',
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
 

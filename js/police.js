@@ -20,7 +20,7 @@ import {
   spawnTooltip,
   updateHUD,
   scheduleGameOver,
-  showPoliceGameOver,
+  showPattinsonGameOver,
   playCrashSound,
 } from './ui.js';
 
@@ -113,15 +113,17 @@ export function updatePoliceBoats(delta) {
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
       S.policeArrived++;
+      // Коп доплыл до маяка — Паттисон суёт взятку, теряем ящик колумбийского.
+      S.crates = Math.max(0, S.crates - 1);
       updateHUD();
       console.log(
-        `🚔 Полицейский катер добрался до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
+        `🚔 Полицейский катер доплыл до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)}). Ящиков осталось: ${S.crates}`,
       );
-      spawnTooltip(spr.x, spr.y - 20, '🚔', TOOLTIP_STYLE_FAIL);
+      spawnTooltip(spr.x, spr.y - 20, '🚔 −❄️📦', TOOLTIP_STYLE_FAIL);
       S.shakeTime = 0.5;
       S.shakeIntensity = 18;
-      if (S.policeArrived >= 3) {
-        scheduleGameOver(showPoliceGameOver);
+      if (S.crates <= 0) {
+        scheduleGameOver(showPattinsonGameOver);
       }
       const fadeOut = () => {
         spr.alpha -= 0.02;

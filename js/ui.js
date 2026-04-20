@@ -94,7 +94,9 @@ export function updateHUD() {
   S.txtScore.text = cargoStr || '📦×0';
   S.txtLives.text = '❤️'.repeat(Math.max(0, S.lives));
   S.txtMermaids.text = `🧜 ${S.mermaidsArrived}/3`;
-  S.txtPolice.text = `🚔 ${S.policeArrived}/3`;
+  // Ящики колумбийского, которые прячет Паттисон.
+  // Каждый освещённый коп = -1 ящик. Ноль — Дефо выкидывает Паттисона.
+  S.txtPolice.text = `❄️${'📦'.repeat(Math.max(0, S.crates))}`;
   const bulbs = Math.max(
     0,
     Math.round((1 - S.lampTimer / LAMP_BURNOUT_TIME) * 5),
@@ -119,7 +121,7 @@ export function buildHUD() {
   S.txtMermaids.anchor.set(1, 0);
   S.hudLayer.addChild(S.txtMermaids);
 
-  S.txtPolice = new PIXI.Text('🚔 0/3', new PIXI.TextStyle(UI_STYLE));
+  S.txtPolice = new PIXI.Text('❄️📦📦📦', new PIXI.TextStyle(UI_STYLE));
   S.txtPolice.anchor.set(1, 0);
   S.hudLayer.addChild(S.txtPolice);
 
@@ -332,6 +334,12 @@ export function buildOverlay() {
   S.overlayLayer.splashPolice.visible = false;
   S.overlayLayer.addChildAt(S.overlayLayer.splashPolice, 3);
 
+  // Pattinson splash — Дефо выкидывает Паттисона: кокс кончился
+  S.overlayLayer.splashPattinson = new PIXI.Sprite();
+  S.overlayLayer.splashPattinson.anchor.set(0.5);
+  S.overlayLayer.splashPattinson.visible = false;
+  S.overlayLayer.addChildAt(S.overlayLayer.splashPattinson, 4);
+
   // Кнопки для экрана поражения / подтверждения выхода
   // Left group: Enter/E — restart/confirm
   S.overlayLayer.btnActionLeft = new PIXI.Container();
@@ -471,6 +479,7 @@ export function repositionUI() {
   positionSplashSprite(S.overlayLayer.splashMermaid);
   positionSplashSprite(S.overlayLayer.splashKraken);
   positionSplashSprite(S.overlayLayer.splashPolice);
+  positionSplashSprite(S.overlayLayer.splashPattinson);
 }
 
 export function buildUI() {
@@ -543,6 +552,7 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
     'splashMermaid',
     'splashKraken',
     'splashPolice',
+    'splashPattinson',
   ]) {
     if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
   }
@@ -553,6 +563,7 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
       splashMermaid: 'sprites/wasted/mermaid.png',
       splashKraken: 'sprites/wasted/kraken.png',
       splashPolice: 'sprites/wasted/police.png',
+      splashPattinson: 'sprites/wasted/pattinson.png',
     }[splashKey];
     if (!S.textures[splashKey]) {
       S.textures[splashKey] = await PIXI.Assets.load(spriteFile);
@@ -577,6 +588,13 @@ export function showPoliceGameOver() {
   return showGameOverScreen({
     message: t('gameOver.police'),
     splashKey: 'splashPolice',
+  });
+}
+
+export function showPattinsonGameOver() {
+  return showGameOverScreen({
+    message: t('gameOver.pattinson'),
+    splashKey: 'splashPattinson',
   });
 }
 
@@ -646,6 +664,7 @@ export function showWin() {
     'splashMermaid',
     'splashKraken',
     'splashPolice',
+    'splashPattinson',
   ]) {
     if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
   }
@@ -699,6 +718,7 @@ export function showExitConfirm() {
     'splashMermaid',
     'splashKraken',
     'splashPolice',
+    'splashPattinson',
   ]) {
     if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
   }
