@@ -12,6 +12,7 @@ import {
   KRAKEN_CHASE_FRAMES,
   KRAKEN_RETREAT_FRAMES,
   KRAKEN_FRAME_DURATION,
+  LIT_DEBOUNCE,
   scaleToWidth,
   tickAnim,
 } from './config.js';
@@ -39,9 +40,12 @@ export function spawnKraken() {
     speed: BOAT_SPEED * 0.6 + Math.random() * 0.3,
     gone: false,
     fleeing: false,
+    litPending: null,
+    litPendingAt: 0,
     wavePhase: Math.random() * Math.PI * 2,
     frameIndex: 0,
     frameTick: Math.random() * KRAKEN_FRAME_DURATION,
+    baseScaleX: spr.scale.x,
   });
 }
 
@@ -50,10 +54,22 @@ export function updateKrakens(delta) {
     const k = S.krakens[i];
     if (k.gone) continue;
 
-    const lit = isInBeam(k.spr.x, k.spr.y);
-    // Динамически: убегает пока в луче, возвращается когда луч ушёл
     const prevFleeing = k.fleeing;
-    k.fleeing = lit;
+    const rawLit = isInBeam(k.spr.x, k.spr.y);
+    const now = performance.now();
+
+    // Debounce beam state so kraken does not thrash on the beam edge.
+    if (rawLit !== k.fleeing) {
+      if (k.litPending !== rawLit) {
+        k.litPending = rawLit;
+        k.litPendingAt = now;
+      } else if (now - k.litPendingAt >= LIT_DEBOUNCE) {
+        k.fleeing = rawLit;
+        k.litPending = null;
+      }
+    } else {
+      k.litPending = null;
+    }
 
     // Сброс кадра при смене фазы
     if (k.fleeing !== prevFleeing) {
@@ -113,6 +129,8 @@ export function updateKrakens(delta) {
     const kWaveOffset = k.fleeing
       ? 0
       : Math.sin(performance.now() * 0.002 + k.wavePhase) * 24;
+
+    k.spr.scale.x = nx > 0 ? -k.baseScaleX : k.baseScaleX;
 
     k.spr.x += nx * k.speed * speedMult * delta + kWaveOffset * 0.04 * delta;
     k.spr.y += ny * k.speed * speedMult * delta;
