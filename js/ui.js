@@ -9,11 +9,13 @@ import {
   WIN_SCORE,
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
+} from './config.js';
+import {
   CRASH_VOLUME,
   CRASH_SOUNDS,
   playSound,
   playRandomSound,
-} from './config.js';
+} from './sound.js';
 import S from './state.js';
 
 // ===== Tooltips =====

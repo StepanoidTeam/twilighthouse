@@ -49,27 +49,6 @@ const CAM_BEAM_OFFSET = 160;
 // ===== Overlay =====
 const OVERLAY_FADE_DURATION = 600;
 
-// ===== Sound =====
-const CRASH_VOLUME = 0.03;
-
-function playSound(file, volume = 0.2) {
-  const snd = new Audio(file);
-  snd.volume = volume;
-  snd.play().catch(() => {});
-}
-
-function playRandomSound(files, volume = 0.2) {
-  playSound(files[Math.floor(Math.random() * files.length)], volume);
-}
-const CRASH_SOUNDS = [
-  'audio/crash/horror-bone-crack.mp3',
-  'audio/crash/rubble-crash.mp3',
-  'audio/crash/small-rock-break.mp3',
-  'audio/crash/wooden-ship-break.mp3',
-];
-const COP_VOLUME = 0.03;
-const BOAT_SONAR_VOLUME = 0.15;
-
 // ===== Animation Frames =====
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8;
@@ -193,10 +172,6 @@ export {
   CAM_EASE,
   CAM_BEAM_OFFSET,
   OVERLAY_FADE_DURATION,
-  CRASH_VOLUME,
-  CRASH_SOUNDS,
-  COP_VOLUME,
-  BOAT_SONAR_VOLUME,
   MERMAID_FRAMES,
   MERMAID_FRAME_DURATION,
   BOAT_FRAMES,
@@ -211,6 +186,4 @@ export {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   CARGO_LABEL_STYLE,
-  playSound,
-  playRandomSound,
 };

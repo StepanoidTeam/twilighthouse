@@ -1,4 +1,6 @@
-import { PIXI, UI_STYLE, C, playSound } from './config.js';
+import { PIXI, UI_STYLE, C } from './config.js';
+import { playSound } from './sound.js';
+import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
 // ===== Menu State =====
@@ -352,13 +354,13 @@ function handleMenuKey(e) {
       selectedIndex = (selectedIndex + 1) % MAIN_MENU.length;
       updateSelection();
       playMenuSelect();
-    } else if (e.code === 'Enter' || e.code === 'KeyE') {
+    } else if (isConfirmKey(e.code)) {
       playMenuClick();
       activateMenuItem();
     }
   } else {
     // Sub-screens: Q or Escape go back
-    if (e.code === 'KeyQ' || e.code === 'Escape') {
+    if (isBackKey(e.code)) {
       playMenuClick();
       showMainMenu();
     }

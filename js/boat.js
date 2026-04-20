@@ -14,9 +14,8 @@ import {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   C,
-  BOAT_SONAR_VOLUME,
-  playRandomSound,
 } from './config.js';
+import { BOAT_SONAR_VOLUME, playRandomSound } from './sound.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
 

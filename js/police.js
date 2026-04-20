@@ -11,10 +11,8 @@ import {
   BOAT_FRAME_DURATION,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
-  COP_VOLUME,
-  playSound,
-  playRandomSound,
 } from './config.js';
+import { COP_VOLUME, playSound, playRandomSound } from './sound.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
 import {

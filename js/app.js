@@ -12,8 +12,9 @@ import {
   SPAWN_INTERVAL_MIN,
   SPAWN_INTERVAL_MAX,
   DARKNESS_PAD,
-  playSound,
 } from './config.js';
+import { playSound } from './sound.js';
+import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
 import { buildLighthouse, buildGlow } from './lighthouse.js';
@@ -67,19 +68,9 @@ function bindEvents() {
       console.log(`🔧 Debug mode: ${S.debugMode}`);
     }
 
-    // Adjust BEAM_ORIGIN_OFFSET_Y in debug mode
-    if (S.debugMode && e.code === 'ArrowUp') S.BEAM_ORIGIN_OFFSET_Y -= 2;
-    if (S.debugMode && e.code === 'ArrowDown') S.BEAM_ORIGIN_OFFSET_Y += 2;
-    if (S.debugMode && e.code === 'BracketLeft')
-      S.BEAM_HALF_ANGLE = Math.max(0.05, S.BEAM_HALF_ANGLE - 0.02);
-    if (S.debugMode && e.code === 'BracketRight') S.BEAM_HALF_ANGLE += 0.02;
-    if (S.debugMode && e.code === 'Minus')
-      S.LH_GLOW_RADIUS = Math.max(5, S.LH_GLOW_RADIUS - 5);
-    if (S.debugMode && e.code === 'Equal') S.LH_GLOW_RADIUS += 5;
-
     // Exit confirmation screen
     if (S.exitConfirm && !isMenuVisible()) {
-      if (e.code === 'Enter' || e.code === 'KeyE') {
+      if (isConfirmKey(e.code)) {
         // Confirm exit → go to menu
         playClickSound();
         hideExitConfirm();
@@ -88,7 +79,7 @@ function bindEvents() {
         requestAnimationFrame(() => exitToMenu());
         return;
       }
-      if (e.code === 'KeyQ' || e.code === 'Escape') {
+      if (isBackKey(e.code)) {
         // Cancel → resume game
         playClickSound();
         hideExitConfirm();
@@ -99,7 +90,7 @@ function bindEvents() {
 
     // Escape or Q → show exit confirmation (during gameplay)
     if (
-      (e.code === 'Escape' || e.code === 'KeyQ') &&
+      isBackKey(e.code) &&
       !S.gameOver &&
       !S.exitConfirm &&
       !isMenuVisible()
@@ -111,13 +102,13 @@ function bindEvents() {
 
     // Game over screen
     if (S.gameOver && !isMenuVisible()) {
-      if (e.code === 'Enter' || e.code === 'KeyE') {
+      if (isConfirmKey(e.code)) {
         // Restart game
         playClickSound();
         restartGame();
         return;
       }
-      if (e.code === 'KeyQ' || e.code === 'Escape') {
+      if (isBackKey(e.code)) {
         // Exit to menu
         playClickSound();
         requestAnimationFrame(() => exitToMenu());
