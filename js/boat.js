@@ -2,7 +2,7 @@ import {
   PIXI,
   BOAT_SPEED,
   BOAT_RADIUS,
-  BOAT_SCALE,
+  BOAT_WIDTH,
   WAKE_MAX,
   ARRIVAL_RADIUS,
   BEACON_RADIUS,
@@ -14,6 +14,7 @@ import {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   C,
+  scaleToWidth,
 } from './config.js';
 import { BOAT_SONAR_VOLUME, playRandomSound } from './sound.js';
 import S from './state.js';
@@ -88,7 +89,7 @@ export function spawnBoat() {
 
   const spr = new PIXI.Sprite(S.textures.boat1);
   spr.anchor.set(0.5);
-  spr.scale.set(BOAT_SCALE);
+  scaleToWidth(spr, BOAT_WIDTH);
   spr.position.set(x, y);
   S.boatLayer.addChild(spr);
 
@@ -199,7 +200,7 @@ export function updateBoats(delta) {
       b.sinkTimer += delta;
       spr.alpha = Math.max(0, 1 - b.sinkTimer / 60);
       spr.rotation += 0.03 * delta;
-      spr.scale.set(BOAT_SCALE * (1 - b.sinkTimer / 80));
+      scaleToWidth(spr, BOAT_WIDTH * (1 - b.sinkTimer / 80));
       if (spr.alpha <= 0) {
         if (b.cargoLabel) {
           S.tooltipLayer.removeChild(b.cargoLabel);

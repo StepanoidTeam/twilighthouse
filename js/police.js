@@ -2,7 +2,7 @@ import {
   PIXI,
   BOAT_SPEED,
   BOAT_RADIUS,
-  BOAT_SCALE,
+  BOAT_WIDTH,
   WAKE_MAX,
   ARRIVAL_RADIUS,
   BEACON_RADIUS,
@@ -11,6 +11,7 @@ import {
   BOAT_FRAME_DURATION,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
+  scaleToWidth,
 } from './config.js';
 import { COP_VOLUME, playSound, playRandomSound } from './sound.js';
 import S from './state.js';
@@ -43,7 +44,7 @@ export function spawnPoliceBoat() {
 
   const spr = new PIXI.Sprite(S.textures.boat1);
   spr.anchor.set(0.5);
-  spr.scale.set(BOAT_SCALE);
+  scaleToWidth(spr, BOAT_WIDTH);
   spr.tint = 0xaaccff;
   spr.position.set(x, y);
   S.boatLayer.addChild(spr);
@@ -140,7 +141,7 @@ export function updatePoliceBoats(delta) {
       p.sinkTimer += delta;
       spr.alpha = Math.max(0, 1 - p.sinkTimer / 60);
       spr.rotation += 0.03 * delta;
-      spr.scale.set(BOAT_SCALE * (1 - p.sinkTimer / 80));
+      scaleToWidth(spr, BOAT_WIDTH * (1 - p.sinkTimer / 80));
       if (spr.alpha <= 0) {
         S.boatLayer.removeChild(spr);
         S.beaconLayer.removeChild(p.beacon);

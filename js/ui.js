@@ -9,6 +9,7 @@ import {
   WIN_SCORE,
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
+  scaleToWidth,
 } from './config.js';
 import {
   CRASH_VOLUME,
@@ -155,14 +156,14 @@ function bindTurnButton(button, keyCode) {
 
 export function buildButtons() {
   const btnSpacing = 110;
-  const btnScale = 0.32;
+  const btnWidth = 88;
   const BTN_BOTTOM_MARGIN = 80;
 
   // Left button
   S.btnLeft = new PIXI.Container();
   const sprLeft = new PIXI.Sprite(S.textures.button);
   sprLeft.anchor.set(0.5);
-  sprLeft.scale.set(btnScale);
+  scaleToWidth(sprLeft, btnWidth);
   S.btnLeft.addChild(sprLeft);
   const txtArrowLeft = new PIXI.Text('←', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
@@ -202,7 +203,7 @@ export function buildButtons() {
   S.btnRight = new PIXI.Container();
   const sprRight = new PIXI.Sprite(S.textures.button);
   sprRight.anchor.set(0.5);
-  sprRight.scale.set(btnScale);
+  scaleToWidth(sprRight, btnWidth);
   S.btnRight.addChild(sprRight);
   const txtArrowRight = new PIXI.Text('→', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
@@ -245,7 +246,7 @@ export function buildButtons() {
   S.btnEsc = new PIXI.Container();
   const sprEsc = new PIXI.Sprite(S.textures.button);
   sprEsc.anchor.set(0.5);
-  sprEsc.scale.set(0.22);
+  scaleToWidth(sprEsc, 60);
   S.btnEsc.addChild(sprEsc);
   const txtEsc = new PIXI.Text('Esc', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
@@ -335,7 +336,7 @@ export function buildOverlay() {
   S.overlayLayer.btnActionLeft = new PIXI.Container();
   const sprActionLeft = new PIXI.Sprite(S.textures.button);
   sprActionLeft.anchor.set(0.5);
-  sprActionLeft.scale.set(0.28);
+  scaleToWidth(sprActionLeft, 77);
   S.overlayLayer.btnActionLeft.addChild(sprActionLeft);
   const txtActionLeftKey = new PIXI.Text('E', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
@@ -375,7 +376,7 @@ export function buildOverlay() {
   S.overlayLayer.btnActionRight = new PIXI.Container();
   const sprActionRight = new PIXI.Sprite(S.textures.button);
   sprActionRight.anchor.set(0.5);
-  sprActionRight.scale.set(0.28);
+  scaleToWidth(sprActionRight, 77);
   S.overlayLayer.btnActionRight.addChild(sprActionRight);
   const txtActionRightKey = new PIXI.Text('Esc', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',

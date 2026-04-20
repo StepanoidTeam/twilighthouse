@@ -1,4 +1,4 @@
-import { PIXI, UI_STYLE, C } from './config.js';
+import { PIXI, UI_STYLE, C, scaleToWidth } from './config.js';
 import { playSound } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
@@ -209,7 +209,7 @@ function createMenuBtn(label, textures, isSelected) {
 
   const btnSpr = new PIXI.Sprite(textures.buttonSpace);
   btnSpr.anchor.set(0.5);
-  btnSpr.scale.set(0.35);
+  scaleToWidth(btnSpr, 109);
   container.addChild(btnSpr);
 
   const txt = new PIXI.Text(

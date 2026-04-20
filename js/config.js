@@ -9,8 +9,9 @@ const SPAWN_MARGIN = 60;
 // ===== Boat / Mob =====
 const BOAT_SPEED = 0.8;
 const BOAT_RADIUS = 14;
-const BOAT_SCALE = 0.18;
+const BOAT_WIDTH = 46;
 const KRAKEN_RADIUS = 72;
+const KRAKEN_WIDTH = 276;
 const WAKE_MAX = 30;
 const ARRIVAL_RADIUS = 55;
 
@@ -35,6 +36,7 @@ const SPAWN_INTERVAL_MAX = 5000;
 const BEAM_ORIGIN_OFFSET_X_DEFAULT = 0;
 const BEAM_ORIGIN_OFFSET_Y_DEFAULT = -64;
 const LH_GLOW_RADIUS_DEFAULT = 55;
+const LIGHTHOUSE_WIDTH = 63;
 
 // ===== Rocks =====
 const ROCK_SAFE_ZONE = 120;
@@ -48,6 +50,12 @@ const CAM_BEAM_OFFSET = 160;
 
 // ===== Overlay =====
 const OVERLAY_FADE_DURATION = 600;
+
+// ===== Sprite Sizing =====
+function scaleToWidth(spr, width) {
+  spr.width = width;
+  spr.scale.y = spr.scale.x;
+}
 
 // ===== Animation Frames =====
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
@@ -145,8 +153,9 @@ export {
   SPAWN_MARGIN,
   BOAT_SPEED,
   BOAT_RADIUS,
-  BOAT_SCALE,
+  BOAT_WIDTH,
   KRAKEN_RADIUS,
+  KRAKEN_WIDTH,
   WAKE_MAX,
   ARRIVAL_RADIUS,
   BEAM_ROTATE_SPEED,
@@ -165,6 +174,7 @@ export {
   BEAM_ORIGIN_OFFSET_X_DEFAULT,
   BEAM_ORIGIN_OFFSET_Y_DEFAULT,
   LH_GLOW_RADIUS_DEFAULT,
+  LIGHTHOUSE_WIDTH,
   ROCK_SAFE_ZONE,
   ROCK_SPAWN_RADIUS,
   CAM_OFFSET,
@@ -186,4 +196,5 @@ export {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   CARGO_LABEL_STYLE,
+  scaleToWidth,
 };

@@ -1,13 +1,14 @@
 import {
   PIXI,
   BOAT_SPEED,
-  BOAT_SCALE,
+  BOAT_WIDTH,
   ARRIVAL_RADIUS,
   MOB_SPAWN_RING,
   SPAWN_MARGIN,
   MERMAID_FRAMES,
   MERMAID_FRAME_DURATION,
   TOOLTIP_STYLE_OK,
+  scaleToWidth,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
@@ -22,7 +23,7 @@ export function spawnMermaid() {
   const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(S.textures.mermaid1);
   spr.anchor.set(0.5);
-  spr.scale.set(BOAT_SCALE);
+  scaleToWidth(spr, BOAT_WIDTH);
   spr.position.set(x, y);
   S.boatLayer.addChild(spr);
   S.mermaids.push({

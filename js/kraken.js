@@ -2,13 +2,14 @@ import {
   PIXI,
   BOAT_SPEED,
   BOAT_RADIUS,
-  BOAT_SCALE,
   KRAKEN_RADIUS,
+  KRAKEN_WIDTH,
   ARRIVAL_RADIUS,
   MOB_SPAWN_RING,
   SPAWN_MARGIN,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
+  scaleToWidth,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
@@ -26,7 +27,7 @@ export function spawnKraken() {
   const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(S.textures.kraken);
   spr.anchor.set(0.5);
-  spr.scale.set(BOAT_SCALE * 1.5);
+  scaleToWidth(spr, KRAKEN_WIDTH);
   spr.position.set(x, y);
   S.boatLayer.addChild(spr);
   S.krakens.push({

@@ -1,4 +1,11 @@
-import { PIXI, C, BOAT_RADIUS, MOB_SPAWN_RING } from './config.js';
+import {
+  PIXI,
+  C,
+  BOAT_RADIUS,
+  MOB_SPAWN_RING,
+  LIGHTHOUSE_WIDTH,
+  scaleToWidth,
+} from './config.js';
 import S from './state.js';
 
 export function buildLighthouse(parent) {
@@ -7,7 +14,7 @@ export function buildLighthouse(parent) {
 
   S.lighthouseSprite = new PIXI.Sprite(S.textures.lighthouse);
   S.lighthouseSprite.anchor.set(0.5, 0.75);
-  S.lighthouseSprite.scale.set(0.27);
+  scaleToWidth(S.lighthouseSprite, LIGHTHOUSE_WIDTH);
   S.lighthouseContainer.addChild(S.lighthouseSprite);
 
   parent.addChild(S.lighthouseContainer);
