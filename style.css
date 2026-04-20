@@ -238,3 +238,41 @@ body {
   background: rgba(0, 0, 0, 0.35);
   font-size: 12px;
 }
+
+/* ===== Back button (shown on menu sub-screens) ===== */
+.back-btn {
+  position: fixed;
+  top: 16px;
+  left: 16px;
+  z-index: 9500;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 20, 40, 0.75);
+  border: 1px solid #2a3f5f;
+  color: #e8eef6;
+  padding: 10px 16px;
+  border-radius: 20px;
+  cursor: pointer;
+  font-size: 15px;
+  font-weight: 600;
+  font-family: inherit;
+  backdrop-filter: blur(4px);
+  transition: background 0.15s, border-color 0.15s, transform 0.08s;
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+.back-btn.is-visible {
+  display: inline-flex;
+}
+.back-btn:hover {
+  background: rgba(30, 50, 80, 0.9);
+  border-color: #5599cc;
+}
+.back-btn:active {
+  transform: translateY(1px);
+}
+.back-btn-arrow {
+  font-size: 18px;
+  line-height: 1;
+}

@@ -21,6 +21,7 @@ let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' |
 let creditsContainer = null;
 let creditsAnimId = null;
 let onStartGame = null;
+let backBtnEl = null;
 
 // ===== Menu Sprites =====
 const MENU_BG_FILE = 'sprites/favicon2.png';
@@ -302,6 +303,10 @@ export async function buildMenu(app, startGameCb) {
     if (menuContainer && menuContainer._hint) {
       menuContainer._hint.text = t('hint.main');
     }
+    if (backBtnEl) {
+      const lbl = backBtnEl.querySelector('.back-btn-label');
+      if (lbl) lbl.textContent = t('btn.back');
+    }
     if (currentScreen === 'settings') showSettings();
     else if (currentScreen === 'leaderboard') showLeaderboard();
     else if (currentScreen === 'authors') showAuthors();
@@ -403,6 +408,7 @@ function showMainItems() {
 function showMainMenu() {
   clearSubScreen();
   showMainItems();
+  hideBackBtn();
   currentScreen = 'main';
 }
 
@@ -413,10 +419,39 @@ function createBackHint() {
   return hint;
 }
 
+// ===== HTML Back Button (для тач-устройств) =====
+function ensureBackBtn() {
+  if (backBtnEl) return backBtnEl;
+  backBtnEl = document.createElement('button');
+  backBtnEl.type = 'button';
+  backBtnEl.className = 'back-btn';
+  backBtnEl.innerHTML = `<span class="back-btn-arrow">←</span><span class="back-btn-label">${t('btn.back')}</span>`;
+  backBtnEl.addEventListener('click', (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    playMenuClick();
+    showMainMenu();
+  });
+  document.body.appendChild(backBtnEl);
+  return backBtnEl;
+}
+
+function showBackBtn() {
+  const el = ensureBackBtn();
+  const lbl = el.querySelector('.back-btn-label');
+  if (lbl) lbl.textContent = t('btn.back');
+  el.classList.add('is-visible');
+}
+
+function hideBackBtn() {
+  if (backBtnEl) backBtnEl.classList.remove('is-visible');
+}
+
 // ===== Leaderboard =====
 async function showLeaderboard() {
   hideMainItems();
   clearSubScreen();
+  showBackBtn();
   currentScreen = 'leaderboard';
 
   const sub = new PIXI.Container();
@@ -508,6 +543,7 @@ async function showLeaderboard() {
 function showSettings() {
   hideMainItems();
   clearSubScreen();
+  showBackBtn();
   currentScreen = 'settings';
 
   const sub = new PIXI.Container();
@@ -677,6 +713,7 @@ function addSlider(parent, label, cx, y, initial, onChange) {
 async function showAuthors() {
   hideMainItems();
   clearSubScreen();
+  showBackBtn();
   currentScreen = 'authors';
 
   const sub = new PIXI.Container();
@@ -725,6 +762,7 @@ async function showAuthors() {
 function hideMenu() {
   if (menuContainer) menuContainer.visible = false;
   clearSubScreen();
+  hideBackBtn();
   currentScreen = null;
   hideAuthWidget();
 }

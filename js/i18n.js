@@ -72,6 +72,7 @@ Photopea — image editor
     'hint.main': '↑↓ / W S — navigate  •  Enter / E — select  •  Q — back',
     'hint.back': 'Q / Escape — back',
     'hint.intro': '◀ ▶ — pages  •  Esc — skip',
+    'btn.back': 'Back',
 
     // Intro / comics
     'intro.start': 'Start',
@@ -196,6 +197,7 @@ Photopea — image editor
     'hint.main': '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
     'hint.back': 'Q / Escape — назад',
     'hint.intro': '◀ ▶ — страницы  •  Esc — пропустить',
+    'btn.back': 'Назад',
 
     'intro.start': 'Начать',
     'intro.skip': 'Пропустить',
