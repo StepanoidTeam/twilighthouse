@@ -12,6 +12,7 @@ import {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   scaleToWidth,
+  tickAnim,
 } from './config.js';
 import { COP_VOLUME, playSound, playRandomSound } from './sound.js';
 import S from './state.js';
@@ -99,12 +100,7 @@ export function updatePoliceBoats(delta) {
     const dist = Math.hypot(toX, toY);
 
     // Frame animation (same as friendly boats)
-    p.frameTick += delta;
-    if (p.frameTick >= BOAT_FRAME_DURATION) {
-      p.frameTick -= BOAT_FRAME_DURATION;
-      p.frameIndex = (p.frameIndex + 1) % BOAT_FRAMES.length;
-      spr.texture = S.textures[BOAT_FRAMES[p.frameIndex]];
-    }
+    tickAnim(p, delta, BOAT_FRAMES, BOAT_FRAME_DURATION, S.textures);
 
     // Копы: если светишь — плывут к маяку, если нет — дрейфяют мимо.
     // Применяем гистерезис: instantaneous isInBeam дрожит, когда луч идёт по

@@ -16,6 +16,7 @@ import {
   TOOLTIP_STYLE_FAIL,
   C,
   scaleToWidth,
+  tickAnim,
 } from './config.js';
 import { BOAT_SONAR_VOLUME, playRandomSound } from './sound.js';
 import S from './state.js';
@@ -168,12 +169,7 @@ export function updateBoats(delta) {
     }
 
     // Frame animation
-    b.frameTick += delta;
-    if (b.frameTick >= BOAT_FRAME_DURATION) {
-      b.frameTick -= BOAT_FRAME_DURATION;
-      b.frameIndex = (b.frameIndex + 1) % BOAT_FRAMES.length;
-      spr.texture = S.textures[BOAT_FRAMES[b.frameIndex]];
-    }
+    tickAnim(b, delta, BOAT_FRAMES, BOAT_FRAME_DURATION, S.textures);
 
     // Steer toward lighthouse
     const toX = S.lhX - spr.x;

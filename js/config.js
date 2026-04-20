@@ -73,6 +73,16 @@ function scaleToWidth(spr, width) {
   spr.scale.y = spr.scale.x;
 }
 
+// ===== Mob Animation =====
+function tickAnim(mob, delta, frames, duration, textures) {
+  mob.frameTick += delta;
+  if (mob.frameTick >= duration) {
+    mob.frameTick -= duration;
+    mob.frameIndex = (mob.frameIndex + 1) % frames.length;
+    mob.spr.texture = textures[frames[mob.frameIndex]];
+  }
+}
+
 // ===== Animation Frames =====
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8;
@@ -234,4 +244,5 @@ export {
   TOOLTIP_STYLE_FAIL,
   CARGO_LABEL_STYLE,
   scaleToWidth,
+  tickAnim,
 };

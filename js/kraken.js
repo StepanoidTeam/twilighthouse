@@ -13,6 +13,7 @@ import {
   KRAKEN_RETREAT_FRAMES,
   KRAKEN_FRAME_DURATION,
   scaleToWidth,
+  tickAnim,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
@@ -61,13 +62,8 @@ export function updateKrakens(delta) {
     }
 
     // Frame animation
-    k.frameTick += delta;
-    if (k.frameTick >= KRAKEN_FRAME_DURATION) {
-      k.frameTick -= KRAKEN_FRAME_DURATION;
-      const frames = k.fleeing ? KRAKEN_RETREAT_FRAMES : KRAKEN_CHASE_FRAMES;
-      k.frameIndex = (k.frameIndex + 1) % frames.length;
-      k.spr.texture = S.textures[frames[k.frameIndex]];
-    }
+    const kFrames = k.fleeing ? KRAKEN_RETREAT_FRAMES : KRAKEN_CHASE_FRAMES;
+    tickAnim(k, delta, kFrames, KRAKEN_FRAME_DURATION, S.textures);
 
     let nx, ny, speedMult;
     if (k.fleeing) {

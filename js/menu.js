@@ -5,6 +5,7 @@ import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal } from './auth.js';
+import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
 // ===== Menu State =====

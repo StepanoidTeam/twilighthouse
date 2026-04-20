@@ -9,6 +9,7 @@ import {
   MERMAID_FRAME_DURATION,
   TOOLTIP_STYLE_OK,
   scaleToWidth,
+  tickAnim,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
@@ -44,12 +45,7 @@ export function updateMermaids(delta) {
     if (m.gone) continue;
 
     // Frame animation
-    m.frameTick += delta;
-    if (m.frameTick >= MERMAID_FRAME_DURATION) {
-      m.frameTick -= MERMAID_FRAME_DURATION;
-      m.frameIndex = (m.frameIndex + 1) % MERMAID_FRAMES.length;
-      m.spr.texture = S.textures[MERMAID_FRAMES[m.frameIndex]];
-    }
+    tickAnim(m, delta, MERMAID_FRAMES, MERMAID_FRAME_DURATION, S.textures);
 
     const lit = isInBeam(m.spr.x, m.spr.y);
 
