@@ -46,11 +46,12 @@ function playClickSound() {
 }
 
 // ===== Resize =====
+// S.lhX/S.lhY — фиксированные МИРОВЫЕ координаты маяка, задаются один раз
+// в init(). При ресайзе их НЕ трогаем: камера сама держит маяк в центре
+// экрана через формулу `gameW/2 - lhX` в updateCamera().
 function resize() {
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;
-  S.lhX = S.gameW / 2;
-  S.lhY = S.gameH / 2;
   S.app.renderer.resize(S.gameW, S.gameH);
   const pad = DARKNESS_PAD;
   S.darkRT.resize(S.gameW + pad * 2, S.gameH + pad * 2);
@@ -137,7 +138,6 @@ function bindEvents() {
 
   window.addEventListener('resize', () => {
     resize();
-    S.lhGlow.position.set(S.lhX, S.lhY + S.BEAM_ORIGIN_OFFSET_Y);
     repositionUI();
     repositionMenu();
   });
@@ -439,6 +439,7 @@ async function init() {
     $sliderOffsetY.addEventListener('input', (e) => {
       S.BEAM_ORIGIN_OFFSET_Y = parseInt($sliderOffsetY.value, 10);
       $valOffsetY.textContent = $sliderOffsetY.value;
+      if (S.lhGlow) S.lhGlow.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
     });
   }
 }
