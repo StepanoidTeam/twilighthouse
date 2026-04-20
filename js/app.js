@@ -1,5 +1,13 @@
 // import * as PIXI from "../../pixi/pixi.js";
 // https://cdn.jsdelivr.net/npm/pixi.js@8.12.0/dist/pixi.mjs
+const GAME_OVER_DELAY = 2000;
+
+function scheduleGameOver(fn) {
+  if (gameOver || gameOverPending) return;
+  gameOverPending = true;
+  setTimeout(fn, GAME_OVER_DELAY);
+}
+
 // ===== Game Over by Boats (Iceberg) =====
 async function showBoatGameOver() {
   // Показать спрайты-кнопки
@@ -112,7 +120,7 @@ if (!PIXI) {
 // ===== Constants =====
 const BOAT_SPEED = 0.8;
 const BOAT_RADIUS = 14;
-const KRAKEN_RADIUS = 36;
+const KRAKEN_RADIUS = 72;
 const BEAM_ROTATE_SPEED = 0.04;
 const WAKE_MAX = 30;
 const ROCK_SAFE_ZONE = 120;
@@ -232,6 +240,7 @@ let darkRT, darkFill, beamErase;
 let keys = {};
 let beamAngle = -Math.PI / 2;
 let gameOver = false;
+let gameOverPending = false;
 let boats = [];
 let mermaids = [];
 let policeBoats = [];
@@ -262,7 +271,14 @@ let debugGfx, debugText;
 
 // ===== UI State =====
 let hudLayer, overlayLayer;
-let txtLives, txtScore, txtMermaids, txtPolice, txtLamp, txtMessage, txtRestart;
+let txtLives,
+  txtScore,
+  txtMermaids,
+  txtPolice,
+  txtLamp,
+  txtSunk,
+  txtMessage,
+  txtRestart;
 let btnLeft, btnRight;
 let overlayBg;
 
@@ -301,6 +317,32 @@ function spawnTooltip(x, y, text, style) {
   tooltips.push({ txt, age: 0 });
 }
 
+const CARGO_LABEL_STYLE = new PIXI.TextStyle({
+  fontFamily: 'Segoe UI, system-ui, sans-serif',
+  fontSize: 14,
+  fontWeight: 'bold',
+  fill: '#aaffcc',
+});
+
+function createCargoLabel(cargoText) {
+  const container = new PIXI.Container();
+  const txt = new PIXI.Text(cargoText, CARGO_LABEL_STYLE);
+  txt.anchor.set(0.5, 0.5);
+  // Build background after text is created so we can read dimensions
+  const pad = 7;
+  const w = txt.width + pad * 2;
+  const h = txt.height + pad * 2;
+  const bg = new PIXI.Graphics();
+  bg.beginFill(0x071420, 0.88);
+  bg.lineStyle(1.5, 0x44cc88, 1);
+  bg.drawRoundedRect(-w / 2, -h / 2, w, h, 6);
+  bg.endFill();
+  container.addChild(bg);
+  container.addChild(txt);
+  container.visible = false;
+  return container;
+}
+
 function updateTooltips(delta) {
   for (let i = tooltips.length - 1; i >= 0; i--) {
     const t = tooltips[i];
@@ -319,7 +361,7 @@ function updateTooltips(delta) {
 function updateDebug() {
   const ox = lhX + BEAM_ORIGIN_OFFSET_X;
   const oy = lhY + BEAM_ORIGIN_OFFSET_Y;
-  const bLen = 300;
+  const bLen = BEAM_LEN;
 
   debugGfx.clear();
 
@@ -397,11 +439,11 @@ function updateDebug() {
     debugGfx.drawCircle(p.spr.x, p.spr.y, BOAT_RADIUS);
   }
 
-  // Kraken colliders (purple, larger)
+  // Kraken colliders (purple, larger, offset down)
   for (const k of krakens) {
     if (k.gone) continue;
     debugGfx.lineStyle(2, 0xcc44ff, 0.9);
-    debugGfx.drawCircle(k.spr.x, k.spr.y, KRAKEN_RADIUS);
+    debugGfx.drawCircle(k.spr.x, k.spr.y + KRAKEN_RADIUS, KRAKEN_RADIUS);
   }
 
   // Rock colliders
@@ -680,7 +722,12 @@ function spawnBoat() {
     frameIndex: 0,
     frameTick: Math.random() * BOAT_FRAME_DURATION,
     cargo: randomCargo(),
+    cargoLabel: null,
   });
+  // Create label after push so we can reference boats.at(-1)
+  const bl = createCargoLabel(boats[boats.length - 1].cargo);
+  boats[boats.length - 1].cargoLabel = bl;
+  tooltipLayer.addChild(bl);
 }
 
 // ===== Mermaids =====
@@ -745,6 +792,7 @@ function spawnKraken() {
     speed: BOAT_SPEED * 0.6 + Math.random() * 0.3,
     gone: false,
     fleeing: false,
+    wavePhase: Math.random() * Math.PI * 2,
   });
 }
 
@@ -829,9 +877,10 @@ function updateBoats(delta) {
 
     const { spr } = b;
     const lit = isInBeam(spr.x, spr.y);
-    // Show cargo tooltip on beam entry
-    if (lit && !b.wasLit) {
-      spawnTooltip(spr.x, spr.y - 30, b.cargo, TOOLTIP_STYLE_OK);
+    // Persistent framed cargo label — visible while beam is on boat
+    if (b.cargoLabel) {
+      b.cargoLabel.visible = lit && !b.sinking;
+      b.cargoLabel.position.set(spr.x, spr.y - 36);
     }
     b.wasLit = lit;
     b.lit = lit;
@@ -852,6 +901,11 @@ function updateBoats(delta) {
     if (dist < ARRIVAL_RADIUS && !b.sinking) {
       // Arrived safely
       b.arrived = true;
+      if (b.cargoLabel) {
+        tooltipLayer.removeChild(b.cargoLabel);
+        b.cargoLabel.destroy();
+        b.cargoLabel = null;
+      }
       score++;
       addCargo(b.cargo);
       updateHUD();
@@ -883,6 +937,11 @@ function updateBoats(delta) {
       spr.rotation += 0.03 * delta;
       spr.scale.set(BOAT_SCALE * (1 - b.sinkTimer / 80));
       if (spr.alpha <= 0) {
+        if (b.cargoLabel) {
+          tooltipLayer.removeChild(b.cargoLabel);
+          b.cargoLabel.destroy();
+          b.cargoLabel = null;
+        }
         boatLayer.removeChild(spr);
         beaconLayer.removeChild(b.beacon);
         boats.splice(i, 1);
@@ -930,11 +989,10 @@ function updateBoats(delta) {
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
         // Если три корабля затонуло — проигрыш
-        if (boatsSunk >= 6 && !gameOver) {
-          showBoatGameOver();
+        if (boatsSunk >= 6) {
+          scheduleGameOver(showBoatGameOver);
         } else if (lives <= 0) {
-          gameOver = true;
-          showGameOver();
+          scheduleGameOver(showGameOver);
         }
       } else {
         // Push away from rock
@@ -1033,8 +1091,8 @@ function updatePoliceBoats(delta) {
       spawnTooltip(spr.x, spr.y - 20, '🚔', TOOLTIP_STYLE_FAIL);
       shakeTime = 0.5;
       shakeIntensity = 18;
-      if (policeArrived >= 3 && !gameOver) {
-        showPoliceGameOver();
+      if (policeArrived >= 3) {
+        scheduleGameOver(showPoliceGameOver);
       }
       const fadeOut = () => {
         spr.alpha -= 0.02;
@@ -1234,15 +1292,15 @@ function buildUI() {
   hudLayer = new PIXI.Container();
 
   txtLives = new PIXI.Text('❤️❤️❤️', new PIXI.TextStyle(UI_STYLE));
-  txtLives.anchor.set(0.5, 0);
+  txtLives.anchor.set(1, 0);
   hudLayer.addChild(txtLives);
 
   txtScore = new PIXI.Text('📦×0', new PIXI.TextStyle(UI_STYLE));
-  txtScore.anchor.set(0.5, 0);
+  txtScore.anchor.set(1, 0);
   hudLayer.addChild(txtScore);
 
   txtMermaids = new PIXI.Text('🧜 0/3', new PIXI.TextStyle(UI_STYLE));
-  txtMermaids.anchor.set(0, 0);
+  txtMermaids.anchor.set(1, 0);
   hudLayer.addChild(txtMermaids);
 
   txtPolice = new PIXI.Text('🚔 0/3', new PIXI.TextStyle(UI_STYLE));
@@ -1250,8 +1308,12 @@ function buildUI() {
   hudLayer.addChild(txtPolice);
 
   txtLamp = new PIXI.Text('💡💡💡💡💡', new PIXI.TextStyle(UI_STYLE));
-  txtLamp.anchor.set(0.5, 0);
+  txtLamp.anchor.set(1, 0);
   hudLayer.addChild(txtLamp);
+
+  txtSunk = new PIXI.Text('⛵💥 0/6', new PIXI.TextStyle(UI_STYLE));
+  txtSunk.anchor.set(1, 0);
+  hudLayer.addChild(txtSunk);
 
   // Arrow buttons at bottom
   const BTN_BOTTOM_MARGIN = 80; // raise buttons higher
@@ -1280,8 +1342,8 @@ function buildUI() {
   txtArrowLeft.x = -24; // move arrow to the left edge of button
   txtArrowLeft.y = -2;
   btnLeft.addChild(txtArrowLeft);
-  // Add 'D' label on the opposite (top-right) corner
-  const txtDLabelOnLeft = new PIXI.Text('D', {
+  // Add 'A' label on the opposite (top-right) corner
+  const txtDLabelOnLeft = new PIXI.Text('A', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 18,
     fill: '#fff',
@@ -1322,8 +1384,8 @@ function buildUI() {
   txtArrowRight.x = 24; // move arrow to the right edge of button
   txtArrowRight.y = -2;
   btnRight.addChild(txtArrowRight);
-  // Add 'A' label on the opposite (top-left) corner
-  const txtALabelOnRight = new PIXI.Text('A', {
+  // Add 'D' label on the opposite (top-left) corner
+  const txtALabelOnRight = new PIXI.Text('D', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
     fontSize: 18,
     fill: '#fff',
@@ -1403,11 +1465,14 @@ function repositionUI() {
     overlayLayer.keyEnter.position.set(gameW / 2 - 60, gameH / 2 + 105);
     overlayLayer.keySpace.position.set(gameW / 2 + 70, gameH / 2 + 105);
   }
-  txtMermaids.position.set(12, 16);
-  txtLives.position.set(gameW / 2 - 55, 16);
-  txtScore.position.set(gameW / 2 + 55, 16);
-  txtPolice.position.set(gameW - 12, 16);
-  txtLamp.position.set(gameW / 2, 44);
+  const HUD_RIGHT = gameW - 12;
+  const HUD_LINE = 28;
+  txtLives.position.set(HUD_RIGHT, 12);
+  txtScore.position.set(HUD_RIGHT, 12 + HUD_LINE);
+  txtMermaids.position.set(HUD_RIGHT, 12 + HUD_LINE * 2);
+  txtPolice.position.set(HUD_RIGHT, 12 + HUD_LINE * 3);
+  txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
+  txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
   // Move buttons if present
   const BTN_BOTTOM_MARGIN = 80;
   if (btnLeft) btnLeft.position.set(gameW / 2 - 110, gameH - BTN_BOTTOM_MARGIN);
@@ -1461,6 +1526,7 @@ function updateHUD() {
     Math.round((1 - lampTimer / LAMP_BURNOUT_TIME) * 5),
   );
   txtLamp.text = bulbs > 0 ? '💡'.repeat(bulbs) : '🔦';
+  txtSunk.text = `⛵💥 ${boatsSunk}/6`;
 }
 
 // ===== Game Loop =====
@@ -1598,8 +1664,8 @@ function updateMermaids(delta) {
         m.gone = true;
         mermaidsArrived++;
         updateHUD();
-        if (mermaidsArrived >= 3 && !gameOver) {
-          showMermaidGameOver();
+        if (mermaidsArrived >= 3) {
+          scheduleGameOver(showMermaidGameOver);
         }
         const fadeOut = () => {
           m.spr.alpha -= 0.04 * delta;
@@ -1686,9 +1752,7 @@ function updateKrakens(delta) {
         k.gone = true;
         krakensArrived++;
         spawnTooltip(k.spr.x, k.spr.y - 20, '🦑', TOOLTIP_STYLE_FAIL);
-        if (!gameOver) {
-          showKrakenGameOver();
-        }
+        scheduleGameOver(showKrakenGameOver);
         const fadeOut = () => {
           k.spr.alpha -= 0.04 * delta;
           if (k.spr.alpha <= 0) {
@@ -1706,8 +1770,86 @@ function updateKrakens(delta) {
       speedMult = 1;
     }
 
-    k.spr.x += nx * k.speed * speedMult * delta;
+    // Синусоидальное колебание (только когда не убегает)
+    k.wavePhase += 0.04 * delta;
+    const kWaveOffset = k.fleeing
+      ? 0
+      : Math.sin(performance.now() * 0.002 + k.wavePhase) * 24;
+
+    k.spr.x += nx * k.speed * speedMult * delta + kWaveOffset * 0.04 * delta;
     k.spr.y += ny * k.speed * speedMult * delta;
+
+    // Смещённый центр коллайдера кракена (вниз на 1 радиус)
+    const kcx = k.spr.x;
+    const kcy = k.spr.y + KRAKEN_RADIUS;
+
+    // Кракен уничтожает корабли
+    for (let bi = boats.length - 1; bi >= 0; bi--) {
+      const b = boats[bi];
+      if (b.arrived || b.sinking) continue;
+      if (
+        Math.hypot(kcx - b.spr.x, kcy - b.spr.y) <
+        KRAKEN_RADIUS + BOAT_RADIUS
+      ) {
+        b.sinking = true;
+        b.sinkTimer = 0;
+        lives--;
+        boatsSunk++;
+        updateHUD();
+        spawnTooltip(b.spr.x, b.spr.y - 20, '🦑💀', TOOLTIP_STYLE_FAIL);
+        console.log(`🦑 Кракен уничтожил корабль`);
+        if (boatsSunk >= 6) scheduleGameOver(showBoatGameOver);
+        else if (lives <= 0) scheduleGameOver(showGameOver);
+      }
+    }
+
+    // Кракен уничтожает русалок
+    for (let mi = mermaids.length - 1; mi >= 0; mi--) {
+      const m = mermaids[mi];
+      if (m.gone) continue;
+      if (
+        Math.hypot(kcx - m.spr.x, kcy - m.spr.y) <
+        KRAKEN_RADIUS + BOAT_RADIUS
+      ) {
+        m.gone = true;
+        spawnTooltip(m.spr.x, m.spr.y - 20, '🦑🧜', TOOLTIP_STYLE_OK);
+        console.log(`🦑 Кракен уничтожил русалку`);
+        boatLayer.removeChild(m.spr);
+        mermaids.splice(mi, 1);
+      }
+    }
+
+    // Кракен уничтожает полицейских
+    for (let pi = policeBoats.length - 1; pi >= 0; pi--) {
+      const p = policeBoats[pi];
+      if (p.arrived || p.sinking) continue;
+      if (
+        Math.hypot(kcx - p.spr.x, kcy - p.spr.y) <
+        KRAKEN_RADIUS + BOAT_RADIUS
+      ) {
+        p.sinking = true;
+        p.sinkTimer = 0;
+        spawnTooltip(p.spr.x, p.spr.y - 20, '🦑🚔', TOOLTIP_STYLE_OK);
+        console.log(`🦑 Кракен уничтожил полицейского`);
+      }
+    }
+
+    // Кракен топит льдины-камни
+    for (let ri = rockColliders.length - 1; ri >= 0; ri--) {
+      const rock = rockColliders[ri];
+      if (
+        Math.hypot(kcx - rock.x, kcy - rock.y) <
+        KRAKEN_RADIUS + rock.radius
+      ) {
+        const spr = rockSprites[ri];
+        if (spr) {
+          rockLayer.removeChild(spr);
+          rockSprites.splice(ri, 1);
+        }
+        rockColliders.splice(ri, 1);
+        console.log(`🦑 Кракен потопил льдину`);
+      }
+    }
 
     // Удалить если уплыл за пределы экрана (только убегая)
     if (
@@ -1860,6 +2002,10 @@ function restart() {
 
   // Remove all boats
   for (const b of boats) {
+    if (b.cargoLabel) {
+      tooltipLayer.removeChild(b.cargoLabel);
+      b.cargoLabel.destroy();
+    }
     boatLayer.removeChild(b.spr);
     beaconLayer.removeChild(b.beacon);
   }
@@ -1889,6 +2035,7 @@ function restart() {
   BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
   beamAngle = -Math.PI / 2;
   gameOver = false;
+  gameOverPending = false;
   nextSpawnTime = performance.now() + 1000;
   updateHUD();
 }
