@@ -33,23 +33,23 @@ const TITLE_STYLE = new PIXI.TextStyle({
 
 const MENU_ITEM_STYLE = new PIXI.TextStyle({
   fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 26,
+  fontSize: 65, // увеличено в 2.5 раза
   fontWeight: 'bold',
   fill: '#c8d8e8',
   dropShadow: true,
   dropShadowColor: '#000',
-  dropShadowBlur: 4,
+  dropShadowBlur: 10,
   dropShadowDistance: 0,
 });
 
 const MENU_ITEM_SELECTED_STYLE = new PIXI.TextStyle({
   fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 28,
+  fontSize: 70, // увеличено в 2.5 раза
   fontWeight: 'bold',
   fill: '#ffdd44',
   dropShadow: true,
   dropShadowColor: '#000',
-  dropShadowBlur: 6,
+  dropShadowBlur: 15,
   dropShadowDistance: 0,
 });
 
@@ -209,7 +209,7 @@ function createMenuBtn(label, textures, isSelected) {
 
   const btnSpr = new PIXI.Sprite(textures.buttonSpace);
   btnSpr.anchor.set(0.5);
-  scaleToWidth(btnSpr, 109);
+  scaleToWidth(btnSpr, 270); // увеличено в 2.5 раза
   container.addChild(btnSpr);
 
   const txt = new PIXI.Text(
@@ -217,7 +217,7 @@ function createMenuBtn(label, textures, isSelected) {
     isSelected ? MENU_ITEM_SELECTED_STYLE : MENU_ITEM_STYLE,
   );
   txt.anchor.set(0.5);
-  txt.y = -10;
+  txt.y = -20; // чуть больше отступ для крупных букв
   container.addChild(txt);
 
   container.interactive = true;
@@ -295,7 +295,7 @@ export async function buildMenu(app, startGameCb) {
 
   // Menu buttons
   const startY = S.gameH * 0.35;
-  const spacing = 95;
+  const spacing = 120;
 
   for (let i = 0; i < MAIN_MENU.length; i++) {
     const item = createMenuBtn(

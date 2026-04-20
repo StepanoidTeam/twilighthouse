@@ -63,6 +63,9 @@ const MERMAID_FRAME_DURATION = 8;
 const BOAT_FRAMES = ['boat1', 'boat2', 'boat3', 'boat2'];
 const BOAT_FRAME_DURATION = 10;
 
+// ===== Boat Lit Debounce =====
+const LIT_DEBOUNCE = 180; // ms — минимальное время стабильного состояния перед сменой
+
 // ===== Tooltips =====
 const TOOLTIP_RISE_SPEED = 0.5;
 const TOOLTIP_DURATION = 80;
@@ -186,6 +189,7 @@ export {
   MERMAID_FRAME_DURATION,
   BOAT_FRAMES,
   BOAT_FRAME_DURATION,
+  LIT_DEBOUNCE,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
   C,

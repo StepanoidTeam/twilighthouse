@@ -9,6 +9,7 @@ import {
   BEACON_PULSE_SPEED,
   BOAT_FRAMES,
   BOAT_FRAME_DURATION,
+  LIT_DEBOUNCE,
   BOAT_CARGO_TYPES,
   WIN_SCORE,
   TOOLTIP_STYLE_OK,
@@ -115,6 +116,8 @@ export function spawnBoat() {
     speed: BOAT_SPEED + Math.random() * 0.4,
     lit: false,
     wasLit: false,
+    litPending: null,
+    litPendingAt: 0,
     sinkTimer: 0,
     sinking: false,
     arrived: false,
@@ -137,18 +140,32 @@ export function updateBoats(delta) {
     if (b.arrived) continue;
 
     const { spr } = b;
-    const lit = isInBeam(spr.x, spr.y);
-    // Play sonar sound on beam entry
-    if (lit && !b.wasLit && !b.sinking) {
-      playBoatSonar();
+    const rawLit = isInBeam(spr.x, spr.y);
+    const now = performance.now();
+
+    // Debounce lit status: commit change only after LIT_DEBOUNCE ms of stable raw value
+    if (rawLit !== b.lit) {
+      if (b.litPending !== rawLit) {
+        b.litPending = rawLit;
+        b.litPendingAt = now;
+      } else if (now - b.litPendingAt >= LIT_DEBOUNCE) {
+        b.wasLit = b.lit;
+        b.lit = rawLit;
+        b.litPending = null;
+        // Play sonar sound on beam entry
+        if (b.lit && !b.wasLit && !b.sinking) {
+          playBoatSonar();
+        }
+      }
+    } else {
+      b.litPending = null;
     }
+
     // Persistent framed cargo label — visible while beam is on boat
     if (b.cargoLabel) {
-      b.cargoLabel.visible = lit && !b.sinking;
+      b.cargoLabel.visible = b.lit && !b.sinking;
       b.cargoLabel.position.set(spr.x, spr.y - 36);
     }
-    b.wasLit = lit;
-    b.lit = lit;
 
     // Frame animation
     b.frameTick += delta;
@@ -215,14 +232,14 @@ export function updateBoats(delta) {
     }
 
     // Movement — boats move slowly, faster when lit
-    const speedMult = lit ? 1.5 : 0.6;
+    const speedMult = b.lit ? 1.5 : 0.6;
     const nx = toX / dist;
     const ny = toY / dist;
 
     // Add slight wander when not lit
     let wx = 0,
       wy = 0;
-    if (!lit) {
+    if (!b.lit) {
       const wander = Math.sin(Date.now() * 0.001 + i * 7) * 0.5;
       wx = -ny * wander;
       wy = nx * wander;
@@ -242,7 +259,7 @@ export function updateBoats(delta) {
 
     // Rock collision — sink if not lit
     if (checkRockCollision(spr.x, spr.y)) {
-      if (!lit) {
+      if (!b.lit) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.lives--;
