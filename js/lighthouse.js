@@ -21,7 +21,7 @@ export function buildLighthouse(parent) {
 }
 
 export function buildGlow() {
-  const SIZE = 60; // ↓ уменьшили в 2 раза
+  const SIZE = 40;
 
   const geometry = new PIXI.Geometry()
     .addAttribute(
