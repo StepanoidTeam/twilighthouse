@@ -16,6 +16,7 @@ const DICT = {
     'menu.leaderboard': '🏆  Leaderboard',
     'menu.settings': '⚙️  Settings',
     'menu.authors': '✍️  Credits',
+    'menu.tutorial': '📖  How to Play',
     'credits.text': `
 🎨 Concept Artists
 
@@ -142,6 +143,7 @@ Photopea — image editor
     'menu.leaderboard': '🏆  Лидерборд',
     'menu.settings': '⚙️  Настройки',
     'menu.authors': '✍️  Авторы',
+    'menu.tutorial': '📖  Как играть',
     'credits.text': `
 🎨 Концепт-художники
 

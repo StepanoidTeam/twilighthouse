@@ -5,6 +5,7 @@ import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal } from './auth.js';
+import { showIntro } from './intro.js';
 import {
   t,
   getLanguage,
@@ -134,6 +135,7 @@ const MAIN_MENU_ACTIONS = [
   { key: 'menu.leaderboard', action: 'leaderboard' },
   { key: 'menu.settings', action: 'settings' },
   { key: 'menu.authors', action: 'authors' },
+  { key: 'menu.tutorial', action: 'tutorial' },
 ];
 
 function getMenuLabels() {
@@ -249,8 +251,8 @@ export async function buildMenu(app, startGameCb) {
   menuContainer._title = title;
 
   // Menu buttons
-  const startY = S.gameH * 0.35;
-  const spacing = 120;
+  const startY = S.gameH * 0.32;
+  const spacing = 110;
 
   const labels = getMenuLabels();
   for (let i = 0; i < labels.length; i++) {
@@ -375,7 +377,27 @@ function activateMenuItem() {
     case 'authors':
       showAuthors();
       break;
+    case 'tutorial':
+      showTutorial();
+      break;
   }
+}
+
+// ===== Tutorial (replay intro comics) =====
+function showTutorial() {
+  if (!menuContainer) return;
+  // Hide menu UI while the intro plays — it renders over the whole screen.
+  menuContainer.visible = false;
+  hideBackBtn();
+  hideAuthWidget();
+  currentScreen = null;
+
+  showIntro(S.app).then(() => {
+    if (!menuContainer) return;
+    menuContainer.visible = true;
+    showMainMenu();
+    showAuthWidget();
+  });
 }
 
 // ===== Sub-screen helpers =====
@@ -801,8 +823,8 @@ export function repositionMenu() {
   }
 
   // Buttons
-  const startY = S.gameH * 0.35;
-  const spacing = 95;
+  const startY = S.gameH * 0.32;
+  const spacing = 110;
   for (let i = 0; i < menuItems.length; i++) {
     menuItems[i].position.set(S.gameW / 2, startY + i * spacing);
   }

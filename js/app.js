@@ -414,8 +414,22 @@ async function init() {
   snapCamera();
   S.app.ticker.add(gameLoop);
 
-  // Intro comics (4 pages) shown before the main menu
-  await showIntro(S.app);
+  // Intro comics (4 pages) shown before the main menu — only on first visit
+  const INTRO_SEEN_KEY = 'lighthouse_intro_seen';
+  let introSeen = false;
+  try {
+    introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1';
+  } catch (e) {
+    introSeen = false;
+  }
+  if (!introSeen) {
+    await showIntro(S.app);
+    try {
+      localStorage.setItem(INTRO_SEEN_KEY, '1');
+    } catch (e) {
+      // ignore (private mode / storage disabled)
+    }
+  }
 
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
