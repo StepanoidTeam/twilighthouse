@@ -25,6 +25,7 @@ import {
   showBoatGameOver,
   showGameOver,
   showWin,
+  playCrashSound,
 } from './ui.js';
 
 // ===== Cargo Helpers =====
@@ -231,6 +232,7 @@ export function updateBoats(delta) {
         S.boatsSunk++;
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
+        playCrashSound();
         // 🛥️ Корабль затонул
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,

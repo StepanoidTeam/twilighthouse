@@ -36,6 +36,12 @@ import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
 
 const $gameContainer = document.getElementById('$gameContainer');
 
+function playClickSound() {
+  const snd = new Audio('audio/button-click.mp3');
+  snd.volume = 0.2;
+  snd.play().catch(() => {});
+}
+
 // ===== Resize =====
 function resize() {
   S.gameW = window.innerWidth;
@@ -76,6 +82,7 @@ function bindEvents() {
     if (S.exitConfirm && !isMenuVisible()) {
       if (e.code === 'Enter' || e.code === 'KeyE') {
         // Confirm exit → go to menu
+        playClickSound();
         hideExitConfirm();
         if (S.btnEsc) S.btnEsc.visible = false;
         // Defer to avoid menu keydown handler catching the same event
@@ -84,6 +91,7 @@ function bindEvents() {
       }
       if (e.code === 'KeyQ' || e.code === 'Escape') {
         // Cancel → resume game
+        playClickSound();
         hideExitConfirm();
         return;
       }
@@ -97,6 +105,7 @@ function bindEvents() {
       !S.exitConfirm &&
       !isMenuVisible()
     ) {
+      playClickSound();
       showExitConfirm();
       return;
     }
@@ -105,11 +114,13 @@ function bindEvents() {
     if (S.gameOver && !isMenuVisible()) {
       if (e.code === 'Enter' || e.code === 'KeyE') {
         // Restart game
+        playClickSound();
         restartGame();
         return;
       }
       if (e.code === 'KeyQ' || e.code === 'Escape') {
         // Exit to menu
+        playClickSound();
         requestAnimationFrame(() => exitToMenu());
         return;
       }
@@ -307,6 +318,7 @@ async function init() {
   // Wire Escape button click to show menu
   S.btnEsc.on('pointerdown', () => {
     if (!S.gameOver && !S.exitConfirm && !isMenuVisible()) {
+      playClickSound();
       showExitConfirm();
     }
   });
@@ -321,10 +333,12 @@ async function init() {
   $btnL.hitArea = new PIXI.Circle(0, 0, 40);
   $btnL.on('pointerdown', () => {
     if (S.exitConfirm) {
+      playClickSound();
       hideExitConfirm();
       if (S.btnEsc) S.btnEsc.visible = false;
       requestAnimationFrame(() => exitToMenu());
     } else if (S.gameOver) {
+      playClickSound();
       restartGame();
     }
   });
@@ -335,8 +349,10 @@ async function init() {
   $btnR.hitArea = new PIXI.Circle(0, 0, 40);
   $btnR.on('pointerdown', () => {
     if (S.exitConfirm) {
+      playClickSound();
       hideExitConfirm();
     } else if (S.gameOver) {
+      playClickSound();
       requestAnimationFrame(() => exitToMenu());
     }
   });

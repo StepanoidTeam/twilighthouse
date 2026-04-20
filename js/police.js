@@ -19,6 +19,7 @@ import {
   updateHUD,
   scheduleGameOver,
   showPoliceGameOver,
+  playCrashSound,
 } from './ui.js';
 
 export function spawnPoliceBoat() {
@@ -165,6 +166,7 @@ export function updatePoliceBoats(delta) {
         p.sinking = true;
         p.sinkTimer = 0;
         spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
+        playCrashSound();
         console.log(
           `🚔 Полицейский катер разбился о камни (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );

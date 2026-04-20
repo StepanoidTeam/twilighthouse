@@ -192,6 +192,19 @@ Photopea — image editor
 🌊 Спасибо за игру! 🌊
 `;
 
+// ===== Sound Helpers =====
+function playMenuSelect() {
+  const snd = new Audio('audio/menu-select.mp3');
+  snd.volume = 0.15;
+  snd.play().catch(() => {});
+}
+
+function playMenuClick() {
+  const snd = new Audio('audio/button-click.mp3');
+  snd.volume = 0.2;
+  snd.play().catch(() => {});
+}
+
 // ===== Helpers =====
 function createMenuBtn(label, textures, isSelected) {
   const container = new PIXI.Container();
@@ -299,12 +312,16 @@ export async function buildMenu(app, startGameCb) {
     // Mouse/touch
     const idx = i;
     item.on('pointerover', () => {
-      selectedIndex = idx;
-      updateSelection();
+      if (selectedIndex !== idx) {
+        selectedIndex = idx;
+        updateSelection();
+        playMenuSelect();
+      }
     });
     item.on('pointerdown', () => {
       selectedIndex = idx;
       updateSelection();
+      playMenuClick();
       activateMenuItem();
     });
   }
@@ -334,15 +351,19 @@ function handleMenuKey(e) {
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
       selectedIndex = (selectedIndex - 1 + MAIN_MENU.length) % MAIN_MENU.length;
       updateSelection();
+      playMenuSelect();
     } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
       selectedIndex = (selectedIndex + 1) % MAIN_MENU.length;
       updateSelection();
+      playMenuSelect();
     } else if (e.code === 'Enter' || e.code === 'KeyE') {
+      playMenuClick();
       activateMenuItem();
     }
   } else {
     // Sub-screens: Q or Escape go back
     if (e.code === 'KeyQ' || e.code === 'Escape') {
+      playMenuClick();
       showMainMenu();
     }
   }
@@ -489,6 +510,7 @@ function showSettings() {
   langTxt.buttonMode = true;
   langTxt.cursor = 'pointer';
   langTxt.on('pointerdown', () => {
+    playMenuClick();
     langIdx = (langIdx + 1) % langs.length;
     langTxt.text = `◀  ${langs[langIdx]}  ▶`;
   });
@@ -563,6 +585,7 @@ function addSlider(parent, label, cx, y, initial, onChange) {
   }
 
   knob.on('pointerdown', () => {
+    playMenuClick();
     dragging = true;
   });
 
@@ -584,6 +607,7 @@ function addSlider(parent, label, cx, y, initial, onChange) {
   track.buttonMode = true;
   track.cursor = 'pointer';
   track.on('pointerdown', (e) => {
+    playMenuClick();
     const pos = e.data.global;
     updateSlider(pos.x);
   });

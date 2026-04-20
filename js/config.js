@@ -49,6 +49,15 @@ const CAM_BEAM_OFFSET = 160;
 // ===== Overlay =====
 const OVERLAY_FADE_DURATION = 600;
 
+// ===== Sound =====
+const CRASH_VOLUME = 0.03;
+const CRASH_SOUNDS = [
+  'audio/crash/horror-bone-crack.mp3',
+  'audio/crash/rubble-crash.mp3',
+  'audio/crash/small-rock-break.mp3',
+  'audio/crash/wooden-ship-break.mp3',
+];
+
 // ===== Animation Frames =====
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8;
@@ -172,6 +181,8 @@ export {
   CAM_EASE,
   CAM_BEAM_OFFSET,
   OVERLAY_FADE_DURATION,
+  CRASH_VOLUME,
+  CRASH_SOUNDS,
   MERMAID_FRAMES,
   MERMAID_FRAME_DURATION,
   BOAT_FRAMES,

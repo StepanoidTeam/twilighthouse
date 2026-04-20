@@ -9,10 +9,19 @@ import {
   WIN_SCORE,
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
+  CRASH_VOLUME,
+  CRASH_SOUNDS,
 } from './config.js';
 import S from './state.js';
 
 // ===== Tooltips =====
+export function playCrashSound() {
+  const file = CRASH_SOUNDS[Math.floor(Math.random() * CRASH_SOUNDS.length)];
+  const snd = new Audio(file);
+  snd.volume = CRASH_VOLUME;
+  snd.play().catch(() => {});
+}
+
 export function spawnTooltip(x, y, text, style) {
   const txt = new PIXI.Text(text, style);
   txt.anchor.set(0.5);
