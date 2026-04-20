@@ -141,29 +141,52 @@ const MOCK_LEADERBOARD = [
 
 // ===== Credits Text =====
 const CREDITS_TEXT = `
-🎨 Художники
+🎨 Концепт-художники
 
-Volodymyr Myshko
-AI-generated assets
+@adriana
+@r1m
+@lina
 
 
 💻 Программисты
 
-Volodymyr Myshko
+@bobanko
+@nuclme
+@claude
+
+
+🎲 Геймдизайнеры
+
+@nuclme
+@stepastepa
+@adriana
+@bobanko
+
+
+🤖 AI-инструменты
+
 GitHub Copilot
+ChatGPT
+Claude
 
 
-🎲 Геймдизайн
+🎵 Музыка
 
-Volodymyr Myshko
+suno.com
 
 
-🎵 Ресурсы
+🔊 Звуки
+
+pixabay.com
+libsounds.com
+
+
+⚙️ Технологии
 
 PixiJS — 2D rendering engine
 Firebase — analytics & backend
-Freesound.org — sound effects
-AI — sprite generation
+VS Code — code editor
+Photopea — image editor
 
 
 🌊 Спасибо за игру! 🌊

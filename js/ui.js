@@ -320,35 +320,88 @@ export function buildOverlay() {
   S.overlayLayer.splashPolice.visible = false;
   S.overlayLayer.addChildAt(S.overlayLayer.splashPolice, 3);
 
-  // Кнопки Enter и Spacebar для экрана поражения
-  S.overlayLayer.keyEnter = new PIXI.Sprite(S.textures.buttonEnter);
-  S.overlayLayer.keyEnter.anchor.set(0.5);
-  S.overlayLayer.keyEnter.scale.set(0.5);
-  S.overlayLayer.keyEnter.visible = false;
-  S.overlayLayer.addChild(S.overlayLayer.keyEnter);
-
-  S.overlayLayer.txtOr = new PIXI.Text(
-    'OR',
+  // Кнопки для экрана поражения / подтверждения выхода
+  // Left group: Enter/E — restart/confirm
+  S.overlayLayer.btnActionLeft = new PIXI.Container();
+  const sprActionLeft = new PIXI.Sprite(S.textures.button);
+  sprActionLeft.anchor.set(0.5);
+  sprActionLeft.scale.set(0.28);
+  S.overlayLayer.btnActionLeft.addChild(sprActionLeft);
+  const txtActionLeftKey = new PIXI.Text('E', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 20,
+    fill: '#fff',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 3,
+    dropShadowDistance: 0,
+  });
+  txtActionLeftKey.anchor.set(0.5);
+  txtActionLeftKey.y = -4;
+  S.overlayLayer.btnActionLeft.addChild(txtActionLeftKey);
+  S.overlayLayer.btnActionLeft.txtLabel = new PIXI.Text(
+    'Заново',
     new PIXI.TextStyle({
       fontFamily: 'Segoe UI, system-ui, sans-serif',
-      fontSize: 18,
+      fontSize: 16,
       fontWeight: 'bold',
-      fill: '#6a8a9a',
+      fill: '#c8d8e8',
       dropShadow: true,
       dropShadowColor: '#000',
       dropShadowBlur: 4,
       dropShadowDistance: 0,
+      align: 'center',
     }),
   );
-  S.overlayLayer.txtOr.anchor.set(0.5);
-  S.overlayLayer.txtOr.visible = false;
-  S.overlayLayer.addChild(S.overlayLayer.txtOr);
+  S.overlayLayer.btnActionLeft.txtLabel.anchor.set(0.5, 0);
+  S.overlayLayer.btnActionLeft.txtLabel.y = 38;
+  S.overlayLayer.btnActionLeft.addChild(S.overlayLayer.btnActionLeft.txtLabel);
+  S.overlayLayer.btnActionLeft.visible = false;
+  S.overlayLayer.addChild(S.overlayLayer.btnActionLeft);
 
-  S.overlayLayer.keySpace = new PIXI.Sprite(S.textures.buttonSpace);
-  S.overlayLayer.keySpace.anchor.set(0.5);
-  S.overlayLayer.keySpace.scale.set(0.5);
-  S.overlayLayer.keySpace.visible = false;
-  S.overlayLayer.addChild(S.overlayLayer.keySpace);
+  // Right group: Esc/Q — exit to menu
+  S.overlayLayer.btnActionRight = new PIXI.Container();
+  const sprActionRight = new PIXI.Sprite(S.textures.button);
+  sprActionRight.anchor.set(0.5);
+  sprActionRight.scale.set(0.28);
+  S.overlayLayer.btnActionRight.addChild(sprActionRight);
+  const txtActionRightKey = new PIXI.Text('Esc', {
+    fontFamily: 'Segoe UI, system-ui, sans-serif',
+    fontSize: 16,
+    fill: '#c8d8e8',
+    align: 'center',
+    fontWeight: 'bold',
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 3,
+    dropShadowDistance: 0,
+  });
+  txtActionRightKey.anchor.set(0.5);
+  txtActionRightKey.y = -4;
+  S.overlayLayer.btnActionRight.addChild(txtActionRightKey);
+  S.overlayLayer.btnActionRight.txtLabel = new PIXI.Text(
+    'В меню',
+    new PIXI.TextStyle({
+      fontFamily: 'Segoe UI, system-ui, sans-serif',
+      fontSize: 16,
+      fontWeight: 'bold',
+      fill: '#c8d8e8',
+      dropShadow: true,
+      dropShadowColor: '#000',
+      dropShadowBlur: 4,
+      dropShadowDistance: 0,
+      align: 'center',
+    }),
+  );
+  S.overlayLayer.btnActionRight.txtLabel.anchor.set(0.5, 0);
+  S.overlayLayer.btnActionRight.txtLabel.y = 38;
+  S.overlayLayer.btnActionRight.addChild(
+    S.overlayLayer.btnActionRight.txtLabel,
+  );
+  S.overlayLayer.btnActionRight.visible = false;
+  S.overlayLayer.addChild(S.overlayLayer.btnActionRight);
 
   S.app.stage.addChild(S.overlayLayer);
 }
@@ -372,13 +425,11 @@ function positionSplashSprite(sprite) {
 }
 
 export function repositionUI() {
-  // Позиционирование спрайтов-кнопок на экране поражения
-  if (S.overlayLayer.keyEnter && S.overlayLayer.keySpace) {
-    const keyY = S.gameH - 80;
-    S.overlayLayer.keyEnter.position.set(S.gameW / 2 - 130, keyY);
-    if (S.overlayLayer.txtOr)
-      S.overlayLayer.txtOr.position.set(S.gameW / 2, keyY);
-    S.overlayLayer.keySpace.position.set(S.gameW / 2 + 130, keyY);
+  // Позиционирование кнопок действий на оверлее
+  if (S.overlayLayer.btnActionLeft && S.overlayLayer.btnActionRight) {
+    const keyY = S.gameH - 90;
+    S.overlayLayer.btnActionLeft.position.set(S.gameW / 2 - 90, keyY);
+    S.overlayLayer.btnActionRight.position.set(S.gameW / 2 + 90, keyY);
   }
   const HUD_RIGHT = S.gameW - 12;
   const HUD_LINE = 28;
@@ -430,6 +481,11 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
   fadeInOverlay();
   playFailSound();
 
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.visible = false;
+  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnEsc) S.btnEsc.visible = false;
+
   S.txtMessage.style = new PIXI.TextStyle({
     ...UI_STYLE,
     fontSize: 38,
@@ -462,9 +518,14 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
   S.txtRestart.position.set(S.gameW / 2, S.gameH / 2 + 60);
   S.txtRestart.visible = true;
 
-  if (S.overlayLayer.keyEnter) S.overlayLayer.keyEnter.visible = true;
-  if (S.overlayLayer.txtOr) S.overlayLayer.txtOr.visible = true;
-  if (S.overlayLayer.keySpace) S.overlayLayer.keySpace.visible = true;
+  if (S.overlayLayer.btnActionLeft) {
+    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.visible = true;
+  }
+  if (S.overlayLayer.btnActionRight) {
+    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.visible = true;
+  }
 
   // Hide all splash sprites, then show the requested one
   for (const key of [
@@ -497,7 +558,7 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
 
 export function showBoatGameOver() {
   return showGameOverScreen({
-    message: '💀 Game Over — 3 boats sunk!',
+    message: `💀 Game Over — ${S.boatsSunk} boats sunk!`,
     splashKey: 'splashIceberg',
   });
 }
@@ -511,7 +572,7 @@ export function showPoliceGameOver() {
 
 export function showMermaidGameOver() {
   return showGameOverScreen({
-    message: '💀 Game Over — 3 mermaids reached the lighthouse!',
+    message: `💀 Game Over — ${S.mermaidsArrived} mermaids reached the lighthouse!`,
     splashKey: 'splashMermaid',
   });
 }
@@ -524,15 +585,139 @@ export function showKrakenGameOver() {
 }
 
 export function showGameOver() {
-  if (S.overlayLayer.keyEnter) S.overlayLayer.keyEnter.visible = true;
-  if (S.overlayLayer.txtOr) S.overlayLayer.txtOr.visible = true;
-  if (S.overlayLayer.keySpace) S.overlayLayer.keySpace.visible = true;
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.visible = false;
+  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnEsc) S.btnEsc.visible = false;
+
+  if (S.overlayLayer.btnActionLeft) {
+    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.visible = true;
+  }
+  if (S.overlayLayer.btnActionRight) {
+    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.visible = true;
+  }
   playFailSound();
   S.txtMessage.text = `💀 Game Over — ${S.score}/${WIN_SCORE} boats saved`;
   fadeInOverlay();
 }
 
 export function showWin() {
+  S.gameOver = true;
   S.txtMessage.text = `🎉 You Win! All ${WIN_SCORE} boats saved!`;
   fadeInOverlay();
+
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.visible = false;
+  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnEsc) S.btnEsc.visible = false;
+
+  S.txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 36,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  S.txtMessage.position.set(S.gameW / 2, S.gameH / 2 - 30);
+  S.txtMessage.visible = true;
+  S.txtRestart.visible = false;
+
+  // Hide splash sprites
+  for (const key of [
+    'splashIceberg',
+    'splashMermaid',
+    'splashKraken',
+    'splashPolice',
+  ]) {
+    if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
+  }
+
+  if (S.overlayLayer.btnActionLeft) {
+    S.overlayLayer.btnActionLeft.txtLabel.text = 'Заново';
+    S.overlayLayer.btnActionLeft.visible = true;
+  }
+  if (S.overlayLayer.btnActionRight) {
+    S.overlayLayer.btnActionRight.txtLabel.text = 'В меню';
+    S.overlayLayer.btnActionRight.visible = true;
+  }
+
+  repositionUI();
+}
+
+// ===== Exit Confirmation =====
+export function showExitConfirm() {
+  S.exitConfirm = true;
+
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.visible = false;
+  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnEsc) S.btnEsc.visible = false;
+
+  S.overlayBg.visible = true;
+  S.overlayLayer.visible = true;
+  S.overlayLayer.alpha = 1;
+
+  S.txtMessage.text = '⏸️ Выйти в меню?';
+  S.txtMessage.style = new PIXI.TextStyle({
+    ...UI_STYLE,
+    fontSize: 36,
+    fontWeight: 'bold',
+    fill: '#fff',
+    stroke: '#000',
+    strokeThickness: 6,
+    dropShadow: true,
+    dropShadowColor: '#000',
+    dropShadowBlur: 8,
+    dropShadowDistance: 0,
+    align: 'center',
+  });
+  S.txtMessage.position.set(S.gameW / 2, S.gameH / 2 - 30);
+  S.txtMessage.visible = true;
+  S.txtRestart.visible = false;
+
+  // Hide splash sprites
+  for (const key of [
+    'splashIceberg',
+    'splashMermaid',
+    'splashKraken',
+    'splashPolice',
+  ]) {
+    if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
+  }
+
+  if (S.overlayLayer.btnActionLeft) {
+    S.overlayLayer.btnActionLeft.txtLabel.text = 'Выйти';
+    S.overlayLayer.btnActionLeft.visible = true;
+  }
+  if (S.overlayLayer.btnActionRight) {
+    S.overlayLayer.btnActionRight.txtLabel.text = 'Вернуться';
+    S.overlayLayer.btnActionRight.visible = true;
+  }
+
+  repositionUI();
+}
+
+export function hideExitConfirm() {
+  S.exitConfirm = false;
+  S.overlayLayer.visible = false;
+  S.overlayLayer.alpha = 1;
+  S.txtMessage.visible = false;
+  S.txtRestart.visible = false;
+  if (S.overlayLayer.btnActionLeft)
+    S.overlayLayer.btnActionLeft.visible = false;
+  if (S.overlayLayer.btnActionRight)
+    S.overlayLayer.btnActionRight.visible = false;
+
+  // Restore gameplay buttons
+  if (S.btnLeft) S.btnLeft.visible = true;
+  if (S.btnRight) S.btnRight.visible = true;
+  if (S.btnEsc) S.btnEsc.visible = true;
 }

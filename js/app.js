@@ -19,7 +19,14 @@ import { buildLighthouse, buildGlow } from './lighthouse.js';
 import { buildRocks, updateRocks } from './rocks.js';
 import { buildDarkness, updateDarkness } from './darkness.js';
 import { updateCamera } from './camera.js';
-import { buildUI, updateHUD, updateTooltips, repositionUI } from './ui.js';
+import {
+  buildUI,
+  updateHUD,
+  updateTooltips,
+  repositionUI,
+  showExitConfirm,
+  hideExitConfirm,
+} from './ui.js';
 import { spawnBoat, updateBoats, drawWakes, cleanupBoats } from './boat.js';
 import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
 import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
@@ -65,20 +72,47 @@ function bindEvents() {
       S.LH_GLOW_RADIUS = Math.max(5, S.LH_GLOW_RADIUS - 5);
     if (S.debugMode && e.code === 'Equal') S.LH_GLOW_RADIUS += 5;
 
-    // Escape → back to menu (during gameplay)
-    if (e.code === 'Escape' && !S.gameOver && !isMenuVisible()) {
-      if (S.btnEsc) S.btnEsc.visible = false;
-      showMenu();
+    // Exit confirmation screen
+    if (S.exitConfirm && !isMenuVisible()) {
+      if (e.code === 'Enter' || e.code === 'KeyE') {
+        // Confirm exit → go to menu
+        hideExitConfirm();
+        if (S.btnEsc) S.btnEsc.visible = false;
+        // Defer to avoid menu keydown handler catching the same event
+        requestAnimationFrame(() => exitToMenu());
+        return;
+      }
+      if (e.code === 'KeyQ' || e.code === 'Escape') {
+        // Cancel → resume game
+        hideExitConfirm();
+        return;
+      }
       return;
     }
 
-    // Restart on Enter/Space when game over
+    // Escape → show exit confirmation (during gameplay)
     if (
-      S.gameOver &&
-      !isMenuVisible() &&
-      (e.code === 'Enter' || e.code === 'Space')
+      e.code === 'Escape' &&
+      !S.gameOver &&
+      !S.exitConfirm &&
+      !isMenuVisible()
     ) {
-      restart();
+      showExitConfirm();
+      return;
+    }
+
+    // Game over screen
+    if (S.gameOver && !isMenuVisible()) {
+      if (e.code === 'Enter' || e.code === 'KeyE') {
+        // Restart game
+        restartGame();
+        return;
+      }
+      if (e.code === 'KeyQ' || e.code === 'Escape') {
+        // Exit to menu
+        requestAnimationFrame(() => exitToMenu());
+        return;
+      }
     }
   });
 
@@ -94,13 +128,15 @@ function bindEvents() {
   });
 }
 
-// ===== Restart =====
-function restart() {
-  if (S.overlayLayer.keyEnter) S.overlayLayer.keyEnter.visible = false;
-  if (S.overlayLayer.txtOr) S.overlayLayer.txtOr.visible = false;
-  if (S.overlayLayer.keySpace) S.overlayLayer.keySpace.visible = false;
+// ===== Clear overlay and entities =====
+function clearGame() {
+  if (S.overlayLayer.btnActionLeft)
+    S.overlayLayer.btnActionLeft.visible = false;
+  if (S.overlayLayer.btnActionRight)
+    S.overlayLayer.btnActionRight.visible = false;
   S.overlayLayer.visible = false;
   S.overlayLayer.alpha = 1;
+  S.overlayBg.visible = true;
   if (S.overlayLayer.splashMermaid)
     S.overlayLayer.splashMermaid.visible = false;
   if (S.overlayLayer.splashKraken) S.overlayLayer.splashKraken.visible = false;
@@ -110,10 +146,26 @@ function restart() {
   cleanupPolice();
   cleanupKrakens();
   cleanupMermaids();
+}
 
+// ===== Exit to menu =====
+function exitToMenu() {
+  clearGame();
   S.reset();
   updateHUD();
+  if (S.btnEsc) S.btnEsc.visible = false;
   showMenu();
+}
+
+// ===== Restart game (play again) =====
+function restartGame() {
+  clearGame();
+  S.reset();
+  updateHUD();
+  S.nextSpawnTime = performance.now() + 1000;
+  if (S.btnEsc) S.btnEsc.visible = true;
+  if (S.btnLeft) S.btnLeft.visible = true;
+  if (S.btnRight) S.btnRight.visible = true;
 }
 
 // ===== Start Game (called from menu) =====
@@ -128,6 +180,7 @@ function startGame() {
 function gameLoop(delta) {
   if (S.gameOver) return;
   if (isMenuVisible()) return;
+  if (S.exitConfirm) return;
 
   // Beam rotation via keyboard (no easing)
   if (S.keys['KeyA'] || S.keys['ArrowLeft'])
@@ -253,9 +306,38 @@ async function init() {
 
   // Wire Escape button click to show menu
   S.btnEsc.on('pointerdown', () => {
-    if (!S.gameOver && !isMenuVisible()) {
-      S.btnEsc.visible = false;
-      showMenu();
+    if (!S.gameOver && !S.exitConfirm && !isMenuVisible()) {
+      showExitConfirm();
+    }
+  });
+
+  // Wire overlay action buttons
+  const $btnL = S.overlayLayer.btnActionLeft;
+  const $btnR = S.overlayLayer.btnActionRight;
+
+  $btnL.interactive = true;
+  $btnL.buttonMode = true;
+  $btnL.cursor = 'pointer';
+  $btnL.hitArea = new PIXI.Circle(0, 0, 40);
+  $btnL.on('pointerdown', () => {
+    if (S.exitConfirm) {
+      hideExitConfirm();
+      if (S.btnEsc) S.btnEsc.visible = false;
+      requestAnimationFrame(() => exitToMenu());
+    } else if (S.gameOver) {
+      restartGame();
+    }
+  });
+
+  $btnR.interactive = true;
+  $btnR.buttonMode = true;
+  $btnR.cursor = 'pointer';
+  $btnR.hitArea = new PIXI.Circle(0, 0, 40);
+  $btnR.on('pointerdown', () => {
+    if (S.exitConfirm) {
+      hideExitConfirm();
+    } else if (S.gameOver) {
+      requestAnimationFrame(() => exitToMenu());
     }
   });
 

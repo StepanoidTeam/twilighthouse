@@ -51,6 +51,7 @@ const State = {
   // Game flow
   gameOver: false,
   gameOverPending: false,
+  exitConfirm: false,
 
   // Entities
   boats: [],
@@ -127,6 +128,7 @@ const State = {
     this.beamAngle = -Math.PI / 2;
     this.gameOver = false;
     this.gameOverPending = false;
+    this.exitConfirm = false;
     this.boatsSunk = 0;
     this.nextSpawnTime = performance.now() + 1000;
   },
