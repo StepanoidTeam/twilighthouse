@@ -35,7 +35,7 @@ const SPAWN_INTERVAL_MAX = 5000;
 // ===== Lighthouse =====
 const BEAM_ORIGIN_OFFSET_X_DEFAULT = 0;
 const BEAM_ORIGIN_OFFSET_Y_DEFAULT = -64;
-const LH_GLOW_RADIUS_DEFAULT = 55;
+const LH_GLOW_RADIUS_DEFAULT = 30;
 const LIGHTHOUSE_WIDTH = 63;
 
 // ===== Rocks =====

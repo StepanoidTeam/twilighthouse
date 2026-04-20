@@ -33,7 +33,7 @@ export function buildLighthouse(parent) {
 //   S.lighthouseContainer.addChild(S.lhGlow);
 // }
 export function buildGlow() {
-  const radius = 40;
+  const radius = 1700;
   const color = C.lhLight;
 
   // Извлекаем RGB из hex-цвета PIXI
@@ -49,8 +49,8 @@ export function buildGlow() {
 
   const ctx = canvas.getContext('2d');
   const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
-  gradient.addColorStop(0,   `rgba(${r},${g},${b}, 0.9)`); // центр
-  gradient.addColorStop(0.4, `rgba(${r},${g},${b}, 0.2)`);
+  gradient.addColorStop(0,   `rgba(${r},${g},${b}, 0.5)`); // центр
+  gradient.addColorStop(0.3, `rgba(${r},${g},${b}, 0.01)`);
   gradient.addColorStop(1,   `rgba(${r},${g},${b}, 0)`);    // край
 
   ctx.fillStyle = gradient;
