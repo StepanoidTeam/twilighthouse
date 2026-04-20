@@ -20,46 +20,15 @@ export function buildLighthouse(parent) {
   parent.addChild(S.lighthouseContainer);
 }
 
-// export function buildGlow() {
-//   S.lhGlow = new PIXI.Graphics();
-//   S.lhGlow.blendMode = PIXI.BLEND_MODES.ADD;
-//   S.lhGlow.beginFill(C.lhLight, 0.12);
-//   S.lhGlow.drawCircle(0, 0, 40);
-//   S.lhGlow.endFill();
-//   S.lhGlow.beginFill(C.lhLight, 0.18);
-//   S.lhGlow.drawCircle(0, 0, 25);
-//   S.lhGlow.endFill();
-//   S.lhGlow.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
-//   S.lighthouseContainer.addChild(S.lhGlow);
-// }
 export function buildGlow() {
-  const radius = 1700;
-  const color = C.lhLight;
-
-  // Извлекаем RGB из hex-цвета PIXI
-  const r = (color >> 16) & 0xff;
-  const g = (color >> 8) & 0xff;
-  const b = color & 0xff;
-
-  // Рисуем градиент на Canvas
-  const canvas = document.createElement('canvas');
-  const size = radius * 2;
-  canvas.width = size;
-  canvas.height = size;
-
-  const ctx = canvas.getContext('2d');
-  const gradient = ctx.createRadialGradient(radius, radius, 0, radius, radius, radius);
-  gradient.addColorStop(0,   `rgba(${r},${g},${b}, 0.5)`); // центр
-  gradient.addColorStop(0.3, `rgba(${r},${g},${b}, 0.01)`);
-  gradient.addColorStop(1,   `rgba(${r},${g},${b}, 0)`);    // край
-
-  ctx.fillStyle = gradient;
-  ctx.fillRect(0, 0, size, size);
-
-  // Создаём спрайт
-  S.lhGlow = new PIXI.Sprite(PIXI.Texture.from(canvas));
-  S.lhGlow.anchor.set(0.5);
-  S.lhGlow.blendMode = PIXI.BLEND_MODES.OVERLAY; // OVERLAY
+  S.lhGlow = new PIXI.Graphics();
+  S.lhGlow.blendMode = PIXI.BLEND_MODES.ADD;
+  S.lhGlow.beginFill(C.lhLight, 0.12);
+  S.lhGlow.drawCircle(0, 0, 40);
+  S.lhGlow.endFill();
+  S.lhGlow.beginFill(C.lhLight, 0.18);
+  S.lhGlow.drawCircle(0, 0, 18);
+  S.lhGlow.endFill();
   S.lhGlow.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
   S.lighthouseContainer.addChild(S.lhGlow);
 }
