@@ -21,16 +21,71 @@ export function buildLighthouse(parent) {
 }
 
 export function buildGlow() {
-  S.lhGlow = new PIXI.Graphics();
-  S.lhGlow.blendMode = PIXI.BLEND_MODES.ADD;
-  S.lhGlow.beginFill(C.lhLight, 0.12);
-  S.lhGlow.drawCircle(0, 0, 40);
-  S.lhGlow.endFill();
-  S.lhGlow.beginFill(C.lhLight, 0.18);
-  S.lhGlow.drawCircle(0, 0, 18);
-  S.lhGlow.endFill();
-  S.lhGlow.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
-  S.lighthouseContainer.addChild(S.lhGlow);
+  const SIZE = 60; // ↓ уменьшили в 2 раза
+
+  const geometry = new PIXI.Geometry()
+    .addAttribute(
+      'aPosition',
+      new PIXI.Buffer(new Float32Array([
+        -SIZE,-SIZE,  SIZE,-SIZE,  SIZE,SIZE,  -SIZE,SIZE
+      ])),
+      2
+    )
+    .addAttribute(
+      'aUV',
+      new PIXI.Buffer(new Float32Array([
+        0,0,  1,0,  1,1,  0,1
+      ])),
+      2
+    )
+    .addIndex([0,1,2, 0,2,3]);
+
+  const shader = PIXI.Shader.from(
+    `
+    precision mediump float;
+    attribute vec2 aPosition;
+    attribute vec2 aUV;
+    uniform mat3 translationMatrix;
+    uniform mat3 projectionMatrix;
+    varying vec2 vUV;
+
+    void main() {
+      vUV = aUV;
+      vec3 pos = projectionMatrix * translationMatrix * vec3(aPosition, 1.0);
+      gl_Position = vec4(pos.xy, 0.0, 1.0);
+    }
+    `,
+    `
+    precision mediump float;
+    varying vec2 vUV;
+    uniform vec3 color;
+
+    void main() {
+      vec2 uv = vUV * 2.0 - 1.0;
+      float d = length(uv);
+
+      float glow = exp(-4.0 * d * d);
+
+      if (glow < 0.01) discard;
+
+      glow = pow(glow, 1.2);
+
+      float a = glow * 0.35;
+
+      gl_FragColor = vec4(color * a * 1.2, a);
+    }
+    `,
+    {
+      color: PIXI.utils.hex2rgb(C.lhLight)
+    }
+  );
+
+  const mesh = new PIXI.Mesh(geometry, shader);
+  mesh.blendMode = PIXI.BLEND_MODES.SCREEN;
+  mesh.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
+
+  S.lhGlow = mesh;
+  S.lighthouseContainer.addChild(mesh);
 }
 
 export function isInBeam(x, y) {
