@@ -43,6 +43,21 @@ const LIGHTHOUSE_WIDTH = 63;
 const ROCK_SAFE_ZONE = 120;
 const ROCK_SPAWN_RADIUS = 400;
 
+// ===== Mobile Zoom =====
+// Если круг ROCK_SPAWN_RADIUS (игровая зона вокруг маяка) не влезает в
+// меньшую сторону экрана, уменьшаем масштаб worldContainer так, чтобы он
+// влез целиком + небольшой отступ. На больших экранах scale = 1.
+// HUD/кнопки остаются в физических пикселях — они живут на stage, а не в
+// worldContainer.
+const WORLD_FIT_MARGIN = 40;
+const WORLD_FIT_DIAMETER = ROCK_SPAWN_RADIUS * 2 + WORLD_FIT_MARGIN;
+
+function computeWorldScale(gameW, gameH) {
+  const minSide = Math.min(gameW, gameH != null ? gameH : Infinity);
+  if (minSide >= WORLD_FIT_DIAMETER) return 1;
+  return Math.max(0.1, minSide / WORLD_FIT_DIAMETER);
+}
+
 // ===== Camera =====
 const CAM_OFFSET = 100;
 const DARKNESS_PAD = CAM_OFFSET + 200;
@@ -176,6 +191,8 @@ export {
   DARK_ALPHA,
   SPAWN_INTERVAL_MIN,
   SPAWN_INTERVAL_MAX,
+  WORLD_FIT_DIAMETER,
+  computeWorldScale,
   BEAM_ORIGIN_OFFSET_X_DEFAULT,
   BEAM_ORIGIN_OFFSET_Y_DEFAULT,
   LH_GLOW_RADIUS_DEFAULT,

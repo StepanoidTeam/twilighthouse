@@ -7,7 +7,10 @@ import {
 import S from './state.js';
 
 function generateRocks() {
-  const count = Math.floor((S.gameW * S.gameH) / 18000);
+  // Плотность считаем от логической площади вокруг маяка, а не от физического
+  // размера вьюпорта — иначе на узких экранах скал почти не будет.
+  const area = Math.PI * ROCK_SPAWN_RADIUS * ROCK_SPAWN_RADIUS;
+  const count = Math.floor(area / 18000);
   const rockDefs = [];
 
   for (let i = 0; i < count; i++) {
@@ -15,8 +18,10 @@ function generateRocks() {
       y,
       tries = 0;
     do {
-      x = Math.random() * S.gameW;
-      y = Math.random() * S.gameH;
+      // Кидаем в квадрат со стороной 2*ROCK_SPAWN_RADIUS вокруг маяка и
+      // отбрасываем по условиям ниже (safe zone, вне радиуса, коллизии).
+      x = S.lhX + (Math.random() * 2 - 1) * ROCK_SPAWN_RADIUS;
+      y = S.lhY + (Math.random() * 2 - 1) * ROCK_SPAWN_RADIUS;
       tries++;
     } while (
       tries < 50 &&

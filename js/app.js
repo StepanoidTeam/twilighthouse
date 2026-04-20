@@ -11,7 +11,7 @@ import {
   LAMP_FLICKER_START,
   SPAWN_INTERVAL_MIN,
   SPAWN_INTERVAL_MAX,
-  DARKNESS_PAD,
+  computeWorldScale,
 } from './config.js';
 import { playSound } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
@@ -19,8 +19,12 @@ import S from './state.js';
 
 import { buildLighthouse, buildGlow } from './lighthouse.js';
 import { buildRocks, updateRocks } from './rocks.js';
-import { buildDarkness, updateDarkness } from './darkness.js';
-import { updateCamera } from './camera.js';
+import {
+  buildDarkness,
+  updateDarkness,
+  rebuildDarknessGeometry,
+} from './darkness.js';
+import { updateCamera, snapCamera } from './camera.js';
 import {
   buildUI,
   updateHUD,
@@ -48,13 +52,16 @@ function playClickSound() {
 // ===== Resize =====
 // S.lhX/S.lhY — фиксированные МИРОВЫЕ координаты маяка, задаются один раз
 // в init(). При ресайзе их НЕ трогаем: камера сама держит маяк в центре
-// экрана через формулу `gameW/2 - lhX` в updateCamera().
+// экрана через формулу `gameW/2 - scale * lhX` в updateCamera().
+// Если меньшая сторона вьюпорта меньше, чем круг ROCK_SPAWN_RADIUS (игровая
+// зона), включается зум-аут worldContainer через computeWorldScale().
 function resize() {
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;
+  S.worldScale = computeWorldScale(S.gameW, S.gameH);
+  if (S.worldContainer) S.worldContainer.scale.set(S.worldScale);
   S.app.renderer.resize(S.gameW, S.gameH);
-  const pad = DARKNESS_PAD;
-  S.darkRT.resize(S.gameW + pad * 2, S.gameH + pad * 2);
+  rebuildDarknessGeometry();
 }
 
 // ===== Input =====
@@ -138,6 +145,9 @@ function bindEvents() {
 
   window.addEventListener('resize', () => {
     resize();
+    // Мгновенно снапаем камеру: gameLoop может стоять (меню / game over),
+    // и без этого маяк остаётся в старых мировых координатах за экраном.
+    snapCamera();
     repositionUI();
     repositionMenu();
   });
@@ -298,8 +308,12 @@ async function loadTextures() {
 async function init() {
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;
-  S.lhX = S.gameW / 2;
-  S.lhY = S.gameH / 2;
+  S.worldScale = computeWorldScale(S.gameW, S.gameH);
+  // lhX/lhY — мировые координаты маяка, фиксируются один раз.
+  // Делим на worldScale, чтобы логическое "поле мира" всегда было достаточно
+  // широким для DARKNESS_RADIUS независимо от физической ширины вьюпорта.
+  S.lhX = S.gameW / (2 * S.worldScale);
+  S.lhY = S.gameH / (2 * S.worldScale);
   S.app = new PIXI.Application({
     width: S.gameW,
     height: S.gameH,
@@ -314,6 +328,7 @@ async function init() {
 
   // World container holds all game elements (camera moves this)
   S.worldContainer = new PIXI.Container();
+  S.worldContainer.scale.set(S.worldScale);
   S.app.stage.addChild(S.worldContainer);
 
   // Layer order: wake → rocks → boats → lighthouse → darkness → beacons → glow
@@ -394,6 +409,9 @@ async function init() {
   bindEvents();
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
+  // Снап камеры до старта тикера: иначе worldContainer в (0,0),
+  // а маяк — в (lhX, lhY), и на узких экранах он оказывается за краем.
+  snapCamera();
   S.app.ticker.add(gameLoop);
 
   // Intro comics (4 pages) shown before the main menu

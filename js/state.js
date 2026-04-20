@@ -19,6 +19,8 @@ const State = {
   gameH: 0,
   lhX: 0,
   lhY: 0,
+  // Масштаб worldContainer (зум-аут на узких экранах, иначе 1)
+  worldScale: 1,
 
   // Audio
   bgMusic: null,
