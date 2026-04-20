@@ -35,6 +35,7 @@ import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
 import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
+import { showIntro } from './intro.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 
@@ -394,6 +395,9 @@ async function init() {
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
   S.app.ticker.add(gameLoop);
+
+  // Intro comics (4 pages) shown before the main menu
+  await showIntro(S.app);
 
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
