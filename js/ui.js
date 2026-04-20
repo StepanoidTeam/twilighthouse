@@ -340,6 +340,12 @@ export function buildOverlay() {
   S.overlayLayer.splashPattinson.visible = false;
   S.overlayLayer.addChildAt(S.overlayLayer.splashPattinson, 4);
 
+  // Peremoha splash — победа: спасены все корабли
+  S.overlayLayer.splashPeremoha = new PIXI.Sprite();
+  S.overlayLayer.splashPeremoha.anchor.set(0.5);
+  S.overlayLayer.splashPeremoha.visible = false;
+  S.overlayLayer.addChildAt(S.overlayLayer.splashPeremoha, 5);
+
   // Кнопки для экрана поражения / подтверждения выхода
   // Left group: Enter/E — restart/confirm
   S.overlayLayer.btnActionLeft = new PIXI.Container();
@@ -480,6 +486,7 @@ export function repositionUI() {
   positionSplashSprite(S.overlayLayer.splashKraken);
   positionSplashSprite(S.overlayLayer.splashPolice);
   positionSplashSprite(S.overlayLayer.splashPattinson);
+  positionSplashSprite(S.overlayLayer.splashPeremoha);
 }
 
 export function buildUI() {
@@ -494,11 +501,16 @@ function playFailSound() {
   playSound('audio/fail-1.mp3', 0.1);
 }
 
-async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
+async function showGameOverScreen({
+  message,
+  splashKey,
+  msgOffsetY = -60,
+  playFail = true,
+}) {
   S.gameOver = true;
   S.txtMessage.text = message;
   fadeInOverlay();
-  playFailSound();
+  if (playFail) playFailSound();
 
   // Hide gameplay buttons
   if (S.btnLeft) S.btnLeft.visible = false;
@@ -553,6 +565,7 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
     'splashKraken',
     'splashPolice',
     'splashPattinson',
+    'splashPeremoha',
   ]) {
     if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
   }
@@ -564,6 +577,7 @@ async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {
       splashKraken: 'sprites/wasted/kraken.png',
       splashPolice: 'sprites/wasted/police.png',
       splashPattinson: 'sprites/wasted/pattinson.png',
+      splashPeremoha: 'sprites/wasted/peremoha.png',
     }[splashKey];
     if (!S.textures[splashKey]) {
       S.textures[splashKey] = await PIXI.Assets.load(spriteFile);
@@ -631,54 +645,13 @@ export function showGameOver() {
   fadeInOverlay();
 }
 
-export function showWin() {
-  S.gameOver = true;
-  S.txtMessage.text = t('win.message', { total: WIN_SCORE });
-  fadeInOverlay();
-
-  // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.visible = false;
-  if (S.btnRight) S.btnRight.visible = false;
-  if (S.btnEsc) S.btnEsc.visible = false;
-
-  S.txtMessage.style = new PIXI.TextStyle({
-    ...UI_STYLE,
-    fontSize: 36,
-    fontWeight: 'bold',
-    fill: '#fff',
-    stroke: '#000',
-    strokeThickness: 6,
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 8,
-    dropShadowDistance: 0,
-    align: 'center',
+export async function showWin() {
+  await showGameOverScreen({
+    message: t('win.message', { total: WIN_SCORE }),
+    splashKey: 'splashPeremoha',
+    msgOffsetY: -60,
+    playFail: false,
   });
-  S.txtMessage.position.set(S.gameW / 2, S.gameH / 2 - 30);
-  S.txtMessage.visible = true;
-  S.txtRestart.visible = false;
-
-  // Hide splash sprites
-  for (const key of [
-    'splashIceberg',
-    'splashMermaid',
-    'splashKraken',
-    'splashPolice',
-    'splashPattinson',
-  ]) {
-    if (S.overlayLayer[key]) S.overlayLayer[key].visible = false;
-  }
-
-  if (S.overlayLayer.btnActionLeft) {
-    S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.restart');
-    S.overlayLayer.btnActionLeft.visible = true;
-  }
-  if (S.overlayLayer.btnActionRight) {
-    S.overlayLayer.btnActionRight.txtLabel.text = t('overlay.toMenu');
-    S.overlayLayer.btnActionRight.visible = true;
-  }
-
-  repositionUI();
 }
 
 // ===== Exit Confirmation =====
