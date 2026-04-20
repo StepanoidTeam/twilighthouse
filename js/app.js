@@ -98,9 +98,9 @@ function bindEvents() {
       return;
     }
 
-    // Escape → show exit confirmation (during gameplay)
+    // Escape or Q → show exit confirmation (during gameplay)
     if (
-      e.code === 'Escape' &&
+      (e.code === 'Escape' || e.code === 'KeyQ') &&
       !S.gameOver &&
       !S.exitConfirm &&
       !isMenuVisible()

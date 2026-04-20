@@ -14,9 +14,25 @@ import {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   C,
+  BOAT_SONAR_VOLUME,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
+
+const BOAT_SONAR_SOUNDS = [
+  'audio/boat/submarine_sonar-1.mp3',
+  'audio/boat/submarine_sonar-2.mp3',
+  'audio/boat/submarine_sonar-3.mp3',
+];
+
+function playBoatSonar() {
+  const file =
+    BOAT_SONAR_SOUNDS[Math.floor(Math.random() * BOAT_SONAR_SOUNDS.length)];
+  const snd = new Audio(file);
+  snd.volume = BOAT_SONAR_VOLUME;
+  snd.play().catch(() => {});
+}
+
 import {
   spawnTooltip,
   createCargoLabel,
@@ -125,6 +141,10 @@ export function updateBoats(delta) {
 
     const { spr } = b;
     const lit = isInBeam(spr.x, spr.y);
+    // Play sonar sound on beam entry
+    if (lit && !b.wasLit && !b.sinking) {
+      playBoatSonar();
+    }
     // Persistent framed cargo label — visible while beam is on boat
     if (b.cargoLabel) {
       b.cargoLabel.visible = lit && !b.sinking;

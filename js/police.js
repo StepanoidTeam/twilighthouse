@@ -11,6 +11,7 @@ import {
   BOAT_FRAME_DURATION,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
+  COP_VOLUME,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
@@ -21,6 +22,27 @@ import {
   showPoliceGameOver,
   playCrashSound,
 } from './ui.js';
+
+const COP_LIT_SOUNDS = [
+  'audio/cop/police-intro-siren.mp3',
+  'audio/cop/police-siren-one-loop.mp3',
+  'audio/cop/radio-thats-correct.mp3',
+];
+const COP_UNLIT_SOUND = 'audio/cop/radio-turn.mp3';
+
+function playCopLitSound() {
+  const file =
+    COP_LIT_SOUNDS[Math.floor(Math.random() * COP_LIT_SOUNDS.length)];
+  const snd = new Audio(file);
+  snd.volume = COP_VOLUME;
+  snd.play().catch(() => {});
+}
+
+function playCopUnlitSound() {
+  const snd = new Audio(COP_UNLIT_SOUND);
+  snd.volume = COP_VOLUME;
+  snd.play().catch(() => {});
+}
 
 export function spawnPoliceBoat() {
   const { x, y } = spawnOnRing();
@@ -86,8 +108,10 @@ export function updatePoliceBoats(delta) {
     // Show cop tooltip on beam entry / exit
     if (lit && !p.wasLit) {
       spawnTooltip(spr.x, spr.y - 30, '‼️', TOOLTIP_STYLE_FAIL);
+      playCopLitSound();
     } else if (!lit && p.wasLit) {
       spawnTooltip(spr.x, spr.y - 30, '❔', TOOLTIP_STYLE_OK);
+      playCopUnlitSound();
     }
     p.wasLit = lit;
 

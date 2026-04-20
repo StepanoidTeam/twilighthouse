@@ -57,6 +57,8 @@ const CRASH_SOUNDS = [
   'audio/crash/small-rock-break.mp3',
   'audio/crash/wooden-ship-break.mp3',
 ];
+const COP_VOLUME = 0.03;
+const BOAT_SONAR_VOLUME = 0.15;
 
 // ===== Animation Frames =====
 const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
@@ -183,6 +185,8 @@ export {
   OVERLAY_FADE_DURATION,
   CRASH_VOLUME,
   CRASH_SOUNDS,
+  COP_VOLUME,
+  BOAT_SONAR_VOLUME,
   MERMAID_FRAMES,
   MERMAID_FRAME_DURATION,
   BOAT_FRAMES,
