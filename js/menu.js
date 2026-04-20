@@ -133,7 +133,6 @@ const MAIN_MENU_ACTIONS = [
   { key: 'menu.leaderboard', action: 'leaderboard' },
   { key: 'menu.settings', action: 'settings' },
   { key: 'menu.authors', action: 'authors' },
-  { key: 'menu.exit', action: 'exit' },
 ];
 
 function getMenuLabels() {
@@ -370,10 +369,6 @@ function activateMenuItem() {
       break;
     case 'authors':
       showAuthors();
-      break;
-    case 'exit':
-      // Exit to Google start page
-      window.location.href = 'https://www.google.com/';
       break;
   }
 }
