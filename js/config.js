@@ -35,9 +35,9 @@ const SPAWN_INTERVAL_MAX = 5000;
 
 // ===== Lighthouse =====
 const BEAM_ORIGIN_OFFSET_X_DEFAULT = 0;
-const BEAM_ORIGIN_OFFSET_Y_DEFAULT = -64;
+const BEAM_ORIGIN_OFFSET_Y_DEFAULT = -100;
 const LH_GLOW_RADIUS_DEFAULT = 55;
-const LIGHTHOUSE_WIDTH = 63;
+const LIGHTHOUSE_WIDTH = 120;
 
 // ===== Rocks =====
 const ROCK_SAFE_ZONE = 120;
@@ -131,7 +131,7 @@ const SPRITE_FILES = {
   button: 'sprites/button.png',
   buttonEnter: 'sprites/button-enter.png',
   buttonSpace: 'sprites/button-space.png',
-  lighthouse: 'sprites/lighthouse.png',
+  lighthouse: 'sprites/lighthouse3.png',
   rock1: 'sprites/rock1.png',
   rock2: 'sprites/rock2.png',
   rock3: 'sprites/rock3.png',
