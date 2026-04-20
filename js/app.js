@@ -129,6 +129,7 @@ const ARRIVAL_RADIUS = 55;
 const MAX_LIVES = 10;
 const WIN_SCORE = 10;
 const SPAWN_MARGIN = 60;
+const MOB_SPAWN_RADIUS = 560; // radius around lighthouse where mobs spawn and beam is capped
 const SPAWN_INTERVAL_MIN = 2500;
 const SPAWN_INTERVAL_MAX = 5000;
 const BOAT_SCALE = 0.18;
@@ -236,7 +237,7 @@ let bgMusic;
 let lighthouseContainer, lighthouseSprite;
 let textures = {};
 let darknessGfx, wakeGfx, lhGlow;
-let darkRT, darkFill, beamErase;
+let darkRT, darkFill, beamErase, outerDark;
 let keys = {};
 let beamAngle = -Math.PI / 2;
 let gameOver = false;
@@ -417,6 +418,10 @@ function updateDebug() {
   debugGfx.drawCircle(lhX, lhY, ROCK_SAFE_ZONE);
   debugGfx.lineStyle(1, 0xffaa00, 0.25);
   debugGfx.drawCircle(lhX, lhY, ROCK_SPAWN_RADIUS);
+
+  // Mob spawn / beam cap radius
+  debugGfx.lineStyle(2, 0xffffff, 0.35);
+  debugGfx.drawCircle(lhX, lhY, MOB_SPAWN_RADIUS);
 
   // Boat colliders (green)
   for (const b of boats) {
@@ -622,6 +627,7 @@ function buildDarkness(parent) {
   darkFill = new PIXI.Graphics();
   beamErase = new PIXI.Graphics();
   beamErase.blendMode = PIXI.BLEND_MODES.ERASE;
+  outerDark = new PIXI.Graphics();
 }
 
 function updateDarkness() {
@@ -659,26 +665,29 @@ function updateDarkness() {
   beamErase.endFill();
 
   app.renderer.render(beamErase, { renderTexture: darkRT, clear: false });
+
+  // Re-fill darkness outside mob spawn radius — beam can't reach beyond it
+  outerDark.clear();
+  outerDark.beginFill(0x000000, 1);
+  outerDark.drawRect(0, 0, gameW + pad * 2, gameH + pad * 2);
+  outerDark.beginHole();
+  outerDark.drawCircle(lhX + pad, lhY + pad, MOB_SPAWN_RADIUS);
+  outerDark.endHole();
+  outerDark.endFill();
+  app.renderer.render(outerDark, { renderTexture: darkRT, clear: false });
+}
+
+function spawnOnRing() {
+  const angle = Math.random() * Math.PI * 2;
+  return {
+    x: lhX + Math.cos(angle) * MOB_SPAWN_RADIUS,
+    y: lhY + Math.sin(angle) * MOB_SPAWN_RADIUS,
+  };
 }
 
 // ===== Boats =====
 function spawnBoat() {
-  const side = Math.floor(Math.random() * 4);
-  let x, y;
-
-  if (side === 0) {
-    x = Math.random() * gameW;
-    y = -SPAWN_MARGIN;
-  } else if (side === 1) {
-    x = gameW + SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  } else if (side === 2) {
-    x = Math.random() * gameW;
-    y = gameH + SPAWN_MARGIN;
-  } else {
-    x = -SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  }
+  const { x, y } = spawnOnRing();
 
   const spr = new PIXI.Sprite(textures.boat1);
   spr.anchor.set(0.5);
@@ -732,22 +741,7 @@ function spawnBoat() {
 
 // ===== Mermaids =====
 function spawnMermaid() {
-  // Same spawn logic as boats
-  const side = Math.floor(Math.random() * 4);
-  let x, y;
-  if (side === 0) {
-    x = Math.random() * gameW;
-    y = -SPAWN_MARGIN;
-  } else if (side === 1) {
-    x = gameW + SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  } else if (side === 2) {
-    x = Math.random() * gameW;
-    y = gameH + SPAWN_MARGIN;
-  } else {
-    x = -SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  }
+  const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(textures.mermaid1);
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE);
@@ -767,21 +761,7 @@ function spawnMermaid() {
 
 // ===== Krakens =====
 function spawnKraken() {
-  const side = Math.floor(Math.random() * 4);
-  let x, y;
-  if (side === 0) {
-    x = Math.random() * gameW;
-    y = -SPAWN_MARGIN;
-  } else if (side === 1) {
-    x = gameW + SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  } else if (side === 2) {
-    x = Math.random() * gameW;
-    y = gameH + SPAWN_MARGIN;
-  } else {
-    x = -SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  }
+  const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(textures.kraken); // placeholder — replace with textures.kraken
   spr.anchor.set(0.5);
   spr.scale.set(BOAT_SCALE * 1.5); // крупнее чем русалка
@@ -798,21 +778,7 @@ function spawnKraken() {
 
 // ===== Police Boats =====
 function spawnPoliceBoat() {
-  const side = Math.floor(Math.random() * 4);
-  let x, y;
-  if (side === 0) {
-    x = Math.random() * gameW;
-    y = -SPAWN_MARGIN;
-  } else if (side === 1) {
-    x = gameW + SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  } else if (side === 2) {
-    x = Math.random() * gameW;
-    y = gameH + SPAWN_MARGIN;
-  } else {
-    x = -SPAWN_MARGIN;
-    y = Math.random() * gameH;
-  }
+  const { x, y } = spawnOnRing();
 
   const spr = new PIXI.Sprite(textures.boat1);
   spr.anchor.set(0.5);
@@ -1693,13 +1659,10 @@ function updateMermaids(delta) {
     m.spr.x += nx * m.speed * speedMult * delta + waveOffset * 0.04 * delta;
     m.spr.y += ny * m.speed * speedMult * delta;
 
-    // Удалить если уплыла за пределы экрана
+    // Удалить если уплыла за пределы зоны
     if (
       m.fleeing &&
-      (m.spr.x < -SPAWN_MARGIN * 2 ||
-        m.spr.x > gameW + SPAWN_MARGIN * 2 ||
-        m.spr.y < -SPAWN_MARGIN * 2 ||
-        m.spr.y > gameH + SPAWN_MARGIN * 2)
+      Math.hypot(m.spr.x - lhX, m.spr.y - lhY) > MOB_SPAWN_RADIUS + SPAWN_MARGIN
     ) {
       m.gone = true;
       console.log(`🧜‍♀️ Русалка уплыла за экран`);
@@ -1851,13 +1814,10 @@ function updateKrakens(delta) {
       }
     }
 
-    // Удалить если уплыл за пределы экрана (только убегая)
+    // Удалить если уплыл за пределы зоны (только убегая)
     if (
       k.fleeing &&
-      (k.spr.x < -SPAWN_MARGIN * 2 ||
-        k.spr.x > gameW + SPAWN_MARGIN * 2 ||
-        k.spr.y < -SPAWN_MARGIN * 2 ||
-        k.spr.y > gameH + SPAWN_MARGIN * 2)
+      Math.hypot(k.spr.x - lhX, k.spr.y - lhY) > MOB_SPAWN_RADIUS + SPAWN_MARGIN
     ) {
       k.gone = true;
       console.log(`🦑 Кракен уплыл за экран`);
