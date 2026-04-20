@@ -372,8 +372,8 @@ function activateMenuItem() {
       showAuthors();
       break;
     case 'exit':
-      // Reload page as "exit"
-      window.location.reload();
+      // Exit to Google start page
+      window.location.href = 'https://www.google.com/';
       break;
   }
 }
@@ -394,11 +394,13 @@ function clearSubScreen() {
 function hideMainItems() {
   for (const item of menuItems) item.visible = false;
   if (menuContainer._title) menuContainer._title.visible = false;
+  if (menuContainer._hint) menuContainer._hint.visible = false;
 }
 
 function showMainItems() {
   for (const item of menuItems) item.visible = true;
   if (menuContainer._title) menuContainer._title.visible = true;
+  if (menuContainer._hint) menuContainer._hint.visible = true;
   // Restore dim
   if (menuContainer._dim) menuContainer._dim.visible = true;
 }

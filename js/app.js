@@ -361,7 +361,8 @@ async function init() {
   $btnL.interactive = true;
   $btnL.buttonMode = true;
   $btnL.cursor = 'pointer';
-  $btnL.hitArea = new PIXI.Circle(0, 0, 40);
+  // Cover icon + label text under it ("Restart"/"Exit")
+  $btnL.hitArea = new PIXI.Rectangle(-52, -44, 104, 112);
   $btnL.on('pointerdown', () => {
     if (S.exitConfirm) {
       playClickSound();
@@ -377,7 +378,8 @@ async function init() {
   $btnR.interactive = true;
   $btnR.buttonMode = true;
   $btnR.cursor = 'pointer';
-  $btnR.hitArea = new PIXI.Circle(0, 0, 40);
+  // Cover icon + label text under it ("Menu"/"Resume")
+  $btnR.hitArea = new PIXI.Rectangle(-52, -44, 104, 112);
   $btnR.on('pointerdown', () => {
     if (S.exitConfirm) {
       playClickSound();
