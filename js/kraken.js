@@ -9,6 +9,9 @@ import {
   SPAWN_MARGIN,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
+  KRAKEN_CHASE_FRAMES,
+  KRAKEN_RETREAT_FRAMES,
+  KRAKEN_FRAME_DURATION,
   scaleToWidth,
 } from './config.js';
 import S from './state.js';
@@ -25,7 +28,7 @@ import {
 
 export function spawnKraken() {
   const { x, y } = spawnOnRing();
-  const spr = new PIXI.Sprite(S.textures.kraken);
+  const spr = new PIXI.Sprite(S.textures.krakenChase1);
   spr.anchor.set(0.5);
   scaleToWidth(spr, KRAKEN_WIDTH);
   spr.position.set(x, y);
@@ -36,6 +39,8 @@ export function spawnKraken() {
     gone: false,
     fleeing: false,
     wavePhase: Math.random() * Math.PI * 2,
+    frameIndex: 0,
+    frameTick: Math.random() * KRAKEN_FRAME_DURATION,
   });
 }
 
@@ -46,7 +51,23 @@ export function updateKrakens(delta) {
 
     const lit = isInBeam(k.spr.x, k.spr.y);
     // Динамически: убегает пока в луче, возвращается когда луч ушёл
+    const prevFleeing = k.fleeing;
     k.fleeing = lit;
+
+    // Сброс кадра при смене фазы
+    if (k.fleeing !== prevFleeing) {
+      k.frameIndex = 0;
+      k.frameTick = 0;
+    }
+
+    // Frame animation
+    k.frameTick += delta;
+    if (k.frameTick >= KRAKEN_FRAME_DURATION) {
+      k.frameTick -= KRAKEN_FRAME_DURATION;
+      const frames = k.fleeing ? KRAKEN_RETREAT_FRAMES : KRAKEN_CHASE_FRAMES;
+      k.frameIndex = (k.frameIndex + 1) % frames.length;
+      k.spr.texture = S.textures[frames[k.frameIndex]];
+    }
 
     let nx, ny, speedMult;
     if (k.fleeing) {

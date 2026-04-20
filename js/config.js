@@ -78,6 +78,14 @@ const MERMAID_FRAMES = ['mermaid1', 'mermaid2', 'mermaid3', 'mermaid2'];
 const MERMAID_FRAME_DURATION = 8;
 const BOAT_FRAMES = ['boat1', 'boat2', 'boat3', 'boat2'];
 const BOAT_FRAME_DURATION = 10;
+const KRAKEN_CHASE_FRAMES = [
+  'krakenChase1',
+  'krakenChase2',
+  'krakenChase3',
+  'krakenChase2',
+];
+const KRAKEN_RETREAT_FRAMES = ['krakenRetreat1'];
+const KRAKEN_FRAME_DURATION = 10;
 
 // ===== Boat Lit Debounce =====
 const LIT_DEBOUNCE = 180; // ms — минимальное время стабильного состояния перед сменой
@@ -99,7 +107,10 @@ const C = {
 
 // ===== Sprite Files =====
 const SPRITE_FILES = {
-  kraken: 'sprites/kraken/kraken2.png',
+  krakenChase1: 'sprites/kraken/chase/1.png',
+  krakenChase2: 'sprites/kraken/chase/2.png',
+  krakenChase3: 'sprites/kraken/chase/3.png',
+  krakenRetreat1: 'sprites/kraken/retreat/1.png',
   mermaid1: 'sprites/mermaid/1.png',
   mermaid2: 'sprites/mermaid/2.png',
   mermaid3: 'sprites/mermaid/3.png',
@@ -208,6 +219,9 @@ export {
   MERMAID_FRAME_DURATION,
   BOAT_FRAMES,
   BOAT_FRAME_DURATION,
+  KRAKEN_CHASE_FRAMES,
+  KRAKEN_RETREAT_FRAMES,
+  KRAKEN_FRAME_DURATION,
   LIT_DEBOUNCE,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
