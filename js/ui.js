@@ -11,15 +11,14 @@ import {
   GAME_OVER_DELAY,
   CRASH_VOLUME,
   CRASH_SOUNDS,
+  playSound,
+  playRandomSound,
 } from './config.js';
 import S from './state.js';
 
 // ===== Tooltips =====
 export function playCrashSound() {
-  const file = CRASH_SOUNDS[Math.floor(Math.random() * CRASH_SOUNDS.length)];
-  const snd = new Audio(file);
-  snd.volume = CRASH_VOLUME;
-  snd.play().catch(() => {});
+  playRandomSound(CRASH_SOUNDS, CRASH_VOLUME);
 }
 
 export function spawnTooltip(x, y, text, style) {
@@ -479,9 +478,7 @@ export function buildUI() {
 
 // ===== Game Over Screens =====
 function playFailSound() {
-  const snd = new Audio('audio/fail-1.mp3');
-  snd.volume = 0.1;
-  snd.play().catch(() => {});
+  playSound('audio/fail-1.mp3', 0.1);
 }
 
 async function showGameOverScreen({ message, splashKey, msgOffsetY = -60 }) {

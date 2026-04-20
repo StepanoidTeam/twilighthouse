@@ -12,6 +12,7 @@ import {
   SPAWN_INTERVAL_MIN,
   SPAWN_INTERVAL_MAX,
   DARKNESS_PAD,
+  playSound,
 } from './config.js';
 import S from './state.js';
 
@@ -37,9 +38,7 @@ import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
 const $gameContainer = document.getElementById('$gameContainer');
 
 function playClickSound() {
-  const snd = new Audio('audio/button-click.mp3');
-  snd.volume = 0.2;
-  snd.play().catch(() => {});
+  playSound('audio/button-click.mp3', 0.2);
 }
 
 // ===== Resize =====

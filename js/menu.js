@@ -1,4 +1,4 @@
-import { PIXI, UI_STYLE, C } from './config.js';
+import { PIXI, UI_STYLE, C, playSound } from './config.js';
 import S from './state.js';
 
 // ===== Menu State =====
@@ -194,15 +194,11 @@ Photopea — image editor
 
 // ===== Sound Helpers =====
 function playMenuSelect() {
-  const snd = new Audio('audio/menu-select.mp3');
-  snd.volume = 0.15;
-  snd.play().catch(() => {});
+  playSound('audio/menu-select.mp3', 0.15);
 }
 
 function playMenuClick() {
-  const snd = new Audio('audio/button-click.mp3');
-  snd.volume = 0.2;
-  snd.play().catch(() => {});
+  playSound('audio/button-click.mp3', 0.2);
 }
 
 // ===== Helpers =====

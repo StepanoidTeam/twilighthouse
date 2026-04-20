@@ -51,6 +51,16 @@ const OVERLAY_FADE_DURATION = 600;
 
 // ===== Sound =====
 const CRASH_VOLUME = 0.03;
+
+function playSound(file, volume = 0.2) {
+  const snd = new Audio(file);
+  snd.volume = volume;
+  snd.play().catch(() => {});
+}
+
+function playRandomSound(files, volume = 0.2) {
+  playSound(files[Math.floor(Math.random() * files.length)], volume);
+}
 const CRASH_SOUNDS = [
   'audio/crash/horror-bone-crack.mp3',
   'audio/crash/rubble-crash.mp3',
@@ -201,4 +211,6 @@ export {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   CARGO_LABEL_STYLE,
+  playSound,
+  playRandomSound,
 };

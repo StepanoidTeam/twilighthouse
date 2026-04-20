@@ -12,6 +12,8 @@ import {
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   COP_VOLUME,
+  playSound,
+  playRandomSound,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
@@ -31,17 +33,11 @@ const COP_LIT_SOUNDS = [
 const COP_UNLIT_SOUND = 'audio/cop/radio-turn.mp3';
 
 function playCopLitSound() {
-  const file =
-    COP_LIT_SOUNDS[Math.floor(Math.random() * COP_LIT_SOUNDS.length)];
-  const snd = new Audio(file);
-  snd.volume = COP_VOLUME;
-  snd.play().catch(() => {});
+  playRandomSound(COP_LIT_SOUNDS, COP_VOLUME);
 }
 
 function playCopUnlitSound() {
-  const snd = new Audio(COP_UNLIT_SOUND);
-  snd.volume = COP_VOLUME;
-  snd.play().catch(() => {});
+  playSound(COP_UNLIT_SOUND, COP_VOLUME);
 }
 
 export function spawnPoliceBoat() {

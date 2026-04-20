@@ -15,6 +15,7 @@ import {
   TOOLTIP_STYLE_FAIL,
   C,
   BOAT_SONAR_VOLUME,
+  playRandomSound,
 } from './config.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
@@ -26,11 +27,7 @@ const BOAT_SONAR_SOUNDS = [
 ];
 
 function playBoatSonar() {
-  const file =
-    BOAT_SONAR_SOUNDS[Math.floor(Math.random() * BOAT_SONAR_SOUNDS.length)];
-  const snd = new Audio(file);
-  snd.volume = BOAT_SONAR_VOLUME;
-  snd.play().catch(() => {});
+  playRandomSound(BOAT_SONAR_SOUNDS, BOAT_SONAR_VOLUME);
 }
 
 import {
