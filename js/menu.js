@@ -561,13 +561,22 @@ function showSettings() {
   y += 60;
 
   // Music volume
-  y = addSlider(sub, t('settings.music'), cx, y, 0.5, (val) => {
+  const musicInit = S.musicVolume != null ? S.musicVolume : 0.05;
+  y = addSlider(sub, t('settings.music'), cx, y, musicInit, (val) => {
+    S.musicVolume = val;
     if (S.bgMusic) S.bgMusic.volume = val;
+    try {
+      localStorage.setItem('lighthouse_music_vol', String(val));
+    } catch (_) {}
   });
 
   // SFX volume
-  y = addSlider(sub, t('settings.sfx'), cx, y + 20, 0.5, () => {
-    // placeholder — no SFX manager yet
+  const sfxInit = S.sfxVolume != null ? S.sfxVolume : 1.0;
+  y = addSlider(sub, t('settings.sfx'), cx, y + 20, sfxInit, (val) => {
+    S.sfxVolume = val;
+    try {
+      localStorage.setItem('lighthouse_sfx_vol', String(val));
+    } catch (_) {}
   });
 
   sub.addChild(createBackHint());

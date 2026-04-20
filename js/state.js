@@ -21,6 +21,20 @@ const State = {
 
   // Audio
   bgMusic: null,
+  musicVolume: (() => {
+    try {
+      const v = parseFloat(localStorage.getItem('lighthouse_music_vol'));
+      if (!Number.isNaN(v) && v >= 0 && v <= 1) return v;
+    } catch (_) {}
+    return 0.05;
+  })(),
+  sfxVolume: (() => {
+    try {
+      const v = parseFloat(localStorage.getItem('lighthouse_sfx_vol'));
+      if (!Number.isNaN(v) && v >= 0 && v <= 1) return v;
+    } catch (_) {}
+    return 1.0;
+  })(),
 
   // Lighthouse
   lighthouseContainer: null,

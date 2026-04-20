@@ -1,4 +1,5 @@
 // ===== Sound Helpers =====
+import S from './state.js';
 
 const CRASH_VOLUME = 0.03;
 const CRASH_SOUNDS = [
@@ -12,7 +13,8 @@ const BOAT_SONAR_VOLUME = 0.15;
 
 function playSound(file, volume = 0.2) {
   const snd = new Audio(file);
-  snd.volume = volume;
+  const master = S.sfxVolume != null ? S.sfxVolume : 1;
+  snd.volume = Math.max(0, Math.min(1, volume * master));
   snd.play().catch(() => {});
 }
 

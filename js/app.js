@@ -401,7 +401,7 @@ async function init() {
   // ===== Background Music =====
   S.bgMusic = new Audio('audio/ocean-sea-soft-waves.mp3');
   S.bgMusic.loop = true;
-  S.bgMusic.volume = 0.05;
+  S.bgMusic.volume = S.musicVolume != null ? S.musicVolume : 0.05;
   const startMusic = () => {
     S.bgMusic.play().catch(() => {});
     window.removeEventListener('pointerdown', startMusic);
