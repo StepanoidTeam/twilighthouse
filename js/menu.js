@@ -630,22 +630,26 @@ async function showAuthors() {
 
 function startCreditsSlideshow($bg) {
   creditsIndex = 0;
-  updateCreditsBackground($bg);
+  updateCreditsBackground($bg, false); // No fade for initial
   creditsInterval = setInterval(() => {
     creditsIndex = (creditsIndex + 1) % creditsImages.length;
-    updateCreditsBackground($bg);
-  }, 10000); // 5 seconds
+    updateCreditsBackground($bg, true);
+  }, 5000); // 5 seconds
 }
 
-function updateCreditsBackground($bg) {
+function updateCreditsBackground($bg, fade = true) {
   if (!$bg) return;
-  // Fade out
-  $bg.style.opacity = '0';
-  setTimeout(() => {
+  if (fade) {
+    // Fade out
+    $bg.style.opacity = '0';
+    setTimeout(() => {
+      $bg.style.backgroundImage = `url("${creditsImages[creditsIndex]}")`;
+      // Fade in
+      $bg.style.opacity = '1';
+    }, 250); // Half of transition time
+  } else {
     $bg.style.backgroundImage = `url("${creditsImages[creditsIndex]}")`;
-    // Fade in
-    $bg.style.opacity = '1';
-  }, 1000); // Half of transition time
+  }
 }
 
 function stopCreditsSlideshow() {
