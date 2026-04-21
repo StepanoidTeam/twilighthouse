@@ -129,14 +129,12 @@ const SPRITE_FILES = {
   boat2: 'sprites/boat/2.png',
   boat3: 'sprites/boat/3.png',
   button: 'sprites/button.png',
-  buttonEnter: 'sprites/button-enter.png',
-  buttonSpace: 'sprites/button-space.png',
   lighthouse: 'sprites/lighthouse3.png',
-  rock1: 'sprites/rock1.png',
-  rock2: 'sprites/rock2.png',
-  rock3: 'sprites/rock3.png',
-  rock4: 'sprites/rock4.png',
-  rock5: 'sprites/rock5.png',
+  rock1: 'sprites/icerock/rock1.png',
+  rock2: 'sprites/icerock/rock2.png',
+  rock3: 'sprites/icerock/rock3.png',
+  rock4: 'sprites/icerock/rock4.png',
+  rock5: 'sprites/icerock/rock5.png',
 };
 
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];

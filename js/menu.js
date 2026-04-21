@@ -18,9 +18,6 @@ let $menuHint = null;
 let $$menuItems = [];
 let selectedIndex = 0;
 let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
-let creditsAnimId = null;
-let creditsOffsetY = 0;
-let creditsLastTs = 0;
 let $creditsScroll = null;
 let onStartGame = null;
 let backBtnEl = null;
@@ -529,39 +526,10 @@ async function showAuthors() {
 }
 
 function startCreditsAnimation() {
-  stopCreditsAnimation();
-  if (!$creditsScroll) return;
-
-  creditsOffsetY = S.gameH;
-  creditsLastTs = 0;
-
-  const animateCredits = (ts) => {
-    if (!$creditsScroll || currentScreen !== 'authors') return;
-
-    if (!creditsLastTs) creditsLastTs = ts;
-    const delta = (ts - creditsLastTs) / 16.6667;
-    creditsLastTs = ts;
-
-    creditsOffsetY -= 0.8 * delta;
-    const endY = -$creditsScroll.offsetHeight - 40;
-    if (creditsOffsetY < endY) {
-      creditsOffsetY = S.gameH;
-    }
-
-    $creditsScroll.style.transform = `translate(-50%, ${creditsOffsetY}px)`;
-    creditsAnimId = requestAnimationFrame(animateCredits);
-  };
-
-  creditsAnimId = requestAnimationFrame(animateCredits);
+  // CSS animation handles scrolling — nothing to do here
 }
 
 function stopCreditsAnimation() {
-  if (creditsAnimId) {
-    cancelAnimationFrame(creditsAnimId);
-    creditsAnimId = null;
-  }
-  creditsLastTs = 0;
-  creditsOffsetY = 0;
   $creditsScroll = null;
 }
 
