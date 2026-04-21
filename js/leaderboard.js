@@ -53,7 +53,7 @@ export async function submitScore(survivalMs) {
     console.warn('Failed to read previous best', e);
   }
 
-  if (survivalMs <= prevBest) {
+  if (prevBest > 0 && survivalMs >= prevBest) {
     return { written: false, best: prevBest };
   }
 
@@ -80,7 +80,7 @@ export async function submitScore(survivalMs) {
 export async function fetchTopLeaderboard(n = 10) {
   const q = query(
     collection(db, COLLECTION),
-    orderBy('bestTimeMs', 'desc'),
+    orderBy('bestTimeMs', 'asc'),
     limit(n),
   );
   const snap = await getDocs(q);

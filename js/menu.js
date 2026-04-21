@@ -3,7 +3,7 @@ import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
-import { currentUser, isSignedInReal } from './auth.js';
+import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
@@ -556,6 +556,91 @@ function showSettings() {
   $sfxControl.appendChild($sfxValue);
   $sfxRow.appendChild($sfxControl);
   $card.appendChild($sfxRow);
+
+  // ===== Display Name =====
+  const $nameRow = document.createElement('div');
+  $nameRow.className = 'menu-setting-row menu-setting-row--name';
+
+  const $nameLabel = document.createElement('span');
+  $nameLabel.className = 'menu-setting-label';
+  $nameLabel.textContent = t('settings.displayName');
+  $nameRow.appendChild($nameLabel);
+
+  if (!currentUser) {
+    const $note = document.createElement('span');
+    $note.className = 'menu-setting-note';
+    $note.textContent = t('settings.displayNameGuestNote');
+    $nameRow.appendChild($note);
+  } else {
+    const isAnon = currentUser.isAnonymous === true;
+    const currentName =
+      (currentUser.displayName && currentUser.displayName.trim()) || '';
+
+    const $nameGroup = document.createElement('div');
+    $nameGroup.className = 'menu-setting-name-group';
+
+    const $nameInput = document.createElement('input');
+    $nameInput.type = 'text';
+    $nameInput.className = 'menu-setting-name-input';
+    $nameInput.maxLength = 30;
+    $nameInput.value = currentName;
+    $nameInput.placeholder = t('settings.displayNamePlaceholder');
+
+    const $nameHint = document.createElement('p');
+    $nameHint.className = 'menu-setting-name-hint';
+    $nameHint.textContent = isAnon
+      ? t('settings.displayNameAnon')
+      : t('settings.displayNameEmail');
+
+    const $nameActions = document.createElement('div');
+    $nameActions.className = 'menu-setting-name-actions';
+
+    const $nameSaveBtn = document.createElement('button');
+    $nameSaveBtn.type = 'button';
+    $nameSaveBtn.className = 'menu-setting-name-save';
+    $nameSaveBtn.textContent = t('settings.displayNameSave');
+
+    const $nameStatus = document.createElement('span');
+    $nameStatus.className = 'menu-setting-name-status';
+
+    $nameSaveBtn.addEventListener('click', async () => {
+      const name = $nameInput.value.trim();
+      if (!name) {
+        $nameStatus.textContent = t('settings.displayNameEmpty');
+        $nameStatus.className = 'menu-setting-name-status is-error';
+        return;
+      }
+      if (name.length > 30) {
+        $nameStatus.textContent = t('settings.displayNameTooLong');
+        $nameStatus.className = 'menu-setting-name-status is-error';
+        return;
+      }
+      $nameSaveBtn.disabled = true;
+      $nameStatus.textContent = t('settings.displayNameSaving');
+      $nameStatus.className = 'menu-setting-name-status';
+      try {
+        await updateDisplayName(name);
+        $nameStatus.textContent = t('settings.displayNameSaved');
+        $nameStatus.className = 'menu-setting-name-status is-success';
+        console.log(`👤 Display name saved: ${name}`);
+      } catch (e) {
+        console.warn('updateDisplayName failed', e);
+        $nameStatus.textContent = t('settings.displayNameError');
+        $nameStatus.className = 'menu-setting-name-status is-error';
+      } finally {
+        $nameSaveBtn.disabled = false;
+      }
+    });
+
+    $nameActions.appendChild($nameSaveBtn);
+    $nameActions.appendChild($nameStatus);
+    $nameGroup.appendChild($nameInput);
+    $nameGroup.appendChild($nameHint);
+    $nameGroup.appendChild($nameActions);
+    $nameRow.appendChild($nameGroup);
+  }
+
+  $card.appendChild($nameRow);
 
   $screen.appendChild($card);
 }

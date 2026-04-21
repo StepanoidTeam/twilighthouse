@@ -73,6 +73,20 @@ export async function signIn(email, password) {
   return cred.user;
 }
 
+/** Update displayName for the current user in Firebase Auth. */
+export async function updateDisplayName(name) {
+  if (!currentUser) throw new Error('Not signed in');
+  await updateProfile(currentUser, { displayName: name });
+  // Re-trigger listeners so widgets update
+  for (const fn of listeners) {
+    try {
+      fn(currentUser);
+    } catch (e) {
+      console.error('auth listener error', e);
+    }
+  }
+}
+
 export async function signOut() {
   await fbSignOut(auth);
   // После выхода сразу логинимся анонимно, чтобы оставалась возможность
