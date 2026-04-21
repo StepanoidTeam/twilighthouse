@@ -32,7 +32,7 @@ _On mobile: tap the on-screen ◀ ▶ buttons to rotate the beam_
 
 ## The Story
 
-Robert Pattinson is keeping a lighthouse and hiding a rather suspicious amount of cargo from Willem Dafoe. A quiet night shift turns into a chaotic battle against the sea, its creatures, and the authorities.
+Young Robert takes a job at a remote lighthouse run by grizzled old sailor Willem — a man deep in debt to the Colombian cartel. What starts as a quiet night shift quickly spirals into chaos: raging seas, monstrous creatures, and authorities closing in. Between the cynical old wolf and the cocky young pup, the real storm is just beginning.
 
 ---
 
