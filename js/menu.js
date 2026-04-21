@@ -1,4 +1,3 @@
-import { PIXI } from './config.js';
 import { playSound, WAVES_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
@@ -9,129 +8,28 @@ import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
 // ===== Menu State =====
-let menuContainer = null;
-let menuBg = null;
-let menuItems = [];
+let menuApp = null;
+let $menuRoot = null;
+let $menuBg = null;
+let $menuTitle = null;
+let $menuMain = null;
+let $menuSub = null;
+let $menuHint = null;
+let $$menuItems = [];
 let selectedIndex = 0;
 let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
-let creditsContainer = null;
 let creditsAnimId = null;
+let creditsOffsetY = 0;
+let creditsLastTs = 0;
+let $creditsScroll = null;
 let onStartGame = null;
 let backBtnEl = null;
+let keyHandlerBound = false;
+let i18nBound = false;
 
-// ===== Menu Sprites =====
+// ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu.PNG';
 const CREDITS_BG_FILE = 'sprites/wasted/police.png';
-
-const MENU_BOX_WIDTH = 420;
-const MENU_BOX_HEIGHT = 78;
-const MENU_BOX_GAP = 18;
-const MENU_EDGE_MARGIN_X = 28;
-const MENU_EDGE_MARGIN_Y = 34;
-const MENU_BOX_COLOR = 0x143b5c;
-const MENU_BOX_SELECTED_COLOR = 0xc94a36;
-const MENU_BOX_ALPHA = 0.92;
-
-// ===== Styles =====
-const TITLE_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 48,
-  fontWeight: 'bold',
-  fill: '#fff',
-  stroke: '#000',
-  strokeThickness: 6,
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 10,
-  dropShadowDistance: 0,
-});
-
-const MENU_ITEM_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 22,
-  fontWeight: 'bold',
-  fill: '#c8d8e8',
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 4,
-  dropShadowDistance: 0,
-});
-
-const MENU_ITEM_SELECTED_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 24,
-  fontWeight: 'bold',
-  fill: '#ffdd44',
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 6,
-  dropShadowDistance: 0,
-});
-
-const SUB_HEADING_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 32,
-  fontWeight: 'bold',
-  fill: '#fff',
-  stroke: '#000',
-  strokeThickness: 4,
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 8,
-  dropShadowDistance: 0,
-});
-
-const CREDITS_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 20,
-  fontWeight: 'normal',
-  fill: '#ffffff',
-  stroke: '#000',
-  strokeThickness: 4,
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 6,
-  dropShadowDistance: 0,
-  align: 'center',
-  wordWrap: true,
-  wordWrapWidth: 400,
-});
-
-const LEADERBOARD_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 18,
-  fontWeight: 'normal',
-  fill: '#c8d8e8',
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 4,
-  dropShadowDistance: 0,
-  align: 'left',
-});
-
-const LEADERBOARD_HIGHLIGHT_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 18,
-  fontWeight: 'bold',
-  fill: '#ffdd44',
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 4,
-  dropShadowDistance: 0,
-  align: 'left',
-});
-
-const HINT_STYLE = new PIXI.TextStyle({
-  fontFamily: 'Segoe UI, system-ui, sans-serif',
-  fontSize: 14,
-  fontWeight: 'normal',
-  fill: '#6a8a9a',
-  dropShadow: true,
-  dropShadowColor: '#000',
-  dropShadowBlur: 3,
-  dropShadowDistance: 0,
-  align: 'center',
-});
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -149,7 +47,6 @@ function getMenuLabels() {
   }));
 }
 
-// ===== Credits Text =====
 function getCreditsText() {
   return t('credits.text');
 }
@@ -163,301 +60,141 @@ function playMenuClick() {
   playSound('audio/button-click.mp3', 0.2);
 }
 
-// ===== Helpers =====
-function drawMenuBtnBg(bg, color) {
-  const { width, height } = getMenuMetrics();
-  bg.clear();
-  bg.beginFill(color, MENU_BOX_ALPHA);
-  bg.drawRoundedRect(0, 0, width, height, 10);
-  bg.endFill();
-}
+// ===== DOM Helpers =====
+function ensureMenuRoot() {
+  if ($menuRoot) return $menuRoot;
 
-function createMenuBtn(label, isSelected) {
-  const container = new PIXI.Container();
+  $menuRoot = document.createElement('div');
+  $menuRoot.className = 'menu-overlay';
+  $menuRoot.hidden = true;
+  $menuRoot.innerHTML = `
+    <div class="menu-overlay-bg"></div>
+    <div class="menu-overlay-dim"></div>
+    <div class="menu-overlay-panel">
+      <h1 class="menu-title"><span class="menu-title-icon">🔦</span> LIGHTHOUSE</h1>
+      <div class="menu-main"></div>
+      <section class="menu-sub" hidden></section>
+      <p class="menu-hint"></p>
+    </div>
+  `;
+  document.body.appendChild($menuRoot);
 
-  const bg = new PIXI.Graphics();
-  container.addChild(bg);
+  $menuBg = $menuRoot.querySelector('.menu-overlay-bg');
+  $menuTitle = $menuRoot.querySelector('.menu-title');
+  $menuMain = $menuRoot.querySelector('.menu-main');
+  $menuSub = $menuRoot.querySelector('.menu-sub');
+  $menuHint = $menuRoot.querySelector('.menu-hint');
 
-  const txt = new PIXI.Text(
-    label,
-    isSelected ? MENU_ITEM_SELECTED_STYLE : MENU_ITEM_STYLE,
-  );
-  txt.anchor.set(0, 0.5);
-  container.addChild(txt);
-
-  container._bg = bg;
-  container._txt = txt;
-  container._isSelected = isSelected;
-
-  container.interactive = true;
-  container.buttonMode = true;
-  container.cursor = 'pointer';
-
-  layoutMenuBtn(container);
-
-  return container;
-}
-
-function getMenuMetrics() {
-  const width = Math.min(MENU_BOX_WIDTH, Math.max(280, S.gameW * 0.5));
-  const height = S.gameH < 760 ? 70 : MENU_BOX_HEIGHT;
-  const gap = S.gameH < 760 ? 14 : MENU_BOX_GAP;
-  return { width, height, gap };
-}
-
-function layoutMenuBtn(item) {
-  if (!item || !item._bg || !item._txt) return;
-  const { width, height } = getMenuMetrics();
-  drawMenuBtnBg(
-    item._bg,
-    item._isSelected ? MENU_BOX_SELECTED_COLOR : MENU_BOX_COLOR,
-  );
-
-  item._txt.x = 28;
-  item._txt.y = height / 2;
-  item.hitArea = new PIXI.Rectangle(0, 0, width, height);
-}
-
-function getMainMenuOrigin() {
-  const { width, height, gap } = getMenuMetrics();
-  const totalHeight =
-    menuItems.length * height + Math.max(0, menuItems.length - 1) * gap;
-  const x = MENU_EDGE_MARGIN_X;
-  const y = S.gameH - MENU_EDGE_MARGIN_Y - totalHeight;
-  return { x, y, width, height, gap };
-}
-
-function updateSelection() {
-  for (let i = 0; i < menuItems.length; i++) {
-    const item = menuItems[i];
-    const txt = item._txt;
-    const bg = item._bg;
-
-    if (i === selectedIndex) {
-      item._isSelected = true;
-      txt.style = MENU_ITEM_SELECTED_STYLE;
-    } else {
-      item._isSelected = false;
-      txt.style = MENU_ITEM_STYLE;
-    }
-    drawMenuBtnBg(bg, item._isSelected ? MENU_BOX_SELECTED_COLOR : MENU_BOX_COLOR);
+  if ($menuBg) {
+    $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
   }
+
+  renderMainMenuButtons();
+  updateSelection();
+  return $menuRoot;
 }
 
-function coverBackground(sprite) {
-  if (!sprite || !sprite.texture || !sprite.texture.baseTexture) return;
-  const tex = sprite.texture;
-  const tw = tex.width;
-  const th = tex.height;
-  // Cover: scale to fill, no gaps
-  const scale = Math.max(S.gameW / tw, S.gameH / th);
-  sprite.width = tw * scale;
-  sprite.height = th * scale;
-  sprite.position.set(S.gameW / 2, S.gameH / 2);
+function createMenuButton(label, index) {
+  const $button = document.createElement('button');
+  $button.type = 'button';
+  $button.className = 'menu-main-btn';
+  $button.textContent = label;
+  $button.addEventListener('pointerover', () => {
+    if (selectedIndex === index) return;
+    selectedIndex = index;
+    updateSelection();
+    playMenuSelect();
+  });
+  $button.addEventListener('click', () => {
+    selectedIndex = index;
+    updateSelection();
+    playMenuClick();
+    activateMenuItem();
+  });
+  return $button;
 }
 
-// ===== Build Menu =====
-export async function buildMenu(app, startGameCb) {
-  onStartGame = startGameCb;
+function renderMainMenuButtons() {
+  if (!$menuMain) return;
 
-  menuContainer = new PIXI.Container();
-  menuContainer.visible = true;
-  app.stage.addChild(menuContainer);
-
-  // Background
-  const bgTex = await PIXI.Assets.load(MENU_BG_FILE);
-  menuBg = new PIXI.Sprite(bgTex);
-  menuBg.anchor.set(0.5);
-  coverBackground(menuBg);
-  menuContainer.addChild(menuBg);
-
-  // Dim overlay
-  const dim = new PIXI.Graphics();
-  dim.beginFill(0x000000, 0.4);
-  dim.drawRect(0, 0, S.gameW, S.gameH);
-  dim.endFill();
-  menuContainer.addChild(dim);
-  menuContainer._dim = dim;
-
-  // Title
-  const title = new PIXI.Text('🔦 LIGHTHOUSE', TITLE_STYLE);
-  title.anchor.set(0.5);
-  title.position.set(S.gameW / 2, S.gameH * 0.18);
-  menuContainer.addChild(title);
-  menuContainer._title = title;
-
-  // Menu buttons
-  const startY = S.gameH * 0.32;
-  const spacing = 110;
+  $menuMain.innerHTML = '';
+  $$menuItems = [];
 
   const labels = getMenuLabels();
   for (let i = 0; i < labels.length; i++) {
-    const item = createMenuBtn(labels[i].label, i === selectedIndex);
-    item.position.set(S.gameW / 2, startY + i * spacing);
-    menuContainer.addChild(item);
-    menuItems.push(item);
-
-    // Mouse/touch
-    const idx = i;
-    item.on('pointerover', () => {
-      if (selectedIndex !== idx) {
-        selectedIndex = idx;
-        updateSelection();
-        playMenuSelect();
-      }
-    });
-    item.on('pointerdown', () => {
-      selectedIndex = idx;
-      updateSelection();
-      playMenuClick();
-      activateMenuItem();
-    });
-  }
-
-  updateSelection();
-  repositionMenu();
-
-  // Hint
-  const hint = new PIXI.Text(t('hint.main'), HINT_STYLE);
-  hint.anchor.set(0.5);
-  hint.position.set(S.gameW / 2, S.gameH - 30);
-  menuContainer.addChild(hint);
-  menuContainer._hint = hint;
-
-  currentScreen = 'main';
-
-  // Account widget (DOM overlay, top-right)
-  showAuthWidget();
-
-  // Keyboard
-  window.addEventListener('keydown', handleMenuKey);
-
-  // Re-render current screen and static texts on language change
-  onLanguageChange(() => {
-    relabelMainMenu();
-    if (menuContainer && menuContainer._hint) {
-      menuContainer._hint.text = t('hint.main');
-    }
-    if (backBtnEl) {
-      const lbl = backBtnEl.querySelector('.back-btn-label');
-      if (lbl) lbl.textContent = t('btn.back');
-    }
-    if (currentScreen === 'settings') showSettings();
-    else if (currentScreen === 'leaderboard') showLeaderboard();
-    else if (currentScreen === 'authors') showAuthors();
-  });
-}
-
-function relabelMainMenu() {
-  const labels = getMenuLabels();
-  for (let i = 0; i < menuItems.length && i < labels.length; i++) {
-    const txt = menuItems[i]._txt;
-    if (txt) txt.text = labels[i].label;
+    const $button = createMenuButton(labels[i].label, i);
+    $$menuItems.push($button);
+    $menuMain.appendChild($button);
   }
 }
 
-function handleMenuKey(e) {
-  if (!menuContainer || !menuContainer.visible) return;
-
-  // Don't intercept keys while typing in the auth modal or other inputs
-  const ae = document.activeElement;
-  if (
-    ae &&
-    (ae.tagName === 'INPUT' ||
-      ae.tagName === 'TEXTAREA' ||
-      ae.isContentEditable ||
-      ae.closest('.auth-modal-backdrop'))
-  ) {
-    return;
-  }
-
-  if (currentScreen === 'main') {
-    const n = MAIN_MENU_ACTIONS.length;
-    if (e.code === 'ArrowUp' || e.code === 'KeyW') {
-      selectedIndex = (selectedIndex - 1 + n) % n;
-      updateSelection();
-      playMenuSelect();
-    } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
-      selectedIndex = (selectedIndex + 1) % n;
-      updateSelection();
-      playMenuSelect();
-    } else if (isConfirmKey(e.code)) {
-      playMenuClick();
-      activateMenuItem();
-    }
-  } else {
-    // Sub-screens: Q or Escape go back
-    if (isBackKey(e.code)) {
-      playMenuClick();
-      showMainMenu();
-    }
+function updateSelection() {
+  for (let i = 0; i < $$menuItems.length; i++) {
+    const $button = $$menuItems[i];
+    const isSelected = i === selectedIndex;
+    $button.classList.toggle('is-selected', isSelected);
+    $button.setAttribute('aria-current', isSelected ? 'true' : 'false');
   }
 }
 
-function activateMenuItem() {
-  const action = MAIN_MENU_ACTIONS[selectedIndex].action;
-  switch (action) {
-    case 'start':
-      hideMenu();
-      if (onStartGame) onStartGame();
-      break;
-    case 'leaderboard':
-      showLeaderboard();
-      break;
-    case 'settings':
-      showSettings();
-      break;
-    case 'authors':
-      showAuthors();
-      break;
-    case 'tutorial':
-      showTutorial();
-      break;
-  }
+function setHint(text) {
+  if ($menuHint) $menuHint.textContent = text;
 }
 
-// ===== Tutorial (replay intro comics) =====
-function showTutorial() {
-  if (!menuContainer) return;
-  // Hide menu UI while the intro plays — it renders over the whole screen.
-  menuContainer.visible = false;
-  hideBackBtn();
-  hideAuthWidget();
-  currentScreen = null;
-
-  showIntro(S.app).then(() => {
-    if (!menuContainer) return;
-    menuContainer.visible = true;
-    showMainMenu();
-    showAuthWidget();
-  });
-}
-
-// ===== Sub-screen helpers =====
 function clearSubScreen() {
-  if (menuContainer._subScreen) {
-    menuContainer.removeChild(menuContainer._subScreen);
-    menuContainer._subScreen.destroy({ children: true });
-    menuContainer._subScreen = null;
-  }
-  if (creditsAnimId) {
-    cancelAnimationFrame(creditsAnimId);
-    creditsAnimId = null;
-  }
+  if (!$menuSub) return;
+
+  stopCreditsAnimation();
+  $menuSub.innerHTML = '';
+  $menuSub.hidden = true;
+  $menuSub.className = 'menu-sub';
 }
 
 function hideMainItems() {
-  for (const item of menuItems) item.visible = false;
-  if (menuContainer._title) menuContainer._title.visible = false;
-  if (menuContainer._hint) menuContainer._hint.visible = false;
+  if ($menuTitle) $menuTitle.hidden = true;
+  if ($menuMain) $menuMain.hidden = true;
+  if ($menuHint) $menuHint.hidden = true;
 }
 
 function showMainItems() {
-  for (const item of menuItems) item.visible = true;
-  if (menuContainer._title) menuContainer._title.visible = true;
-  if (menuContainer._hint) menuContainer._hint.visible = true;
-  // Restore dim
-  if (menuContainer._dim) menuContainer._dim.visible = true;
+  if ($menuTitle) $menuTitle.hidden = false;
+  if ($menuMain) $menuMain.hidden = false;
+  if ($menuHint) $menuHint.hidden = false;
+  setHint(t('hint.main'));
+}
+
+function buildBackHint() {
+  const $hint = document.createElement('p');
+  $hint.className = 'menu-sub-hint';
+  $hint.textContent = t('hint.back');
+  return $hint;
+}
+
+function buildScreenShell(title, subtitle = '') {
+  clearSubScreen();
+  if (!$menuSub) return null;
+
+  $menuSub.hidden = false;
+  $menuSub.className = 'menu-sub menu-screen';
+
+  const $screen = document.createElement('div');
+  $screen.className = 'menu-screen-shell';
+
+  const $heading = document.createElement('h2');
+  $heading.className = 'menu-screen-title';
+  $heading.textContent = title;
+  $screen.appendChild($heading);
+
+  if (subtitle) {
+    const $subtitle = document.createElement('p');
+    $subtitle.className = 'menu-screen-subtitle';
+    $subtitle.textContent = subtitle;
+    $screen.appendChild($subtitle);
+  }
+
+  $menuSub.appendChild($screen);
+  $menuSub.appendChild(buildBackHint());
+  return $screen;
 }
 
 function showMainMenu() {
@@ -465,16 +202,10 @@ function showMainMenu() {
   showMainItems();
   hideBackBtn();
   currentScreen = 'main';
+  updateSelection();
 }
 
-function createBackHint() {
-  const hint = new PIXI.Text(t('hint.back'), HINT_STYLE);
-  hint.anchor.set(0.5);
-  hint.position.set(S.gameW / 2, S.gameH - 30);
-  return hint;
-}
-
-// ===== HTML Back Button (для тач-устройств) =====
+// ===== HTML Back Button =====
 function ensureBackBtn() {
   if (backBtnEl) return backBtnEl;
   backBtnEl = document.createElement('button');
@@ -502,36 +233,140 @@ function hideBackBtn() {
   if (backBtnEl) backBtnEl.classList.remove('is-visible');
 }
 
+// ===== Lifecycle =====
+export async function buildMenu(app, startGameCb) {
+  menuApp = app;
+  onStartGame = startGameCb;
+
+  ensureMenuRoot();
+  $menuRoot.hidden = false;
+  showMainMenu();
+  currentScreen = 'main';
+
+  showAuthWidget();
+
+  if (!keyHandlerBound) {
+    window.addEventListener('keydown', handleMenuKey);
+    keyHandlerBound = true;
+  }
+
+  if (!i18nBound) {
+    onLanguageChange(() => {
+      if (!$menuRoot) return;
+
+      renderMainMenuButtons();
+      updateSelection();
+      setHint(currentScreen === 'main' ? t('hint.main') : t('hint.back'));
+
+      if (backBtnEl) {
+        const lbl = backBtnEl.querySelector('.back-btn-label');
+        if (lbl) lbl.textContent = t('btn.back');
+      }
+
+      if (currentScreen === 'settings') showSettings();
+      else if (currentScreen === 'leaderboard') showLeaderboard();
+      else if (currentScreen === 'authors') showAuthors();
+      else if (currentScreen === 'main') showMainMenu();
+    });
+    i18nBound = true;
+  }
+
+  repositionMenu();
+}
+
+function handleMenuKey(e) {
+  if (!$menuRoot || $menuRoot.hidden) return;
+
+  const ae = document.activeElement;
+  if (
+    ae &&
+    (ae.tagName === 'INPUT' ||
+      ae.tagName === 'TEXTAREA' ||
+      ae.isContentEditable ||
+      ae.closest('.auth-modal-backdrop'))
+  ) {
+    return;
+  }
+
+  if (currentScreen === 'main') {
+    const n = MAIN_MENU_ACTIONS.length;
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+      selectedIndex = (selectedIndex - 1 + n) % n;
+      updateSelection();
+      playMenuSelect();
+    } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+      selectedIndex = (selectedIndex + 1) % n;
+      updateSelection();
+      playMenuSelect();
+    } else if (isConfirmKey(e.code)) {
+      playMenuClick();
+      activateMenuItem();
+    }
+  } else if (isBackKey(e.code)) {
+    playMenuClick();
+    showMainMenu();
+  }
+}
+
+function activateMenuItem() {
+  const action = MAIN_MENU_ACTIONS[selectedIndex].action;
+  switch (action) {
+    case 'start':
+      hideMenu();
+      if (onStartGame) onStartGame();
+      break;
+    case 'leaderboard':
+      showLeaderboard();
+      break;
+    case 'settings':
+      showSettings();
+      break;
+    case 'authors':
+      showAuthors();
+      break;
+    case 'tutorial':
+      showTutorial();
+      break;
+  }
+}
+
+// ===== Tutorial =====
+function showTutorial() {
+  if (!$menuRoot) return;
+  $menuRoot.hidden = true;
+  hideBackBtn();
+  hideAuthWidget();
+  currentScreen = null;
+
+  showIntro(menuApp || S.app).then(() => {
+    if (!$menuRoot) return;
+    $menuRoot.hidden = false;
+    showMainMenu();
+    showAuthWidget();
+  });
+}
+
 // ===== Leaderboard =====
 async function showLeaderboard() {
   hideMainItems();
-  clearSubScreen();
   showBackBtn();
   currentScreen = 'leaderboard';
+  setHint(t('hint.back'));
 
-  const sub = new PIXI.Container();
+  const $screen = buildScreenShell(
+    t('leaderboard.title'),
+    t('leaderboard.subtitle'),
+  );
+  if (!$screen) return;
 
-  const heading = new PIXI.Text(t('leaderboard.title'), SUB_HEADING_STYLE);
-  heading.anchor.set(0.5);
-  heading.position.set(S.gameW / 2, S.gameH * 0.12);
-  sub.addChild(heading);
+  const $body = document.createElement('div');
+  $body.className = 'menu-card menu-leaderboard';
+  const $loading = document.createElement('p');
+  $loading.className = 'menu-state-label';
+  $loading.textContent = t('leaderboard.loading');
+  $body.appendChild($loading);
+  $screen.appendChild($body);
 
-  const subtitle = new PIXI.Text(t('leaderboard.subtitle'), HINT_STYLE);
-  subtitle.anchor.set(0.5);
-  subtitle.position.set(S.gameW / 2, S.gameH * 0.18);
-  sub.addChild(subtitle);
-
-  // Loading placeholder
-  const loading = new PIXI.Text(t('leaderboard.loading'), LEADERBOARD_STYLE);
-  loading.anchor.set(0.5);
-  loading.position.set(S.gameW / 2, S.gameH * 0.5);
-  sub.addChild(loading);
-
-  sub.addChild(createBackHint());
-  menuContainer.addChild(sub);
-  menuContainer._subScreen = sub;
-
-  // Fetch and render
   let rows = [];
   let error = null;
   try {
@@ -541,273 +376,228 @@ async function showLeaderboard() {
     error = e;
   }
 
-  // User navigated away while loading
-  if (currentScreen !== 'leaderboard' || menuContainer._subScreen !== sub) {
-    return;
-  }
+  if (currentScreen !== 'leaderboard') return;
 
-  sub.removeChild(loading);
-  loading.destroy();
+  $body.innerHTML = '';
 
   if (error) {
-    const err = new PIXI.Text(t('leaderboard.loadError'), LEADERBOARD_STYLE);
-    err.anchor.set(0.5);
-    err.position.set(S.gameW / 2, S.gameH * 0.5);
-    sub.addChild(err);
+    const $error = document.createElement('p');
+    $error.className = 'menu-state-label';
+    $error.textContent = t('leaderboard.loadError');
+    $body.appendChild($error);
     return;
   }
 
   if (rows.length === 0) {
-    const empty = new PIXI.Text(t('leaderboard.empty'), LEADERBOARD_STYLE);
-    empty.anchor.set(0.5);
-    empty.position.set(S.gameW / 2, S.gameH * 0.5);
-    sub.addChild(empty);
+    const $empty = document.createElement('p');
+    $empty.className = 'menu-state-label';
+    $empty.textContent = t('leaderboard.empty');
+    $body.appendChild($empty);
     return;
   }
 
+  const $list = document.createElement('div');
+  $list.className = 'menu-leaderboard-list';
   const myUid = currentUser ? currentUser.uid : null;
-  const startY = S.gameH * 0.26;
+
   for (let i = 0; i < rows.length; i++) {
     const entry = rows[i];
     const isMe = myUid && entry.uid === myUid;
-    const style =
-      i < 3 || isMe ? LEADERBOARD_HIGHLIGHT_STYLE : LEADERBOARD_STYLE;
     const medal =
       i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
     const label = isMe
-      ? `${entry.displayName}  ${t('leaderboard.you')}`
+      ? `${entry.displayName} ${t('leaderboard.you')}`
       : entry.displayName;
-    const txt = new PIXI.Text(
-      `${medal}  ${label}  —  ${formatSurvivalTime(entry.bestTimeMs)}`,
-      style,
-    );
-    txt.anchor.set(0.5);
-    txt.position.set(S.gameW / 2, startY + i * 36);
-    sub.addChild(txt);
+
+    const $row = document.createElement('div');
+    $row.className = `menu-leaderboard-row${i < 3 || isMe ? ' is-highlight' : ''}`;
+
+    const $rank = document.createElement('span');
+    $rank.className = 'menu-leaderboard-rank';
+    $rank.textContent = medal;
+
+    const $name = document.createElement('span');
+    $name.className = 'menu-leaderboard-name';
+    $name.textContent = label;
+
+    const $time = document.createElement('span');
+    $time.className = 'menu-leaderboard-time';
+    $time.textContent = formatSurvivalTime(entry.bestTimeMs);
+
+    $row.appendChild($rank);
+    $row.appendChild($name);
+    $row.appendChild($time);
+    $list.appendChild($row);
   }
 
+  $body.appendChild($list);
+
   if (!isSignedInReal(currentUser)) {
-    const note = new PIXI.Text(t('leaderboard.signInPrompt'), HINT_STYLE);
-    note.anchor.set(0.5);
-    note.position.set(S.gameW / 2, S.gameH - 60);
-    sub.addChild(note);
+    const $note = document.createElement('p');
+    $note.className = 'menu-card-note';
+    $note.textContent = t('leaderboard.signInPrompt');
+    $body.appendChild($note);
   }
 }
 
 // ===== Settings =====
 function showSettings() {
   hideMainItems();
-  clearSubScreen();
   showBackBtn();
   currentScreen = 'settings';
+  setHint(t('hint.back'));
 
-  const sub = new PIXI.Container();
+  const $screen = buildScreenShell(t('settings.title'));
+  if (!$screen) return;
 
-  const heading = new PIXI.Text(t('settings.title'), SUB_HEADING_STYLE);
-  heading.anchor.set(0.5);
-  heading.position.set(S.gameW / 2, S.gameH * 0.12);
-  sub.addChild(heading);
+  const $card = document.createElement('div');
+  $card.className = 'menu-card menu-settings';
 
-  const cx = S.gameW / 2;
-  let y = S.gameH * 0.26;
-
-  // Language (first — so it's easy to reach)
-  const langLabel = new PIXI.Text(t('settings.language'), MENU_ITEM_STYLE);
-  langLabel.anchor.set(0.5);
-  langLabel.position.set(cx, y);
-  sub.addChild(langLabel);
-
-  y += 40;
   const langs = [
     { code: 'en', label: t('lang.english') },
     { code: 'ru', label: t('lang.russian') },
   ];
   let langIdx = Math.max(
     0,
-    langs.findIndex((l) => l.code === getLanguage()),
+    langs.findIndex((lang) => lang.code === getLanguage()),
   );
 
-  const langTxt = new PIXI.Text(
-    `◀  ${langs[langIdx].label}  ▶`,
-    MENU_ITEM_SELECTED_STYLE,
-  );
-  langTxt.anchor.set(0.5);
-  langTxt.position.set(cx, y);
-  langTxt.interactive = true;
-  langTxt.buttonMode = true;
-  langTxt.cursor = 'pointer';
-  langTxt.on('pointerdown', () => {
+  const $langRow = document.createElement('div');
+  $langRow.className = 'menu-setting-row';
+
+  const $langLabel = document.createElement('span');
+  $langLabel.className = 'menu-setting-label';
+  $langLabel.textContent = t('settings.language');
+  $langRow.appendChild($langLabel);
+
+  const $langBtn = document.createElement('button');
+  $langBtn.type = 'button';
+  $langBtn.className = 'menu-setting-toggle';
+  $langBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
+  $langBtn.addEventListener('click', () => {
     playMenuClick();
     langIdx = (langIdx + 1) % langs.length;
-    // setLanguage triggers onLanguageChange → rerenders this screen
     setLanguage(langs[langIdx].code);
   });
-  sub.addChild(langTxt);
+  $langRow.appendChild($langBtn);
 
-  y += 60;
+  $card.appendChild($langRow);
 
-  // SFX volume
-  const sfxInit = S.sfxVolume != null ? S.sfxVolume : 1.0;
-  y = addSlider(sub, t('settings.sfx'), cx, y, sfxInit, (val) => {
+  const $sfxRow = document.createElement('div');
+  $sfxRow.className = 'menu-setting-row menu-setting-row--slider';
+
+  const $sfxLabel = document.createElement('span');
+  $sfxLabel.className = 'menu-setting-label';
+  $sfxLabel.textContent = t('settings.sfx');
+  $sfxRow.appendChild($sfxLabel);
+
+  const $sfxControl = document.createElement('div');
+  $sfxControl.className = 'menu-slider';
+
+  const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
+  const $sfxInput = document.createElement('input');
+  $sfxInput.type = 'range';
+  $sfxInput.min = '0';
+  $sfxInput.max = '100';
+  $sfxInput.step = '1';
+  $sfxInput.value = String(Math.round(initialSfx * 100));
+
+  const $sfxValue = document.createElement('span');
+  $sfxValue.className = 'menu-slider-value';
+  $sfxValue.textContent = `${$sfxInput.value}%`;
+
+  $sfxInput.addEventListener('input', () => {
+    const val = Number($sfxInput.value) / 100;
+    $sfxValue.textContent = `${$sfxInput.value}%`;
     S.sfxVolume = val;
-    if (S.wavesSound)
+    if (S.wavesSound) {
       S.wavesSound.volume = Math.max(0, Math.min(1, WAVES_VOLUME * val));
+    }
     try {
       localStorage.setItem('lighthouse_sfx_vol', String(val));
     } catch (_) {}
   });
 
-  sub.addChild(createBackHint());
-  menuContainer.addChild(sub);
-  menuContainer._subScreen = sub;
+  $sfxControl.appendChild($sfxInput);
+  $sfxControl.appendChild($sfxValue);
+  $sfxRow.appendChild($sfxControl);
+  $card.appendChild($sfxRow);
+
+  $screen.appendChild($card);
 }
 
-function addSlider(parent, label, cx, y, initial, onChange) {
-  const lbl = new PIXI.Text(label, MENU_ITEM_STYLE);
-  lbl.anchor.set(0.5);
-  lbl.position.set(cx, y);
-  parent.addChild(lbl);
-
-  y += 36;
-  const sliderW = 200;
-  const sliderH = 8;
-  const knobR = 12;
-
-  // Track background
-  const track = new PIXI.Graphics();
-  track.beginFill(0x334455, 0.8);
-  track.drawRoundedRect(cx - sliderW / 2, y - sliderH / 2, sliderW, sliderH, 4);
-  track.endFill();
-  parent.addChild(track);
-
-  // Fill
-  const fill = new PIXI.Graphics();
-  parent.addChild(fill);
-
-  // Knob
-  const knob = new PIXI.Graphics();
-  knob.beginFill(0xffdd44, 1);
-  knob.drawCircle(0, 0, knobR);
-  knob.endFill();
-  knob.position.set(cx - sliderW / 2 + initial * sliderW, y);
-  knob.interactive = true;
-  knob.buttonMode = true;
-  knob.cursor = 'pointer';
-  parent.addChild(knob);
-
-  // Value text
-  const valTxt = new PIXI.Text(`${Math.round(initial * 100)}%`, HINT_STYLE);
-  valTxt.anchor.set(0, 0.5);
-  valTxt.position.set(cx + sliderW / 2 + 14, y);
-  parent.addChild(valTxt);
-
-  function drawFill(val) {
-    fill.clear();
-    fill.beginFill(0x5599cc, 0.9);
-    fill.drawRoundedRect(
-      cx - sliderW / 2,
-      y - sliderH / 2,
-      val * sliderW,
-      sliderH,
-      4,
-    );
-    fill.endFill();
-  }
-  drawFill(initial);
-
-  let dragging = false;
-
-  function updateSlider(px) {
-    const val = Math.max(0, Math.min(1, (px - (cx - sliderW / 2)) / sliderW));
-    knob.x = cx - sliderW / 2 + val * sliderW;
-    drawFill(val);
-    valTxt.text = `${Math.round(val * 100)}%`;
-    onChange(val);
-  }
-
-  knob.on('pointerdown', () => {
-    playMenuClick();
-    dragging = true;
-  });
-
-  // Use stage-level events for drag
-  S.app.stage.on('pointermove', (e) => {
-    if (!dragging) return;
-    const pos = e.data.global;
-    updateSlider(pos.x);
-  });
-
-  const stopDrag = () => {
-    dragging = false;
-  };
-  S.app.stage.on('pointerup', stopDrag);
-  S.app.stage.on('pointerupoutside', stopDrag);
-
-  // Click on track
-  track.interactive = true;
-  track.buttonMode = true;
-  track.cursor = 'pointer';
-  track.on('pointerdown', (e) => {
-    playMenuClick();
-    const pos = e.data.global;
-    updateSlider(pos.x);
-  });
-
-  return y + 10;
-}
-
-// ===== Authors (scrolling credits) =====
+// ===== Authors =====
 async function showAuthors() {
   hideMainItems();
-  clearSubScreen();
   showBackBtn();
   currentScreen = 'authors';
+  setHint(t('hint.back'));
 
-  const sub = new PIXI.Container();
+  clearSubScreen();
+  if (!$menuSub) return;
 
-  // Background image
-  const creditsBgTex = await PIXI.Assets.load(CREDITS_BG_FILE);
-  const bgSprite = new PIXI.Sprite(creditsBgTex);
-  bgSprite.anchor.set(0.5);
-  coverBackground(bgSprite);
-  sub.addChild(bgSprite);
+  $menuSub.hidden = false;
+  $menuSub.className = 'menu-sub menu-authors';
+  $menuSub.innerHTML = `
+    <div class="menu-authors-bg"></div>
+    <div class="menu-authors-dim"></div>
+    <div class="menu-authors-scroll">
+      <pre class="menu-authors-text"></pre>
+    </div>
+  `;
+  $menuSub.appendChild(buildBackHint());
 
-  // Dim over background
-  const dim = new PIXI.Graphics();
-  dim.beginFill(0x000000, 0.5);
-  dim.drawRect(0, 0, S.gameW, S.gameH);
-  dim.endFill();
-  sub.addChild(dim);
+  const $authorsBg = $menuSub.querySelector('.menu-authors-bg');
+  if ($authorsBg) {
+    $authorsBg.style.backgroundImage = `url("${CREDITS_BG_FILE}")`;
+  }
 
-  // Credits text — starts below screen, scrolls up
-  creditsContainer = new PIXI.Container();
-  const creditsTxt = new PIXI.Text(getCreditsText(), CREDITS_STYLE);
-  creditsTxt.anchor.set(0.5, 0);
-  creditsTxt.position.set(S.gameW / 2, 0);
-  creditsContainer.addChild(creditsTxt);
-  creditsContainer.y = S.gameH;
-  sub.addChild(creditsContainer);
+  $creditsScroll = $menuSub.querySelector('.menu-authors-scroll');
+  const $creditsText = $menuSub.querySelector('.menu-authors-text');
+  if ($creditsText) $creditsText.textContent = getCreditsText();
+  startCreditsAnimation();
+}
 
-  sub.addChild(createBackHint());
-  menuContainer.addChild(sub);
-  menuContainer._subScreen = sub;
+function startCreditsAnimation() {
+  stopCreditsAnimation();
+  if (!$creditsScroll) return;
 
-  // Animate credits scrolling
-  const speed = 0.8; // px per frame
-  const endY = -creditsTxt.height - 40;
-  const animateCredits = () => {
-    creditsContainer.y -= speed;
-    if (creditsContainer.y < endY) {
-      creditsContainer.y = S.gameH; // loop
+  creditsOffsetY = S.gameH;
+  creditsLastTs = 0;
+
+  const animateCredits = (ts) => {
+    if (!$creditsScroll || currentScreen !== 'authors') return;
+
+    if (!creditsLastTs) creditsLastTs = ts;
+    const delta = (ts - creditsLastTs) / 16.6667;
+    creditsLastTs = ts;
+
+    creditsOffsetY -= 0.8 * delta;
+    const endY = -$creditsScroll.offsetHeight - 40;
+    if (creditsOffsetY < endY) {
+      creditsOffsetY = S.gameH;
     }
+
+    $creditsScroll.style.transform = `translate(-50%, ${creditsOffsetY}px)`;
     creditsAnimId = requestAnimationFrame(animateCredits);
   };
+
   creditsAnimId = requestAnimationFrame(animateCredits);
+}
+
+function stopCreditsAnimation() {
+  if (creditsAnimId) {
+    cancelAnimationFrame(creditsAnimId);
+    creditsAnimId = null;
+  }
+  creditsLastTs = 0;
+  creditsOffsetY = 0;
+  $creditsScroll = null;
 }
 
 // ===== Show / Hide =====
 function hideMenu() {
-  if (menuContainer) menuContainer.visible = false;
+  if ($menuRoot) $menuRoot.hidden = true;
   clearSubScreen();
   hideBackBtn();
   currentScreen = null;
@@ -815,8 +605,8 @@ function hideMenu() {
 }
 
 export function showMenu() {
-  if (!menuContainer) return;
-  menuContainer.visible = true;
+  if (!$menuRoot) return;
+  $menuRoot.hidden = false;
   selectedIndex = 0;
   showMainMenu();
   currentScreen = 'main';
@@ -825,37 +615,12 @@ export function showMenu() {
 }
 
 export function isMenuVisible() {
-  return menuContainer && menuContainer.visible;
+  return Boolean($menuRoot && !$menuRoot.hidden);
 }
 
 export function repositionMenu() {
-  if (!menuContainer) return;
+  if (!$menuRoot) return;
 
-  // Background
-  if (menuBg) coverBackground(menuBg);
-
-  // Dim
-  if (menuContainer._dim) {
-    menuContainer._dim.clear();
-    menuContainer._dim.beginFill(0x000000, 0.4);
-    menuContainer._dim.drawRect(0, 0, S.gameW, S.gameH);
-    menuContainer._dim.endFill();
-  }
-
-  // Title
-  if (menuContainer._title) {
-    menuContainer._title.position.set(S.gameW / 2, S.gameH * 0.18);
-  }
-
-  // Buttons
-  const { x, y, height, gap } = getMainMenuOrigin();
-  for (let i = 0; i < menuItems.length; i++) {
-    layoutMenuBtn(menuItems[i]);
-    menuItems[i].position.set(x, y + i * (height + gap));
-  }
-
-  // Hint
-  if (menuContainer._hint) {
-    menuContainer._hint.position.set(S.gameW / 2, S.gameH - 30);
-  }
+  $menuRoot.style.setProperty('--menu-vw', `${S.gameW}px`);
+  $menuRoot.style.setProperty('--menu-vh', `${S.gameH}px`);
 }
