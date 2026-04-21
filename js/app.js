@@ -13,7 +13,7 @@ import {
   SPAWN_INTERVAL_MAX,
   computeWorldScale,
 } from './config.js';
-import { playSound, WAVES_VOLUME } from './sound.js';
+import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
@@ -97,6 +97,7 @@ function bindEvents() {
         playClickSound();
         hideExitConfirm();
         if (S.btnEsc) S.btnEsc.visible = false;
+        if (S.volControls) S.volControls.hidden = true;
         // Defer to avoid menu keydown handler catching the same event
         requestAnimationFrame(() => exitToMenu());
         return;
@@ -179,6 +180,7 @@ function exitToMenu() {
   S.reset();
   updateHUD();
   if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
   showMenu();
 }
 
@@ -189,8 +191,9 @@ function restartGame() {
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
   if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.btnLeft) S.btnLeft.visible = true;
-  if (S.btnRight) S.btnRight.visible = true;
+  if (S.volControls) S.volControls.hidden = false;
+  if (S.btnLeft) S.btnLeft.hidden = false;
+  if (S.btnRight) S.btnRight.hidden = false;
 }
 
 // ===== Start Game (called from menu) =====
@@ -199,6 +202,7 @@ function startGame() {
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
   if (S.btnEsc) S.btnEsc.visible = true;
+  if (S.volControls) S.volControls.hidden = false;
 }
 
 // ===== Submit Score =====
@@ -366,6 +370,7 @@ async function init() {
 
   buildUI();
   S.btnEsc.visible = false; // hidden until game starts
+  if (S.volControls) S.volControls.hidden = true;
 
   // Wire Escape button click to show menu
   S.btnEsc.on('pointerdown', () => {
@@ -389,6 +394,7 @@ async function init() {
       playClickSound();
       hideExitConfirm();
       if (S.btnEsc) S.btnEsc.visible = false;
+      if (S.volControls) S.volControls.hidden = true;
       requestAnimationFrame(() => exitToMenu());
     } else if (S.gameOver) {
       playClickSound();
@@ -444,16 +450,27 @@ async function init() {
   wavesAudio.loop = true;
   wavesAudio.volume = Math.max(
     0,
-    Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 1)),
+    Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 0.5)),
   );
   S.wavesSound = wavesAudio;
-  const startWaves = () => {
+
+  // ===== Music =====
+  const musicAudio = new Audio('music/1-lighthouse-salt.mp3');
+  musicAudio.loop = true;
+  musicAudio.volume = Math.max(
+    0,
+    Math.min(1, MUSIC_VOLUME * (S.musicVolume != null ? S.musicVolume : 0.5)),
+  );
+  S.musicSound = musicAudio;
+
+  const startAmbient = () => {
     S.wavesSound.play().catch(() => {});
-    window.removeEventListener('pointerdown', startWaves);
-    window.removeEventListener('keydown', startWaves);
+    S.musicSound.play().catch(() => {});
+    window.removeEventListener('pointerdown', startAmbient);
+    window.removeEventListener('keydown', startAmbient);
   };
-  window.addEventListener('pointerdown', startWaves);
-  window.addEventListener('keydown', startWaves);
+  window.addEventListener('pointerdown', startAmbient);
+  window.addEventListener('keydown', startAmbient);
 
   if (analytics) {
     logEvent(analytics, 'game_start', {

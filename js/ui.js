@@ -16,6 +16,7 @@ import {
   CRASH_SOUNDS,
   playSound,
   playRandomSound,
+  MUSIC_VOLUME,
 } from './sound.js';
 import S from './state.js';
 import { t } from './i18n.js';
@@ -169,93 +170,25 @@ function bindTurnButton(button, keyCode) {
 }
 
 export function buildButtons() {
-  const btnSpacing = 110;
-  const btnWidth = 88;
-  const BTN_BOTTOM_MARGIN = 80;
+  // ===== Left / Right turn buttons (HTML) =====
+  S.btnLeft = $btnLeft;
+  S.btnRight = $btnRight;
 
-  // Left button
-  S.btnLeft = new PIXI.Container();
-  const sprLeft = new PIXI.Sprite(S.textures.button);
-  sprLeft.anchor.set(0.5);
-  scaleToWidth(sprLeft, btnWidth);
-  S.btnLeft.addChild(sprLeft);
-  const txtArrowLeft = new PIXI.Text('←', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 32,
-    fill: '#fff',
-    align: 'center',
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 4,
-    dropShadowDistance: 0,
-  });
-  txtArrowLeft.anchor.set(0.5);
-  txtArrowLeft.x = -15;
-  txtArrowLeft.y = -5;
-  S.btnLeft.addChild(txtArrowLeft);
-  const txtDLabelOnLeft = new PIXI.Text('A', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 24,
-    fill: '#fff',
-    align: 'center',
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 3,
-    dropShadowDistance: 0,
-  });
-  txtDLabelOnLeft.anchor.set(0.5);
-  txtDLabelOnLeft.x = 5;
-  txtDLabelOnLeft.y = -24;
-  S.btnLeft.addChild(txtDLabelOnLeft);
-  S.btnLeft.position.set(S.gameW / 2 - btnSpacing, S.gameH - BTN_BOTTOM_MARGIN);
-  bindTurnButton(S.btnLeft, 'ArrowLeft');
-  S.hudLayer.addChild(S.btnLeft);
+  function bindHtmlTurnButton($btn, keyCode) {
+    const press = () => {
+      S.keys[keyCode] = true;
+    };
+    const release = () => {
+      S.keys[keyCode] = false;
+    };
+    $btn.addEventListener('pointerdown', press);
+    $btn.addEventListener('pointerup', release);
+    $btn.addEventListener('pointercancel', release);
+    $btn.addEventListener('pointerleave', release);
+  }
 
-  // Right button
-  S.btnRight = new PIXI.Container();
-  const sprRight = new PIXI.Sprite(S.textures.button);
-  sprRight.anchor.set(0.5);
-  scaleToWidth(sprRight, btnWidth);
-  S.btnRight.addChild(sprRight);
-  const txtArrowRight = new PIXI.Text('→', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 32,
-    fill: '#fff',
-    align: 'center',
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 4,
-    dropShadowDistance: 0,
-  });
-  txtArrowRight.anchor.set(0.5);
-
-  txtArrowRight.x = 10;
-  txtArrowRight.y = -5;
-  S.btnRight.addChild(txtArrowRight);
-  const txtALabelOnRight = new PIXI.Text('D', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 24,
-    fill: '#fff',
-    align: 'center',
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 3,
-    dropShadowDistance: 0,
-  });
-  txtALabelOnRight.anchor.set(0.5);
-  txtALabelOnRight.x = -10;
-  txtALabelOnRight.y = -24;
-  S.btnRight.addChild(txtALabelOnRight);
-  S.btnRight.position.set(
-    S.gameW / 2 + btnSpacing,
-    S.gameH - BTN_BOTTOM_MARGIN,
-  );
-  bindTurnButton(S.btnRight, 'ArrowRight');
-  S.hudLayer.addChild(S.btnRight);
+  bindHtmlTurnButton($btnLeft, 'ArrowLeft');
+  bindHtmlTurnButton($btnRight, 'ArrowRight');
 
   // Escape button (top-left)
   S.btnEsc = new PIXI.Container();
@@ -290,9 +223,52 @@ export function buildButtons() {
     S.btnEsc.alpha = 0.7;
   });
   S.hudLayer.addChild(S.btnEsc);
+
+  // ===== Volume controls (HTML, top-left of screen) =====
+  S.volControls = $volControls;
+  const STEP = 0.1;
+
+  function applyVol(target, v) {
+    if (target === 'sfx') {
+      S.sfxVolume = v;
+      if (S.wavesSound)
+        S.wavesSound.volume = Math.max(0, Math.min(1, 0.05 * v));
+      try {
+        localStorage.setItem('lighthouse_sfx_vol', String(v));
+      } catch (_) {}
+      $volSfxVal.textContent = `${Math.round(v * 100)}%`;
+    } else {
+      S.musicVolume = v;
+      if (S.musicSound)
+        S.musicSound.volume = Math.max(0, Math.min(1, MUSIC_VOLUME * v));
+      try {
+        localStorage.setItem('lighthouse_music_vol', String(v));
+      } catch (_) {}
+      $volMusicVal.textContent = `${Math.round(v * 100)}%`;
+    }
+  }
+
+  // Init displayed values
+  $volSfxVal.textContent = `${Math.round((S.sfxVolume ?? 0.5) * 100)}%`;
+  $volMusicVal.textContent = `${Math.round((S.musicVolume ?? 0.5) * 100)}%`;
+
+  $volControls.addEventListener('pointerdown', (e) => {
+    const $btn = e.target.closest('.vol-btn');
+    if (!$btn) return;
+    const target = $btn.dataset.target;
+    const dir = Number($btn.dataset.dir);
+    const cur =
+      target === 'sfx' ? (S.sfxVolume ?? 0.5) : (S.musicVolume ?? 0.5);
+    const v = Math.min(
+      1,
+      Math.max(0, Math.round((cur + dir * STEP) * 10) / 10),
+    );
+    applyVol(target, v);
+  });
 }
 
-// ===== Overlay =====
+function buildVolumeBtn(label) {}
+function buildVolumeControls() {}
 export function buildOverlay() {
   S.overlayLayer = new PIXI.Container();
   S.overlayLayer.visible = false;
@@ -478,12 +454,6 @@ export function repositionUI() {
   S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
   S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
   if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 6);
-  // Move buttons if present
-  const BTN_BOTTOM_MARGIN = 80;
-  if (S.btnLeft)
-    S.btnLeft.position.set(S.gameW / 2 - 110, S.gameH - BTN_BOTTOM_MARGIN);
-  if (S.btnRight)
-    S.btnRight.position.set(S.gameW / 2 + 110, S.gameH - BTN_BOTTOM_MARGIN);
   if (S.btnEsc) S.btnEsc.position.set(44, 28);
 
   S.overlayBg.clear();
@@ -526,9 +496,10 @@ async function showGameOverScreen({
   if (playFail) playFailSound();
 
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.visible = false;
-  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
 
   S.txtMessage.style = new PIXI.TextStyle({
     ...UI_STYLE,
@@ -641,9 +612,10 @@ export function showKrakenGameOver() {
 
 export function showGameOver() {
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.visible = false;
-  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
 
   if (S.overlayLayer.btnActionLeft) {
     S.overlayLayer.btnActionLeft.txtLabel.text = t('overlay.restart');
@@ -672,9 +644,10 @@ export function showExitConfirm() {
   S.exitConfirm = true;
 
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.visible = false;
-  if (S.btnRight) S.btnRight.visible = false;
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
 
   S.overlayBg.visible = true;
   S.overlayLayer.visible = true;
@@ -733,7 +706,8 @@ export function hideExitConfirm() {
     S.overlayLayer.btnActionRight.visible = false;
 
   // Restore gameplay buttons
-  if (S.btnLeft) S.btnLeft.visible = true;
-  if (S.btnRight) S.btnRight.visible = true;
+  if (S.btnLeft) S.btnLeft.hidden = false;
+  if (S.btnRight) S.btnRight.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
+  if (S.volControls) S.volControls.hidden = false;
 }

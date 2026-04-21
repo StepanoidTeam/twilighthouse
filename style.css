@@ -523,6 +523,49 @@ body {
   gap: 18px;
 }
 
+/* ===== How to Play ===== */
+.menu-howtoplay {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  max-height: calc(100vh - 9vh - 96px - 80px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+.howtoplay-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+
+  &:last-child {
+    border-bottom: none;
+  }
+}
+
+.howtoplay-icon {
+  font-size: 3.75rem;
+  line-height: 1;
+  flex-shrink: 0;
+  width: 5rem;
+  text-align: center;
+
+  img {
+    width: 5rem;
+    height: 5rem;
+    object-fit: contain;
+    display: block;
+  }
+}
+
+.howtoplay-text {
+  color: #d5e3f3;
+  font-size: clamp(0.9rem, 1.75vw, 1.05rem);
+  line-height: 1.5;
+}
+
 .menu-setting-row {
   display: flex;
   align-items: center;
@@ -691,4 +734,117 @@ body {
     top: 12px;
     left: 12px;
   }
+}
+
+/* ===== In-game volume controls ===== */
+.vol-controls {
+  position: fixed;
+  top: 6px;
+  left: 90px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  z-index: 2;
+}
+
+.vol-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.vol-btn {
+  background: rgba(10, 28, 46, 0.75);
+  border: 1px solid #2a4a6a;
+  color: #c8d8e8;
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: bold;
+  width: 24px;
+  height: 24px;
+  border-radius: 5px;
+  cursor: pointer;
+  padding: 0;
+  line-height: 1;
+  opacity: 0.75;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(20, 50, 80, 0.9);
+  }
+  &:active {
+    opacity: 1;
+    background: rgba(30, 70, 110, 0.9);
+  }
+}
+
+.vol-icon {
+  font-size: 14px;
+  width: 20px;
+  text-align: center;
+}
+
+.vol-val {
+  font-size: 11px;
+  color: #8aabcc;
+  font-family: var(--font-ui);
+  min-width: 30px;
+  text-align: center;
+  text-shadow: 0 1px 3px #000;
+}
+
+/* ===== In-game turn buttons ===== */
+.turn-btn {
+  position: fixed;
+  bottom: 28px;
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: rgba(10, 28, 46, 0.7);
+  border: 2px solid rgba(80, 140, 200, 0.4);
+  color: #fff;
+  cursor: pointer;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  z-index: 2;
+  user-select: none;
+  -webkit-user-select: none;
+  touch-action: none;
+  opacity: 0.75;
+
+  &:hover {
+    opacity: 1;
+    background: rgba(20, 50, 80, 0.85);
+  }
+  &:active {
+    opacity: 1;
+    background: rgba(30, 70, 110, 0.9);
+    border-color: rgba(100, 180, 255, 0.7);
+  }
+}
+
+.turn-btn--left {
+  left: calc(50% - 120px);
+}
+
+.turn-btn--right {
+  left: calc(50% + 40px);
+}
+
+.turn-btn-arrow {
+  font-size: 28px;
+  font-weight: bold;
+  line-height: 1;
+  text-shadow: 0 1px 4px #000;
+}
+
+.turn-btn-key {
+  font-size: 13px;
+  font-family: var(--font-ui);
+  font-weight: bold;
+  color: #8aabcc;
+  text-shadow: 0 1px 3px #000;
 }

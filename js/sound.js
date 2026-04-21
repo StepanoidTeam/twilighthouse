@@ -11,6 +11,7 @@ const CRASH_SOUNDS = [
 const COP_VOLUME = 0.03;
 const BOAT_SONAR_VOLUME = 0.15;
 const WAVES_VOLUME = 0.05;
+const MUSIC_VOLUME = 0.3;
 
 function playSound(file, volume = 0.2) {
   const snd = new Audio(file);
@@ -29,6 +30,7 @@ export {
   COP_VOLUME,
   BOAT_SONAR_VOLUME,
   WAVES_VOLUME,
+  MUSIC_VOLUME,
   playSound,
   playRandomSound,
 };

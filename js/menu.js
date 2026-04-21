@@ -1,4 +1,4 @@
-import { playSound, WAVES_VOLUME } from './sound.js';
+import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
@@ -505,7 +505,7 @@ function showSettings() {
     $musicValue.textContent = `${$musicInput.value}%`;
     S.musicVolume = val;
     if (S.musicSound) {
-      S.musicSound.volume = Math.max(0, Math.min(1, 0.5 * val));
+      S.musicSound.volume = Math.max(0, Math.min(1, MUSIC_VOLUME * val));
     }
     try {
       localStorage.setItem('lighthouse_music_vol', String(val));

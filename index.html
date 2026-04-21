@@ -15,6 +15,32 @@
   <body>
     <div id="$gameContainer"></div>
 
+    <!-- ===== In-game volume controls ===== -->
+    <div id="$volControls" class="vol-controls" hidden>
+      <div class="vol-row">
+        <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">◀</button>
+        <span class="vol-icon">🔊</span>
+        <span class="vol-val" id="$volSfxVal">50%</span>
+        <button type="button" class="vol-btn" data-target="sfx" data-dir="1">▶</button>
+      </div>
+      <div class="vol-row">
+        <button type="button" class="vol-btn" data-target="music" data-dir="-1">◀</button>
+        <span class="vol-icon">🎵</span>
+        <span class="vol-val" id="$volMusicVal">50%</span>
+        <button type="button" class="vol-btn" data-target="music" data-dir="1">▶</button>
+      </div>
+    </div>
+
+    <!-- ===== In-game turn buttons ===== -->
+    <button type="button" id="$btnLeft" class="turn-btn turn-btn--left" hidden aria-label="Turn left">
+      <span class="turn-btn-arrow">←</span>
+      <span class="turn-btn-key">A</span>
+    </button>
+    <button type="button" id="$btnRight" class="turn-btn turn-btn--right" hidden aria-label="Turn right">
+      <span class="turn-btn-arrow">→</span>
+      <span class="turn-btn-key">D</span>
+    </button>
+
     <!-- ===== Menu overlay ===== -->
     <div id="$menuOverlay" class="menu-overlay" hidden>
       <div class="menu-overlay-bg"></div>
