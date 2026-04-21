@@ -13,7 +13,20 @@
     <script type="module" src="js/app.js" defer></script>
   </head>
   <body>
-    <div id="$gameContainer">
+    <div id="$bootLoader" class="boot-loader">
+      <div class="boot-loader-panel blur-bg">
+        <p id="$bootLoaderEyebrow" class="boot-loader-eyebrow">TWILIGHTHOUSE</p>
+        <h1 id="$bootLoaderTitle" class="boot-loader-title">Lighthouse</h1>
+        <p id="$bootLoaderText" class="boot-loader-text">Loading…</p>
+        <p id="$bootLoaderAsset" class="boot-loader-asset">Texture - ...</p>
+        <div class="boot-loader-bar" aria-hidden="true">
+          <div id="$bootLoaderBarFill" class="boot-loader-bar-fill"></div>
+        </div>
+        <p id="$bootLoaderPercent" class="boot-loader-percent">0%</p>
+      </div>
+    </div>
+
+    <div id="$gameContainer" hidden>
       <!-- ===== In-game volume controls ===== -->
       <div id="$volControls" class="vol-controls">
         <div class="vol-row">
@@ -119,7 +132,7 @@
     </div>
 
     <!-- ===== Menu overlay ===== -->
-    <div id="$menuOverlay" class="menu-overlay" hidden>
+    <div id="$menuOverlay" class="menu-overlay">
       <div id="$menuBg" class="menu-overlay-bg"></div>
       <div class="menu-overlay-dim" hidden></div>
       <div class="menu-overlay-panel">

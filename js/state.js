@@ -68,10 +68,12 @@ const State = {
   LH_GLOW_RADIUS: LH_GLOW_RADIUS_DEFAULT,
 
   // Game flow
+  gameSessionActive: false,
   gameOver: false,
   gameOverPending: false,
   gameWon: false,
   exitConfirm: false,
+  gameOverTimeoutId: null,
 
   // Run timing (survival)
   runStartTime: 0,
@@ -144,6 +146,11 @@ const State = {
 
   // ===== Methods =====
   reset() {
+    if (this.gameOverTimeoutId) {
+      clearTimeout(this.gameOverTimeoutId);
+      this.gameOverTimeoutId = null;
+    }
+
     this.score = 0;
     this.deliveredCargo = { '💡': 0, '🛢️': 0, '📦': 0 };
     this.lives = MAX_LIVES;
@@ -155,10 +162,12 @@ const State = {
     this.lampFlicker = 1;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
     this.beamAngle = -Math.PI / 2;
+    this.gameSessionActive = false;
     this.gameOver = false;
     this.gameOverPending = false;
     this.gameWon = false;
     this.exitConfirm = false;
+    this.keys = {};
     this.boatsSunk = 0;
     this.nextSpawnTime = performance.now() + 1000;
     this.runStartTime = performance.now();

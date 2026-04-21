@@ -66,6 +66,11 @@ export function createCargoLabel(cargoText) {
   return container;
 }
 
+// ===== Overlay Fade =====
+export function fadeInOverlay() {
+  // no-op: game-over screen is now HTML
+}
+
 export function scheduleGameOver(fn) {
   if (S.gameOver || S.gameOverPending) return;
   S.gameOverPending = true;
@@ -157,6 +162,8 @@ function bindTurnButton(button, keyCode) {
 
 export function buildButtons() {
   // ===== Left / Right turn buttons (HTML) =====
+  S.btnLeft = $btnLeft;
+  S.btnRight = $btnRight;
 
   function bindHtmlTurnButton($btn, keyCode) {
     const press = () => {
@@ -233,7 +240,8 @@ export function buildButtons() {
   }
 
   // Init displayed values
-  updateVolumeDisplays();
+  $volSfxVal.textContent = `${Math.round((S.sfxVolume ?? 0.5) * 100)}%`;
+  $volMusicVal.textContent = `${Math.round((S.musicVolume ?? 0.5) * 100)}%`;
 
   $volControls.addEventListener('pointerdown', (e) => {
     const $btn = e.target.closest('.vol-btn');
@@ -276,11 +284,6 @@ export function repositionUI() {
   if (S.btnEsc) S.btnEsc.position.set(44, 28);
 }
 
-export function updateVolumeDisplays() {
-  $volSfxVal.textContent = `${Math.round((S.sfxVolume ?? 0.5) * 100)}%`;
-  $volMusicVal.textContent = `${Math.round((S.musicVolume ?? 0.5) * 100)}%`;
-}
-
 export function buildUI() {
   buildHUD();
   buildButtons();
@@ -309,7 +312,7 @@ function playFailSound() {
 }
 
 // ===== HTML Game Over / Win screen =====
-export const SPLASH_IMAGES = {
+const SPLASH_IMAGES = {
   splashIceberg: 'sprites/wasted/iceberg.png',
   splashMermaid: 'sprites/wasted/mermaid.png',
   splashKraken: 'sprites/wasted/kraken.png',
@@ -321,6 +324,14 @@ export const SPLASH_IMAGES = {
 async function showGameOverScreen({ message, splashKey, playFail = true }) {
   S.gameOver = true;
   if (playFail) playFailSound();
+
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
+  if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
+
+  $gameContainer.hidden = true;
 
   $resultMsg.textContent = message;
   $resultRestartLabel.textContent = t('overlay.restart');
@@ -374,6 +385,12 @@ export function showGameOver() {
   S.gameOver = true;
   playFailSound();
 
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
+  if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
+
   $gameContainer.hidden = true;
   $resultMsg.textContent = t('gameOver.score', {
     score: S.score,
@@ -397,6 +414,12 @@ export async function showWin() {
 export function showExitConfirm() {
   S.exitConfirm = true;
 
+  // Hide gameplay buttons
+  if (S.btnLeft) S.btnLeft.hidden = true;
+  if (S.btnRight) S.btnRight.hidden = true;
+  if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
+
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
   $exitResumeLabel.textContent = t('overlay.resume');
@@ -406,4 +429,10 @@ export function showExitConfirm() {
 export function hideExitConfirm() {
   S.exitConfirm = false;
   $screenExitConfirm.hidden = true;
+
+  // Restore gameplay buttons
+  if (S.btnLeft) S.btnLeft.hidden = false;
+  if (S.btnRight) S.btnRight.hidden = false;
+  if (S.btnEsc) S.btnEsc.visible = true;
+  if (S.volControls) S.volControls.hidden = false;
 }

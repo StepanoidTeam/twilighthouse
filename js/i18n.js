@@ -87,6 +87,16 @@ Photopea — image editor
     'leaderboard.empty': 'No one is in the top yet — be the first!',
     'leaderboard.you': '(you)',
 
+    // Boot loader
+    'boot.title': 'Lighthouse',
+    'boot.loading': 'Loading lighthouse assets…',
+    'boot.progress': 'Loading assets {loaded}/{total}',
+    'boot.ready': 'Ready',
+    'boot.failed': 'Failed to load game assets',
+    'boot.texture': 'Texture',
+    'boot.audio': 'Sound',
+    'boot.finalizing': 'Finalizing startup…',
+
     // Settings
     'settings.title': '⚙️ Settings',
     'settings.language': '🌐 Language',
@@ -249,6 +259,15 @@ Photopea — image editor
     'leaderboard.loadError': 'Не удалось загрузить лидерборд',
     'leaderboard.empty': 'Пока никто не попал в топ — стань первым!',
     'leaderboard.you': '(вы)',
+
+    'boot.title': 'Маяк',
+    'boot.loading': 'Загрузка игровых ресурсов…',
+    'boot.progress': 'Загружаем ресурсы {loaded}/{total}',
+    'boot.ready': 'Готово',
+    'boot.failed': 'Не удалось загрузить ресурсы игры',
+    'boot.texture': 'Текстура',
+    'boot.audio': 'Звук',
+    'boot.finalizing': 'Завершаем запуск…',
 
     'settings.title': '⚙️ Настройки',
     'settings.language': '🌐 Язык',

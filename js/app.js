@@ -29,6 +29,7 @@ import {
   buildUI,
   updateHUD,
   updateTooltips,
+  clearTooltips,
   repositionUI,
   showExitConfirm,
   hideExitConfirm,
@@ -39,20 +40,230 @@ import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
 import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
-import {
-  buildMenu,
-  showMenu,
-  isMenuVisible,
-  repositionMenu,
-  showTutorial,
-} from './menu.js';
+import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
+import { t, onLanguageChange } from './i18n.js';
 
 const $gameContainer = document.getElementById('$gameContainer');
+const $bootLoader = document.getElementById('$bootLoader');
+const $bootLoaderTitle = document.getElementById('$bootLoaderTitle');
+const $bootLoaderText = document.getElementById('$bootLoaderText');
+const $bootLoaderAsset = document.getElementById('$bootLoaderAsset');
+const $bootLoaderBarFill = document.getElementById('$bootLoaderBarFill');
+const $bootLoaderPercent = document.getElementById('$bootLoaderPercent');
+const MUSIC_PLAYLIST = [
+  'music/1-lighthouse-salt.mp3',
+  'music/2-twilight-house.mp3',
+  'music/3-techno-salt.mp3',
+];
+const BOOT_AUDIO_ASSETS = Array.from(
+  new Set([
+    'audio/button-click.mp3',
+    'audio/menu-select.mp3',
+    'audio/book.mp3',
+    'audio/fail-1.mp3',
+    'audio/ocean-sea-soft-waves.mp3',
+    'audio/crash/horror-bone-crack.mp3',
+    'audio/crash/rubble-crash.mp3',
+    'audio/crash/small-rock-break.mp3',
+    'audio/crash/wooden-ship-break.mp3',
+    'audio/cop/police-intro-siren.mp3',
+    'audio/cop/police-siren-one-loop.mp3',
+    'audio/cop/radio-thats-correct.mp3',
+    'audio/cop/radio-turn.mp3',
+    'audio/boat/submarine_sonar-1.mp3',
+    'audio/boat/submarine_sonar-2.mp3',
+    'audio/boat/submarine_sonar-3.mp3',
+    ...MUSIC_PLAYLIST,
+  ]),
+);
+
+let musicTrackIndex = 0;
+let bootLoaderState = {
+  loaded: 0,
+  total: Object.keys(SPRITE_FILES).length + BOOT_AUDIO_ASSETS.length,
+  status: 'loading',
+  currentAsset: null,
+};
+
+function getBootAssetLabel(asset) {
+  if (!asset) {
+    return bootLoaderState.status === 'ready' ? t('boot.finalizing') : '';
+  }
+
+  const kindKey = asset.kind === 'audio' ? 'boot.audio' : 'boot.texture';
+  const fileName = asset.path.split('/').pop() || asset.path;
+  return `${t(kindKey)} - ${fileName}`;
+}
+
+function renderBootLoaderText() {
+  if ($bootLoaderTitle) $bootLoaderTitle.textContent = t('boot.title');
+  if ($bootLoaderText) {
+    if (bootLoaderState.status === 'failed') {
+      $bootLoaderText.textContent = t('boot.failed');
+    } else if (bootLoaderState.status === 'ready') {
+      $bootLoaderText.textContent = t('boot.ready');
+    } else if (bootLoaderState.total > 0 && bootLoaderState.loaded > 0) {
+      $bootLoaderText.textContent = t('boot.progress', {
+        loaded: bootLoaderState.loaded,
+        total: bootLoaderState.total,
+      });
+    } else {
+      $bootLoaderText.textContent = t('boot.loading');
+    }
+  }
+
+  if ($bootLoaderAsset) {
+    $bootLoaderAsset.textContent = getBootAssetLabel(
+      bootLoaderState.currentAsset,
+    );
+  }
+}
+
+function setBootLoaderProgress(loaded, total, currentAsset = null) {
+  bootLoaderState = {
+    ...bootLoaderState,
+    loaded,
+    total,
+    currentAsset,
+    status: 'loading',
+  };
+  const percent = total > 0 ? Math.round((loaded / total) * 100) : 0;
+
+  renderBootLoaderText();
+
+  if ($bootLoaderBarFill) $bootLoaderBarFill.style.width = `${percent}%`;
+  if ($bootLoaderPercent) $bootLoaderPercent.textContent = `${percent}%`;
+}
+
+function hideBootLoader() {
+  if (!$bootLoader) return;
+
+  bootLoaderState = {
+    ...bootLoaderState,
+    loaded: bootLoaderState.total,
+    status: 'ready',
+    currentAsset: null,
+  };
+  if ($bootLoaderBarFill) $bootLoaderBarFill.style.width = '100%';
+  if ($bootLoaderPercent) $bootLoaderPercent.textContent = '100%';
+  renderBootLoaderText();
+
+  requestAnimationFrame(() => {
+    $bootLoader.classList.add('is-hiding');
+  });
+
+  window.setTimeout(() => {
+    $bootLoader.hidden = true;
+  }, 320);
+}
+
+function showBootLoaderError() {
+  if (!$bootLoader) return;
+
+  bootLoaderState = {
+    ...bootLoaderState,
+    status: 'failed',
+    currentAsset: null,
+  };
+  renderBootLoaderText();
+  if ($bootLoaderPercent) $bootLoaderPercent.textContent = 'ERR';
+}
+
+function preloadAudioAsset(path) {
+  return new Promise((resolve) => {
+    const audio = new Audio();
+    let settled = false;
+    const timeoutId = window.setTimeout(handleDone, 4000);
+
+    function cleanup() {
+      window.clearTimeout(timeoutId);
+      audio.removeEventListener('canplaythrough', handleReady);
+      audio.removeEventListener('loadeddata', handleReady);
+      audio.removeEventListener('error', handleDone);
+    }
+
+    function handleDone() {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      resolve();
+    }
+
+    function handleReady() {
+      handleDone();
+    }
+
+    audio.preload = 'auto';
+    audio.addEventListener('canplaythrough', handleReady, { once: true });
+    audio.addEventListener('loadeddata', handleReady, { once: true });
+    audio.addEventListener('error', handleDone, { once: true });
+    audio.src = path;
+    audio.load();
+  });
+}
 
 function playClickSound() {
   playSound('audio/button-click.mp3', 0.2);
+}
+
+function stopAmbientSounds({ resetPlayback = false } = {}) {
+  if (S.wavesSound) {
+    S.wavesSound.pause();
+    if (resetPlayback) S.wavesSound.currentTime = 0;
+  }
+
+  if (S.musicSound) {
+    S.musicSound.pause();
+    if (resetPlayback) {
+      musicTrackIndex = 0;
+      if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
+        S.musicSound.src = MUSIC_PLAYLIST[0];
+      }
+      S.musicSound.currentTime = 0;
+    }
+  }
+}
+
+function startAmbientSounds({ restartPlayback = false } = {}) {
+  if (S.wavesSound) {
+    if (restartPlayback) S.wavesSound.currentTime = 0;
+    S.wavesSound.play().catch(() => {});
+  }
+
+  if (S.musicSound) {
+    if (restartPlayback) {
+      musicTrackIndex = 0;
+      if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
+        S.musicSound.src = MUSIC_PLAYLIST[0];
+      }
+      S.musicSound.currentTime = 0;
+    }
+    S.musicSound.play().catch(() => {});
+    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
+  }
+}
+
+function clearTransientVisuals() {
+  if (S.wakeGfx) S.wakeGfx.clear();
+  clearTooltips();
+}
+
+function prepareFreshRun() {
+  clearGame();
+  S.reset();
+  S.gameSessionActive = true;
+  updateHUD();
+  updateVolumeDisplays();
+  clearTransientVisuals();
+  S.nextSpawnTime = performance.now() + 1000;
+  snapCamera();
+  updateDarkness();
+  $gameContainer.hidden = false;
+  if (S.btnEsc) S.btnEsc.visible = true;
+  if (S.volControls) S.volControls.hidden = false;
+  startAmbientSounds({ restartPlayback: true });
 }
 
 // ===== Resize =====
@@ -176,29 +387,22 @@ function exitToMenu() {
   clearGame();
   S.reset();
   updateHUD();
+  clearTransientVisuals();
+  stopAmbientSounds({ resetPlayback: true });
   $gameContainer.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
+  if (S.volControls) S.volControls.hidden = true;
   showMenu();
 }
 
 // ===== Restart game (play again) =====
 function restartGame() {
-  clearGame();
-  S.reset();
-  updateHUD();
-  updateVolumeDisplays();
-  S.nextSpawnTime = performance.now() + 1000;
-  $gameContainer.hidden = false;
+  prepareFreshRun();
 }
 
 // ===== Start Game (called from menu) =====
 function startGame() {
-  S.reset();
-  updateHUD();
-  updateVolumeDisplays();
-  S.nextSpawnTime = performance.now() + 1000;
-  $gameContainer.hidden = false;
-  if (S.btnEsc) S.btnEsc.visible = true;
+  prepareFreshRun();
 }
 
 // ===== Submit Score =====
@@ -229,6 +433,8 @@ async function trySubmitScore() {
 
 // ===== Game Loop =====
 function gameLoop(delta) {
+  if (!S.gameSessionActive) return;
+
   // Detect a fresh game-over transition: freeze survival time and submit once
   if (S.gameOver) {
     if (!S.scoreSubmitted) {
@@ -305,13 +511,29 @@ function gameLoop(delta) {
 
 // ===== Load Textures =====
 async function loadTextures() {
-  for (const [name, path] of Object.entries(SPRITE_FILES)) {
+  const entries = Object.entries(SPRITE_FILES);
+  const total = bootLoaderState.total;
+  let loaded = 0;
+
+  for (const [index, [name, path]] of entries.entries()) {
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
     S.textures[name] = await PIXI.Assets.load(path);
+    loaded = index + 1;
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
+  }
+
+  for (const path of BOOT_AUDIO_ASSETS) {
+    setBootLoaderProgress(loaded, total, { kind: 'audio', path });
+    await preloadAudioAsset(path);
+    loaded += 1;
+    setBootLoaderProgress(loaded, total, { kind: 'audio', path });
   }
 }
 
 // ===== Init =====
 async function init() {
+  renderBootLoaderText();
+
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;
   S.worldScale = computeWorldScale(S.gameW, S.gameH);
@@ -409,22 +631,8 @@ async function init() {
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
 
-  // Tutorial shown on first visit instead of intro comics
-  const INTRO_SEEN_KEY = 'lighthouse_intro_seen';
-  let introSeen = false;
-  try {
-    introSeen = localStorage.getItem(INTRO_SEEN_KEY) === '1';
-  } catch (e) {
-    introSeen = false;
-  }
-  if (!introSeen) {
-    showTutorial();
-    try {
-      localStorage.setItem(INTRO_SEEN_KEY, '1');
-    } catch (e) {
-      // ignore (private mode / storage disabled)
-    }
-  }
+  S.gameSessionActive = false;
+  hideBootLoader();
 
   // ===== Waves Sound =====
   const wavesAudio = new Audio('audio/ocean-sea-soft-waves.mp3');
@@ -436,12 +644,6 @@ async function init() {
   S.wavesSound = wavesAudio;
 
   // ===== Music playlist =====
-  const MUSIC_PLAYLIST = [
-    'music/1-lighthouse-salt.mp3',
-    'music/2-twilight-beacon.mp3',
-    'music/3-techno-salt.mp3',
-  ];
-  let musicTrackIndex = 0;
   const musicAudio = new Audio(MUSIC_PLAYLIST[0]);
   musicAudio.volume = Math.max(
     0,
@@ -454,16 +656,7 @@ async function init() {
     console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
   });
   S.musicSound = musicAudio;
-
-  const startAmbient = () => {
-    S.wavesSound.play().catch(() => {});
-    S.musicSound.play().catch(() => {});
-    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
-    window.removeEventListener('pointerdown', startAmbient);
-    window.removeEventListener('keydown', startAmbient);
-  };
-  window.addEventListener('pointerdown', startAmbient);
-  window.addEventListener('keydown', startAmbient);
+  stopAmbientSounds({ resetPlayback: true });
 
   if (analytics) {
     logEvent(analytics, 'game_start', {
@@ -495,4 +688,10 @@ async function init() {
   }
 }
 
-init();
+renderBootLoaderText();
+onLanguageChange(renderBootLoaderText);
+
+init().catch((e) => {
+  console.error('init failed', e);
+  showBootLoaderError();
+});

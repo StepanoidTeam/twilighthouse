@@ -1,16 +1,10 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@400..700&family=Oswald:wght@200..700&display=swap');
 
-@import url(./helpers.css);
-
 :root {
   --color-bg: #0a1020;
   --font-ui: 'Segoe UI', system-ui, sans-serif;
   --font-menu: 'Oswald', 'Segoe UI', system-ui, sans-serif;
   --font-handwritten: 'Caveat', 'Segoe Print', 'Comic Sans MS', cursive;
-}
-
-.blur-bg {
-  backdrop-filter: blur(5px);
 }
 
 * {
@@ -32,7 +26,6 @@ body {
 #\$gameContainer {
   width: 100vw;
   height: 100vh;
-  z-index: 1;
 }
 
 #\$gameContainer canvas {
@@ -50,6 +43,7 @@ body {
   align-items: center;
   justify-content: center;
   z-index: 10000;
+  backdrop-filter: blur(6px);
 }
 
 .auth-modal-backdrop.is-visible {
@@ -211,16 +205,22 @@ body {
 }
 
 .auth-widget-btn {
+  background: rgba(10, 20, 40, 0.75);
   border: 1px solid #2a3f5f;
+  color: #e8eef6;
   padding: 8px 14px;
+  border-radius: 20px;
+  cursor: pointer;
   font-size: 14px;
   font-weight: 600;
+  font-family: inherit;
+  backdrop-filter: blur(4px);
   transition:
     background 0.15s,
     border-color 0.15s;
 }
-
 .auth-widget-btn:hover {
+  background: rgba(30, 50, 80, 0.9);
   border-color: #5599cc;
 }
 
@@ -236,6 +236,7 @@ body {
   border: 1px solid #2a3f5f;
   padding: 6px 6px 6px 14px;
   border-radius: 20px;
+  backdrop-filter: blur(4px);
 }
 .auth-widget-name {
   color: #ffdd44;
@@ -246,6 +247,8 @@ body {
   white-space: nowrap;
 }
 .auth-widget-btn--signout {
+  padding: 5px 12px;
+  border-radius: 14px;
   background: rgba(0, 0, 0, 0.35);
   font-size: 12px;
 }
@@ -259,27 +262,33 @@ body {
   display: none;
   align-items: center;
   gap: 6px;
+  background: rgba(10, 20, 40, 0.75);
+  border: 1px solid #2a3f5f;
+  color: #e8eef6;
   padding: 10px 16px;
+  border-radius: 20px;
+  cursor: pointer;
   font-size: 15px;
   font-weight: 600;
+  font-family: inherit;
+  backdrop-filter: blur(4px);
+  transition:
+    background 0.15s,
+    border-color 0.15s,
+    transform 0.08s;
   user-select: none;
   -webkit-tap-highlight-color: transparent;
 }
-
-.back-btn:hover {
-  transform: translateX(8px);
-  background: #f93320db;
-  color: #f2e3b9;
-}
-
 .back-btn.is-visible {
   display: inline-flex;
 }
-
+.back-btn:hover {
+  background: rgba(30, 50, 80, 0.9);
+  border-color: #5599cc;
+}
 .back-btn:active {
   transform: translateY(1px);
 }
-
 .back-btn-arrow {
   font-size: 18px;
   line-height: 1;
@@ -314,8 +323,6 @@ body {
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-  transition: opacity 0.5s ease-in-out;
-  opacity: 1;
 }
 
 .menu-overlay-dim {
@@ -325,17 +332,16 @@ body {
 }
 
 .menu-overlay-panel {
-  display: flex;
-  flex-direction: column;
-  justify-content: space-evenly;
-  padding: 40px;
-
-  width: fit-content;
-
-  gap: 60px;
+  position: absolute;
+  inset: 0;
+  padding: 14vh 28px 34px;
 }
 
 .menu-title-logo {
+  bottom: calc(
+    80px + 5 * (18px + 78px) + 24px
+  ); /* above menu-main: bottom + gaps + buttons + gap */
+  left: 28px;
   width: min(420px, max(280px, 50vw));
   height: auto;
   pointer-events: none;
@@ -343,40 +349,23 @@ body {
 }
 
 .menu-main {
+  position: absolute;
+  left: 28px;
+  bottom: 80px;
   display: flex;
   flex-direction: column;
   gap: 18px;
-}
-
-/* ===== Common menu button style ===== */
-.menu-btn {
-  background: #002f50d9;
-  color: #f2e3b9cf;
-  border-radius: 15px;
-  cursor: pointer;
-  font-family: inherit;
-  transition:
-    transform 120ms ease,
-    background 120ms ease;
-  border: none;
-}
-
-.menu-btn {
-  &.is-selected,
-  &:hover {
-    transform: translateX(8px);
-    background: #f93320db;
-    color: #f2e3b9;
-  }
+  width: min(420px, max(280px, 50vw));
 }
 
 .menu-main-btn {
   position: relative;
-  display: flex;
-  align-items: center;
-  gap: 16px;
 
-  padding: 0px 70px 0 28px;
+  padding: 18px 28px;
+  border: none;
+  border-radius: 14px;
+  background: #002f50d9;
+  color: #f2e3b9cf;
   text-align: left;
   line-height: 1;
 
@@ -384,7 +373,9 @@ body {
   font-size: 36px;
   font-weight: 500;
   letter-spacing: 0.04em;
+  cursor: pointer;
   text-transform: uppercase;
+  border-radius: 15px;
   corner-shape: scoop;
   transition:
     transform 120ms ease,
@@ -397,27 +388,16 @@ body {
     padding-right: 15px;
   }
 
-  .menu-main-btn-icon {
-    height: 70px;
-    width: auto;
-    opacity: 0.81;
-  }
-
-  &:hover &.is-selected {
-    background: #f93320db;
-
-    &:after {
-      content: '✒︎';
-    }
+  &.is-selected:after {
+    content: '✒︎';
   }
 }
 
-.menu-main-btn-icon {
-  width: 44px;
-  height: 44px;
-  object-fit: contain;
-  flex-shrink: 0;
-  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
+.menu-main-btn:hover,
+.menu-main-btn.is-selected {
+  transform: translateX(8px);
+  background: #f93320db;
+  color: #f2e3b9;
 }
 
 .menu-main-btn:focus-visible,
@@ -503,6 +483,7 @@ body {
   box-shadow:
     0 24px 60px rgba(0, 0, 0, 0.32),
     inset 0 1px 0 rgba(255, 255, 255, 0.04);
+  backdrop-filter: blur(12px);
 }
 
 .menu-state-label,
@@ -525,7 +506,7 @@ body {
 
 .menu-leaderboard-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto;
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
@@ -540,14 +521,8 @@ body {
 }
 
 .menu-leaderboard-rank,
-.menu-leaderboard-time,
-.menu-leaderboard-date {
+.menu-leaderboard-time {
   white-space: nowrap;
-}
-
-.menu-leaderboard-date {
-  font-size: 0.8em;
-  opacity: 0.55;
 }
 
 .menu-leaderboard-name {
@@ -739,12 +714,6 @@ body {
 }
 
 .menu-authors {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: #000;
   overflow: hidden;
 }
 
@@ -753,19 +722,11 @@ body {
 }
 
 @keyframes scroll-credits {
-  0% {
+  from {
     transform: translate(-50%, 100vh);
-    opacity: 0;
   }
-  5% {
-    opacity: 1;
-  }
-  95% {
-    opacity: 1;
-  }
-  100% {
+  to {
     transform: translate(-50%, -100%);
-    opacity: 0;
   }
 }
 
@@ -774,7 +735,7 @@ body {
   left: 50%;
   top: 0;
   width: min(420px, calc(100vw - 48px));
-  animation: scroll-credits 40s linear infinite;
+  animation: scroll-credits 28s linear infinite;
 }
 
 .menu-authors-text {
@@ -794,19 +755,6 @@ body {
   z-index: 1;
 }
 
-.fullscreen {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-
-  overflow: hidden;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-}
-
 @media (max-height: 760px) {
   .menu-main {
     gap: 14px;
@@ -815,6 +763,71 @@ body {
   .menu-main-btn {
     min-height: 70px;
     font-size: 20px;
+  }
+}
+
+@media (max-width: 720px) {
+  .menu-overlay-panel {
+    padding-inline: 16px;
+  }
+
+  .menu-title-logo {
+    bottom: calc(80px + 5 * (14px + 68px) + 20px);
+    left: 16px;
+    width: min(380px, 75vw);
+  }
+
+  .menu-main {
+    left: 16px;
+    right: 16px;
+    bottom: 80px;
+    width: auto;
+  }
+
+  .menu-main-btn {
+    min-height: 68px;
+    font-size: 19px;
+  }
+
+  .menu-screen {
+    padding-inline: 16px;
+    padding-top: 84px;
+  }
+
+  .menu-card {
+    padding: 18px;
+  }
+
+  .menu-setting-row,
+  .menu-setting-row--slider {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .menu-slider {
+    min-width: 0;
+  }
+
+  .menu-slider input {
+    width: 100%;
+  }
+
+  .menu-leaderboard-row {
+    grid-template-columns: 44px minmax(0, 1fr);
+  }
+
+  .menu-leaderboard-time {
+    grid-column: 2;
+  }
+
+  .auth-widget {
+    top: 12px;
+    right: 12px;
+  }
+
+  .back-btn {
+    top: 12px;
+    left: 12px;
   }
 }
 
@@ -988,6 +1001,7 @@ body {
   align-items: center;
   justify-content: center;
   gap: 32px;
+  background: rgba(10, 16, 32, 0.8);
 
   .exit-confirm-msg {
     font-family: var(--font-ui);
@@ -1012,8 +1026,11 @@ body {
   align-items: center;
   gap: 6px;
   padding: 10px 20px;
-
+  background: rgba(10, 30, 50, 0.85);
+  border: 1.5px solid #44cc88;
   border-radius: 6px;
+  cursor: pointer;
+  color: #c8d8e8;
   font-family: var(--font-ui);
 
   .result-btn-key {
@@ -1026,5 +1043,10 @@ body {
     font-size: 14px;
     font-weight: bold;
     color: #c8d8e8;
+  }
+
+  &:hover {
+    background: rgba(20, 60, 90, 0.9);
+    border-color: #66ee99;
   }
 }
