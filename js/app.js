@@ -192,6 +192,7 @@ function startGame() {
   updateHUD();
   updateVolumeDisplays();
   S.nextSpawnTime = performance.now() + 1000;
+  $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
 }
 
