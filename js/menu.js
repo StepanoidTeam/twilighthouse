@@ -233,6 +233,7 @@ export async function buildMenu(app, startGameCb) {
       if (currentScreen === 'settings') showSettings();
       else if (currentScreen === 'leaderboard') showLeaderboard();
       else if (currentScreen === 'authors') showAuthors();
+      else if (currentScreen === 'tutorial') showTutorial();
       else if (currentScreen === 'main') showMainMenu();
     });
     i18nBound = true;
@@ -297,20 +298,46 @@ function activateMenuItem() {
   }
 }
 
-// ===== Tutorial =====
+// ===== Tutorial / How to Play =====
 function showTutorial() {
-  if (!$menuRoot) return;
-  $menuRoot.hidden = true;
-  hideBackBtn();
-  hideAuthWidget();
-  currentScreen = null;
+  hideMainItems();
+  showBackBtn();
+  currentScreen = 'tutorial';
+  setHint(t('hint.back'));
 
-  showIntro(menuApp || S.app).then(() => {
-    if (!$menuRoot) return;
-    $menuRoot.hidden = false;
-    showMainMenu();
-    showAuthWidget();
-  });
+  const $screen = buildScreenShell(t('howtoplay.title'));
+  if (!$screen) return;
+
+  const $card = document.createElement('div');
+  $card.className = 'menu-card menu-howtoplay';
+
+  const items = t('howtoplay.items');
+  for (const item of items) {
+    const $row = document.createElement('div');
+    $row.className = 'howtoplay-row';
+
+    const $icon = document.createElement('span');
+    $icon.className = 'howtoplay-icon';
+    if (item.icon.includes('/')) {
+      const $img = document.createElement('img');
+      $img.src = item.icon;
+      $img.alt = '';
+      $img.setAttribute('aria-hidden', 'true');
+      $icon.appendChild($img);
+    } else {
+      $icon.textContent = item.icon;
+    }
+
+    const $text = document.createElement('span');
+    $text.className = 'howtoplay-text';
+    $text.textContent = item.text;
+
+    $row.appendChild($icon);
+    $row.appendChild($text);
+    $card.appendChild($row);
+  }
+
+  $screen.appendChild($card);
 }
 
 // ===== Leaderboard =====
@@ -449,6 +476,46 @@ function showSettings() {
   $langRow.appendChild($langBtn);
 
   $card.appendChild($langRow);
+
+  const $musicRow = document.createElement('div');
+  $musicRow.className = 'menu-setting-row menu-setting-row--slider';
+
+  const $musicLabel = document.createElement('span');
+  $musicLabel.className = 'menu-setting-label';
+  $musicLabel.textContent = t('settings.music');
+  $musicRow.appendChild($musicLabel);
+
+  const $musicControl = document.createElement('div');
+  $musicControl.className = 'menu-slider';
+
+  const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
+  const $musicInput = document.createElement('input');
+  $musicInput.type = 'range';
+  $musicInput.min = '0';
+  $musicInput.max = '100';
+  $musicInput.step = '1';
+  $musicInput.value = String(Math.round(initialMusic * 100));
+
+  const $musicValue = document.createElement('span');
+  $musicValue.className = 'menu-slider-value';
+  $musicValue.textContent = `${$musicInput.value}%`;
+
+  $musicInput.addEventListener('input', () => {
+    const val = Number($musicInput.value) / 100;
+    $musicValue.textContent = `${$musicInput.value}%`;
+    S.musicVolume = val;
+    if (S.musicSound) {
+      S.musicSound.volume = Math.max(0, Math.min(1, 0.5 * val));
+    }
+    try {
+      localStorage.setItem('lighthouse_music_vol', String(val));
+    } catch (_) {}
+  });
+
+  $musicControl.appendChild($musicInput);
+  $musicControl.appendChild($musicValue);
+  $musicRow.appendChild($musicControl);
+  $card.appendChild($musicRow);
 
   const $sfxRow = document.createElement('div');
   $sfxRow.className = 'menu-setting-row menu-setting-row--slider';
