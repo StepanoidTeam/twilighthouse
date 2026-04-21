@@ -18,28 +18,81 @@
     <!-- ===== In-game volume controls ===== -->
     <div id="$volControls" class="vol-controls" hidden>
       <div class="vol-row">
-        <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">◀</button>
+        <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">
+          ◀
+        </button>
         <span class="vol-icon">🔊</span>
         <span class="vol-val" id="$volSfxVal">50%</span>
-        <button type="button" class="vol-btn" data-target="sfx" data-dir="1">▶</button>
+        <button type="button" class="vol-btn" data-target="sfx" data-dir="1">
+          ▶
+        </button>
       </div>
       <div class="vol-row">
-        <button type="button" class="vol-btn" data-target="music" data-dir="-1">◀</button>
+        <button type="button" class="vol-btn" data-target="music" data-dir="-1">
+          ◀
+        </button>
         <span class="vol-icon">🎵</span>
         <span class="vol-val" id="$volMusicVal">50%</span>
-        <button type="button" class="vol-btn" data-target="music" data-dir="1">▶</button>
+        <button type="button" class="vol-btn" data-target="music" data-dir="1">
+          ▶
+        </button>
       </div>
     </div>
 
     <!-- ===== In-game turn buttons ===== -->
-    <button type="button" id="$btnLeft" class="turn-btn turn-btn--left" hidden aria-label="Turn left">
+    <button
+      type="button"
+      id="$btnLeft"
+      class="turn-btn turn-btn--left"
+      hidden
+      aria-label="Turn left"
+    >
       <span class="turn-btn-arrow">←</span>
       <span class="turn-btn-key">A</span>
     </button>
-    <button type="button" id="$btnRight" class="turn-btn turn-btn--right" hidden aria-label="Turn right">
+    <button
+      type="button"
+      id="$btnRight"
+      class="turn-btn turn-btn--right"
+      hidden
+      aria-label="Turn right"
+    >
       <span class="turn-btn-arrow">→</span>
       <span class="turn-btn-key">D</span>
     </button>
+
+    <!-- ===== Game over / Win screen ===== -->
+    <div id="$screenGameOver" class="screen-result" hidden>
+      <div class="screen-result-splash" id="$resultSplash"></div>
+      <div class="screen-result-content">
+        <p class="screen-result-msg" id="$resultMsg"></p>
+        <div class="screen-result-actions">
+          <button type="button" id="$btnResultRestart" class="result-btn">
+            <span class="result-btn-key">E</span>
+            <span class="result-btn-label" id="$resultRestartLabel"></span>
+          </button>
+          <button type="button" id="$btnResultMenu" class="result-btn">
+            <span class="result-btn-key">Esc</span>
+            <span class="result-btn-label" id="$resultMenuLabel"></span>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- ===== Exit confirm screen ===== -->
+    <div id="$screenExitConfirm" class="screen-exit-confirm" hidden>
+      <p class="exit-confirm-msg" id="$exitConfirmMsg"></p>
+      <div class="exit-confirm-actions">
+        <button type="button" id="$btnExitConfirm" class="result-btn">
+          <span class="result-btn-key">E</span>
+          <span class="result-btn-label" id="$exitConfirmLabel"></span>
+        </button>
+        <button type="button" id="$btnExitResume" class="result-btn">
+          <span class="result-btn-key">Esc</span>
+          <span class="result-btn-label" id="$exitResumeLabel"></span>
+        </button>
+      </div>
+    </div>
 
     <!-- ===== Menu overlay ===== -->
     <div id="$menuOverlay" class="menu-overlay" hidden>

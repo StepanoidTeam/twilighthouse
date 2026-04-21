@@ -1,0 +1,48 @@
+.flex-row {
+  display: flex;
+  flex-direction: row;
+}
+.flex-col {
+  display: flex;
+  flex-direction: column;
+}
+
+/* -- Justify Content -- */
+.justify-center {
+  justify-content: center;
+}
+.justify-between {
+  justify-content: space-between;
+}
+
+/* -- Align Items -- */
+.items-center {
+  align-items: center;
+}
+
+.hidden,
+[hidden] {
+  display: none !important;
+}
+
+svg[aria-hidden='true'] {
+  display: none !important;
+}
+
+[disabled] {
+  pointer-events: none;
+}
+
+.overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  bottom: 0;
+  right: 0;
+  backdrop-filter: blur(5px);
+  z-index: 1;
+}
+
+.cursor-pointer {
+  cursor: pointer;
+}

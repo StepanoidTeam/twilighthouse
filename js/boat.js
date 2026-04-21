@@ -192,6 +192,7 @@ export function updateBoats(delta) {
       S.lampTimer = 0;
       if (S.score >= WIN_SCORE) {
         S.gameOver = true;
+        S.gameWon = true;
         showWin();
       }
       // Fade out

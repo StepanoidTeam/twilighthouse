@@ -156,17 +156,9 @@ function bindEvents() {
 
 // ===== Clear overlay and entities =====
 function clearGame() {
-  if (S.overlayLayer.btnActionLeft)
-    S.overlayLayer.btnActionLeft.visible = false;
-  if (S.overlayLayer.btnActionRight)
-    S.overlayLayer.btnActionRight.visible = false;
+  $screenGameOver.hidden = true;
+  $screenExitConfirm.hidden = true;
   S.overlayLayer.visible = false;
-  S.overlayLayer.alpha = 1;
-  S.overlayBg.visible = true;
-  if (S.overlayLayer.splashMermaid)
-    S.overlayLayer.splashMermaid.visible = false;
-  if (S.overlayLayer.splashKraken) S.overlayLayer.splashKraken.visible = false;
-  if (S.overlayLayer.splashPolice) S.overlayLayer.splashPolice.visible = false;
 
   cleanupBoats();
   cleanupPolice();
@@ -179,6 +171,7 @@ function exitToMenu() {
   clearGame();
   S.reset();
   updateHUD();
+  $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = false;
   if (S.volControls) S.volControls.hidden = true;
   showMenu();
@@ -190,6 +183,7 @@ function restartGame() {
   S.reset();
   updateHUD();
   S.nextSpawnTime = performance.now() + 1000;
+  $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
   if (S.volControls) S.volControls.hidden = false;
   if (S.btnLeft) S.btnLeft.hidden = false;
@@ -209,6 +203,7 @@ function startGame() {
 async function trySubmitScore() {
   if (S.scoreSubmitted) return;
   S.scoreSubmitted = true;
+  if (!S.gameWon) return;
   const survivalMs = S.runSurvivalMs || performance.now() - S.runStartTime;
   if (!currentUser) {
     console.log(
@@ -380,41 +375,25 @@ async function init() {
     }
   });
 
-  // Wire overlay action buttons
-  const $btnL = S.overlayLayer.btnActionLeft;
-  const $btnR = S.overlayLayer.btnActionRight;
-
-  $btnL.interactive = true;
-  $btnL.buttonMode = true;
-  $btnL.cursor = 'pointer';
-  // Cover icon + label text under it ("Restart"/"Exit")
-  $btnL.hitArea = new PIXI.Rectangle(-52, -44, 104, 112);
-  $btnL.on('pointerdown', () => {
-    if (S.exitConfirm) {
-      playClickSound();
-      hideExitConfirm();
-      if (S.btnEsc) S.btnEsc.visible = false;
-      if (S.volControls) S.volControls.hidden = true;
-      requestAnimationFrame(() => exitToMenu());
-    } else if (S.gameOver) {
-      playClickSound();
-      restartGame();
-    }
+  // Wire game-over / exit-confirm HTML buttons
+  $btnResultRestart.addEventListener('pointerdown', () => {
+    playClickSound();
+    restartGame();
   });
-
-  $btnR.interactive = true;
-  $btnR.buttonMode = true;
-  $btnR.cursor = 'pointer';
-  // Cover icon + label text under it ("Menu"/"Resume")
-  $btnR.hitArea = new PIXI.Rectangle(-52, -44, 104, 112);
-  $btnR.on('pointerdown', () => {
-    if (S.exitConfirm) {
-      playClickSound();
-      hideExitConfirm();
-    } else if (S.gameOver) {
-      playClickSound();
-      requestAnimationFrame(() => exitToMenu());
-    }
+  $btnResultMenu.addEventListener('pointerdown', () => {
+    playClickSound();
+    requestAnimationFrame(() => exitToMenu());
+  });
+  $btnExitConfirm.addEventListener('pointerdown', () => {
+    playClickSound();
+    hideExitConfirm();
+    if (S.btnEsc) S.btnEsc.visible = false;
+    if (S.volControls) S.volControls.hidden = true;
+    requestAnimationFrame(() => exitToMenu());
+  });
+  $btnExitResume.addEventListener('pointerdown', () => {
+    playClickSound();
+    hideExitConfirm();
   });
 
   bindEvents();
@@ -454,13 +433,23 @@ async function init() {
   );
   S.wavesSound = wavesAudio;
 
-  // ===== Music =====
-  const musicAudio = new Audio('music/1-lighthouse-salt.mp3');
-  musicAudio.loop = true;
+  // ===== Music playlist =====
+  const MUSIC_PLAYLIST = [
+    'music/1-lighthouse-salt.mp3',
+    'music/2-twilight-beacon.mp3',
+    'music/3-techno-salt.mp3',
+  ];
+  let musicTrackIndex = 0;
+  const musicAudio = new Audio(MUSIC_PLAYLIST[0]);
   musicAudio.volume = Math.max(
     0,
     Math.min(1, MUSIC_VOLUME * (S.musicVolume != null ? S.musicVolume : 0.5)),
   );
+  musicAudio.addEventListener('ended', () => {
+    musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
+    musicAudio.src = MUSIC_PLAYLIST[musicTrackIndex];
+    musicAudio.play().catch(() => {});
+  });
   S.musicSound = musicAudio;
 
   const startAmbient = () => {

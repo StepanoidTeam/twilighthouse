@@ -70,6 +70,7 @@ const State = {
   // Game flow
   gameOver: false,
   gameOverPending: false,
+  gameWon: false,
   exitConfirm: false,
 
   // Run timing (survival)
@@ -158,6 +159,7 @@ const State = {
     this.beamAngle = -Math.PI / 2;
     this.gameOver = false;
     this.gameOverPending = false;
+    this.gameWon = false;
     this.exitConfirm = false;
     this.boatsSunk = 0;
     this.nextSpawnTime = performance.now() + 1000;
