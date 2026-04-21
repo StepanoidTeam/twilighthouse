@@ -235,8 +235,7 @@ export function buildButtons() {
   }
 
   // Init displayed values
-  $volSfxVal.textContent = `${Math.round((S.sfxVolume ?? 0.5) * 100)}%`;
-  $volMusicVal.textContent = `${Math.round((S.musicVolume ?? 0.5) * 100)}%`;
+  updateVolumeDisplays();
 
   $volControls.addEventListener('pointerdown', (e) => {
     const $btn = e.target.closest('.vol-btn');
@@ -277,6 +276,11 @@ export function repositionUI() {
   S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
   if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 6);
   if (S.btnEsc) S.btnEsc.position.set(44, 28);
+}
+
+export function updateVolumeDisplays() {
+  $volSfxVal.textContent = `${Math.round((S.sfxVolume ?? 0.5) * 100)}%`;
+  $volMusicVal.textContent = `${Math.round((S.musicVolume ?? 0.5) * 100)}%`;
 }
 
 export function buildUI() {

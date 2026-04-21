@@ -32,6 +32,7 @@ import {
   repositionUI,
   showExitConfirm,
   hideExitConfirm,
+  updateVolumeDisplays,
 } from './ui.js';
 import { spawnBoat, updateBoats, drawWakes, cleanupBoats } from './boat.js';
 import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
@@ -182,6 +183,7 @@ function restartGame() {
   clearGame();
   S.reset();
   updateHUD();
+  updateVolumeDisplays();
   S.nextSpawnTime = performance.now() + 1000;
   $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
@@ -194,6 +196,7 @@ function restartGame() {
 function startGame() {
   S.reset();
   updateHUD();
+  updateVolumeDisplays();
   S.nextSpawnTime = performance.now() + 1000;
   if (S.btnEsc) S.btnEsc.visible = true;
   if (S.volControls) S.volControls.hidden = false;
