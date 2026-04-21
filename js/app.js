@@ -39,8 +39,13 @@ import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
 import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
-import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
-import { showIntro } from './intro.js';
+import {
+  buildMenu,
+  showMenu,
+  isMenuVisible,
+  repositionMenu,
+  showTutorial,
+} from './menu.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 
@@ -401,7 +406,10 @@ async function init() {
   snapCamera();
   S.app.ticker.add(gameLoop);
 
-  // Intro comics (4 pages) shown before the main menu — only on first visit
+  // Build menu (on top of everything) and show it
+  await buildMenu(S.app, startGame);
+
+  // Tutorial shown on first visit instead of intro comics
   const INTRO_SEEN_KEY = 'lighthouse_intro_seen';
   let introSeen = false;
   try {
@@ -410,16 +418,13 @@ async function init() {
     introSeen = false;
   }
   if (!introSeen) {
-    await showIntro(S.app);
+    showTutorial();
     try {
       localStorage.setItem(INTRO_SEEN_KEY, '1');
     } catch (e) {
       // ignore (private mode / storage disabled)
     }
   }
-
-  // Build menu (on top of everything) and show it
-  await buildMenu(S.app, startGame);
 
   // ===== Waves Sound =====
   const wavesAudio = new Audio('audio/ocean-sea-soft-waves.mp3');

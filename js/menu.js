@@ -301,7 +301,7 @@ function activateMenuItem() {
 }
 
 // ===== Tutorial / How to Play =====
-function showTutorial() {
+export function showTutorial() {
   hideMainItems();
   showBackBtn();
   currentScreen = 'tutorial';
