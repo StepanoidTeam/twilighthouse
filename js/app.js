@@ -449,12 +449,14 @@ async function init() {
     musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
     musicAudio.src = MUSIC_PLAYLIST[musicTrackIndex];
     musicAudio.play().catch(() => {});
+    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
   });
   S.musicSound = musicAudio;
 
   const startAmbient = () => {
     S.wavesSound.play().catch(() => {});
     S.musicSound.play().catch(() => {});
+    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
     window.removeEventListener('pointerdown', startAmbient);
     window.removeEventListener('keydown', startAmbient);
   };
