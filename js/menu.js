@@ -6,27 +6,27 @@ import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
+import { SPLASH_IMAGES } from './ui.js';
 
 // ===== Menu State =====
 let menuApp = null;
 let $menuRoot = null;
-let $menuBg = null;
-let $menuTitle = null; // unused — logo is now a static <img>
-let $menuMain = null;
-let $menuSub = null;
-let $menuHint = null;
-let $$menuItems = [];
-let selectedIndex = 0;
-let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
 let $creditsScroll = null;
 let onStartGame = null;
 let backBtnEl = null;
+let $$menuItems = [];
+let selectedIndex = 0;
+let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
 let keyHandlerBound = false;
 let i18nBound = false;
 
+// ===== Credits Slideshow =====
+let creditsInterval = null;
+let creditsIndex = 0;
+const creditsImages = Object.values(SPLASH_IMAGES);
+
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu.PNG';
-const CREDITS_BG_FILE = 'sprites/wasted/police.png';
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -60,10 +60,6 @@ function playMenuClick() {
 // ===== DOM Helpers =====
 function initMenu() {
   $menuRoot = $menuOverlay;
-  $menuBg = $menuRoot.querySelector('.menu-overlay-bg');
-  $menuMain = $menuRoot.querySelector('.menu-main');
-  $menuSub = $menuRoot.querySelector('.menu-sub');
-  $menuHint = $menuRoot.querySelector('.menu-hint');
 
   if ($menuBg) {
     $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
@@ -124,6 +120,10 @@ function clearSubScreen() {
   $menuSub.innerHTML = '';
   $menuSub.hidden = true;
   $menuSub.className = 'menu-sub';
+  if ($menuAuthors) $menuAuthors.hidden = true;
+  if ($menuTutorial) $menuTutorial.hidden = true;
+  if ($menuSettings) $menuSettings.hidden = true;
+  if ($menuLeaderboard) $menuLeaderboard.hidden = true;
 }
 
 function hideMainItems() {
@@ -307,39 +307,46 @@ function showTutorial() {
   currentScreen = 'tutorial';
   setHint(t('hint.back'));
 
-  const $screen = buildScreenShell(t('howtoplay.title'));
-  if (!$screen) return;
+  clearSubScreen();
+  if (!$menuTutorial) return;
 
-  const $card = document.createElement('div');
-  $card.className = 'menu-card menu-howtoplay';
+  $menuTutorial.hidden = false;
 
-  const items = t('howtoplay.items');
-  for (const item of items) {
-    const $row = document.createElement('div');
-    $row.className = 'howtoplay-row';
+  const $title = $menuTutorial.querySelector('.menu-screen-title');
+  if ($title) $title.textContent = t('howtoplay.title');
 
-    const $icon = document.createElement('span');
-    $icon.className = 'howtoplay-icon';
-    if (item.icon.includes('/')) {
-      const $img = document.createElement('img');
-      $img.src = item.icon;
-      $img.alt = '';
-      $img.setAttribute('aria-hidden', 'true');
-      $icon.appendChild($img);
-    } else {
-      $icon.textContent = item.icon;
+  const $card = $menuTutorial.querySelector('.menu-howtoplay');
+  if ($card) {
+    $card.innerHTML = ''; // Clear existing items
+    const items = t('howtoplay.items');
+    for (const item of items) {
+      const $row = document.createElement('div');
+      $row.className = 'howtoplay-row';
+
+      const $icon = document.createElement('span');
+      $icon.className = 'howtoplay-icon';
+      if (item.icon.includes('/')) {
+        const $img = document.createElement('img');
+        $img.src = item.icon;
+        $img.alt = '';
+        $img.setAttribute('aria-hidden', 'true');
+        $icon.appendChild($img);
+      } else {
+        $icon.textContent = item.icon;
+      }
+
+      const $text = document.createElement('span');
+      $text.className = 'howtoplay-text';
+      $text.textContent = item.text;
+
+      $row.appendChild($icon);
+      $row.appendChild($text);
+      $card.appendChild($row);
     }
-
-    const $text = document.createElement('span');
-    $text.className = 'howtoplay-text';
-    $text.textContent = item.text;
-
-    $row.appendChild($icon);
-    $row.appendChild($text);
-    $card.appendChild($row);
   }
 
-  $screen.appendChild($card);
+  const $hint = $menuTutorial.querySelector('.menu-sub-hint');
+  if ($hint) $hint.textContent = t('hint.back');
 }
 
 // ===== Leaderboard =====
@@ -349,19 +356,23 @@ async function showLeaderboard() {
   currentScreen = 'leaderboard';
   setHint(t('hint.back'));
 
-  const $screen = buildScreenShell(
-    t('leaderboard.title'),
-    t('leaderboard.subtitle'),
-  );
-  if (!$screen) return;
+  clearSubScreen();
+  if (!$menuLeaderboard) return;
 
-  const $body = document.createElement('div');
-  $body.className = 'menu-card menu-leaderboard';
-  const $loading = document.createElement('p');
-  $loading.className = 'menu-state-label';
+  $menuLeaderboard.hidden = false;
+
+  const $title = $menuLeaderboard.querySelector('.menu-screen-title');
+  if ($title) $title.textContent = t('leaderboard.title');
+
+  const $subtitle = $menuLeaderboard.querySelector('.menu-screen-subtitle');
+  if ($subtitle) $subtitle.textContent = t('leaderboard.subtitle');
+
+  const $body = $menuLeaderboard.querySelector('.menu-card');
+  const $loading = $body.querySelector('.menu-state-label');
+  const $list = $body.querySelector('.menu-leaderboard-list');
+
   $loading.textContent = t('leaderboard.loading');
-  $body.appendChild($loading);
-  $screen.appendChild($body);
+  $list.innerHTML = '';
 
   let rows = [];
   let error = null;
@@ -374,26 +385,18 @@ async function showLeaderboard() {
 
   if (currentScreen !== 'leaderboard') return;
 
-  $body.innerHTML = '';
-
   if (error) {
-    const $error = document.createElement('p');
-    $error.className = 'menu-state-label';
-    $error.textContent = t('leaderboard.loadError');
-    $body.appendChild($error);
+    $loading.textContent = t('leaderboard.loadError');
     return;
   }
 
   if (rows.length === 0) {
-    const $empty = document.createElement('p');
-    $empty.className = 'menu-state-label';
-    $empty.textContent = t('leaderboard.empty');
-    $body.appendChild($empty);
+    $loading.textContent = t('leaderboard.empty');
     return;
   }
 
-  const $list = document.createElement('div');
-  $list.className = 'menu-leaderboard-list';
+  $loading.textContent = '';
+
   const myUid = currentUser ? currentUser.uid : null;
 
   for (let i = 0; i < rows.length; i++) {
@@ -439,7 +442,8 @@ async function showLeaderboard() {
     $list.appendChild($row);
   }
 
-  $body.appendChild($list);
+  const $hint = $menuLeaderboard.querySelector('.menu-sub-hint');
+  if ($hint) $hint.textContent = t('hint.back');
 }
 
 // ===== Settings =====
@@ -449,11 +453,23 @@ function showSettings() {
   currentScreen = 'settings';
   setHint(t('hint.back'));
 
-  const $screen = buildScreenShell(t('settings.title'));
-  if (!$screen) return;
+  clearSubScreen();
+  if (!$menuSettings) return;
 
-  const $card = document.createElement('div');
-  $card.className = 'menu-card menu-settings';
+  $menuSettings.hidden = false;
+
+  const $title = $menuSettings.querySelector('.menu-screen-title');
+  if ($title) $title.textContent = t('settings.title');
+
+  const $card = $menuSettings.querySelector('.menu-settings');
+  if (!$card) return;
+
+  // Language row
+  const $langRow = $card.querySelector('.menu-setting-row');
+  const $langLabel = $langRow.querySelector('.menu-setting-label');
+  const $langBtn = $langRow.querySelector('.menu-setting-toggle');
+
+  $langLabel.textContent = t('settings.language');
 
   const langs = [
     { code: 'en', label: t('lang.english') },
@@ -464,48 +480,23 @@ function showSettings() {
     langs.findIndex((lang) => lang.code === getLanguage()),
   );
 
-  const $langRow = document.createElement('div');
-  $langRow.className = 'menu-setting-row';
-
-  const $langLabel = document.createElement('span');
-  $langLabel.className = 'menu-setting-label';
-  $langLabel.textContent = t('settings.language');
-  $langRow.appendChild($langLabel);
-
-  const $langBtn = document.createElement('button');
-  $langBtn.type = 'button';
-  $langBtn.className = 'menu-setting-toggle';
   $langBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
   $langBtn.addEventListener('click', () => {
     playMenuClick();
     langIdx = (langIdx + 1) % langs.length;
     setLanguage(langs[langIdx].code);
   });
-  $langRow.appendChild($langBtn);
 
-  $card.appendChild($langRow);
+  // Music row
+  const $musicRow = $card.querySelector('.menu-setting-row--slider');
+  const $musicLabel = $musicRow.querySelector('.menu-setting-label');
+  const $musicInput = $musicRow.querySelector('input');
+  const $musicValue = $musicRow.querySelector('.menu-slider-value');
 
-  const $musicRow = document.createElement('div');
-  $musicRow.className = 'menu-setting-row menu-setting-row--slider';
-
-  const $musicLabel = document.createElement('span');
-  $musicLabel.className = 'menu-setting-label';
   $musicLabel.textContent = t('settings.music');
-  $musicRow.appendChild($musicLabel);
-
-  const $musicControl = document.createElement('div');
-  $musicControl.className = 'menu-slider';
 
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
-  const $musicInput = document.createElement('input');
-  $musicInput.type = 'range';
-  $musicInput.min = '0';
-  $musicInput.max = '100';
-  $musicInput.step = '1';
   $musicInput.value = String(Math.round(initialMusic * 100));
-
-  const $musicValue = document.createElement('span');
-  $musicValue.className = 'menu-slider-value';
   $musicValue.textContent = `${$musicInput.value}%`;
 
   $musicInput.addEventListener('input', () => {
@@ -520,32 +511,16 @@ function showSettings() {
     } catch (_) {}
   });
 
-  $musicControl.appendChild($musicInput);
-  $musicControl.appendChild($musicValue);
-  $musicRow.appendChild($musicControl);
-  $card.appendChild($musicRow);
+  // SFX row
+  const $sfxRow = $card.querySelectorAll('.menu-setting-row--slider')[1];
+  const $sfxLabel = $sfxRow.querySelector('.menu-setting-label');
+  const $sfxInput = $sfxRow.querySelector('input');
+  const $sfxValue = $sfxRow.querySelector('.menu-slider-value');
 
-  const $sfxRow = document.createElement('div');
-  $sfxRow.className = 'menu-setting-row menu-setting-row--slider';
-
-  const $sfxLabel = document.createElement('span');
-  $sfxLabel.className = 'menu-setting-label';
   $sfxLabel.textContent = t('settings.sfx');
-  $sfxRow.appendChild($sfxLabel);
-
-  const $sfxControl = document.createElement('div');
-  $sfxControl.className = 'menu-slider';
 
   const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
-  const $sfxInput = document.createElement('input');
-  $sfxInput.type = 'range';
-  $sfxInput.min = '0';
-  $sfxInput.max = '100';
-  $sfxInput.step = '1';
   $sfxInput.value = String(Math.round(initialSfx * 100));
-
-  const $sfxValue = document.createElement('span');
-  $sfxValue.className = 'menu-slider-value';
   $sfxValue.textContent = `${$sfxInput.value}%`;
 
   $sfxInput.addEventListener('input', () => {
@@ -560,56 +535,36 @@ function showSettings() {
     } catch (_) {}
   });
 
-  $sfxControl.appendChild($sfxInput);
-  $sfxControl.appendChild($sfxValue);
-  $sfxRow.appendChild($sfxControl);
-  $card.appendChild($sfxRow);
+  // Display Name row
+  const $nameRow = $card.querySelector('.menu-setting-row--name');
+  const $nameLabel = $nameRow.querySelector('.menu-setting-label');
+  const $nameGroup = $nameRow.querySelector('.menu-setting-name-group');
+  const $nameInput = $nameGroup.querySelector('.menu-setting-name-input');
+  const $nameHint = $nameGroup.querySelector('.menu-setting-name-hint');
+  const $nameActions = $nameGroup.querySelector('.menu-setting-name-actions');
+  const $nameSaveBtn = $nameActions.querySelector('.menu-setting-name-save');
+  const $nameStatus = $nameActions.querySelector('.menu-setting-name-status');
 
-  // ===== Display Name =====
-  const $nameRow = document.createElement('div');
-  $nameRow.className = 'menu-setting-row menu-setting-row--name';
-
-  const $nameLabel = document.createElement('span');
-  $nameLabel.className = 'menu-setting-label';
   $nameLabel.textContent = t('settings.displayName');
-  $nameRow.appendChild($nameLabel);
 
   if (!currentUser) {
+    $nameGroup.hidden = true;
     const $note = document.createElement('span');
     $note.className = 'menu-setting-note';
     $note.textContent = t('settings.displayNameGuestNote');
     $nameRow.appendChild($note);
   } else {
+    $nameGroup.hidden = false;
     const isAnon = currentUser.isAnonymous === true;
     const currentName =
       (currentUser.displayName && currentUser.displayName.trim()) || '';
 
-    const $nameGroup = document.createElement('div');
-    $nameGroup.className = 'menu-setting-name-group';
-
-    const $nameInput = document.createElement('input');
-    $nameInput.type = 'text';
-    $nameInput.className = 'menu-setting-name-input';
-    $nameInput.maxLength = 30;
     $nameInput.value = currentName;
     $nameInput.placeholder = t('settings.displayNamePlaceholder');
-
-    const $nameHint = document.createElement('p');
-    $nameHint.className = 'menu-setting-name-hint';
     $nameHint.textContent = isAnon
       ? t('settings.displayNameAnon')
       : t('settings.displayNameEmail');
-
-    const $nameActions = document.createElement('div');
-    $nameActions.className = 'menu-setting-name-actions';
-
-    const $nameSaveBtn = document.createElement('button');
-    $nameSaveBtn.type = 'button';
-    $nameSaveBtn.className = 'menu-setting-name-save';
     $nameSaveBtn.textContent = t('settings.displayNameSave');
-
-    const $nameStatus = document.createElement('span');
-    $nameStatus.className = 'menu-setting-name-status';
 
     $nameSaveBtn.addEventListener('click', async () => {
       const name = $nameInput.value.trim();
@@ -639,18 +594,10 @@ function showSettings() {
         $nameSaveBtn.disabled = false;
       }
     });
-
-    $nameActions.appendChild($nameSaveBtn);
-    $nameActions.appendChild($nameStatus);
-    $nameGroup.appendChild($nameInput);
-    $nameGroup.appendChild($nameHint);
-    $nameGroup.appendChild($nameActions);
-    $nameRow.appendChild($nameGroup);
   }
 
-  $card.appendChild($nameRow);
-
-  $screen.appendChild($card);
+  const $hint = $menuSettings.querySelector('.menu-sub-hint');
+  if ($hint) $hint.textContent = t('hint.back');
 }
 
 // ===== Authors =====
@@ -661,28 +608,51 @@ async function showAuthors() {
   setHint(t('hint.back'));
 
   clearSubScreen();
-  if (!$menuSub) return;
+  if (!$menuAuthors) return;
 
-  $menuSub.hidden = false;
-  $menuSub.className = 'menu-sub menu-authors';
-  $menuSub.innerHTML = `
-    <div class="menu-authors-bg"></div>
-    <div class="menu-authors-dim"></div>
-    <div class="menu-authors-scroll">
-      <pre class="menu-authors-text"></pre>
-    </div>
-  `;
-  $menuSub.appendChild(buildBackHint());
+  $menuAuthors.hidden = false;
 
-  const $authorsBg = $menuSub.querySelector('.menu-authors-bg');
+  const $authorsBg = $menuAuthors.querySelector('.menu-authors-bg');
   if ($authorsBg) {
-    $authorsBg.style.backgroundImage = `url("${CREDITS_BG_FILE}")`;
+    // Start slideshow instead of static background
+    startCreditsSlideshow($authorsBg);
   }
 
-  $creditsScroll = $menuSub.querySelector('.menu-authors-scroll');
-  const $creditsText = $menuSub.querySelector('.menu-authors-text');
+  $creditsScroll = $menuAuthors.querySelector('.menu-authors-scroll');
+  const $creditsText = $menuAuthors.querySelector('.menu-authors-text');
   if ($creditsText) $creditsText.textContent = getCreditsText();
+
+  const $hint = $menuAuthors.querySelector('.menu-sub-hint');
+  if ($hint) $hint.textContent = t('hint.back');
+
   startCreditsAnimation();
+}
+
+function startCreditsSlideshow($bg) {
+  creditsIndex = 0;
+  updateCreditsBackground($bg);
+  creditsInterval = setInterval(() => {
+    creditsIndex = (creditsIndex + 1) % creditsImages.length;
+    updateCreditsBackground($bg);
+  }, 10000); // 5 seconds
+}
+
+function updateCreditsBackground($bg) {
+  if (!$bg) return;
+  // Fade out
+  $bg.style.opacity = '0';
+  setTimeout(() => {
+    $bg.style.backgroundImage = `url("${creditsImages[creditsIndex]}")`;
+    // Fade in
+    $bg.style.opacity = '1';
+  }, 1000); // Half of transition time
+}
+
+function stopCreditsSlideshow() {
+  if (creditsInterval) {
+    clearInterval(creditsInterval);
+    creditsInterval = null;
+  }
 }
 
 function startCreditsAnimation() {
@@ -690,6 +660,7 @@ function startCreditsAnimation() {
 }
 
 function stopCreditsAnimation() {
+  stopCreditsSlideshow();
   $creditsScroll = null;
 }
 

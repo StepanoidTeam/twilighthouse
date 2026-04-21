@@ -46,3 +46,7 @@ svg[aria-hidden='true'] {
 .cursor-pointer {
   cursor: pointer;
 }
+
+.blur-bg {
+  backdrop-filter: blur(5px);
+}

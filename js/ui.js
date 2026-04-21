@@ -309,7 +309,7 @@ function playFailSound() {
 }
 
 // ===== HTML Game Over / Win screen =====
-const SPLASH_IMAGES = {
+export const SPLASH_IMAGES = {
   splashIceberg: 'sprites/wasted/iceberg.png',
   splashMermaid: 'sprites/wasted/mermaid.png',
   splashKraken: 'sprites/wasted/kraken.png',
@@ -321,8 +321,6 @@ const SPLASH_IMAGES = {
 async function showGameOverScreen({ message, splashKey, playFail = true }) {
   S.gameOver = true;
   if (playFail) playFailSound();
-
-  $gameContainer.hidden = true;
 
   $resultMsg.textContent = message;
   $resultRestartLabel.textContent = t('overlay.restart');
@@ -399,7 +397,6 @@ export async function showWin() {
 export function showExitConfirm() {
   S.exitConfirm = true;
 
-  $gameContainer.hidden = true;
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
   $exitResumeLabel.textContent = t('overlay.resume');
@@ -409,6 +406,4 @@ export function showExitConfirm() {
 export function hideExitConfirm() {
   S.exitConfirm = false;
   $screenExitConfirm.hidden = true;
-
-  $gameContainer.hidden = false;
 }
