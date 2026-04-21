@@ -1,17 +1,17 @@
 // ===== Sound Helpers =====
 import S from './state.js';
 
-const CRASH_VOLUME = 0.03;
+const CRASH_VOLUME = 0.06;
 const CRASH_SOUNDS = [
   'audio/crash/horror-bone-crack.mp3',
   'audio/crash/rubble-crash.mp3',
   'audio/crash/small-rock-break.mp3',
   'audio/crash/wooden-ship-break.mp3',
 ];
-const COP_VOLUME = 0.03;
-const BOAT_SONAR_VOLUME = 0.15;
-const WAVES_VOLUME = 0.05;
-const MUSIC_VOLUME = 0.3;
+const COP_VOLUME = 0.06;
+const BOAT_SONAR_VOLUME = 0.3;
+const WAVES_VOLUME = 0.1;
+const MUSIC_VOLUME = 0.15;
 
 function playSound(file, volume = 0.2) {
   const snd = new Audio(file);
