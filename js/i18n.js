@@ -86,7 +86,6 @@ Photopea — image editor
     'leaderboard.loadError': 'Failed to load leaderboard',
     'leaderboard.empty': 'No one is in the top yet — be the first!',
     'leaderboard.you': '(you)',
-    'leaderboard.signInPrompt': 'Sign in to appear in the leaderboard',
 
     // Settings
     'settings.title': '⚙️ Settings',
@@ -250,7 +249,6 @@ Photopea — image editor
     'leaderboard.loadError': 'Не удалось загрузить лидерборд',
     'leaderboard.empty': 'Пока никто не попал в топ — стань первым!',
     'leaderboard.you': '(вы)',
-    'leaderboard.signInPrompt': 'Войдите, чтобы попасть в лидерборд',
 
     'settings.title': '⚙️ Настройки',
     'settings.language': '🌐 Язык',

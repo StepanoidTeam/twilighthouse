@@ -425,13 +425,6 @@ async function showLeaderboard() {
   }
 
   $body.appendChild($list);
-
-  if (!isSignedInReal(currentUser)) {
-    const $note = document.createElement('p');
-    $note.className = 'menu-card-note';
-    $note.textContent = t('leaderboard.signInPrompt');
-    $body.appendChild($note);
-  }
 }
 
 // ===== Settings =====
