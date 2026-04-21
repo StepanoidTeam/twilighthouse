@@ -13,53 +13,61 @@
     <script type="module" src="js/app.js" defer></script>
   </head>
   <body>
-    <div id="$gameContainer"></div>
+    <div id="$gameContainer">
+      <!-- ===== In-game volume controls ===== -->
+      <div id="$volControls" class="vol-controls" hidden>
+        <div class="vol-row">
+          <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">
+            ◀
+          </button>
+          <span class="vol-icon">🔊</span>
+          <span class="vol-val" id="$volSfxVal">50%</span>
+          <button type="button" class="vol-btn" data-target="sfx" data-dir="1">
+            ▶
+          </button>
+        </div>
+        <div class="vol-row">
+          <button
+            type="button"
+            class="vol-btn"
+            data-target="music"
+            data-dir="-1"
+          >
+            ◀
+          </button>
+          <span class="vol-icon">🎵</span>
+          <span class="vol-val" id="$volMusicVal">50%</span>
+          <button
+            type="button"
+            class="vol-btn"
+            data-target="music"
+            data-dir="1"
+          >
+            ▶
+          </button>
+        </div>
+      </div>
 
-    <!-- ===== In-game volume controls ===== -->
-    <div id="$volControls" class="vol-controls" hidden>
-      <div class="vol-row">
-        <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">
-          ◀
-        </button>
-        <span class="vol-icon">🔊</span>
-        <span class="vol-val" id="$volSfxVal">50%</span>
-        <button type="button" class="vol-btn" data-target="sfx" data-dir="1">
-          ▶
-        </button>
-      </div>
-      <div class="vol-row">
-        <button type="button" class="vol-btn" data-target="music" data-dir="-1">
-          ◀
-        </button>
-        <span class="vol-icon">🎵</span>
-        <span class="vol-val" id="$volMusicVal">50%</span>
-        <button type="button" class="vol-btn" data-target="music" data-dir="1">
-          ▶
-        </button>
-      </div>
+      <!-- ===== In-game turn buttons ===== -->
+      <button
+        type="button"
+        id="$btnLeft"
+        class="turn-btn turn-btn--left"
+        aria-label="Turn left"
+      >
+        <span class="turn-btn-arrow">←</span>
+        <span class="turn-btn-key">A</span>
+      </button>
+      <button
+        type="button"
+        id="$btnRight"
+        class="turn-btn turn-btn--right"
+        aria-label="Turn right"
+      >
+        <span class="turn-btn-arrow">→</span>
+        <span class="turn-btn-key">D</span>
+      </button>
     </div>
-
-    <!-- ===== In-game turn buttons ===== -->
-    <button
-      type="button"
-      id="$btnLeft"
-      class="turn-btn turn-btn--left"
-      hidden
-      aria-label="Turn left"
-    >
-      <span class="turn-btn-arrow">←</span>
-      <span class="turn-btn-key">A</span>
-    </button>
-    <button
-      type="button"
-      id="$btnRight"
-      class="turn-btn turn-btn--right"
-      hidden
-      aria-label="Turn right"
-    >
-      <span class="turn-btn-arrow">→</span>
-      <span class="turn-btn-key">D</span>
-    </button>
 
     <!-- ===== Game over / Win screen ===== -->
     <div id="$screenGameOver" class="screen-result" hidden>
@@ -67,11 +75,15 @@
       <div class="screen-result-content">
         <p class="screen-result-msg" id="$resultMsg"></p>
         <div class="screen-result-actions">
-          <button type="button" id="$btnResultRestart" class="result-btn">
+          <button
+            type="button"
+            id="$btnResultRestart"
+            class="menu-btn result-btn"
+          >
             <span class="result-btn-key">E</span>
             <span class="result-btn-label" id="$resultRestartLabel"></span>
           </button>
-          <button type="button" id="$btnResultMenu" class="result-btn">
+          <button type="button" id="$btnResultMenu" class="menu-btn result-btn">
             <span class="result-btn-key">Esc</span>
             <span class="result-btn-label" id="$resultMenuLabel"></span>
           </button>
@@ -83,11 +95,11 @@
     <div id="$screenExitConfirm" class="screen-exit-confirm" hidden>
       <p class="exit-confirm-msg" id="$exitConfirmMsg"></p>
       <div class="exit-confirm-actions">
-        <button type="button" id="$btnExitConfirm" class="result-btn">
+        <button type="button" id="$btnExitConfirm" class="menu-btn result-btn">
           <span class="result-btn-key">E</span>
           <span class="result-btn-label" id="$exitConfirmLabel"></span>
         </button>
-        <button type="button" id="$btnExitResume" class="result-btn">
+        <button type="button" id="$btnExitResume" class="menu-btn result-btn">
           <span class="result-btn-key">Esc</span>
           <span class="result-btn-label" id="$exitResumeLabel"></span>
         </button>
@@ -106,7 +118,11 @@
           aria-hidden="false"
         />
         <div class="menu-main">
-          <button type="button" class="menu-main-btn" data-action="start">
+          <button
+            type="button"
+            class="menu-btn menu-main-btn"
+            data-action="start"
+          >
             <img
               class="menu-main-btn-icon"
               src="sprites/icons/lighthouse.png"
@@ -114,7 +130,11 @@
               aria-hidden="true"
             /><span class="menu-main-btn-label"></span>
           </button>
-          <button type="button" class="menu-main-btn" data-action="leaderboard">
+          <button
+            type="button"
+            class="menu-btn menu-main-btn"
+            data-action="leaderboard"
+          >
             <img
               class="menu-main-btn-icon"
               src="sprites/icons/compass.png"
@@ -122,7 +142,11 @@
               aria-hidden="true"
             /><span class="menu-main-btn-label"></span>
           </button>
-          <button type="button" class="menu-main-btn" data-action="settings">
+          <button
+            type="button"
+            class="menu-btn menu-main-btn"
+            data-action="settings"
+          >
             <img
               class="menu-main-btn-icon"
               src="sprites/icons/wheel.png"
@@ -130,7 +154,11 @@
               aria-hidden="true"
             /><span class="menu-main-btn-label"></span>
           </button>
-          <button type="button" class="menu-main-btn" data-action="authors">
+          <button
+            type="button"
+            class="menu-btn menu-main-btn"
+            data-action="authors"
+          >
             <img
               class="menu-main-btn-icon"
               src="sprites/icons/chest.png"
@@ -138,7 +166,11 @@
               aria-hidden="true"
             /><span class="menu-main-btn-label"></span>
           </button>
-          <button type="button" class="menu-main-btn" data-action="tutorial">
+          <button
+            type="button"
+            class="menu-btn menu-main-btn"
+            data-action="tutorial"
+          >
             <img
               class="menu-main-btn-icon"
               src="sprites/icons/map.png"
@@ -153,7 +185,7 @@
     </div>
 
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
-    <button type="button" id="$backBtn" class="back-btn">
+    <button type="button" id="$backBtn" class="menu-btn back-btn">
       <span class="back-btn-arrow">←</span><span class="back-btn-label"></span>
     </button>
 
@@ -198,10 +230,12 @@
 
     <!-- ===== Auth widget (top-right) ===== -->
     <div id="$authWidget" class="auth-widget">
-      <button class="auth-widget-btn auth-widget-btn--signin"></button>
+      <button class="menu-btn auth-widget-btn auth-widget-btn--signin"></button>
       <div class="auth-widget-user" style="display: none">
         <span class="auth-widget-name"></span>
-        <button class="auth-widget-btn auth-widget-btn--signout"></button>
+        <button
+          class="menu-btn auth-widget-btn auth-widget-btn--signout"
+        ></button>
       </div>
     </div>
   </body>

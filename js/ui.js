@@ -157,8 +157,6 @@ function bindTurnButton(button, keyCode) {
 
 export function buildButtons() {
   // ===== Left / Right turn buttons (HTML) =====
-  S.btnLeft = $btnLeft;
-  S.btnRight = $btnRight;
 
   function bindHtmlTurnButton($btn, keyCode) {
     const press = () => {
@@ -324,12 +322,6 @@ async function showGameOverScreen({ message, splashKey, playFail = true }) {
   S.gameOver = true;
   if (playFail) playFailSound();
 
-  // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
-
   $gameContainer.hidden = true;
 
   $resultMsg.textContent = message;
@@ -384,12 +376,6 @@ export function showGameOver() {
   S.gameOver = true;
   playFailSound();
 
-  // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
-
   $gameContainer.hidden = true;
   $resultMsg.textContent = t('gameOver.score', {
     score: S.score,
@@ -413,12 +399,7 @@ export async function showWin() {
 export function showExitConfirm() {
   S.exitConfirm = true;
 
-  // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
-
+  $gameContainer.hidden = true;
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
   $exitResumeLabel.textContent = t('overlay.resume');
@@ -429,9 +410,5 @@ export function hideExitConfirm() {
   S.exitConfirm = false;
   $screenExitConfirm.hidden = true;
 
-  // Restore gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = false;
-  if (S.btnRight) S.btnRight.hidden = false;
-  if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.volControls) S.volControls.hidden = false;
+  $gameContainer.hidden = false;
 }

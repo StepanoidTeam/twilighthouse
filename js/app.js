@@ -98,7 +98,6 @@ function bindEvents() {
         playClickSound();
         hideExitConfirm();
         if (S.btnEsc) S.btnEsc.visible = false;
-        if (S.volControls) S.volControls.hidden = true;
         // Defer to avoid menu keydown handler catching the same event
         requestAnimationFrame(() => exitToMenu());
         return;
@@ -172,9 +171,8 @@ function exitToMenu() {
   clearGame();
   S.reset();
   updateHUD();
-  $gameContainer.hidden = false;
+  $gameContainer.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
   showMenu();
 }
 
@@ -186,10 +184,6 @@ function restartGame() {
   updateVolumeDisplays();
   S.nextSpawnTime = performance.now() + 1000;
   $gameContainer.hidden = false;
-  if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.volControls) S.volControls.hidden = false;
-  if (S.btnLeft) S.btnLeft.hidden = false;
-  if (S.btnRight) S.btnRight.hidden = false;
 }
 
 // ===== Start Game (called from menu) =====
@@ -199,7 +193,6 @@ function startGame() {
   updateVolumeDisplays();
   S.nextSpawnTime = performance.now() + 1000;
   if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.volControls) S.volControls.hidden = false;
 }
 
 // ===== Submit Score =====
@@ -391,7 +384,7 @@ async function init() {
     playClickSound();
     hideExitConfirm();
     if (S.btnEsc) S.btnEsc.visible = false;
-    if (S.volControls) S.volControls.hidden = true;
+
     requestAnimationFrame(() => exitToMenu());
   });
   $btnExitResume.addEventListener('pointerdown', () => {

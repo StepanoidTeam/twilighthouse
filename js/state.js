@@ -137,8 +137,6 @@ const State = {
   txtTime: null,
   txtMessage: null,
   txtRestart: null,
-  btnLeft: null,
-  btnRight: null,
   overlayBg: null,
 
   // Tooltips
