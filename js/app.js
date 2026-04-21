@@ -29,11 +29,9 @@ import {
   buildUI,
   updateHUD,
   updateTooltips,
-  clearTooltips,
   repositionUI,
   showExitConfirm,
   hideExitConfirm,
-  updateVolumeDisplays,
 } from './ui.js';
 import { spawnBoat, updateBoats, drawWakes, cleanupBoats } from './boat.js';
 import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
@@ -247,7 +245,6 @@ function startAmbientSounds({ restartPlayback = false } = {}) {
 
 function clearTransientVisuals() {
   if (S.wakeGfx) S.wakeGfx.clear();
-  clearTooltips();
 }
 
 function prepareFreshRun() {
@@ -255,7 +252,6 @@ function prepareFreshRun() {
   S.reset();
   S.gameSessionActive = true;
   updateHUD();
-  updateVolumeDisplays();
   clearTransientVisuals();
   S.nextSpawnTime = performance.now() + 1000;
   snapCamera();
