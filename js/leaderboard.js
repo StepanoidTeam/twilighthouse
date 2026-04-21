@@ -91,6 +91,7 @@ export async function fetchTopLeaderboard(n = 10) {
       uid: data.uid || d.id,
       displayName: data.displayName || 'Аноним',
       bestTimeMs: Number(data.bestTimeMs) || 0,
+      updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
     });
   });
   return rows;

@@ -78,7 +78,8 @@ function initMenuButtons() {
   const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
     const $button = $$menuItems[i];
-    $button.textContent = labels[i]?.label ?? '';
+    const $label = $button.querySelector('.menu-main-btn-label');
+    if ($label) $label.textContent = labels[i]?.label ?? '';
     const idx = i;
     $button.addEventListener('pointerover', () => {
       if (selectedIndex === idx) return;
@@ -98,7 +99,8 @@ function initMenuButtons() {
 function renderMainMenuButtons() {
   const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
-    $$menuItems[i].textContent = labels[i]?.label ?? '';
+    const $label = $$menuItems[i].querySelector('.menu-main-btn-label');
+    if ($label) $label.textContent = labels[i]?.label ?? '';
   }
 }
 
@@ -418,9 +420,22 @@ async function showLeaderboard() {
     $time.className = 'menu-leaderboard-time';
     $time.textContent = formatSurvivalTime(entry.bestTimeMs);
 
+    const $date = document.createElement('span');
+    $date.className = 'menu-leaderboard-date';
+    $date.textContent = entry.updatedAt
+      ? entry.updatedAt.toLocaleString(undefined, {
+          day: 'numeric',
+          month: 'short',
+          year: 'numeric',
+          hour: '2-digit',
+          minute: '2-digit',
+        })
+      : '';
+
     $row.appendChild($rank);
     $row.appendChild($name);
     $row.appendChild($time);
+    $row.appendChild($date);
     $list.appendChild($row);
   }
 
