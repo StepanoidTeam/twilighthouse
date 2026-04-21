@@ -28,12 +28,118 @@ body {
 #\$gameContainer {
   width: 100vw;
   height: 100vh;
+  z-index: 1;
 }
 
 #\$gameContainer canvas {
   display: block;
   width: 100%;
   height: 100%;
+}
+
+/* ===== Boot loader ===== */
+.boot-loader {
+  position: fixed;
+  inset: 0;
+  z-index: 11000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background:
+    radial-gradient(circle at top, rgba(79, 130, 184, 0.22), transparent 38%),
+    radial-gradient(circle at bottom, rgba(255, 221, 68, 0.16), transparent 30%),
+    linear-gradient(180deg, #06101f 0%, #0b1930 52%, #050c18 100%);
+  transition:
+    opacity 280ms ease,
+    visibility 280ms ease;
+}
+
+.boot-loader.is-hiding {
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+}
+
+.boot-loader[hidden] {
+  display: none;
+}
+
+.boot-loader-panel {
+  width: min(92vw, 460px);
+  padding: 28px 28px 24px;
+  border: 1px solid rgba(138, 160, 189, 0.28);
+  border-radius: 22px;
+  background:
+    linear-gradient(180deg, rgba(16, 31, 54, 0.86) 0%, rgba(7, 17, 31, 0.9) 100%);
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.05);
+}
+
+.boot-loader-eyebrow {
+  color: #8aa0bd;
+  font: 600 12px/1 var(--font-menu);
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+}
+
+.boot-loader-title {
+  margin-top: 10px;
+  color: #ffdd44;
+  font: 700 clamp(2.2rem, 6vw, 3.6rem) / 0.92 var(--font-menu);
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.boot-loader-text {
+  margin-top: 14px;
+  color: #dbe7f6;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.boot-loader-asset {
+  margin-top: 8px;
+  min-height: 19px;
+  color: #8aa0bd;
+  font-size: 13px;
+  line-height: 1.45;
+  letter-spacing: 0.04em;
+}
+
+.boot-loader-bar {
+  margin-top: 18px;
+  height: 12px;
+  padding: 2px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.boot-loader-bar-fill {
+  width: 0%;
+  height: 100%;
+  border-radius: inherit;
+  background:
+    linear-gradient(90deg, #ffdd44 0%, #f4b73d 38%, #74d8ff 100%);
+  box-shadow: 0 0 20px rgba(116, 216, 255, 0.35);
+  transition: width 160ms ease;
+}
+
+.boot-loader-percent {
+  margin-top: 12px;
+  color: #8aa0bd;
+  font: 600 13px/1 var(--font-menu);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+}
+
+@media (max-width: 640px) {
+  .boot-loader-panel {
+    padding: 24px 20px 20px;
+    border-radius: 18px;
+  }
 }
 
 /* ===== Auth modal ===== */
