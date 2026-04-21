@@ -357,13 +357,15 @@ body {
   display: flex;
   flex-direction: column;
   gap: 18px;
-  width: min(420px, max(280px, 50vw));
 }
 
 .menu-main-btn {
   position: relative;
+  display: flex;
+  align-items: center;
+  gap: 16px;
 
-  padding: 18px 28px;
+  padding: 0px 70px 0 28px;
   border: none;
   border-radius: 14px;
   background: #002f50d9;
@@ -390,9 +392,23 @@ body {
     padding-right: 15px;
   }
 
+  .menu-main-btn-icon {
+    height: 70px;
+    width: auto;
+    opacity: 0.81;
+  }
+
   &.is-selected:after {
     content: '✒︎';
   }
+}
+
+.menu-main-btn-icon {
+  width: 44px;
+  height: 44px;
+  object-fit: contain;
+  flex-shrink: 0;
+  filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.6));
 }
 
 .menu-main-btn:hover,
@@ -508,7 +524,7 @@ body {
 
 .menu-leaderboard-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto;
+  grid-template-columns: 56px minmax(0, 1fr) auto auto;
   gap: 12px;
   align-items: center;
   padding: 12px 14px;
@@ -523,8 +539,14 @@ body {
 }
 
 .menu-leaderboard-rank,
-.menu-leaderboard-time {
+.menu-leaderboard-time,
+.menu-leaderboard-date {
   white-space: nowrap;
+}
+
+.menu-leaderboard-date {
+  font-size: 0.8em;
+  opacity: 0.55;
 }
 
 .menu-leaderboard-name {
@@ -765,71 +787,6 @@ body {
   .menu-main-btn {
     min-height: 70px;
     font-size: 20px;
-  }
-}
-
-@media (max-width: 720px) {
-  .menu-overlay-panel {
-    padding-inline: 16px;
-  }
-
-  .menu-title-logo {
-    bottom: calc(80px + 5 * (14px + 68px) + 20px);
-    left: 16px;
-    width: min(380px, 75vw);
-  }
-
-  .menu-main {
-    left: 16px;
-    right: 16px;
-    bottom: 80px;
-    width: auto;
-  }
-
-  .menu-main-btn {
-    min-height: 68px;
-    font-size: 19px;
-  }
-
-  .menu-screen {
-    padding-inline: 16px;
-    padding-top: 84px;
-  }
-
-  .menu-card {
-    padding: 18px;
-  }
-
-  .menu-setting-row,
-  .menu-setting-row--slider {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .menu-slider {
-    min-width: 0;
-  }
-
-  .menu-slider input {
-    width: 100%;
-  }
-
-  .menu-leaderboard-row {
-    grid-template-columns: 44px minmax(0, 1fr);
-  }
-
-  .menu-leaderboard-time {
-    grid-column: 2;
-  }
-
-  .auth-widget {
-    top: 12px;
-    right: 12px;
-  }
-
-  .back-btn {
-    top: 12px;
-    left: 12px;
   }
 }
 
