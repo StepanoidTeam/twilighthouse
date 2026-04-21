@@ -338,11 +338,11 @@ body {
 }
 
 .menu-title-logo {
-  position: absolute;
-  top: 14vh;
-  left: 50%;
-  transform: translateX(-50%);
-  width: min(520px, 80vw);
+  bottom: calc(
+    80px + 5 * (18px + 78px) + 24px
+  ); /* above menu-main: bottom + gaps + buttons + gap */
+  left: 28px;
+  width: min(420px, max(280px, 50vw));
   height: auto;
   pointer-events: none;
   filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
@@ -361,32 +361,49 @@ body {
 .menu-main-btn {
   min-height: 78px;
   padding: 0 28px;
-  border: 1px solid rgba(120, 156, 194, 0.18);
-  border-radius: 14px;
-  background: var(--color-menu-button);
+  border: none;
+  border-radius: 0;
+  background-image: url('sprites/blue-buttons.png');
+  background-size: 100% 500%;
+  background-position: 0 0%;
+  background-color: transparent;
+  box-shadow: none;
+  padding-left: 100px;
   color: #f2e3b9;
   text-align: left;
   font-family: var(--font-menu);
-  font-size: 26px;
+  font-size: 40px;
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
   text-transform: uppercase;
-  box-shadow:
-    0 14px 30px rgba(0, 0, 0, 0.28),
-    inset 0 1px 0 rgba(255, 255, 255, 0.06);
   transition:
     transform 120ms ease,
-    background 120ms ease,
-    color 120ms ease,
-    border-color 120ms ease;
+    background-image 120ms ease,
+    color 120ms ease;
+}
+
+.menu-main-btn:nth-child(1) {
+  background-position: 0 3%;
+}
+.menu-main-btn:nth-child(2) {
+  background-position: 0 26%;
+}
+.menu-main-btn:nth-child(3) {
+  background-position: 0 48%;
+}
+.menu-main-btn:nth-child(4) {
+  background-position: 0 70%;
+}
+.menu-main-btn:nth-child(5) {
+  background-position: 0 93%;
 }
 
 .menu-main-btn:hover,
 .menu-main-btn.is-selected {
   transform: translateX(8px);
-  background: #d63f2e;
-  border-color: rgba(255, 221, 68, 0.3);
+  background-image: url('sprites/red-buttons.png');
+  color: #f2e3b9;
 }
 
 .menu-main-btn:focus-visible,
@@ -613,7 +630,8 @@ body {
   }
 
   .menu-title-logo {
-    top: 10vh;
+    bottom: calc(80px + 5 * (14px + 68px) + 20px);
+    left: 16px;
     width: min(380px, 75vw);
   }
 
