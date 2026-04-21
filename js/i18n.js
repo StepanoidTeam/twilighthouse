@@ -96,6 +96,32 @@ Photopea — image editor
     'lang.russian': 'Русский',
     'lang.english': 'English',
 
+    // How to play
+    'howtoplay.title': 'How to Play',
+    'howtoplay.items': [
+      {
+        icon: 'sprites/icons/wreck.png',
+        text: 'Rotate the beam to light up approaching boats — they use your signal to navigate safely to shore',
+      },
+      {
+        icon: 'sprites/icons/mermaid.png',
+        text: "Mermaids swim toward the lighthouse in the dark — illuminate them to scare them off. Let 3 reach you and it's over",
+      },
+      {
+        icon: 'sprites/icons/kraken.png',
+        text: 'The Kraken lurks in darkness and charges at you — shine the beam on it to drive it away',
+      },
+      {
+        icon: 'sprites/icons/warning.png',
+        text: "Police boats are different — don't light them up. Every cop you illuminate confiscates a crate. Lose all 3 and the game ends very badly",
+      },
+      {
+        icon: 'sprites/icons/lantern.png',
+        text: 'The lamp burns out over time — the beam narrows and flickers. Keep an eye on it',
+      },
+      { icon: 'sprites/icons/trophy.png', text: 'Save 10 boats to win' },
+    ],
+
     // Game over / overlay
     'overlay.restart': 'Restart',
     'overlay.toMenu': 'Menu',
@@ -218,6 +244,32 @@ Photopea — image editor
     'settings.music': '🎵 Музыка',
     'settings.sfx': '🔊 Звуки',
     'lang.russian': 'Русский',
+
+    // How to play
+    'howtoplay.title': 'Как играть',
+    'howtoplay.items': [
+      {
+        icon: 'sprites/icons/wreck.png',
+        text: 'Поворачивай луч, чтобы освещать приближающиеся лодки — они используют твой сигнал, чтобы добраться до берега',
+      },
+      {
+        icon: 'sprites/icons/mermaid.png',
+        text: 'Русалки плывут к маяку в темноте — освети их, чтобы отпугнуть. Если 3 доберутся до маяка — конец',
+      },
+      {
+        icon: 'sprites/icons/kraken.png',
+        text: 'Кракен таится в темноте и атакует маяк — направь луч на него, чтобы отогнать',
+      },
+      {
+        icon: 'sprites/icons/warning.png',
+        text: 'Полицейские катера — другая история. Не свети на них! Каждый освещённый коп забирает ящик. Потеряешь все 3 — плохой финал',
+      },
+      {
+        icon: 'sprites/icons/lantern.png',
+        text: 'Лампа постепенно сгорает — луч сужается и мигает. Следи за ней',
+      },
+      { icon: 'sprites/icons/trophy.png', text: 'Спаси 10 лодок — и победишь' },
+    ],
     'lang.english': 'English',
 
     'overlay.restart': 'Заново',
