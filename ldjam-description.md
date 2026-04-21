@@ -1,6 +1,6 @@
 ## LIGHTHOUSE
 
-*A survival signal game made for Ludum Dare 59 — Theme: Signal*
+_A survival signal game made for Ludum Dare 59 — Theme: Signal_
 
 You are a lighthouse keeper on a stormy night. Your only tool is the lighthouse beam — a rotating signal that cuts through the darkness.
 
@@ -15,7 +15,7 @@ Boats lost at sea depend on your signal to find safety. But the darkness hides m
 - `Enter` / `E` — confirm
 - `Q` / `Esc` — back / pause
 
-*On mobile: tap the on-screen ◀ ▶ buttons to rotate the beam*
+_On mobile: tap the on-screen ◀ ▶ buttons to rotate the beam_
 
 ---
 
