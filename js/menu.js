@@ -11,7 +11,7 @@ import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 let menuApp = null;
 let $menuRoot = null;
 let $menuBg = null;
-let $menuTitle = null;
+let $menuTitle = null; // unused — logo is now a static <img>
 let $menuMain = null;
 let $menuSub = null;
 let $menuHint = null;
@@ -61,26 +61,9 @@ function playMenuClick() {
 }
 
 // ===== DOM Helpers =====
-function ensureMenuRoot() {
-  if ($menuRoot) return $menuRoot;
-
-  $menuRoot = document.createElement('div');
-  $menuRoot.className = 'menu-overlay';
-  $menuRoot.hidden = true;
-  $menuRoot.innerHTML = `
-    <div class="menu-overlay-bg"></div>
-    <div class="menu-overlay-dim"></div>
-    <div class="menu-overlay-panel">
-      <h1 class="menu-title"><span class="menu-title-icon">🔦</span> LIGHTHOUSE</h1>
-      <div class="menu-main"></div>
-      <section class="menu-sub" hidden></section>
-      <p class="menu-hint"></p>
-    </div>
-  `;
-  document.body.appendChild($menuRoot);
-
+function initMenu() {
+  $menuRoot = $menuOverlay;
   $menuBg = $menuRoot.querySelector('.menu-overlay-bg');
-  $menuTitle = $menuRoot.querySelector('.menu-title');
   $menuMain = $menuRoot.querySelector('.menu-main');
   $menuSub = $menuRoot.querySelector('.menu-sub');
   $menuHint = $menuRoot.querySelector('.menu-hint');
@@ -89,42 +72,36 @@ function ensureMenuRoot() {
     $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
   }
 
-  renderMainMenuButtons();
+  initMenuButtons();
   updateSelection();
-  return $menuRoot;
 }
 
-function createMenuButton(label, index) {
-  const $button = document.createElement('button');
-  $button.type = 'button';
-  $button.className = 'menu-main-btn';
-  $button.textContent = label;
-  $button.addEventListener('pointerover', () => {
-    if (selectedIndex === index) return;
-    selectedIndex = index;
-    updateSelection();
-    playMenuSelect();
-  });
-  $button.addEventListener('click', () => {
-    selectedIndex = index;
-    updateSelection();
-    playMenuClick();
-    activateMenuItem();
-  });
-  return $button;
+function initMenuButtons() {
+  $$menuItems = Array.from($menuMain.querySelectorAll('.menu-main-btn'));
+  const labels = getMenuLabels();
+  for (let i = 0; i < $$menuItems.length; i++) {
+    const $button = $$menuItems[i];
+    $button.textContent = labels[i]?.label ?? '';
+    const idx = i;
+    $button.addEventListener('pointerover', () => {
+      if (selectedIndex === idx) return;
+      selectedIndex = idx;
+      updateSelection();
+      playMenuSelect();
+    });
+    $button.addEventListener('click', () => {
+      selectedIndex = idx;
+      updateSelection();
+      playMenuClick();
+      activateMenuItem();
+    });
+  }
 }
 
 function renderMainMenuButtons() {
-  if (!$menuMain) return;
-
-  $menuMain.innerHTML = '';
-  $$menuItems = [];
-
   const labels = getMenuLabels();
-  for (let i = 0; i < labels.length; i++) {
-    const $button = createMenuButton(labels[i].label, i);
-    $$menuItems.push($button);
-    $menuMain.appendChild($button);
+  for (let i = 0; i < $$menuItems.length; i++) {
+    $$menuItems[i].textContent = labels[i]?.label ?? '';
   }
 }
 
@@ -151,13 +128,11 @@ function clearSubScreen() {
 }
 
 function hideMainItems() {
-  if ($menuTitle) $menuTitle.hidden = true;
   if ($menuMain) $menuMain.hidden = true;
   if ($menuHint) $menuHint.hidden = true;
 }
 
 function showMainItems() {
-  if ($menuTitle) $menuTitle.hidden = false;
   if ($menuMain) $menuMain.hidden = false;
   if ($menuHint) $menuHint.hidden = false;
   setHint(t('hint.main'));
@@ -206,31 +181,25 @@ function showMainMenu() {
 }
 
 // ===== HTML Back Button =====
-function ensureBackBtn() {
-  if (backBtnEl) return backBtnEl;
-  backBtnEl = document.createElement('button');
-  backBtnEl.type = 'button';
-  backBtnEl.className = 'back-btn';
-  backBtnEl.innerHTML = `<span class="back-btn-arrow">←</span><span class="back-btn-label">${t('btn.back')}</span>`;
+function initBackBtn() {
+  backBtnEl = $backBtn;
+  backBtnEl.querySelector('.back-btn-label').textContent = t('btn.back');
   backBtnEl.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
     playMenuClick();
     showMainMenu();
   });
-  document.body.appendChild(backBtnEl);
-  return backBtnEl;
 }
 
 function showBackBtn() {
-  const el = ensureBackBtn();
-  const lbl = el.querySelector('.back-btn-label');
+  const lbl = backBtnEl.querySelector('.back-btn-label');
   if (lbl) lbl.textContent = t('btn.back');
-  el.classList.add('is-visible');
+  backBtnEl.classList.add('is-visible');
 }
 
 function hideBackBtn() {
-  if (backBtnEl) backBtnEl.classList.remove('is-visible');
+  backBtnEl.classList.remove('is-visible');
 }
 
 // ===== Lifecycle =====
@@ -238,7 +207,8 @@ export async function buildMenu(app, startGameCb) {
   menuApp = app;
   onStartGame = startGameCb;
 
-  ensureMenuRoot();
+  initMenu();
+  initBackBtn();
   $menuRoot.hidden = false;
   showMainMenu();
   currentScreen = 'main';

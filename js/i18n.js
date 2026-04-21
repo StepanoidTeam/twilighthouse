@@ -12,11 +12,11 @@ const SUPPORTED = ['en', 'ru'];
 const DICT = {
   en: {
     // Main menu
-    'menu.newGame': '🎮  New Game',
-    'menu.leaderboard': '🏆  Leaderboard',
-    'menu.settings': '⚙️  Settings',
-    'menu.authors': '✍️  Credits',
-    'menu.tutorial': '📖  How to Play',
+    'menu.newGame': 'New Game',
+    'menu.leaderboard': 'Leaderboard',
+    'menu.settings': 'Settings',
+    'menu.authors': 'Credits',
+    'menu.tutorial': 'How to Play',
     'credits.text': `
 🎨 Concept Artists
 
@@ -108,7 +108,8 @@ Photopea — image editor
     'gameOver.mermaids': '💀 Game Over — {n} mermaids reached the lighthouse!',
     'gameOver.police': '🚔 Arrested! Police captured the lighthouse!',
     'gameOver.kraken': '🦑 The Kraken captured the lighthouse!',
-    'gameOver.pattinson': '📦 Out of powder! Lighthouse keeper threw intern off cliff!',
+    'gameOver.pattinson':
+      '📦 Out of powder! Lighthouse keeper threw intern off cliff!',
     'gameOver.score': '💀 Game Over — {score}/{total} boats saved',
     'win.message': '🎉 You Win! All {total} boats saved!',
 
@@ -139,11 +140,11 @@ Photopea — image editor
   },
 
   ru: {
-    'menu.newGame': '🎮  Новая игра',
-    'menu.leaderboard': '🏆  Лидерборд',
-    'menu.settings': '⚙️  Настройки',
-    'menu.authors': '✍️  Авторы',
-    'menu.tutorial': '📖  Как играть',
+    'menu.newGame': 'Новая игра',
+    'menu.leaderboard': 'Лидерборд',
+    'menu.settings': 'Настройки',
+    'menu.authors': 'Авторы',
+    'menu.tutorial': 'Как играть',
     'credits.text': `
 🎨 Концепт-художники
 
@@ -230,7 +231,8 @@ Photopea — image editor
     'gameOver.mermaids': '💀 Game Over — русалки добрались до маяка: {n}!',
     'gameOver.police': '🚔 Арест! Полиция захватила маяк!',
     'gameOver.kraken': '🦑 Кракен захватил маяк!',
-    'gameOver.pattinson': '📦 Порошок закончился! Смотритель маяка сбросил стажера со скалы!',
+    'gameOver.pattinson':
+      '📦 Порошок закончился! Смотритель маяка сбросил стажера со скалы!',
     'gameOver.score': '💀 Game Over — спасено {score}/{total} кораблей',
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
 

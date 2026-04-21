@@ -14,35 +14,7 @@ let mode = 'signin'; // 'signin' | 'signup'
 function build() {
   if (modal) return modal;
 
-  modal = document.createElement('div');
-  modal.className = 'auth-modal-backdrop';
-  modal.innerHTML = `
-    <div class="auth-modal">
-      <button class="auth-close" title="">×</button>
-      <h2 class="auth-title"></h2>
-      <div class="auth-tabs">
-        <button class="auth-tab is-active" data-mode="signin"></button>
-        <button class="auth-tab" data-mode="signup"></button>
-      </div>
-      <form class="auth-form">
-        <label class="auth-field auth-field--name">
-          <span></span>
-          <input name="name" type="text" autocomplete="nickname" maxlength="24" />
-        </label>
-        <label class="auth-field">
-          <span></span>
-          <input name="email" type="email" required autocomplete="email" />
-        </label>
-        <label class="auth-field">
-          <span></span>
-          <input name="password" type="password" required minlength="6" autocomplete="current-password" />
-        </label>
-        <div class="auth-error" role="alert"></div>
-        <button type="submit" class="auth-submit"></button>
-      </form>
-    </div>
-  `;
-  document.body.appendChild(modal);
+  modal = $authModal;
 
   const form = modal.querySelector('.auth-form');
   const title = modal.querySelector('.auth-title');
@@ -51,9 +23,8 @@ function build() {
   const nameField = modal.querySelector('.auth-field--name');
   const tabs = modal.querySelectorAll('.auth-tab');
   const closeBtn = modal.querySelector('.auth-close');
-  const [nameSpan, emailSpan, passwordSpan] = modal.querySelectorAll(
-    '.auth-field > span',
-  );
+  const [nameSpan, emailSpan, passwordSpan] =
+    modal.querySelectorAll('.auth-field > span');
 
   function applyStaticI18n() {
     closeBtn.title = t('auth.close');
@@ -163,16 +134,7 @@ let widget = null;
 function buildWidget() {
   if (widget) return widget;
 
-  widget = document.createElement('div');
-  widget.className = 'auth-widget';
-  widget.innerHTML = `
-    <button class="auth-widget-btn auth-widget-btn--signin"></button>
-    <div class="auth-widget-user" style="display:none">
-      <span class="auth-widget-name"></span>
-      <button class="auth-widget-btn auth-widget-btn--signout"></button>
-    </div>
-  `;
-  document.body.appendChild(widget);
+  widget = $authWidget;
 
   const signinBtn = widget.querySelector('.auth-widget-btn--signin');
   const signoutBtn = widget.querySelector('.auth-widget-btn--signout');

@@ -302,7 +302,7 @@ body {
   --color-menu-muted: #7f95af;
   --color-menu-accent: #ffdd44;
   --color-menu-selected: #c94a36;
-  --color-menu-button: rgba(20, 59, 92, 0.92);
+  --color-menu-button: #0a3755;
   position: fixed;
   inset: 0;
   z-index: 8500;
@@ -337,32 +337,21 @@ body {
   padding: 14vh 28px 34px;
 }
 
-.menu-title {
+.menu-title-logo {
   position: absolute;
-  top: 18vh;
+  top: 14vh;
   left: 50%;
   transform: translateX(-50%);
-  display: inline-flex;
-  align-items: center;
-  gap: 12px;
-  color: #fff;
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-family: var(--font-menu);
-  font-weight: 800;
-  letter-spacing: 0.08em;
-  text-shadow:
-    0 3px 0 rgba(0, 0, 0, 0.45),
-    0 0 18px rgba(0, 0, 0, 0.5);
-}
-
-.menu-title-icon {
-  font-size: 0.9em;
+  width: min(520px, 80vw);
+  height: auto;
+  pointer-events: none;
+  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
 }
 
 .menu-main {
   position: absolute;
   left: 28px;
-  bottom: 34px;
+  bottom: 80px;
   display: flex;
   flex-direction: column;
   gap: 18px;
@@ -375,10 +364,10 @@ body {
   border: 1px solid rgba(120, 156, 194, 0.18);
   border-radius: 14px;
   background: var(--color-menu-button);
-  color: #c8d8e8;
+  color: #f2e3b9;
   text-align: left;
   font-family: var(--font-menu);
-  font-size: 22px;
+  font-size: 26px;
   font-weight: 700;
   letter-spacing: 0.04em;
   cursor: pointer;
@@ -396,8 +385,7 @@ body {
 .menu-main-btn:hover,
 .menu-main-btn.is-selected {
   transform: translateX(8px);
-  background: rgba(201, 74, 54, 0.94);
-  color: var(--color-menu-accent);
+  background: #d63f2e;
   border-color: rgba(255, 221, 68, 0.3);
 }
 
@@ -624,10 +612,9 @@ body {
     padding-inline: 16px;
   }
 
-  .menu-title {
-    top: 14vh;
-    gap: 8px;
-    letter-spacing: 0.05em;
+  .menu-title-logo {
+    top: 10vh;
+    width: min(380px, 75vw);
   }
 
   .menu-main {

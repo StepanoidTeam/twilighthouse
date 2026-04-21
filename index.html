@@ -14,5 +14,101 @@
   </head>
   <body>
     <div id="$gameContainer"></div>
+
+    <!-- ===== Menu overlay ===== -->
+    <div id="$menuOverlay" class="menu-overlay" hidden>
+      <div class="menu-overlay-bg"></div>
+      <div class="menu-overlay-dim"></div>
+      <div class="menu-overlay-panel">
+        <img
+          class="menu-title-logo"
+          src="sprites/title-logo.png"
+          alt="TWILIGHTHOUSE"
+          aria-hidden="false"
+        />
+        <div class="menu-main">
+          <button
+            type="button"
+            class="menu-main-btn"
+            data-action="start"
+          ></button>
+          <button
+            type="button"
+            class="menu-main-btn"
+            data-action="leaderboard"
+          ></button>
+          <button
+            type="button"
+            class="menu-main-btn"
+            data-action="settings"
+          ></button>
+          <button
+            type="button"
+            class="menu-main-btn"
+            data-action="authors"
+          ></button>
+          <button
+            type="button"
+            class="menu-main-btn"
+            data-action="tutorial"
+          ></button>
+        </div>
+        <section class="menu-sub" hidden></section>
+        <p class="menu-hint"></p>
+      </div>
+    </div>
+
+    <!-- ===== Back button (shown on menu sub-screens) ===== -->
+    <button type="button" id="$backBtn" class="back-btn">
+      <span class="back-btn-arrow">←</span><span class="back-btn-label"></span>
+    </button>
+
+    <!-- ===== Auth modal ===== -->
+    <div id="$authModal" class="auth-modal-backdrop">
+      <div class="auth-modal">
+        <button class="auth-close" title="">×</button>
+        <h2 class="auth-title"></h2>
+        <div class="auth-tabs">
+          <button class="auth-tab is-active" data-mode="signin"></button>
+          <button class="auth-tab" data-mode="signup"></button>
+        </div>
+        <form class="auth-form">
+          <label class="auth-field auth-field--name">
+            <span></span>
+            <input
+              name="name"
+              type="text"
+              autocomplete="nickname"
+              maxlength="24"
+            />
+          </label>
+          <label class="auth-field">
+            <span></span>
+            <input name="email" type="email" required autocomplete="email" />
+          </label>
+          <label class="auth-field">
+            <span></span>
+            <input
+              name="password"
+              type="password"
+              required
+              minlength="6"
+              autocomplete="current-password"
+            />
+          </label>
+          <div class="auth-error" role="alert"></div>
+          <button type="submit" class="auth-submit"></button>
+        </form>
+      </div>
+    </div>
+
+    <!-- ===== Auth widget (top-right) ===== -->
+    <div id="$authWidget" class="auth-widget">
+      <button class="auth-widget-btn auth-widget-btn--signin"></button>
+      <div class="auth-widget-user" style="display: none">
+        <span class="auth-widget-name"></span>
+        <button class="auth-widget-btn auth-widget-btn--signout"></button>
+      </div>
+    </div>
   </body>
 </html>
