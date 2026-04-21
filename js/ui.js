@@ -191,12 +191,12 @@ export function buildButtons() {
     dropShadowDistance: 0,
   });
   txtArrowLeft.anchor.set(0.5);
-  txtArrowLeft.x = -24;
-  txtArrowLeft.y = -2;
+  txtArrowLeft.x = -15;
+  txtArrowLeft.y = -5;
   S.btnLeft.addChild(txtArrowLeft);
   const txtDLabelOnLeft = new PIXI.Text('A', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 18,
+    fontSize: 24,
     fill: '#fff',
     align: 'center',
     fontWeight: 'bold',
@@ -206,8 +206,8 @@ export function buildButtons() {
     dropShadowDistance: 0,
   });
   txtDLabelOnLeft.anchor.set(0.5);
-  txtDLabelOnLeft.x = 22;
-  txtDLabelOnLeft.y = -28;
+  txtDLabelOnLeft.x = 5;
+  txtDLabelOnLeft.y = -24;
   S.btnLeft.addChild(txtDLabelOnLeft);
   S.btnLeft.position.set(S.gameW / 2 - btnSpacing, S.gameH - BTN_BOTTOM_MARGIN);
   bindTurnButton(S.btnLeft, 'ArrowLeft');
@@ -231,12 +231,13 @@ export function buildButtons() {
     dropShadowDistance: 0,
   });
   txtArrowRight.anchor.set(0.5);
-  txtArrowRight.x = 24;
-  txtArrowRight.y = -2;
+
+  txtArrowRight.x = 10;
+  txtArrowRight.y = -5;
   S.btnRight.addChild(txtArrowRight);
   const txtALabelOnRight = new PIXI.Text('D', {
     fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 18,
+    fontSize: 24,
     fill: '#fff',
     align: 'center',
     fontWeight: 'bold',
@@ -246,8 +247,8 @@ export function buildButtons() {
     dropShadowDistance: 0,
   });
   txtALabelOnRight.anchor.set(0.5);
-  txtALabelOnRight.x = -22;
-  txtALabelOnRight.y = -28;
+  txtALabelOnRight.x = -10;
+  txtALabelOnRight.y = -24;
   S.btnRight.addChild(txtALabelOnRight);
   S.btnRight.position.set(
     S.gameW / 2 + btnSpacing,
