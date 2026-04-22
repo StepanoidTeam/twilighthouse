@@ -20,7 +20,7 @@ const DICT = {
     'credits.text': `
 🎨 Concept Artists
 
-@adriana
+@adriaaaaana
 @r1m
 @lina
 
@@ -28,23 +28,20 @@ const DICT = {
 💻 Programmers
 
 @bobanko
-@noki_a
-@claude
+@nuclme
 
 
 🎲 Game Designers
 
-@noki_a
+@nuclme
 @stepastepa
-@adriana
+@adriaaaaana
 @bobanko
 
 
 🤖 AI Tools
 
 GitHub Copilot
-ChatGPT
-Claude
 
 
 🎵 Music
@@ -61,8 +58,8 @@ libsounds.com
 ⚙️ Technologies
 
 PixiJS — 2D rendering engine
-Firebase — analytics & backend
 VS Code — code editor
+Firebase — analytics & backend
 Photopea — image editor
 
 
@@ -196,7 +193,7 @@ Photopea — image editor
     'credits.text': `
 🎨 Концепт-художники
 
-@adriana
+@adriaaaaana
 @r1m
 @lina
 
@@ -204,23 +201,20 @@ Photopea — image editor
 💻 Программисты
 
 @bobanko
-@noki_a
-@claude
+@nuclme
 
 
 🎲 Геймдизайнеры
 
-@noki_a
+@nuclme
 @stepastepa
-@adriana
+@adriaaaaana
 @bobanko
 
 
 🤖 AI-инструменты
 
 GitHub Copilot
-ChatGPT
-Claude
 
 
 🎵 Музыка

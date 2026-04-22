@@ -2,7 +2,7 @@
 
 @nuclme
 @stepastepa
-@adriana
+@adriaaaaana
 @bobanko
 
 # programmers
@@ -13,7 +13,7 @@
 
 # concept artists
 
-@adriana
+@adriaaaaana
 @r1m
 @lina
 

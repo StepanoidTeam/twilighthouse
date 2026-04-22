@@ -2,9 +2,11 @@
 
 _A survival signal game made for Ludum Dare 59 — Theme: Signal_
 
-You are a lighthouse keeper on a stormy night. Your only tool is the lighthouse beam — a rotating signal that cuts through the darkness.
+Congratulations, you got the job as lighthouse keeper. Your real responsibilities: help smugglers deliver their "medicine", blind sea monsters, and make sure the cops stay in the dark.
 
-Boats lost at sea depend on your signal to find safety. But the darkness hides more than just sailors…
+One wrong shine and it’s game over — in more ways than one...​
+
+Sounds easy, right?
 
 ---
 
@@ -32,19 +34,20 @@ _On mobile: tap the on-screen ◀ ▶ buttons to rotate the beam_
 
 ## The Story
 
-Young Robert takes a job at a remote lighthouse run by grizzled old sailor Willem — a man deep in debt to the Colombian cartel. What starts as a quiet night shift quickly spirals into chaos: raging seas, monstrous creatures, and authorities closing in. Between the cynical old wolf and the cocky young pup, the real storm is just beginning.
+Young Robert takes the night shift at a remote lighthouse run by grizzled old sailor Willem. What looks like a simple job quickly turns into cartel logistics: guiding suspicious boats to shore, keeping the beam away from police patrols, and using the lighthouse light to fend off very angry mermaids and an increasingly pissed kraken.
+
+Between the cynical old wolf and the cocky young pup, the real storm isn’t the weather — it’s trying not to get everyone arrested (or eaten).
 
 ---
 
 ## Authors
 
-- **@adriana** — concept art
+- **@adriaaaaana** — concept art
 - **@r1m** — concept art
 - **@lina** — concept art
 - **@bobanko** — programming, game design
-- **@noki_a** — programming, game design
+- **@nuclme** — programming, game design
 - **@stepastepa** — game design
-- **@claude** — programming
 
 **Music:** suno.com | **Sounds:** pixabay.com, libsounds.com  
 **Tech:** PixiJS, Firebase, Vanilla JS

@@ -7,15 +7,14 @@ https://libsounds.com/
 
 https://suno.com/
 
+# code
+
+https://code.visualstudio.com/
+
 # AI
 
 https://www.copilot.com/
 https://chatgpt.com/
-https://claude.ai/
-
-# code
-
-https://code.visualstudio.com/
 
 # editor
 
