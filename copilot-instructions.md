@@ -1,4 +1,4 @@
-# Dobble — Project Code Guidelines
+# Project Code Guidelines
 
 ## Tech Stack
 
