@@ -38,7 +38,7 @@
 .menu-overlay-panel {
   position: absolute;
   inset: 0;
-  padding: 14vh 28px 34px;
+  padding: 34px 28px;
 }
 
 .menu-title-logo {
@@ -56,13 +56,16 @@
   bottom: 80px;
   display: flex;
   flex-direction: column;
-  gap: 18px;
+  gap: 14px;
   width: min(420px, max(280px, 50vw));
 }
 
 .menu-main-btn {
   position: relative;
-  padding: 18px 28px;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 8px 28px;
   border: none;
   border-radius: 15px;
   background: #002f50d9;
@@ -90,6 +93,23 @@
   &.is-selected:after {
     content: '✒︎';
   }
+}
+
+.menu-main-btn-icon {
+  --icon-size: 60px;
+  width: var(--icon-size);
+  height: var(--icon-size);
+  flex: 0 0 var(--icon-size);
+  object-fit: contain;
+  display: block;
+}
+
+.menu-main-btn-label {
+  display: block;
+  min-width: 0;
+
+  font-size: 30px;
+  line-height: 1em;
 }
 
 .menu-main-btn:hover,
@@ -462,6 +482,12 @@
     min-height: 70px;
     font-size: 20px;
   }
+
+  .menu-main-btn-icon {
+    width: 36px;
+    height: 36px;
+    flex-basis: 36px;
+  }
 }
 
 @media (max-width: 720px) {
@@ -485,6 +511,12 @@
   .menu-main-btn {
     min-height: 68px;
     font-size: 19px;
+  }
+
+  .menu-main-btn-icon {
+    width: 34px;
+    height: 34px;
+    flex-basis: 34px;
   }
 
   .menu-screen {
