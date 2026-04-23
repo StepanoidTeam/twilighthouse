@@ -8,32 +8,32 @@ import {
 } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 
-let modal = null;
+let $modal = null;
 let mode = 'signin'; // 'signin' | 'signup'
 
 function build() {
-  if (modal) return modal;
+  if ($modal) return $modal;
 
-  modal = $authModal;
+  $modal = $authModal;
 
-  const form = modal.querySelector('.auth-form');
-  const title = modal.querySelector('.auth-title');
-  const submitBtn = modal.querySelector('.auth-submit');
-  const errorEl = modal.querySelector('.auth-error');
-  const nameField = modal.querySelector('.auth-field--name');
-  const tabs = modal.querySelectorAll('.auth-tab');
-  const closeBtn = modal.querySelector('.auth-close');
-  const [nameSpan, emailSpan, passwordSpan] =
-    modal.querySelectorAll('.auth-field > span');
+  const $form = $modal.querySelector('.auth-form');
+  const $title = $modal.querySelector('.auth-title');
+  const $submitBtn = $modal.querySelector('.auth-submit');
+  const $errorEl = $modal.querySelector('.auth-error');
+  const $nameField = $modal.querySelector('.auth-field--name');
+  const $$tabs = $modal.querySelectorAll('.auth-tab');
+  const $closeBtn = $modal.querySelector('.auth-close');
+  const [$nameSpan, $emailSpan, $passwordSpan] =
+    $modal.querySelectorAll('.auth-field > span');
 
   function applyStaticI18n() {
-    closeBtn.title = t('auth.close');
-    nameSpan.textContent = t('auth.fieldName');
-    emailSpan.textContent = t('auth.fieldEmail');
-    passwordSpan.textContent = t('auth.fieldPassword');
-    for (const tab of tabs) {
-      tab.textContent =
-        tab.dataset.mode === 'signin'
+    $closeBtn.title = t('auth.close');
+    $nameSpan.textContent = t('auth.fieldName');
+    $emailSpan.textContent = t('auth.fieldEmail');
+    $passwordSpan.textContent = t('auth.fieldPassword');
+    for (const $tab of $$tabs) {
+      $tab.textContent =
+        $tab.dataset.mode === 'signin'
           ? t('auth.tabSignIn')
           : t('auth.tabSignUp');
     }
@@ -41,23 +41,23 @@ function build() {
 
   function setMode(next) {
     mode = next;
-    for (const tab of tabs) {
-      tab.classList.toggle('is-active', tab.dataset.mode === mode);
+    for (const $tab of $$tabs) {
+      $tab.classList.toggle('is-active', $tab.dataset.mode === mode);
     }
     if (mode === 'signup') {
-      title.textContent = t('auth.signUp');
-      submitBtn.textContent = t('auth.submitSignUp');
-      nameField.style.display = '';
+      $title.textContent = t('auth.signUp');
+      $submitBtn.textContent = t('auth.submitSignUp');
+      $nameField.style.display = '';
     } else {
-      title.textContent = t('auth.signIn');
-      submitBtn.textContent = t('auth.submitSignIn');
-      nameField.style.display = 'none';
+      $title.textContent = t('auth.signIn');
+      $submitBtn.textContent = t('auth.submitSignIn');
+      $nameField.style.display = 'none';
     }
-    errorEl.textContent = '';
+    $errorEl.textContent = '';
   }
 
-  for (const tab of tabs) {
-    tab.addEventListener('click', () => setMode(tab.dataset.mode));
+  for (const $tab of $$tabs) {
+    $tab.addEventListener('click', () => setMode($tab.dataset.mode));
   }
 
   // Rerender labels when language changes
@@ -67,19 +67,19 @@ function build() {
   });
   applyStaticI18n();
 
-  modal.querySelector('.auth-close').addEventListener('click', () => {
+  $closeBtn.addEventListener('click', () => {
     hideAuthModal();
   });
 
-  modal.addEventListener('click', (e) => {
-    if (e.target === modal) hideAuthModal();
+  $modal.addEventListener('click', (e) => {
+    if (e.target === $modal) hideAuthModal();
   });
 
-  form.addEventListener('submit', async (e) => {
+  $form.addEventListener('submit', async (e) => {
     e.preventDefault();
-    errorEl.textContent = '';
-    submitBtn.disabled = true;
-    const data = new FormData(form);
+    $errorEl.textContent = '';
+    $submitBtn.disabled = true;
+    const data = new FormData($form);
     const email = String(data.get('email') || '').trim();
     const password = String(data.get('password') || '');
     const name = String(data.get('name') || '').trim();
@@ -91,33 +91,33 @@ function build() {
       }
       hideAuthModal();
     } catch (err) {
-      errorEl.textContent = prettyAuthError(err);
+      $errorEl.textContent = prettyAuthError(err);
     } finally {
-      submitBtn.disabled = false;
+      $submitBtn.disabled = false;
     }
   });
 
   // Initial mode
   setMode('signin');
 
-  modal._setMode = setMode;
-  return modal;
+  $modal._setMode = setMode;
+  return $modal;
 }
 
 export function showAuthModal(initialMode = 'signin') {
-  const m = build();
-  m._setMode(initialMode);
-  m.classList.add('is-visible');
-  const firstInput = m.querySelector(
+  const $modalEl = build();
+  $modalEl._setMode(initialMode);
+  $modalEl.classList.add('is-visible');
+  const $firstInput = $modalEl.querySelector(
     initialMode === 'signup'
       ? '.auth-field--name input'
       : 'input[name="email"]',
   );
-  if (firstInput) setTimeout(() => firstInput.focus(), 30);
+  if ($firstInput) setTimeout(() => $firstInput.focus(), 30);
 }
 
 export function hideAuthModal() {
-  if (modal) modal.classList.remove('is-visible');
+  if ($modal) $modal.classList.remove('is-visible');
 }
 
 export async function doSignOut() {
@@ -129,48 +129,48 @@ export async function doSignOut() {
 }
 
 // ===== Account widget (top-right badge in menu) =====
-let widget = null;
+let $widget = null;
 
 function buildWidget() {
-  if (widget) return widget;
+  if ($widget) return $widget;
 
-  widget = $authWidget;
+  $widget = $authWidget;
 
-  const signinBtn = widget.querySelector('.auth-widget-btn--signin');
-  const signoutBtn = widget.querySelector('.auth-widget-btn--signout');
-  const userEl = widget.querySelector('.auth-widget-user');
-  const nameEl = widget.querySelector('.auth-widget-name');
+  const $signinBtn = $widget.querySelector('.auth-widget-btn--signin');
+  const $signoutBtn = $widget.querySelector('.auth-widget-btn--signout');
+  const $userEl = $widget.querySelector('.auth-widget-user');
+  const $nameEl = $widget.querySelector('.auth-widget-name');
 
   function applyWidgetI18n() {
-    signinBtn.textContent = t('widget.signIn');
-    signoutBtn.textContent = t('widget.signOut');
-    signoutBtn.title = t('widget.signOut');
+    $signinBtn.textContent = t('widget.signIn');
+    $signoutBtn.textContent = t('widget.signOut');
+    $signoutBtn.title = t('widget.signOut');
   }
 
   applyWidgetI18n();
   onLanguageChange(applyWidgetI18n);
 
-  signinBtn.addEventListener('click', () => showAuthModal('signin'));
-  signoutBtn.addEventListener('click', () => doSignOut());
+  $signinBtn.addEventListener('click', () => showAuthModal('signin'));
+  $signoutBtn.addEventListener('click', () => doSignOut());
 
   onAuthChange((user) => {
     // Анонимных юзеров не показываем в виджете — для пользователя они =
     // "не залогинен". Кнопка "Войти" остаётся видна, но счёт за ним всё
     // равно пишется в Firestore под его анонимным uid.
     if (isSignedInReal(user)) {
-      signinBtn.style.display = 'none';
-      userEl.style.display = '';
+      $signinBtn.style.display = 'none';
+      $userEl.style.display = '';
       const label =
         (user.displayName && user.displayName.trim()) ||
         (user.email ? user.email.split('@')[0] : 'Капитан');
-      nameEl.textContent = `👤 ${label}`;
+      $nameEl.textContent = `👤 ${label}`;
     } else {
-      signinBtn.style.display = '';
-      userEl.style.display = 'none';
+      $signinBtn.style.display = '';
+      $userEl.style.display = 'none';
     }
   });
 
-  return widget;
+  return $widget;
 }
 
 export function showAuthWidget() {
@@ -179,5 +179,5 @@ export function showAuthWidget() {
 }
 
 export function hideAuthWidget() {
-  if (widget) widget.classList.remove('is-visible');
+  if ($widget) $widget.classList.remove('is-visible');
 }
