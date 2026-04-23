@@ -7,16 +7,41 @@ import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
-const { $menuOverlay, $backBtn } = globalThis;
+const {
+  $menuOverlay,
+  $menuBg,
+  $menuMain,
+  $menuSub,
+  $menuHint,
+  $menuBtnStart,
+  $menuBtnLeaderboard,
+  $menuBtnSettings,
+  $menuBtnAuthors,
+  $menuBtnTutorial,
+  $backBtn,
+  $backBtnLabel,
+  $menuSettings,
+  $menuSettingsTitle,
+  $menuSettingsHint,
+  $menuSettingsLangLabel,
+  $menuSettingsLangBtn,
+  $menuSettingsMusicLabel,
+  $menuSettingsMusicInput,
+  $menuSettingsMusicValue,
+  $menuSettingsSfxLabel,
+  $menuSettingsSfxInput,
+  $menuSettingsSfxValue,
+  $menuSettingsNameLabel,
+  $menuSettingsNameNote,
+  $menuDisplayNameForm,
+  $menuDisplayNameInput,
+  $menuDisplayNameHint,
+  $menuDisplayNameSave,
+  $menuDisplayNameStatus,
+} = globalThis;
 
 // ===== Menu State =====
 let menuApp = null;
-let $menuRoot = null;
-let $menuBg = null;
-let $menuTitle = null; // unused — logo is now a static <img>
-let $menuMain = null;
-let $menuSub = null;
-let $menuHint = null;
 let $$menuItems = [];
 let selectedIndex = 0;
 let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
@@ -61,12 +86,6 @@ function playMenuClick() {
 
 // ===== DOM Helpers =====
 function initMenu() {
-  $menuRoot = $menuOverlay;
-  $menuBg = $menuRoot.querySelector('.menu-overlay-bg');
-  $menuMain = $menuRoot.querySelector('.menu-main');
-  $menuSub = $menuRoot.querySelector('.menu-sub');
-  $menuHint = $menuRoot.querySelector('.menu-hint');
-
   if ($menuBg) {
     $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
   }
@@ -76,7 +95,13 @@ function initMenu() {
 }
 
 function initMenuButtons() {
-  $$menuItems = Array.from($menuMain.querySelectorAll('.menu-main-btn'));
+  $$menuItems = [
+    $menuBtnStart,
+    $menuBtnLeaderboard,
+    $menuBtnSettings,
+    $menuBtnAuthors,
+    $menuBtnTutorial,
+  ].filter(Boolean);
   const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
     const $button = $$menuItems[i];
@@ -173,6 +198,7 @@ function buildScreenShell(title, subtitle = '') {
 
 function showMainMenu() {
   clearSubScreen();
+  if ($menuSettings) $menuSettings.hidden = true;
   showMainItems();
   hideBackBtn();
   currentScreen = 'main';
@@ -182,7 +208,7 @@ function showMainMenu() {
 // ===== HTML Back Button =====
 function initBackBtn() {
   backBtnEl = $backBtn;
-  backBtnEl.querySelector('.back-btn-label').textContent = t('btn.back');
+  if ($backBtnLabel) $backBtnLabel.textContent = t('btn.back');
   backBtnEl.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -192,8 +218,7 @@ function initBackBtn() {
 }
 
 function showBackBtn() {
-  const lbl = backBtnEl.querySelector('.back-btn-label');
-  if (lbl) lbl.textContent = t('btn.back');
+  if ($backBtnLabel) $backBtnLabel.textContent = t('btn.back');
   backBtnEl.classList.add('is-visible');
 }
 
@@ -208,7 +233,7 @@ export async function buildMenu(app, startGameCb) {
 
   initMenu();
   initBackBtn();
-  $menuRoot.hidden = false;
+  $menuOverlay.hidden = false;
   showMainMenu();
   currentScreen = 'main';
 
@@ -221,16 +246,13 @@ export async function buildMenu(app, startGameCb) {
 
   if (!i18nBound) {
     onLanguageChange(() => {
-      if (!$menuRoot) return;
+      if (!$menuOverlay) return;
 
       renderMainMenuButtons();
       updateSelection();
       setHint(currentScreen === 'main' ? t('hint.main') : t('hint.back'));
 
-      if (backBtnEl) {
-        const lbl = backBtnEl.querySelector('.back-btn-label');
-        if (lbl) lbl.textContent = t('btn.back');
-      }
+      if (backBtnEl && $backBtnLabel) $backBtnLabel.textContent = t('btn.back');
 
       if (currentScreen === 'settings') showSettings();
       else if (currentScreen === 'leaderboard') showLeaderboard();
@@ -245,7 +267,7 @@ export async function buildMenu(app, startGameCb) {
 }
 
 function handleMenuKey(e) {
-  if (!$menuRoot || $menuRoot.hidden) return;
+  if (!$menuOverlay || $menuOverlay.hidden) return;
 
   const ae = document.activeElement;
   if (
@@ -443,11 +465,13 @@ function showSettings() {
   currentScreen = 'settings';
   setHint(t('hint.back'));
 
-  const $screen = buildScreenShell(t('settings.title'));
-  if (!$screen) return;
+  clearSubScreen();
+  if (!$menuSettings) return;
 
-  const $card = document.createElement('div');
-  $card.className = 'menu-card menu-settings';
+  $menuSettings.hidden = false;
+
+  if ($menuSettingsTitle) $menuSettingsTitle.textContent = t('settings.title');
+  if ($menuSettingsHint) $menuSettingsHint.textContent = t('hint.back');
 
   const langs = [
     { code: 'en', label: t('lang.english') },
@@ -458,53 +482,30 @@ function showSettings() {
     langs.findIndex((lang) => lang.code === getLanguage()),
   );
 
-  const $langRow = document.createElement('div');
-  $langRow.className = 'menu-setting-row';
-
-  const $langLabel = document.createElement('span');
-  $langLabel.className = 'menu-setting-label';
-  $langLabel.textContent = t('settings.language');
-  $langRow.appendChild($langLabel);
-
-  const $langBtn = document.createElement('button');
-  $langBtn.type = 'button';
-  $langBtn.className = 'menu-setting-toggle';
-  $langBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
-  $langBtn.addEventListener('click', () => {
+  if (!$menuSettingsLangLabel || !$menuSettingsLangBtn) return;
+  $menuSettingsLangLabel.textContent = t('settings.language');
+  $menuSettingsLangBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
+  $menuSettingsLangBtn.onclick = () => {
     playMenuClick();
     langIdx = (langIdx + 1) % langs.length;
     setLanguage(langs[langIdx].code);
-  });
-  $langRow.appendChild($langBtn);
+  };
 
-  $card.appendChild($langRow);
-
-  const $musicRow = document.createElement('div');
-  $musicRow.className = 'menu-setting-row menu-setting-row--slider';
-
-  const $musicLabel = document.createElement('span');
-  $musicLabel.className = 'menu-setting-label';
-  $musicLabel.textContent = t('settings.music');
-  $musicRow.appendChild($musicLabel);
-
-  const $musicControl = document.createElement('div');
-  $musicControl.className = 'menu-slider';
+  if (
+    !$menuSettingsMusicLabel ||
+    !$menuSettingsMusicInput ||
+    !$menuSettingsMusicValue
+  )
+    return;
+  $menuSettingsMusicLabel.textContent = t('settings.music');
 
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
-  const $musicInput = document.createElement('input');
-  $musicInput.type = 'range';
-  $musicInput.min = '0';
-  $musicInput.max = '100';
-  $musicInput.step = '1';
-  $musicInput.value = String(Math.round(initialMusic * 100));
+  $menuSettingsMusicInput.value = String(Math.round(initialMusic * 100));
+  $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
 
-  const $musicValue = document.createElement('span');
-  $musicValue.className = 'menu-slider-value';
-  $musicValue.textContent = `${$musicInput.value}%`;
-
-  $musicInput.addEventListener('input', () => {
-    const val = Number($musicInput.value) / 100;
-    $musicValue.textContent = `${$musicInput.value}%`;
+  $menuSettingsMusicInput.oninput = () => {
+    const val = Number($menuSettingsMusicInput.value) / 100;
+    $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
     S.musicVolume = val;
     if (S.musicSound) {
       S.musicSound.volume = Math.max(0, Math.min(1, MUSIC_VOLUME * val));
@@ -512,39 +513,23 @@ function showSettings() {
     try {
       localStorage.setItem('lighthouse_music_vol', String(val));
     } catch (_) {}
-  });
+  };
 
-  $musicControl.appendChild($musicInput);
-  $musicControl.appendChild($musicValue);
-  $musicRow.appendChild($musicControl);
-  $card.appendChild($musicRow);
-
-  const $sfxRow = document.createElement('div');
-  $sfxRow.className = 'menu-setting-row menu-setting-row--slider';
-
-  const $sfxLabel = document.createElement('span');
-  $sfxLabel.className = 'menu-setting-label';
-  $sfxLabel.textContent = t('settings.sfx');
-  $sfxRow.appendChild($sfxLabel);
-
-  const $sfxControl = document.createElement('div');
-  $sfxControl.className = 'menu-slider';
+  if (
+    !$menuSettingsSfxLabel ||
+    !$menuSettingsSfxInput ||
+    !$menuSettingsSfxValue
+  )
+    return;
+  $menuSettingsSfxLabel.textContent = t('settings.sfx');
 
   const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
-  const $sfxInput = document.createElement('input');
-  $sfxInput.type = 'range';
-  $sfxInput.min = '0';
-  $sfxInput.max = '100';
-  $sfxInput.step = '1';
-  $sfxInput.value = String(Math.round(initialSfx * 100));
+  $menuSettingsSfxInput.value = String(Math.round(initialSfx * 100));
+  $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
 
-  const $sfxValue = document.createElement('span');
-  $sfxValue.className = 'menu-slider-value';
-  $sfxValue.textContent = `${$sfxInput.value}%`;
-
-  $sfxInput.addEventListener('input', () => {
-    const val = Number($sfxInput.value) / 100;
-    $sfxValue.textContent = `${$sfxInput.value}%`;
+  $menuSettingsSfxInput.oninput = () => {
+    const val = Number($menuSettingsSfxInput.value) / 100;
+    $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
     S.sfxVolume = val;
     if (S.wavesSound) {
       S.wavesSound.volume = Math.max(0, Math.min(1, WAVES_VOLUME * val));
@@ -552,99 +537,76 @@ function showSettings() {
     try {
       localStorage.setItem('lighthouse_sfx_vol', String(val));
     } catch (_) {}
-  });
-
-  $sfxControl.appendChild($sfxInput);
-  $sfxControl.appendChild($sfxValue);
-  $sfxRow.appendChild($sfxControl);
-  $card.appendChild($sfxRow);
+  };
 
   // ===== Display Name =====
-  const $nameRow = document.createElement('div');
-  $nameRow.className = 'menu-setting-row menu-setting-row--name';
-
-  const $nameLabel = document.createElement('span');
-  $nameLabel.className = 'menu-setting-label';
-  $nameLabel.textContent = t('settings.displayName');
-  $nameRow.appendChild($nameLabel);
+  if (!$menuSettingsNameLabel || !$menuSettingsNameNote) return;
+  $menuSettingsNameLabel.textContent = t('settings.displayName');
 
   if (!currentUser) {
-    const $note = document.createElement('span');
-    $note.className = 'menu-setting-note';
-    $note.textContent = t('settings.displayNameGuestNote');
-    $nameRow.appendChild($note);
+    $menuSettingsNameNote.textContent = t('settings.displayNameGuestNote');
+    $menuSettingsNameNote.hidden = false;
+    if ($menuDisplayNameForm) $menuDisplayNameForm.hidden = true;
   } else {
+    $menuSettingsNameNote.hidden = true;
+    if (
+      !$menuDisplayNameForm ||
+      !$menuDisplayNameInput ||
+      !$menuDisplayNameHint ||
+      !$menuDisplayNameSave ||
+      !$menuDisplayNameStatus
+    ) {
+      return;
+    }
+
     const isAnon = currentUser.isAnonymous === true;
     const currentName =
       (currentUser.displayName && currentUser.displayName.trim()) || '';
 
-    const $nameGroup = document.createElement('div');
-    $nameGroup.className = 'menu-setting-name-group';
+    $menuDisplayNameForm.hidden = false;
+    $menuDisplayNameInput.value = currentName;
+    $menuDisplayNameInput.placeholder = t('settings.displayNamePlaceholder');
 
-    const $nameInput = document.createElement('input');
-    $nameInput.type = 'text';
-    $nameInput.className = 'menu-setting-name-input';
-    $nameInput.maxLength = 30;
-    $nameInput.value = currentName;
-    $nameInput.placeholder = t('settings.displayNamePlaceholder');
-
-    const $nameHint = document.createElement('p');
-    $nameHint.className = 'menu-setting-name-hint';
-    $nameHint.textContent = isAnon
+    $menuDisplayNameHint.textContent = isAnon
       ? t('settings.displayNameAnon')
       : t('settings.displayNameEmail');
+    $menuDisplayNameSave.textContent = t('settings.displayNameSave');
 
-    const $nameActions = document.createElement('div');
-    $nameActions.className = 'menu-setting-name-actions';
+    $menuDisplayNameStatus.textContent = '';
+    $menuDisplayNameStatus.className = 'menu-setting-name-status';
 
-    const $nameSaveBtn = document.createElement('button');
-    $nameSaveBtn.type = 'button';
-    $nameSaveBtn.className = 'menu-setting-name-save';
-    $nameSaveBtn.textContent = t('settings.displayNameSave');
+    $menuDisplayNameForm.onsubmit = async (e) => {
+      e.preventDefault();
 
-    const $nameStatus = document.createElement('span');
-    $nameStatus.className = 'menu-setting-name-status';
-
-    $nameSaveBtn.addEventListener('click', async () => {
-      const name = $nameInput.value.trim();
+      const name = $menuDisplayNameInput.value.trim();
       if (!name) {
-        $nameStatus.textContent = t('settings.displayNameEmpty');
-        $nameStatus.className = 'menu-setting-name-status is-error';
+        $menuDisplayNameStatus.textContent = t('settings.displayNameEmpty');
+        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
         return;
       }
       if (name.length > 30) {
-        $nameStatus.textContent = t('settings.displayNameTooLong');
-        $nameStatus.className = 'menu-setting-name-status is-error';
+        $menuDisplayNameStatus.textContent = t('settings.displayNameTooLong');
+        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
         return;
       }
-      $nameSaveBtn.disabled = true;
-      $nameStatus.textContent = t('settings.displayNameSaving');
-      $nameStatus.className = 'menu-setting-name-status';
+      $menuDisplayNameSave.disabled = true;
+      $menuDisplayNameStatus.textContent = t('settings.displayNameSaving');
+      $menuDisplayNameStatus.className = 'menu-setting-name-status';
       try {
         await updateDisplayName(name);
-        $nameStatus.textContent = t('settings.displayNameSaved');
-        $nameStatus.className = 'menu-setting-name-status is-success';
+        $menuDisplayNameStatus.textContent = t('settings.displayNameSaved');
+        $menuDisplayNameStatus.className =
+          'menu-setting-name-status is-success';
         console.log(`👤 Display name saved: ${name}`);
       } catch (e) {
         console.warn('updateDisplayName failed', e);
-        $nameStatus.textContent = t('settings.displayNameError');
-        $nameStatus.className = 'menu-setting-name-status is-error';
+        $menuDisplayNameStatus.textContent = t('settings.displayNameError');
+        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
       } finally {
-        $nameSaveBtn.disabled = false;
+        $menuDisplayNameSave.disabled = false;
       }
-    });
-
-    $nameActions.appendChild($nameSaveBtn);
-    $nameActions.appendChild($nameStatus);
-    $nameGroup.appendChild($nameInput);
-    $nameGroup.appendChild($nameHint);
-    $nameGroup.appendChild($nameActions);
-    $nameRow.appendChild($nameGroup);
+    };
   }
-
-  $card.appendChild($nameRow);
-
-  $screen.appendChild($card);
 }
 
 // ===== Authors =====
@@ -689,16 +651,17 @@ function stopCreditsAnimation() {
 
 // ===== Show / Hide =====
 function hideMenu() {
-  if ($menuRoot) $menuRoot.hidden = true;
+  if ($menuOverlay) $menuOverlay.hidden = true;
   clearSubScreen();
+  if ($menuSettings) $menuSettings.hidden = true;
   hideBackBtn();
   currentScreen = null;
   hideAuthWidget();
 }
 
 export function showMenu() {
-  if (!$menuRoot) return;
-  $menuRoot.hidden = false;
+  if (!$menuOverlay) return;
+  $menuOverlay.hidden = false;
   selectedIndex = 0;
   showMainMenu();
   currentScreen = 'main';
@@ -707,12 +670,12 @@ export function showMenu() {
 }
 
 export function isMenuVisible() {
-  return Boolean($menuRoot && !$menuRoot.hidden);
+  return Boolean($menuOverlay && !$menuOverlay.hidden);
 }
 
 export function repositionMenu() {
-  if (!$menuRoot) return;
+  if (!$menuOverlay) return;
 
-  $menuRoot.style.setProperty('--menu-vw', `${S.gameW}px`);
-  $menuRoot.style.setProperty('--menu-vh', `${S.gameH}px`);
+  $menuOverlay.style.setProperty('--menu-vw', `${S.gameW}px`);
+  $menuOverlay.style.setProperty('--menu-vh', `${S.gameH}px`);
 }
