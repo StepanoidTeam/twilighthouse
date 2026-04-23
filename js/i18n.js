@@ -83,6 +83,10 @@ Photopea — image editor
     'leaderboard.loadError': 'Failed to load leaderboard',
     'leaderboard.empty': 'No one is in the top yet — be the first!',
     'leaderboard.you': '(you)',
+    'leaderboard.col.rank': '#',
+    'leaderboard.col.name': 'имя',
+    'leaderboard.col.time': 'лучшее время',
+    'leaderboard.col.date': 'дата',
 
     // Boot loader
     'boot.title': 'Lighthouse',
@@ -253,6 +257,10 @@ Photopea — image editor
     'leaderboard.loadError': 'Не удалось загрузить лидерборд',
     'leaderboard.empty': 'Пока никто не попал в топ — стань первым!',
     'leaderboard.you': '(вы)',
+    'leaderboard.col.rank': '#',
+    'leaderboard.col.name': 'name',
+    'leaderboard.col.time': 'best time',
+    'leaderboard.col.date': 'date',
 
     'boot.title': 'Маяк',
     'boot.loading': 'Загрузка игровых ресурсов…',

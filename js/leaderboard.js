@@ -10,7 +10,8 @@ import {
   limit,
   getDocs,
 } from '../firebase.js';
-import { currentUser } from './auth.js';
+import { currentUser, isSignedInReal } from './auth.js';
+import { t } from './i18n.js';
 
 const COLLECTION = 'leaderboard';
 
@@ -169,4 +170,148 @@ export function formatLeaderboardDateTime(value) {
     hour: '2-digit',
     minute: '2-digit',
   }).format(value);
+}
+
+function createLeaderboardHeader() {
+  const $template = document.getElementById('$menuLeaderboardHeaderTemplate');
+  const $header = $template?.content.firstElementChild?.cloneNode(true);
+
+  if (!$header) {
+    const $fallback = document.createElement('div');
+    $fallback.className = 'menu-leaderboard-header';
+    return $fallback;
+  }
+
+  const $headerRank = $header.querySelector('[data-col="rank"]');
+  const $headerName = $header.querySelector('[data-col="name"]');
+  const $headerTime = $header.querySelector('[data-col="time"]');
+  const $headerDate = $header.querySelector('[data-col="date"]');
+
+  if ($headerRank) $headerRank.textContent = t('leaderboard.col.rank');
+  if ($headerName) $headerName.textContent = t('leaderboard.col.name');
+  if ($headerTime) $headerTime.textContent = t('leaderboard.col.time');
+  if ($headerDate) $headerDate.textContent = t('leaderboard.col.date');
+
+  return $header;
+}
+
+function createLeaderboardRow(entry, myUid) {
+  const isMe = myUid && entry.uid === myUid;
+  const medal =
+    entry.rank === 1
+      ? '🥇'
+      : entry.rank === 2
+        ? '🥈'
+        : entry.rank === 3
+          ? '🥉'
+          : `${entry.rank}.`;
+  const label = isMe
+    ? `${entry.displayName} ${t('leaderboard.you')}`
+    : entry.displayName;
+
+  const $row = document.createElement('div');
+  $row.className = `menu-leaderboard-row${entry.rank <= 3 || isMe ? ' is-highlight' : ''}`;
+
+  const $rank = document.createElement('span');
+  $rank.className = 'menu-leaderboard-rank';
+  $rank.textContent = medal;
+
+  const $name = document.createElement('span');
+  $name.className = 'menu-leaderboard-name';
+  $name.textContent = label;
+
+  const $time = document.createElement('span');
+  $time.className = 'menu-leaderboard-time';
+  $time.textContent = formatSurvivalTime(entry.bestTimeMs);
+
+  const $date = document.createElement('span');
+  $date.className = 'menu-leaderboard-date';
+  $date.textContent = formatLeaderboardDateTime(entry.updatedAt);
+
+  $row.appendChild($rank);
+  $row.appendChild($name);
+  $row.appendChild($time);
+  $row.appendChild($date);
+
+  return { $row, isMe };
+}
+
+export async function renderLeaderboardScreen({ buildScreenShell, isActive }) {
+  const $screen = buildScreenShell(
+    t('leaderboard.title'),
+    t('leaderboard.subtitle'),
+  );
+  if (!$screen) return;
+
+  const $body = document.createElement('div');
+  $body.className = 'menu-card menu-leaderboard';
+  const $loading = document.createElement('p');
+  $loading.className = 'menu-state-label';
+  $loading.textContent = t('leaderboard.loading');
+  $body.appendChild($loading);
+  $screen.appendChild($body);
+
+  let leaderboardView = { rows: [], currentUid: null };
+  let error = null;
+  try {
+    leaderboardView = await fetchLeaderboardView(50, currentUser?.uid);
+  } catch (e) {
+    console.warn('Failed to load leaderboard', e);
+    error = e;
+  }
+
+  if (!isActive()) return;
+
+  $body.innerHTML = '';
+
+  if (error) {
+    const $error = document.createElement('p');
+    $error.className = 'menu-state-label';
+    $error.textContent = t('leaderboard.loadError');
+    $body.appendChild($error);
+    return;
+  }
+
+  if (leaderboardView.rows.length === 0) {
+    const $empty = document.createElement('p');
+    $empty.className = 'menu-state-label';
+    $empty.textContent = t('leaderboard.empty');
+    $body.appendChild($empty);
+    return;
+  }
+
+  $body.appendChild(createLeaderboardHeader());
+
+  const $list = document.createElement('div');
+  $list.className = 'menu-leaderboard-list';
+  const myUid = currentUser ? currentUser.uid : null;
+  let $currentRow = null;
+
+  for (const entry of leaderboardView.rows) {
+    const { $row, isMe } = createLeaderboardRow(entry, myUid);
+    if (isMe) {
+      $row.dataset.currentUser = 'true';
+      $currentRow = $row;
+    }
+    $list.appendChild($row);
+  }
+
+  $body.appendChild($list);
+
+  if ($currentRow) {
+    requestAnimationFrame(() => {
+      $currentRow.scrollIntoView({
+        block: 'center',
+        inline: 'nearest',
+        behavior: 'auto',
+      });
+    });
+  }
+
+  if (!isSignedInReal(currentUser)) {
+    const $note = document.createElement('p');
+    $note.className = 'menu-card-note';
+    $note.textContent = t('leaderboard.signInPrompt');
+    $body.appendChild($note);
+  }
 }
