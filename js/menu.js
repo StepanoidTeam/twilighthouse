@@ -77,7 +77,7 @@ function getCreditsText() {
 
 // ===== Sound Helpers =====
 function playMenuSelect() {
-  playSound('audio/menu-select.mp3', 0.15);
+  playSound('audio/menu-select.mp3', 0.55);
 }
 
 function playMenuClick() {
