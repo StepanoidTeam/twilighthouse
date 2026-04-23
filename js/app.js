@@ -209,30 +209,21 @@ function playClickSound() {
   playSound('audio/button-click.mp3', 0.2);
 }
 
-function stopAmbientSounds({ resetPlayback = false } = {}) {
+function stopWavesSound({ resetPlayback = false } = {}) {
   if (S.wavesSound) {
     S.wavesSound.pause();
     if (resetPlayback) S.wavesSound.currentTime = 0;
   }
-
-  if (S.musicSound) {
-    S.musicSound.pause();
-    if (resetPlayback) {
-      musicTrackIndex = 0;
-      if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
-        S.musicSound.src = MUSIC_PLAYLIST[0];
-      }
-      S.musicSound.currentTime = 0;
-    }
-  }
 }
 
-function startAmbientSounds({ restartPlayback = false } = {}) {
+function startWavesSound({ restartPlayback = false } = {}) {
   if (S.wavesSound) {
     if (restartPlayback) S.wavesSound.currentTime = 0;
     S.wavesSound.play().catch(() => {});
   }
+}
 
+function startMenuMusic({ restartPlayback = false } = {}) {
   if (S.musicSound) {
     if (restartPlayback) {
       musicTrackIndex = 0;
@@ -262,7 +253,8 @@ function prepareFreshRun() {
   $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
   if ($volControls) $volControls.hidden = false;
-  startAmbientSounds({ restartPlayback: true });
+  startWavesSound();
+  startMenuMusic();
 }
 
 // ===== Resize =====
@@ -387,7 +379,8 @@ function exitToMenu() {
   S.reset();
   updateHUD();
   clearTransientVisuals();
-  stopAmbientSounds({ resetPlayback: true });
+  startWavesSound();
+  startMenuMusic();
   $gameContainer.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
   if ($volControls) $volControls.hidden = true;
@@ -655,7 +648,8 @@ async function init() {
     console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
   });
   S.musicSound = musicAudio;
-  stopAmbientSounds({ resetPlayback: true });
+  startWavesSound({ restartPlayback: true });
+  startMenuMusic({ restartPlayback: true });
 
   if (analytics) {
     logEvent(analytics, 'game_start', {

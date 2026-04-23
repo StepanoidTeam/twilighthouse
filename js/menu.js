@@ -76,11 +76,23 @@ function getCreditsText() {
 }
 
 // ===== Sound Helpers =====
+function ensureMenuAmbient() {
+  if (S.wavesSound && S.wavesSound.paused) {
+    S.wavesSound.play().catch(() => {});
+  }
+
+  if (S.musicSound && S.musicSound.paused) {
+    S.musicSound.play().catch(() => {});
+  }
+}
+
 function playMenuSelect() {
+  ensureMenuAmbient();
   playSound('audio/menu-select.mp3', 0.55);
 }
 
 function playMenuClick() {
+  ensureMenuAmbient();
   playSound('audio/button-click.mp3', 0.2);
 }
 
@@ -105,7 +117,8 @@ function initMenuButtons() {
   const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
     const $button = $$menuItems[i];
-    $button.textContent = labels[i]?.label ?? '';
+    const $label = $button.querySelector('.menu-main-btn-label');
+    if ($label) $label.textContent = labels[i]?.label ?? '';
     const idx = i;
     $button.addEventListener('pointerover', () => {
       if (selectedIndex === idx) return;
@@ -125,7 +138,8 @@ function initMenuButtons() {
 function renderMainMenuButtons() {
   const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
-    $$menuItems[i].textContent = labels[i]?.label ?? '';
+    const $label = $$menuItems[i].querySelector('.menu-main-btn-label');
+    if ($label) $label.textContent = labels[i]?.label ?? '';
   }
 }
 
@@ -268,6 +282,8 @@ export async function buildMenu(app, startGameCb) {
 
 function handleMenuKey(e) {
   if (!$menuOverlay || $menuOverlay.hidden) return;
+
+  ensureMenuAmbient();
 
   const ae = document.activeElement;
   if (
