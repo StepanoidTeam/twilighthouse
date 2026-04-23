@@ -1,7 +1,11 @@
 import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
-import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
+import {
+  fetchLeaderboardView,
+  formatLeaderboardDateTime,
+  formatSurvivalTime,
+} from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
@@ -401,10 +405,10 @@ async function showLeaderboard() {
   $body.appendChild($loading);
   $screen.appendChild($body);
 
-  let rows = [];
+  let leaderboardView = { rows: [], currentUid: null };
   let error = null;
   try {
-    rows = await fetchTopLeaderboard(10);
+    leaderboardView = await fetchLeaderboardView(50, currentUser?.uid);
   } catch (e) {
     console.warn('Failed to load leaderboard', e);
     error = e;
@@ -422,7 +426,7 @@ async function showLeaderboard() {
     return;
   }
 
-  if (rows.length === 0) {
+  if (leaderboardView.rows.length === 0) {
     const $empty = document.createElement('p');
     $empty.className = 'menu-state-label';
     $empty.textContent = t('leaderboard.empty');
@@ -433,18 +437,29 @@ async function showLeaderboard() {
   const $list = document.createElement('div');
   $list.className = 'menu-leaderboard-list';
   const myUid = currentUser ? currentUser.uid : null;
+  let $currentRow = null;
 
-  for (let i = 0; i < rows.length; i++) {
-    const entry = rows[i];
+  for (let i = 0; i < leaderboardView.rows.length; i++) {
+    const entry = leaderboardView.rows[i];
     const isMe = myUid && entry.uid === myUid;
     const medal =
-      i === 0 ? '🥇' : i === 1 ? '🥈' : i === 2 ? '🥉' : `${i + 1}.`;
+      entry.rank === 1
+        ? '🥇'
+        : entry.rank === 2
+          ? '🥈'
+          : entry.rank === 3
+            ? '🥉'
+            : `${entry.rank}.`;
     const label = isMe
       ? `${entry.displayName} ${t('leaderboard.you')}`
       : entry.displayName;
 
     const $row = document.createElement('div');
-    $row.className = `menu-leaderboard-row${i < 3 || isMe ? ' is-highlight' : ''}`;
+    $row.className = `menu-leaderboard-row${entry.rank <= 3 || isMe ? ' is-highlight' : ''}`;
+    if (isMe) {
+      $row.dataset.currentUser = 'true';
+      $currentRow = $row;
+    }
 
     const $rank = document.createElement('span');
     $rank.className = 'menu-leaderboard-rank';
@@ -458,13 +473,28 @@ async function showLeaderboard() {
     $time.className = 'menu-leaderboard-time';
     $time.textContent = formatSurvivalTime(entry.bestTimeMs);
 
+    const $date = document.createElement('span');
+    $date.className = 'menu-leaderboard-date';
+    $date.textContent = formatLeaderboardDateTime(entry.updatedAt);
+
     $row.appendChild($rank);
     $row.appendChild($name);
     $row.appendChild($time);
+    $row.appendChild($date);
     $list.appendChild($row);
   }
 
   $body.appendChild($list);
+
+  if ($currentRow) {
+    requestAnimationFrame(() => {
+      $currentRow.scrollIntoView({
+        block: 'center',
+        inline: 'nearest',
+        behavior: 'auto',
+      });
+    });
+  }
 
   if (!isSignedInReal(currentUser)) {
     const $note = document.createElement('p');

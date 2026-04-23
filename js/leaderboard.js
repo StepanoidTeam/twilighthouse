@@ -31,8 +31,8 @@ function resolveDisplayName(user) {
 }
 
 /**
- * Submit a run. Stores the user's best survival time in `leaderboard/{uid}`.
- * Only writes if the new time beats the previously stored best.
+ * Submit a winning run. Stores the user's best survival time in `leaderboard/{uid}`.
+ * Only writes if the new winning time beats the previously stored best.
  * Returns { written: boolean, best: number } or null if not signed in.
  */
 export async function submitScore(survivalMs) {
@@ -74,13 +74,13 @@ export async function submitScore(survivalMs) {
 }
 
 /**
- * Fetch top N entries ordered by bestTimeMs desc.
+ * Fetch top N winning entries ordered by bestTimeMs desc.
  * Returns array of { uid, displayName, bestTimeMs }.
  */
 export async function fetchTopLeaderboard(n = 10) {
   const q = query(
     collection(db, COLLECTION),
-    orderBy('bestTimeMs', 'asc'),
+    orderBy('bestTimeMs', 'desc'),
     limit(n),
   );
   const snap = await getDocs(q);
@@ -97,10 +97,76 @@ export async function fetchTopLeaderboard(n = 10) {
   return rows;
 }
 
+/**
+ * Fetches top N winning leaderboard entries and appends the current player's row
+ * when they are outside the visible top list.
+ * Returns { rows, currentUid } where each row includes a 1-based rank.
+ */
+export async function fetchLeaderboardView(n = 50, uid = currentUser?.uid) {
+  const q = query(collection(db, COLLECTION), orderBy('bestTimeMs', 'desc'));
+  const snap = await getDocs(q);
+  const allRows = [];
+
+  snap.forEach((d) => {
+    const data = d.data();
+    allRows.push({
+      uid: data.uid || d.id,
+      displayName: data.displayName || 'Аноним',
+      bestTimeMs: Number(data.bestTimeMs) || 0,
+      updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
+    });
+  });
+
+  const topRows = allRows.slice(0, n).map((row, index) => ({
+    ...row,
+    rank: index + 1,
+  }));
+
+  if (!uid) {
+    return { rows: topRows, currentUid: null };
+  }
+
+  const currentInTop = topRows.some((row) => row.uid === uid);
+  if (currentInTop) {
+    return { rows: topRows, currentUid: uid };
+  }
+
+  const currentIndex = allRows.findIndex((row) => row.uid === uid);
+  if (currentIndex === -1) {
+    return { rows: topRows, currentUid: uid };
+  }
+
+  return {
+    rows: [
+      ...topRows,
+      {
+        ...allRows[currentIndex],
+        rank: currentIndex + 1,
+      },
+    ],
+    currentUid: uid,
+  };
+}
+
 /** Format ms → "M:SS" */
 export function formatSurvivalTime(ms) {
   const totalSeconds = Math.max(0, Math.floor(ms / 1000));
   const m = Math.floor(totalSeconds / 60);
   const s = totalSeconds % 60;
   return `${m}:${String(s).padStart(2, '0')}`;
+}
+
+/** Format Date → locale date and time */
+export function formatLeaderboardDateTime(value) {
+  if (!(value instanceof Date) || Number.isNaN(value.getTime())) {
+    return '—';
+  }
+
+  return new Intl.DateTimeFormat(undefined, {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+  }).format(value);
 }
