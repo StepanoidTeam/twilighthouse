@@ -94,7 +94,11 @@ const KRAKEN_CHASE_FRAMES = [
   'krakenChase3',
   'krakenChase2',
 ];
-const KRAKEN_RETREAT_FRAMES = ['krakenRetreat1'];
+const KRAKEN_RETREAT_FRAMES = [
+  'krakenRetreat1',
+  'krakenRetreat2',
+  'krakenRetreat3',
+];
 const KRAKEN_FRAME_DURATION = 30;
 
 // ===== Boat Lit Debounce =====
@@ -121,6 +125,8 @@ const SPRITE_FILES = {
   krakenChase2: 'sprites/kraken/chase/2.png',
   krakenChase3: 'sprites/kraken/chase/3.png',
   krakenRetreat1: 'sprites/kraken/retreat/1.png',
+  krakenRetreat2: 'sprites/kraken/retreat/2.png',
+  krakenRetreat3: 'sprites/kraken/retreat/3.png',
   mermaid1: 'sprites/mermaid/1.png',
   mermaid2: 'sprites/mermaid/2.png',
   mermaid3: 'sprites/mermaid/3.png',
