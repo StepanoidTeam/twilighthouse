@@ -58,6 +58,15 @@ const MUSIC_PLAYLIST = [
   'music/2-twilight-house.mp3',
   'music/3-techno-salt.mp3',
 ];
+const BOOT_TEXTURE_ASSETS = [
+  'sprites/mainmenu.PNG',
+  'sprites/title-logo.png',
+  'sprites/icons/lighthouse.png',
+  'sprites/icons/compass.png',
+  'sprites/icons/wheel.png',
+  'sprites/icons/chest.png',
+  'sprites/icons/map.png',
+];
 const BOOT_AUDIO_ASSETS = Array.from(
   new Set([
     'audio/button-click.mp3',
@@ -83,7 +92,10 @@ const BOOT_AUDIO_ASSETS = Array.from(
 let musicTrackIndex = 0;
 let bootLoaderState = {
   loaded: 0,
-  total: Object.keys(SPRITE_FILES).length + BOOT_AUDIO_ASSETS.length,
+  total:
+    Object.keys(SPRITE_FILES).length +
+    BOOT_TEXTURE_ASSETS.length +
+    BOOT_AUDIO_ASSETS.length,
   status: 'loading',
   currentAsset: null,
 };
@@ -511,6 +523,13 @@ async function loadTextures() {
     setBootLoaderProgress(loaded, total, { kind: 'texture', path });
     S.textures[name] = await PIXI.Assets.load(path);
     loaded = index + 1;
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
+  }
+
+  for (const path of BOOT_TEXTURE_ASSETS) {
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
+    await PIXI.Assets.load(path);
+    loaded += 1;
     setBootLoaderProgress(loaded, total, { kind: 'texture', path });
   }
 
