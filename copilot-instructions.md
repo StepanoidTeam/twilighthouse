@@ -31,7 +31,7 @@
 
 ### DOM
 
-- Elements with IDs are available directly as global variables (e.g., `$screenStart` for `id="$screenStart"`), no need to query them via `querySelector` or `getElementById`
+- In ES modules, access ID-backed globals via `globalThis`, preferably with a single top-level destructuring (e.g., `const { $screenStart, $screenGame } = globalThis`), rather than `querySelector` or `getElementById`
 - Cache frequently used elements once (in `init()` or at module top-level), never re-query in loops
 - Manipulate classes with `classList.add/remove/toggle/contains`
 - Use `dataset` for reading `data-*` attributes
