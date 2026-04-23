@@ -54,9 +54,9 @@ const {
   $volControls,
 } = globalThis;
 const MUSIC_PLAYLIST = [
-  'music/1-lighthouse-salt.mp3',
+  'music/1-techno-salt.mp3',
   'music/2-twilight-house.mp3',
-  'music/3-techno-salt.mp3',
+  'music/3-silent-MARK-light.mp3',
 ];
 const BOOT_TEXTURE_ASSETS = [
   'sprites/mainmenu.PNG',
