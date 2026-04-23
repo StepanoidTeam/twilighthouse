@@ -164,7 +164,7 @@ function hideBootLoader() {
   renderBootLoaderText();
 
   requestAnimationFrame(() => {
-    $bootLoader.classList.add('is-hiding');
+    $bootLoader.hidden = true;
   });
 
   window.setTimeout(() => {

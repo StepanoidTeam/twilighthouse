@@ -17,6 +17,7 @@
 .menu-overlay-dim,
 .menu-overlay-panel,
 .menu-authors-bg,
+.menu-authors-blackout,
 .menu-authors-dim {
   position: absolute;
   inset: 0;
@@ -435,8 +436,21 @@
   overflow: hidden;
 }
 
+.menu-authors-bg {
+  opacity: 1;
+  z-index: 0;
+}
+
 .menu-authors-dim {
   background: rgba(0, 0, 0, 0.5);
+  z-index: 1;
+}
+
+.menu-authors-blackout {
+  background: #000;
+  opacity: 0;
+  pointer-events: none;
+  z-index: 2;
 }
 
 @keyframes scroll-credits {
@@ -455,6 +469,7 @@
   top: 0;
   width: min(420px, calc(100vw - 48px));
   animation: scroll-credits 28s linear infinite;
+  z-index: 3;
 }
 
 .menu-authors-text {
@@ -470,7 +485,7 @@
 
 .menu-authors .menu-sub-hint {
   bottom: 30px;
-  z-index: 1;
+  z-index: 3;
 }
 
 @media (max-height: 760px) {

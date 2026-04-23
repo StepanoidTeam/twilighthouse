@@ -4,6 +4,7 @@ import S from './state.js';
 import { fetchTopLeaderboard, formatSurvivalTime } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
+import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
 import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
@@ -53,7 +54,6 @@ let i18nBound = false;
 
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu.PNG';
-const CREDITS_BG_FILE = 'sprites/wasted/police.png';
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -635,33 +635,21 @@ async function showAuthors() {
   clearSubScreen();
   if (!$menuSub) return;
 
-  $menuSub.hidden = false;
-  $menuSub.className = 'menu-sub menu-authors';
-  $menuSub.innerHTML = `
-    <div class="menu-authors-bg"></div>
-    <div class="menu-authors-dim"></div>
-    <div class="menu-authors-scroll">
-      <pre class="menu-authors-text"></pre>
-    </div>
-  `;
-  $menuSub.appendChild(buildBackHint());
-
-  const $authorsBg = $menuSub.querySelector('.menu-authors-bg');
-  if ($authorsBg) {
-    $authorsBg.style.backgroundImage = `url("${CREDITS_BG_FILE}")`;
-  }
-
+  renderAuthorsScreen({
+    container: $menuSub,
+    creditsText: getCreditsText(),
+    backHint: buildBackHint(),
+  });
   $creditsScroll = $menuSub.querySelector('.menu-authors-scroll');
-  const $creditsText = $menuSub.querySelector('.menu-authors-text');
-  if ($creditsText) $creditsText.textContent = getCreditsText();
   startCreditsAnimation();
 }
 
 function startCreditsAnimation() {
-  // CSS animation handles scrolling — nothing to do here
+  // authors screen animation is managed by authors-screen.js
 }
 
 function stopCreditsAnimation() {
+  destroyAuthorsScreen();
   $creditsScroll = null;
 }
 
