@@ -43,13 +43,16 @@ import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 
-const $gameContainer = document.getElementById('$gameContainer');
-const $bootLoader = document.getElementById('$bootLoader');
-const $bootLoaderTitle = document.getElementById('$bootLoaderTitle');
-const $bootLoaderText = document.getElementById('$bootLoaderText');
-const $bootLoaderAsset = document.getElementById('$bootLoaderAsset');
-const $bootLoaderBarFill = document.getElementById('$bootLoaderBarFill');
-const $bootLoaderPercent = document.getElementById('$bootLoaderPercent');
+const {
+  $gameContainer,
+  $bootLoader,
+  $bootLoaderTitle,
+  $bootLoaderText,
+  $bootLoaderAsset,
+  $bootLoaderBarFill,
+  $bootLoaderPercent,
+  $volControls,
+} = globalThis;
 const MUSIC_PLAYLIST = [
   'music/1-lighthouse-salt.mp3',
   'music/2-twilight-house.mp3',
@@ -258,7 +261,7 @@ function prepareFreshRun() {
   updateDarkness();
   $gameContainer.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.volControls) S.volControls.hidden = false;
+  if ($volControls) $volControls.hidden = false;
   startAmbientSounds({ restartPlayback: true });
 }
 
@@ -387,7 +390,7 @@ function exitToMenu() {
   stopAmbientSounds({ resetPlayback: true });
   $gameContainer.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
+  if ($volControls) $volControls.hidden = true;
   showMenu();
 }
 
@@ -585,7 +588,7 @@ async function init() {
 
   buildUI();
   S.btnEsc.visible = false; // hidden until game starts
-  if (S.volControls) S.volControls.hidden = true;
+  if ($volControls) $volControls.hidden = true;
 
   // Wire Escape button click to show menu
   S.btnEsc.on('pointerdown', () => {
@@ -663,25 +666,6 @@ async function init() {
   }
 
   console.log('🔦 Lighthouse game initialized');
-
-  // ===== Beam Controls (Sliders) =====
-  const $sliderOffsetX = document.getElementById('sliderOffsetX');
-  const $valOffsetX = document.getElementById('valOffsetX');
-  const $sliderOffsetY = document.getElementById('sliderOffsetY');
-  const $valOffsetY = document.getElementById('valOffsetY');
-  if ($sliderOffsetX && $valOffsetX) {
-    $sliderOffsetX.addEventListener('input', (e) => {
-      S.BEAM_ORIGIN_OFFSET_X = parseInt($sliderOffsetX.value, 10);
-      $valOffsetX.textContent = $sliderOffsetX.value;
-    });
-  }
-  if ($sliderOffsetY && $valOffsetY) {
-    $sliderOffsetY.addEventListener('input', (e) => {
-      S.BEAM_ORIGIN_OFFSET_Y = parseInt($sliderOffsetY.value, 10);
-      $valOffsetY.textContent = $sliderOffsetY.value;
-      if (S.lhGlow) S.lhGlow.position.set(0, S.BEAM_ORIGIN_OFFSET_Y);
-    });
-  }
 }
 
 renderBootLoaderText();

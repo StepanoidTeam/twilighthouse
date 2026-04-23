@@ -7,6 +7,8 @@ import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { showIntro } from './intro.js';
 import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 
+const { $menuOverlay, $backBtn } = globalThis;
+
 // ===== Menu State =====
 let menuApp = null;
 let $menuRoot = null;

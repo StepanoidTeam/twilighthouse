@@ -21,6 +21,24 @@ import S from './state.js';
 import { t } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 
+const {
+  $btnLeft,
+  $btnRight,
+  $volControls,
+  $volSfxVal,
+  $volMusicVal,
+  $gameContainer,
+  $resultMsg,
+  $resultRestartLabel,
+  $resultMenuLabel,
+  $resultSplash,
+  $screenGameOver,
+  $exitConfirmMsg,
+  $exitConfirmLabel,
+  $exitResumeLabel,
+  $screenExitConfirm,
+} = globalThis;
+
 // ===== Tooltips =====
 export function playCrashSound() {
   playRandomSound(CRASH_SOUNDS, CRASH_VOLUME);
@@ -162,9 +180,6 @@ function bindTurnButton(button, keyCode) {
 
 export function buildButtons() {
   // ===== Left / Right turn buttons (HTML) =====
-  S.btnLeft = $btnLeft;
-  S.btnRight = $btnRight;
-
   function bindHtmlTurnButton($btn, keyCode) {
     const press = () => {
       S.keys[keyCode] = true;
@@ -216,7 +231,6 @@ export function buildButtons() {
   S.hudLayer.addChild(S.btnEsc);
 
   // ===== Volume controls (HTML, top-left of screen) =====
-  S.volControls = $volControls;
   const STEP = 0.1;
 
   function applyVol(target, v) {
@@ -326,10 +340,10 @@ async function showGameOverScreen({ message, splashKey, playFail = true }) {
   if (playFail) playFailSound();
 
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
+  if ($btnLeft) $btnLeft.hidden = true;
+  if ($btnRight) $btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
+  if ($volControls) $volControls.hidden = true;
 
   $gameContainer.hidden = true;
 
@@ -386,10 +400,10 @@ export function showGameOver() {
   playFailSound();
 
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
+  if ($btnLeft) $btnLeft.hidden = true;
+  if ($btnRight) $btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
+  if ($volControls) $volControls.hidden = true;
 
   $gameContainer.hidden = true;
   $resultMsg.textContent = t('gameOver.score', {
@@ -415,10 +429,10 @@ export function showExitConfirm() {
   S.exitConfirm = true;
 
   // Hide gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = true;
-  if (S.btnRight) S.btnRight.hidden = true;
+  if ($btnLeft) $btnLeft.hidden = true;
+  if ($btnRight) $btnRight.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
-  if (S.volControls) S.volControls.hidden = true;
+  if ($volControls) $volControls.hidden = true;
 
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
@@ -431,8 +445,8 @@ export function hideExitConfirm() {
   $screenExitConfirm.hidden = true;
 
   // Restore gameplay buttons
-  if (S.btnLeft) S.btnLeft.hidden = false;
-  if (S.btnRight) S.btnRight.hidden = false;
+  if ($btnLeft) $btnLeft.hidden = false;
+  if ($btnRight) $btnRight.hidden = false;
   if (S.btnEsc) S.btnEsc.visible = true;
-  if (S.volControls) S.volControls.hidden = false;
+  if ($volControls) $volControls.hidden = false;
 }

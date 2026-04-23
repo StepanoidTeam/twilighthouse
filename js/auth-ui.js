@@ -8,6 +8,8 @@ import {
 } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 
+const { $authModal, $authWidget } = globalThis;
+
 let $modal = null;
 let mode = 'signin'; // 'signin' | 'signup'
 

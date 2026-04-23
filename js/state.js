@@ -25,7 +25,6 @@ const State = {
   // Audio
   wavesSound: null,
   musicSound: null,
-  volControls: null,
   sfxVolume: (() => {
     try {
       const v = parseFloat(localStorage.getItem('lighthouse_sfx_vol'));
