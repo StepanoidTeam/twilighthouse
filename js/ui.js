@@ -17,6 +17,7 @@ import {
   playRandomSound,
   MUSIC_VOLUME,
   syncLoopingAudio,
+  playFailSound,
 } from './sound.js';
 import S from './state.js';
 import { t } from './i18n.js';
@@ -304,22 +305,6 @@ export function buildUI() {
   buildButtons();
   buildOverlay();
   repositionUI();
-}
-
-// ===== Game Over Screens =====
-function playFailSound() {
-  if (S.musicSound && !S.musicSound.paused) {
-    S.musicSound.pause();
-    playSound('audio/fail-1.mp3', 0.1, {
-      onEnded: () => {
-        if (S.musicSound) {
-          void S.musicSound.play();
-        }
-      },
-    });
-  } else {
-    playSound('audio/fail-1.mp3', 0.1);
-  }
 }
 
 // ===== HTML Game Over / Win screen =====

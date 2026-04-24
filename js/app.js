@@ -14,15 +14,14 @@ import {
   computeWorldScale,
 } from './config.js';
 import {
-  playSound,
-  WAVES_VOLUME,
-  MUSIC_VOLUME,
-  createAmbientAudioTrack,
-  unlockAudioContext,
-  syncLoopingAudio,
-  getSfxVolume,
-  getMusicVolume,
-  primeAmbientAudioBuffers,
+  BOOT_AUDIO_ASSETS,
+  preloadBootAudioAssets,
+  initializeAmbientAudio,
+  playClickSound,
+  bindAmbientAudioUnlock,
+  startWavesSound,
+  startMenuMusic,
+  primeBootAmbientAudio,
 } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
@@ -75,11 +74,6 @@ const {
   $btnExitResume,
   $volControls,
 } = globalThis;
-const MUSIC_PLAYLIST = [
-  'music/1-techno-salt.mp3',
-  'music/2-twilight-house.mp3',
-  'music/3-silent-MARK-light.mp3',
-];
 const BOOT_TEXTURE_ASSETS = [
   'sprites/mainmenu.PNG',
   'sprites/title-logo.png',
@@ -89,30 +83,6 @@ const BOOT_TEXTURE_ASSETS = [
   'sprites/icons/chest.png',
   'sprites/icons/map.png',
 ];
-const BOOT_AUDIO_ASSETS = Array.from(
-  new Set([
-    'audio/button-click.mp3',
-    'audio/menu-select.mp3',
-    'audio/book.mp3',
-    'audio/fail-1.mp3',
-    'audio/ocean-sea-soft-waves.mp3',
-    'audio/crash/horror-bone-crack.mp3',
-    'audio/crash/rubble-crash.mp3',
-    'audio/crash/small-rock-break.mp3',
-    'audio/crash/wooden-ship-break.mp3',
-    'audio/cop/police-intro-siren.mp3',
-    'audio/cop/police-siren-one-loop.mp3',
-    'audio/cop/radio-thats-correct.mp3',
-    'audio/cop/radio-turn.mp3',
-    'audio/boat/submarine_sonar-1.mp3',
-    'audio/boat/submarine_sonar-2.mp3',
-    'audio/boat/submarine_sonar-3.mp3',
-    ...MUSIC_PLAYLIST,
-  ]),
-);
-
-let musicTrackIndex = 0;
-let ambientUnlockBound = false;
 let bootLoaderState = {
   loaded: 0,
   total:
@@ -205,98 +175,6 @@ function showBootLoaderError() {
   };
   renderBootLoaderText();
   if ($bootLoaderPercent) $bootLoaderPercent.textContent = 'ERR';
-}
-
-function preloadAudioAsset(path) {
-  return new Promise((resolve) => {
-    const audio = new Audio();
-    let settled = false;
-    const timeoutId = window.setTimeout(handleDone, 4000);
-
-    function cleanup() {
-      window.clearTimeout(timeoutId);
-      audio.removeEventListener('canplaythrough', handleReady);
-      audio.removeEventListener('loadeddata', handleReady);
-      audio.removeEventListener('error', handleDone);
-    }
-
-    function handleDone() {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      resolve();
-    }
-
-    function handleReady() {
-      handleDone();
-    }
-
-    audio.preload = 'auto';
-    audio.addEventListener('canplaythrough', handleReady, { once: true });
-    audio.addEventListener('loadeddata', handleReady, { once: true });
-    audio.addEventListener('error', handleDone, { once: true });
-    audio.src = path;
-    audio.load();
-  });
-}
-
-function playClickSound() {
-  playSound('audio/button-click.mp3', 0.2);
-}
-
-function bindAmbientAudioUnlock() {
-  if (ambientUnlockBound) return;
-  ambientUnlockBound = true;
-
-  const unlock = () => {
-    void unlockAudioContext().then((unlocked) => {
-      if (!unlocked) return;
-      document.removeEventListener('pointerdown', unlock, true);
-      document.removeEventListener('touchstart', unlock, true);
-      document.removeEventListener('keydown', unlock, true);
-      if (!S.gameOver) {
-        startWavesSound();
-        void startMenuMusic();
-      }
-    });
-  };
-
-  document.addEventListener('pointerdown', unlock, true);
-  document.addEventListener('touchstart', unlock, true);
-  document.addEventListener('keydown', unlock, true);
-}
-
-function stopWavesSound({ resetPlayback = false } = {}) {
-  if (S.wavesSound) {
-    S.wavesSound.stop({ resetPlayback });
-  }
-}
-
-function startWavesSound({ restartPlayback = false } = {}) {
-  if (S.wavesSound) {
-    if (restartPlayback) S.wavesSound.currentTime = 0;
-    void syncLoopingAudio(S.wavesSound, getSfxVolume(WAVES_VOLUME));
-  }
-}
-
-async function startMenuMusic({ restartPlayback = false } = {}) {
-  if (S.musicSound) {
-    if (restartPlayback) {
-      musicTrackIndex = 0;
-      if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
-        await S.musicSound.setSource(MUSIC_PLAYLIST[0], {
-          resetPlayback: true,
-        });
-      }
-      S.musicSound.currentTime = 0;
-    }
-    if (
-      (await syncLoopingAudio(S.musicSound, getMusicVolume(MUSIC_VOLUME))) >
-      0.0001
-    ) {
-      console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
-    }
-  }
 }
 
 function clearTransientVisuals() {
@@ -611,12 +489,11 @@ async function loadTextures() {
     setBootLoaderProgress(loaded, total, { kind: 'texture', path });
   }
 
-  for (const path of BOOT_AUDIO_ASSETS) {
-    setBootLoaderProgress(loaded, total, { kind: 'audio', path });
-    await preloadAudioAsset(path);
-    loaded += 1;
-    setBootLoaderProgress(loaded, total, { kind: 'audio', path });
-  }
+  loaded = await preloadBootAudioAssets({
+    loaded,
+    total,
+    onProgress: setBootLoaderProgress,
+  });
 }
 
 // ===== Init =====
@@ -732,42 +609,12 @@ async function init() {
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
 
-  await primeAmbientAudioBuffers([
-    'audio/ocean-sea-soft-waves.mp3',
-    ...MUSIC_PLAYLIST,
-  ]);
+  await primeBootAmbientAudio();
 
   S.gameSessionActive = false;
   hideBootLoader();
 
-  // ===== Waves Sound =====
-  const wavesAudio = createAmbientAudioTrack({
-    path: 'audio/ocean-sea-soft-waves.mp3',
-    loop: true,
-  });
-  wavesAudio.setVolume(
-    WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 0.5),
-  );
-  S.wavesSound = wavesAudio;
-
-  // ===== Music playlist =====
-  const musicAudio = createAmbientAudioTrack({
-    path: MUSIC_PLAYLIST[0],
-    onEnded: async () => {
-      musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
-      await musicAudio.setSource(MUSIC_PLAYLIST[musicTrackIndex], {
-        resetPlayback: true,
-      });
-      if (getMusicVolume(MUSIC_VOLUME) > 0.0001) {
-        await musicAudio.play();
-        console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
-      }
-    },
-  });
-  musicAudio.setVolume(
-    MUSIC_VOLUME * (S.musicVolume != null ? S.musicVolume : 0.5),
-  );
-  S.musicSound = musicAudio;
+  initializeAmbientAudio();
   startWavesSound({ restartPlayback: true });
   void startMenuMusic({ restartPlayback: true });
 
