@@ -1,4 +1,11 @@
-import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
+import {
+  playSound,
+  WAVES_VOLUME,
+  MUSIC_VOLUME,
+  syncLoopingAudio,
+  getSfxVolume,
+  getMusicVolume,
+} from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 import { renderLeaderboardScreen } from './leaderboard.js';
@@ -77,12 +84,12 @@ function getCreditsText() {
 
 // ===== Sound Helpers =====
 function ensureMenuAmbient() {
-  if (S.wavesSound && S.wavesSound.paused) {
-    S.wavesSound.play().catch(() => {});
+  if (S.wavesSound) {
+    void syncLoopingAudio(S.wavesSound, getSfxVolume(WAVES_VOLUME));
   }
 
-  if (S.musicSound && S.musicSound.paused) {
-    S.musicSound.play().catch(() => {});
+  if (S.musicSound) {
+    void syncLoopingAudio(S.musicSound, getMusicVolume(MUSIC_VOLUME));
   }
 }
 
@@ -392,6 +399,11 @@ async function showLeaderboard() {
   });
 }
 
+export async function openLeaderboard() {
+  showMenu();
+  await showLeaderboard();
+}
+
 // ===== Settings =====
 function showSettings() {
   hideMainItems();
@@ -442,7 +454,7 @@ function showSettings() {
     $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
     S.musicVolume = val;
     if (S.musicSound) {
-      S.musicSound.volume = Math.max(0, Math.min(1, MUSIC_VOLUME * val));
+      void syncLoopingAudio(S.musicSound, MUSIC_VOLUME * val);
     }
     try {
       localStorage.setItem('lighthouse_music_vol', String(val));
@@ -466,7 +478,7 @@ function showSettings() {
     $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
     S.sfxVolume = val;
     if (S.wavesSound) {
-      S.wavesSound.volume = Math.max(0, Math.min(1, WAVES_VOLUME * val));
+      void syncLoopingAudio(S.wavesSound, WAVES_VOLUME * val);
     }
     try {
       localStorage.setItem('lighthouse_sfx_vol', String(val));

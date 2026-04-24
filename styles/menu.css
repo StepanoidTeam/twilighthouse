@@ -39,10 +39,7 @@
 
 .menu-overlay-panel {
   position: absolute;
-  inset: initial;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  inset: 0;
   padding: 34px 28px;
 }
 

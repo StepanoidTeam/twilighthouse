@@ -16,6 +16,7 @@ import {
   playSound,
   playRandomSound,
   MUSIC_VOLUME,
+  syncLoopingAudio,
 } from './sound.js';
 import S from './state.js';
 import { t } from './i18n.js';
@@ -24,6 +25,8 @@ import { formatSurvivalTime } from './leaderboard.js';
 const {
   $btnLeft,
   $btnRight,
+  $btnResultRestart,
+  $btnResultMenu,
   $volControls,
   $volSfxVal,
   $volMusicVal,
@@ -236,16 +239,14 @@ export function buildButtons() {
   function applyVol(target, v) {
     if (target === 'sfx') {
       S.sfxVolume = v;
-      if (S.wavesSound)
-        S.wavesSound.volume = Math.max(0, Math.min(1, 0.05 * v));
+      if (S.wavesSound) void syncLoopingAudio(S.wavesSound, 0.05 * v);
       try {
         localStorage.setItem('lighthouse_sfx_vol', String(v));
       } catch (_) {}
       $volSfxVal.textContent = `${Math.round(v * 100)}%`;
     } else {
       S.musicVolume = v;
-      if (S.musicSound)
-        S.musicSound.volume = Math.max(0, Math.min(1, MUSIC_VOLUME * v));
+      if (S.musicSound) void syncLoopingAudio(S.musicSound, MUSIC_VOLUME * v);
       try {
         localStorage.setItem('lighthouse_music_vol', String(v));
       } catch (_) {}
@@ -309,17 +310,13 @@ export function buildUI() {
 function playFailSound() {
   if (S.musicSound && !S.musicSound.paused) {
     S.musicSound.pause();
-    const snd = new Audio('audio/fail-1.mp3');
-    const master = S.sfxVolume != null ? S.sfxVolume : 1;
-    snd.volume = Math.max(0, Math.min(1, 0.1 * master));
-    snd.play().catch(() => {});
-    snd.addEventListener(
-      'ended',
-      () => {
-        if (S.musicSound) S.musicSound.play().catch(() => {});
+    playSound('audio/fail-1.mp3', 0.1, {
+      onEnded: () => {
+        if (S.musicSound) {
+          void S.musicSound.play();
+        }
       },
-      { once: true },
-    );
+    });
   } else {
     playSound('audio/fail-1.mp3', 0.1);
   }
@@ -350,6 +347,8 @@ async function showGameOverScreen({ message, splashKey, playFail = true }) {
   $resultMsg.textContent = message;
   $resultRestartLabel.textContent = t('overlay.restart');
   $resultMenuLabel.textContent = t('overlay.toMenu');
+  if ($btnResultRestart) $btnResultRestart.hidden = false;
+  if ($btnResultMenu) $btnResultMenu.hidden = false;
 
   if (splashKey && SPLASH_IMAGES[splashKey]) {
     $resultSplash.style.backgroundImage = `url("${SPLASH_IMAGES[splashKey]}")`;
@@ -417,11 +416,19 @@ export function showGameOver() {
 }
 
 export async function showWin() {
+  const finalTime = formatSurvivalTime(
+    S.runSurvivalMs || performance.now() - S.runStartTime,
+  );
   await showGameOverScreen({
-    message: t('win.message', { total: WIN_SCORE }),
+    message: t('win.messageTime', {
+      total: WIN_SCORE,
+      time: finalTime,
+    }),
     splashKey: 'splashPeremoha',
     playFail: false,
   });
+  $resultRestartLabel.textContent = t('menu.leaderboard');
+  $resultMenuLabel.textContent = t('menu.leaderboard');
 }
 
 // ===== Exit Confirmation =====

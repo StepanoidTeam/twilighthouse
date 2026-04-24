@@ -13,7 +13,17 @@ import {
   SPAWN_INTERVAL_MAX,
   computeWorldScale,
 } from './config.js';
-import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
+import {
+  playSound,
+  WAVES_VOLUME,
+  MUSIC_VOLUME,
+  createAmbientAudioTrack,
+  unlockAudioContext,
+  syncLoopingAudio,
+  getSfxVolume,
+  getMusicVolume,
+  primeAmbientAudioBuffers,
+} from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
@@ -38,7 +48,13 @@ import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
 import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
 import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
-import { buildMenu, showMenu, isMenuVisible, repositionMenu } from './menu.js';
+import {
+  buildMenu,
+  showMenu,
+  openLeaderboard,
+  isMenuVisible,
+  repositionMenu,
+} from './menu.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
@@ -51,6 +67,12 @@ const {
   $bootLoaderAsset,
   $bootLoaderBarFill,
   $bootLoaderPercent,
+  $screenGameOver,
+  $resultSplash,
+  $btnResultRestart,
+  $btnResultMenu,
+  $btnExitConfirm,
+  $btnExitResume,
   $volControls,
 } = globalThis;
 const MUSIC_PLAYLIST = [
@@ -90,6 +112,7 @@ const BOOT_AUDIO_ASSETS = Array.from(
 );
 
 let musicTrackIndex = 0;
+let ambientUnlockBound = false;
 let bootLoaderState = {
   loaded: 0,
   total:
@@ -221,31 +244,58 @@ function playClickSound() {
   playSound('audio/button-click.mp3', 0.2);
 }
 
+function bindAmbientAudioUnlock() {
+  if (ambientUnlockBound) return;
+  ambientUnlockBound = true;
+
+  const unlock = () => {
+    void unlockAudioContext().then((unlocked) => {
+      if (!unlocked) return;
+      document.removeEventListener('pointerdown', unlock, true);
+      document.removeEventListener('touchstart', unlock, true);
+      document.removeEventListener('keydown', unlock, true);
+      if (!S.gameOver) {
+        startWavesSound();
+        void startMenuMusic();
+      }
+    });
+  };
+
+  document.addEventListener('pointerdown', unlock, true);
+  document.addEventListener('touchstart', unlock, true);
+  document.addEventListener('keydown', unlock, true);
+}
+
 function stopWavesSound({ resetPlayback = false } = {}) {
   if (S.wavesSound) {
-    S.wavesSound.pause();
-    if (resetPlayback) S.wavesSound.currentTime = 0;
+    S.wavesSound.stop({ resetPlayback });
   }
 }
 
 function startWavesSound({ restartPlayback = false } = {}) {
   if (S.wavesSound) {
     if (restartPlayback) S.wavesSound.currentTime = 0;
-    S.wavesSound.play().catch(() => {});
+    void syncLoopingAudio(S.wavesSound, getSfxVolume(WAVES_VOLUME));
   }
 }
 
-function startMenuMusic({ restartPlayback = false } = {}) {
+async function startMenuMusic({ restartPlayback = false } = {}) {
   if (S.musicSound) {
     if (restartPlayback) {
       musicTrackIndex = 0;
       if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
-        S.musicSound.src = MUSIC_PLAYLIST[0];
+        await S.musicSound.setSource(MUSIC_PLAYLIST[0], {
+          resetPlayback: true,
+        });
       }
       S.musicSound.currentTime = 0;
     }
-    S.musicSound.play().catch(() => {});
-    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
+    if (
+      (await syncLoopingAudio(S.musicSound, getMusicVolume(MUSIC_VOLUME))) >
+      0.0001
+    ) {
+      console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
+    }
   }
 }
 
@@ -266,7 +316,7 @@ function prepareFreshRun() {
   if (S.btnEsc) S.btnEsc.visible = true;
   if ($volControls) $volControls.hidden = false;
   startWavesSound();
-  startMenuMusic();
+  void startMenuMusic();
 }
 
 // ===== Resize =====
@@ -345,15 +395,20 @@ function bindEvents() {
     // Game over screen
     if (S.gameOver && !isMenuVisible()) {
       if (isConfirmKey(e.code)) {
-        // Restart game
         playClickSound();
-        restartGame();
+        if (S.gameWon) {
+          requestAnimationFrame(() => exitToLeaderboard());
+        } else {
+          restartGame();
+        }
         return;
       }
       if (isBackKey(e.code)) {
-        // Exit to menu
         playClickSound();
-        requestAnimationFrame(() => exitToMenu());
+        requestAnimationFrame(() => {
+          if (S.gameWon) exitToLeaderboard();
+          else exitToMenu();
+        });
         return;
       }
     }
@@ -392,11 +447,26 @@ function exitToMenu() {
   updateHUD();
   clearTransientVisuals();
   startWavesSound();
-  startMenuMusic();
+  void startMenuMusic();
   $gameContainer.hidden = true;
   if (S.btnEsc) S.btnEsc.visible = false;
   if ($volControls) $volControls.hidden = true;
   showMenu();
+}
+
+function exitToLeaderboard() {
+  if (!S.gameOver) return;
+
+  clearGame();
+  S.reset();
+  updateHUD();
+  clearTransientVisuals();
+  startWavesSound();
+  void startMenuMusic();
+  $gameContainer.hidden = true;
+  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($volControls) $volControls.hidden = true;
+  void openLeaderboard();
 }
 
 // ===== Restart game (play again) =====
@@ -445,6 +515,14 @@ function gameLoop(delta) {
       S.runSurvivalMs = performance.now() - S.runStartTime;
       updateHUD();
       trySubmitScore();
+    }
+    if (S.gameWon && !S.gameOverTimeoutId) {
+      S.gameOverTimeoutId = window.setTimeout(() => {
+        S.gameOverTimeoutId = null;
+        if (S.gameWon && S.gameOver && !isMenuVisible()) {
+          exitToLeaderboard();
+        }
+      }, 4000);
     }
     return;
   }
@@ -544,6 +622,7 @@ async function loadTextures() {
 // ===== Init =====
 async function init() {
   renderBootLoaderText();
+  bindAmbientAudioUnlock();
 
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;
@@ -613,11 +692,22 @@ async function init() {
   // Wire game-over / exit-confirm HTML buttons
   $btnResultRestart.addEventListener('pointerdown', () => {
     playClickSound();
-    restartGame();
+    if (S.gameWon) exitToLeaderboard();
+    else restartGame();
   });
   $btnResultMenu.addEventListener('pointerdown', () => {
     playClickSound();
-    requestAnimationFrame(() => exitToMenu());
+    requestAnimationFrame(() => {
+      if (S.gameWon) exitToLeaderboard();
+      else exitToMenu();
+    });
+  });
+  $screenGameOver.addEventListener('pointerdown', (e) => {
+    if (!S.gameWon) return;
+    if (e.target === $screenGameOver || e.target === $resultSplash) {
+      playClickSound();
+      exitToLeaderboard();
+    }
   });
   $btnExitConfirm.addEventListener('pointerdown', () => {
     playClickSound();
@@ -642,33 +732,44 @@ async function init() {
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
 
+  await primeAmbientAudioBuffers([
+    'audio/ocean-sea-soft-waves.mp3',
+    ...MUSIC_PLAYLIST,
+  ]);
+
   S.gameSessionActive = false;
   hideBootLoader();
 
   // ===== Waves Sound =====
-  const wavesAudio = new Audio('audio/ocean-sea-soft-waves.mp3');
-  wavesAudio.loop = true;
-  wavesAudio.volume = Math.max(
-    0,
-    Math.min(1, WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 0.5)),
+  const wavesAudio = createAmbientAudioTrack({
+    path: 'audio/ocean-sea-soft-waves.mp3',
+    loop: true,
+  });
+  wavesAudio.setVolume(
+    WAVES_VOLUME * (S.sfxVolume != null ? S.sfxVolume : 0.5),
   );
   S.wavesSound = wavesAudio;
 
   // ===== Music playlist =====
-  const musicAudio = new Audio(MUSIC_PLAYLIST[0]);
-  musicAudio.volume = Math.max(
-    0,
-    Math.min(1, MUSIC_VOLUME * (S.musicVolume != null ? S.musicVolume : 0.5)),
-  );
-  musicAudio.addEventListener('ended', () => {
-    musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
-    musicAudio.src = MUSIC_PLAYLIST[musicTrackIndex];
-    musicAudio.play().catch(() => {});
-    console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
+  const musicAudio = createAmbientAudioTrack({
+    path: MUSIC_PLAYLIST[0],
+    onEnded: async () => {
+      musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
+      await musicAudio.setSource(MUSIC_PLAYLIST[musicTrackIndex], {
+        resetPlayback: true,
+      });
+      if (getMusicVolume(MUSIC_VOLUME) > 0.0001) {
+        await musicAudio.play();
+        console.log('🎵 Music track:', MUSIC_PLAYLIST[musicTrackIndex]);
+      }
+    },
   });
+  musicAudio.setVolume(
+    MUSIC_VOLUME * (S.musicVolume != null ? S.musicVolume : 0.5),
+  );
   S.musicSound = musicAudio;
   startWavesSound({ restartPlayback: true });
-  startMenuMusic({ restartPlayback: true });
+  void startMenuMusic({ restartPlayback: true });
 
   if (analytics) {
     logEvent(analytics, 'game_start', {

@@ -161,6 +161,8 @@ Photopea — image editor
       '📦 Out of powder! Lighthouse keeper threw intern off cliff!',
     'gameOver.score': '💀 Game Over — {score}/{total} boats saved',
     'win.message': '🎉 You Win! All {total} boats saved!',
+    'win.messageTime':
+      '🎉 You Win! All {total} boats saved! Final time: {time}',
 
     // Auth modal
     'auth.signIn': 'Sign in',
@@ -332,6 +334,8 @@ Photopea — image editor
       '📦 Порошок закончился! Смотритель маяка сбросил стажера со скалы!',
     'gameOver.score': '💀 Game Over — спасено {score}/{total} кораблей',
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
+    'win.messageTime':
+      '🎉 Победа! Спасены все {total} кораблей! Финальное время: {time}',
 
     'auth.signIn': 'Вход',
     'auth.signUp': 'Регистрация',
