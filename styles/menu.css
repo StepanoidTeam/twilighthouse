@@ -3,7 +3,7 @@
   --color-menu-panel: rgba(8, 18, 34, 0.72);
   --color-menu-border: rgba(95, 132, 173, 0.34);
   --color-menu-text: #d5e3f3;
-  --color-main-menu-text: #d5e3f3;
+  --color-main-menu-text: #f2e3b9;
   --color-menu-muted: #7f95af;
   --color-menu-accent: #ffdd44;
   --color-menu-selected: #f93320db;
@@ -17,7 +17,6 @@
 
 .menu-overlay-bg,
 .menu-overlay-dim,
-.menu-overlay-panel,
 .menu-authors-bg,
 .menu-authors-blackout,
 .menu-authors-dim {
@@ -40,17 +39,35 @@
 
 .menu-overlay-panel {
   position: absolute;
-  inset: 0;
+  inset: initial;
+  left: 0;
+  top: 0;
+  bottom: 0;
   padding: 34px 28px;
 }
 
-.menu-title-logo {
-  bottom: calc(80px + 5 * (18px + 78px) + 24px);
-  left: 28px;
-  width: min(420px, max(280px, 50vw));
-  height: auto;
-  pointer-events: none;
-  filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
+.menu-title {
+  position: relative;
+
+  .menu-title-logo {
+    bottom: calc(80px + 5 * (18px + 78px) + 24px);
+    left: 28px;
+    width: min(420px, max(280px, 50vw));
+    height: auto;
+    pointer-events: none;
+    filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
+  }
+
+  .menu-title-logo-svg-text {
+    position: absolute;
+
+    inset: 0;
+    fill: var(--color-main-menu-text);
+    text-transform: uppercase;
+    font-size: 20px;
+    /* debug */
+    background: #ff000045;
+  }
 }
 
 .menu-main {
@@ -72,7 +89,7 @@
   border: none;
   border-radius: 15px;
   background: #002f50d9;
-  color: #f2e3b9cf;
+
   text-align: left;
   line-height: 1;
   font-family: var(--font-menu);
@@ -86,11 +103,14 @@
     transform var(--duration-menu) ease,
     background var(--duration-menu) ease;
 
+  color: var(--color-main-menu-text);
+
   &:after {
     content: '✑';
     right: 0;
     position: absolute;
     padding-right: 15px;
+    opacity: 0.8;
   }
 
   &.is-selected:after {
@@ -111,6 +131,8 @@
   display: block;
   min-width: 0;
 
+  opacity: 0.8;
+
   font-size: 30px;
   line-height: 1em;
 }
@@ -119,7 +141,6 @@
 .menu-main-btn.is-selected {
   transform: translateX(8px);
   background: var(--color-menu-selected);
-  color: #f2e3b9;
 }
 
 .menu-main-btn:focus-visible,

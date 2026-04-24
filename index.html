@@ -136,12 +136,30 @@
       <div id="$menuBg" class="menu-overlay-bg"></div>
       <div class="menu-overlay-dim" hidden></div>
       <div class="menu-overlay-panel">
-        <img
-          class="menu-title-logo"
-          src="sprites/title-logo.png"
-          alt="TWILIGHTHOUSE"
-          aria-hidden="false"
-        />
+        <div class="menu-title">
+          <img
+            class="menu-title-logo"
+            src="sprites/title-logo.png"
+            alt="TWILIGHTHOUSE"
+            aria-hidden="false"
+          />
+
+          <svg class="menu-title-logo-svg-text" viewBox="0 0 420 252" hidden>
+            <defs>
+              <path id="arc" d="M 0 222 Q 210 200 420 222" />
+            </defs>
+            <text>
+              <textPath
+                href="#arc"
+                startOffset="20%"
+                dominant-baseline="middle"
+              >
+                Deliver at Any Cost
+                <!-- доставь любой ценой -->
+              </textPath>
+            </text>
+          </svg>
+        </div>
 
         <div id="$menuMain" class="menu-main">
           <button
