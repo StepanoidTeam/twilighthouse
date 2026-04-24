@@ -8,7 +8,6 @@ import {
   WIN_SCORE,
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
-  scaleToWidth,
 } from './config.js';
 import {
   CRASH_VOLUME,
@@ -26,6 +25,7 @@ import { formatSurvivalTime } from './leaderboard.js';
 const {
   $btnLeft,
   $btnRight,
+  $btnEsc,
   $btnResultRestart,
   $btnResultMenu,
   $volControls,
@@ -200,40 +200,6 @@ export function buildButtons() {
   bindHtmlTurnButton($btnLeft, 'ArrowLeft');
   bindHtmlTurnButton($btnRight, 'ArrowRight');
 
-  // Escape button (top-left)
-  S.btnEsc = new PIXI.Container();
-  const sprEsc = new PIXI.Sprite(S.textures.button);
-  sprEsc.anchor.set(0.5);
-  scaleToWidth(sprEsc, 60);
-  S.btnEsc.addChild(sprEsc);
-  const txtEsc = new PIXI.Text('Esc', {
-    fontFamily: 'Segoe UI, system-ui, sans-serif',
-    fontSize: 16,
-    fill: '#c8d8e8',
-    align: 'center',
-    fontWeight: 'bold',
-    dropShadow: true,
-    dropShadowColor: '#000',
-    dropShadowBlur: 3,
-    dropShadowDistance: 0,
-  });
-  txtEsc.anchor.set(0.5);
-  txtEsc.y = -4;
-  S.btnEsc.addChild(txtEsc);
-  S.btnEsc.position.set(44, 28);
-  S.btnEsc.interactive = true;
-  S.btnEsc.buttonMode = true;
-  S.btnEsc.cursor = 'pointer';
-  S.btnEsc.hitArea = new PIXI.Circle(0, 0, 30);
-  S.btnEsc.alpha = 0.7;
-  S.btnEsc.on('pointerover', () => {
-    S.btnEsc.alpha = 1;
-  });
-  S.btnEsc.on('pointerout', () => {
-    S.btnEsc.alpha = 0.7;
-  });
-  S.hudLayer.addChild(S.btnEsc);
-
   // ===== Volume controls (HTML, top-left of screen) =====
   const STEP = 0.1;
 
@@ -297,7 +263,6 @@ export function repositionUI() {
   S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
   S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
   if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 6);
-  if (S.btnEsc) S.btnEsc.position.set(44, 28);
 }
 
 export function buildUI() {
@@ -324,7 +289,7 @@ async function showGameOverScreen({ message, splashKey, playFail = true }) {
   // Hide gameplay buttons
   if ($btnLeft) $btnLeft.hidden = true;
   if ($btnRight) $btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($btnEsc) $btnEsc.hidden = true;
   if ($volControls) $volControls.hidden = true;
 
   $gameContainer.hidden = true;
@@ -386,7 +351,7 @@ export function showGameOver() {
   // Hide gameplay buttons
   if ($btnLeft) $btnLeft.hidden = true;
   if ($btnRight) $btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($btnEsc) $btnEsc.hidden = true;
   if ($volControls) $volControls.hidden = true;
 
   $gameContainer.hidden = true;
@@ -423,7 +388,7 @@ export function showExitConfirm() {
   // Hide gameplay buttons
   if ($btnLeft) $btnLeft.hidden = true;
   if ($btnRight) $btnRight.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($btnEsc) $btnEsc.hidden = true;
   if ($volControls) $volControls.hidden = true;
 
   $exitConfirmMsg.textContent = t('exit.confirm');
@@ -439,6 +404,6 @@ export function hideExitConfirm() {
   // Restore gameplay buttons
   if ($btnLeft) $btnLeft.hidden = false;
   if ($btnRight) $btnRight.hidden = false;
-  if (S.btnEsc) S.btnEsc.visible = true;
+  if ($btnEsc) $btnEsc.hidden = false;
   if ($volControls) $volControls.hidden = false;
 }

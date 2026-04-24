@@ -72,6 +72,7 @@ const {
   $btnResultMenu,
   $btnExitConfirm,
   $btnExitResume,
+  $btnEsc,
   $volControls,
 } = globalThis;
 const BOOT_TEXTURE_ASSETS = [
@@ -192,7 +193,7 @@ function prepareFreshRun() {
   snapCamera();
   updateDarkness();
   $gameContainer.hidden = false;
-  if (S.btnEsc) S.btnEsc.visible = true;
+  if ($btnEsc) $btnEsc.hidden = false;
   if ($volControls) $volControls.hidden = false;
   startWavesSound();
   void startMenuMusic();
@@ -245,7 +246,7 @@ function bindEvents() {
         // Confirm exit → go to menu
         playClickSound();
         hideExitConfirm();
-        if (S.btnEsc) S.btnEsc.visible = false;
+        if ($btnEsc) $btnEsc.hidden = true;
         // Defer to avoid menu keydown handler catching the same event
         requestAnimationFrame(() => exitToMenu());
         return;
@@ -329,7 +330,7 @@ function exitToMenu() {
   startWavesSound();
   void startMenuMusic();
   $gameContainer.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($btnEsc) $btnEsc.hidden = true;
   if ($volControls) $volControls.hidden = true;
   showMenu();
 }
@@ -344,7 +345,7 @@ function exitToLeaderboard() {
   startWavesSound();
   void startMenuMusic();
   $gameContainer.hidden = true;
-  if (S.btnEsc) S.btnEsc.visible = false;
+  if ($btnEsc) $btnEsc.hidden = true;
   if ($volControls) $volControls.hidden = true;
   void openLeaderboard();
 }
@@ -557,11 +558,11 @@ async function init() {
   buildGlow();
 
   buildUI();
-  S.btnEsc.visible = false; // hidden until game starts
+  $btnEsc.hidden = true; // hidden until game starts
   if ($volControls) $volControls.hidden = true;
 
-  // Wire Escape button click to show menu
-  S.btnEsc.on('pointerdown', () => {
+  // Wire Escape button click to show exit confirmation
+  $btnEsc.addEventListener('pointerdown', () => {
     if (!S.gameOver && !S.exitConfirm && !isMenuVisible()) {
       playClickSound();
       showExitConfirm();
@@ -591,7 +592,7 @@ async function init() {
   $btnExitConfirm.addEventListener('pointerdown', () => {
     playClickSound();
     hideExitConfirm();
-    if (S.btnEsc) S.btnEsc.visible = false;
+    if ($btnEsc) $btnEsc.hidden = true;
 
     requestAnimationFrame(() => exitToMenu());
   });
