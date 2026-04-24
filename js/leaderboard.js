@@ -33,7 +33,7 @@ function resolveDisplayName(user) {
 
 /**
  * Submit a winning run. Stores the user's best survival time in `leaderboard/{uid}`.
- * Only writes if the new winning time beats the previously stored best.
+ * Only writes if the new winning time is greater than the previously stored best.
  * Returns { written: boolean, best: number } or null if not signed in.
  */
 export async function submitScore(survivalMs) {
@@ -54,7 +54,7 @@ export async function submitScore(survivalMs) {
     console.warn('Failed to read previous best', e);
   }
 
-  if (prevBest > 0 && survivalMs >= prevBest) {
+  if (prevBest > 0 && survivalMs <= prevBest) {
     return { written: false, best: prevBest };
   }
 
