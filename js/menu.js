@@ -1,9 +1,7 @@
 import { playSound, WAVES_VOLUME, MUSIC_VOLUME } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
-import {
-  renderLeaderboardScreen,
-} from './leaderboard.js';
+import { renderLeaderboardScreen } from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';

@@ -1,4 +1,7 @@
 .menu-leaderboard {
+  --leaderboard-rank-col: 56px;
+  --leaderboard-time-col: 92px;
+  --leaderboard-date-col: 156px;
   max-height: calc(100vh - 9vh - 96px - 80px);
   overflow-y: auto;
   overscroll-behavior: contain;
@@ -13,7 +16,11 @@
 .menu-leaderboard-header,
 .menu-leaderboard-row {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) auto auto;
+  grid-template-columns:
+    var(--leaderboard-rank-col)
+    minmax(0, 1fr)
+    var(--leaderboard-time-col)
+    var(--leaderboard-date-col);
   gap: 12px;
   align-items: center;
 }
@@ -45,6 +52,12 @@
   white-space: nowrap;
 }
 
+.menu-leaderboard-time,
+.menu-leaderboard-date {
+  justify-self: end;
+  text-align: right;
+}
+
 .menu-leaderboard-name {
   overflow: hidden;
   text-overflow: ellipsis;
@@ -54,17 +67,25 @@
 .menu-leaderboard-date {
   color: var(--color-menu-muted);
   font-size: 13px;
-  text-align: right;
 }
 
 @media (max-width: 720px) {
+  .menu-leaderboard {
+    --leaderboard-rank-col: 25px;
+    --leaderboard-time-col: 84px;
+  }
+
   .menu-leaderboard-header,
   .menu-leaderboard-row {
-    grid-template-columns: 25px minmax(0, 1fr) auto;
+    grid-template-columns:
+      var(--leaderboard-rank-col)
+      minmax(0, 1fr)
+      var(--leaderboard-time-col);
   }
 
   .menu-leaderboard-time {
     grid-column: 2;
+    justify-self: end;
   }
 
   .menu-leaderboard-header .menu-leaderboard-time {
@@ -73,6 +94,7 @@
 
   .menu-leaderboard-date {
     grid-column: 2 / -1;
+    justify-self: start;
     text-align: left;
   }
 
