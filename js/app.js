@@ -27,7 +27,7 @@ import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
 import { buildLighthouse, buildGlow } from './lighthouse.js';
-import { buildRocks, updateRocks } from './rocks.js';
+import { buildRocks, updateRocks, cleanupRocks } from './rocks.js';
 import {
   buildDarkness,
   updateDarkness,
@@ -184,6 +184,7 @@ function clearTransientVisuals() {
 function prepareFreshRun() {
   clearGame();
   S.reset();
+  buildRocks(S.rockLayer);
   S.gameSessionActive = true;
   updateHUD();
   clearTransientVisuals();
@@ -316,6 +317,7 @@ function clearGame() {
   cleanupPolice();
   cleanupKrakens();
   cleanupMermaids();
+  cleanupRocks();
 }
 
 // ===== Exit to menu =====

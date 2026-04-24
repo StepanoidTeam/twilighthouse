@@ -67,3 +67,16 @@ export function updateRocks() {
     spr.y = spr._baseY + Math.sin(rockTime * 1.4 + spr._floatPhase) * 4;
   }
 }
+
+// ===== Cleanup for restart =====
+// Камни могут быть уничтожены кракенами во время игры, поэтому между
+// забегами нужно полностью сносить их и генерировать заново.
+export function cleanupRocks() {
+  if (S.rockLayer) {
+    for (const spr of S.rockSprites) {
+      S.rockLayer.removeChild(spr);
+    }
+  }
+  S.rockSprites = [];
+  S.rockColliders = [];
+}
