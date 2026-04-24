@@ -89,8 +89,8 @@ Photopea — image editor
     'leaderboard.col.date': 'дата',
 
     // Boot loader
-    'boot.title': 'Lighthouse',
-    'boot.loading': 'Loading lighthouse assets…',
+    'boot.title': 'TWILIGHTHOUSE',
+    'boot.loading': 'Loading twilighthouse assets…',
     'boot.progress': 'Loading assets {loaded}/{total}',
     'boot.ready': 'Ready',
     'boot.failed': 'Failed to load game assets',

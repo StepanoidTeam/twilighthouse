@@ -18,6 +18,7 @@
 }
 
 .boot-loader-panel {
+  gap: 12px;
   width: min(92vw, 460px);
   padding: 28px 28px 24px;
   border: 1px solid rgba(138, 160, 189, 0.28);
@@ -40,53 +41,58 @@
 }
 
 .boot-loader-title {
-  margin-top: 10px;
-  color: #ffdd44;
+  color: var(--color-main-menu-text);
   font: 700 clamp(2.2rem, 6vw, 3.6rem) / 0.92 var(--font-menu);
   letter-spacing: 0.04em;
   text-transform: uppercase;
 }
 
 .boot-loader-text {
-  margin-top: 14px;
   color: #dbe7f6;
   font-size: 15px;
   line-height: 1.5;
+  padding-left: 10px;
 }
 
 .boot-loader-asset {
-  margin-top: 8px;
   min-height: 19px;
   color: #8aa0bd;
   font-size: 13px;
+  padding-left: 10px;
   line-height: 1.45;
   letter-spacing: 0.04em;
 }
 
 .boot-loader-bar {
-  margin-top: 18px;
-  height: 12px;
-  padding: 2px;
+  position: relative;
+  display: flex;
+  height: 30px;
   border-radius: var(--size-pill-radius);
   background: rgba(255, 255, 255, 0.08);
+  corner-shape: scoop;
+  border-radius: 10px;
   overflow: hidden;
 }
 
 .boot-loader-bar-fill {
   width: 0%;
   height: 100%;
-  border-radius: inherit;
-  background: linear-gradient(90deg, #ffdd44 0%, #f4b73d 38%, #74d8ff 100%);
+  border-radius: 0;
+  background: var(--color-menu-selected);
   box-shadow: 0 0 20px rgba(116, 216, 255, 0.35);
   transition: width var(--duration-progress) ease;
 }
 
 .boot-loader-percent {
-  margin-top: 12px;
-  color: #8aa0bd;
+  position: absolute;
+  inset: 0;
+  color: var(--color-main-menu-text);
   font: 600 13px/1 var(--font-menu);
   letter-spacing: 0.14em;
   text-transform: uppercase;
+
+  align-self: center;
+  justify-self: center;
 }
 
 @media (max-width: 640px) {

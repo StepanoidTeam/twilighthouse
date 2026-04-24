@@ -56,3 +56,8 @@ svg[aria-hidden='true'] {
 .blur-bg {
   backdrop-filter: blur(5px);
 }
+
+.fullscreen {
+  position: absolute;
+  inset: 0;
+}

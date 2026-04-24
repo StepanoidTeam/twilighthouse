@@ -1,5 +1,6 @@
 /* ===== Main menu overlay ===== */
-.menu-overlay {
+
+:root {
   --color-menu-panel: rgba(8, 18, 34, 0.72);
   --color-menu-border: rgba(95, 132, 173, 0.34);
   --color-menu-text: #d5e3f3;
@@ -8,7 +9,9 @@
   --color-menu-accent: #ffdd44;
   --color-menu-selected: #f93320db;
   --color-menu-button: #0a3755;
+}
 
+.menu-overlay {
   position: fixed;
   inset: 0;
   z-index: 2;
