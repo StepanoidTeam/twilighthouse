@@ -99,7 +99,7 @@ const KRAKEN_RETREAT_FRAMES = [
   'krakenRetreat2',
   'krakenRetreat3',
 ];
-const KRAKEN_FRAME_DURATION = 30;
+const KRAKEN_FRAME_DURATION = 15;
 
 // ===== Boat Lit Debounce =====
 const LIT_DEBOUNCE = 180; // ms — минимальное время стабильного состояния перед сменой
