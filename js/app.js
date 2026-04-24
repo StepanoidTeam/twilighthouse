@@ -228,8 +228,8 @@ function bindEvents() {
 
     S.keys[e.code] = true;
 
-    // Toggle debug mode
-    if (e.code === 'F1') {
+    // Toggle debug mode (backtick/tilde `~`)
+    if (e.code === 'Backquote') {
       e.preventDefault();
       S.debugMode = !S.debugMode;
       S.debugGfx.visible = S.debugMode;

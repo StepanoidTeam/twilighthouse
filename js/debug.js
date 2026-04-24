@@ -145,6 +145,6 @@ export function updateDebug() {
 
   // Debug text
   S.debugText.text =
-    `[F1] Debug  |  ↑↓ offsetY: ${S.BEAM_ORIGIN_OFFSET_Y}  |  [] halfAngle: ${S.BEAM_HALF_ANGLE.toFixed(2)}  |  -+ glowR: ${S.LH_GLOW_RADIUS}\n` +
+    `[~] Debug  |  ↑↓ offsetY: ${S.BEAM_ORIGIN_OFFSET_Y}  |  [] halfAngle: ${S.BEAM_HALF_ANGLE.toFixed(2)}  |  -+ glowR: ${S.LH_GLOW_RADIUS}\n` +
     `beamAngle: ${((S.beamAngle * 180) / Math.PI).toFixed(1)}°  |  origin: (${ox}, ${oy})`;
 }
