@@ -282,6 +282,11 @@
                   id="$menuSettingsMusicValue"
                   class="menu-slider-value"
                 ></span>
+                <button
+                  id="$menuSettingsMusicMute"
+                  type="button"
+                  class="menu-setting-toggle menu-slider-toggle"
+                ></button>
               </div>
             </div>
             <!-- SFX row -->
@@ -302,6 +307,11 @@
                   id="$menuSettingsSfxValue"
                   class="menu-slider-value"
                 ></span>
+                <button
+                  id="$menuSettingsSfxMute"
+                  type="button"
+                  class="menu-setting-toggle menu-slider-toggle"
+                ></button>
               </div>
             </div>
             <!-- Display Name row -->
@@ -316,26 +326,29 @@
                 hidden
               ></span>
               <form id="$menuDisplayNameForm" class="menu-setting-name-group">
-                <input
-                  id="$menuDisplayNameInput"
-                  type="text"
-                  name="displayName"
-                  class="menu-setting-name-input"
-                  maxlength="30"
-                  autocomplete="nickname"
-                />
-                <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
-                <div class="menu-setting-name-actions">
-                  <button
-                    id="$menuDisplayNameSave"
-                    type="submit"
-                    class="menu-setting-name-save"
-                  ></button>
-                  <span
-                    id="$menuDisplayNameStatus"
-                    class="menu-setting-name-status"
-                  ></span>
+                <div class="flex-row">
+                  <input
+                    id="$menuDisplayNameInput"
+                    type="text"
+                    name="displayName"
+                    class="menu-setting-name-input"
+                    maxlength="30"
+                    autocomplete="nickname"
+                  />
+                  <div class="menu-setting-name-actions">
+                    <button
+                      id="$menuDisplayNameSave"
+                      type="submit"
+                      class="menu-setting-name-save"
+                    ></button>
+                    <span
+                      id="$menuDisplayNameStatus"
+                      class="menu-setting-name-status"
+                    ></span>
+                  </div>
                 </div>
+
+                <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
               </form>
             </div>
           </div>

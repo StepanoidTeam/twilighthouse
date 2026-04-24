@@ -36,9 +36,11 @@ const {
   $menuSettingsMusicLabel,
   $menuSettingsMusicInput,
   $menuSettingsMusicValue,
+  $menuSettingsMusicMute,
   $menuSettingsSfxLabel,
   $menuSettingsSfxInput,
   $menuSettingsSfxValue,
+  $menuSettingsSfxMute,
   $menuSettingsNameLabel,
   $menuSettingsNameNote,
   $menuDisplayNameForm,
@@ -440,18 +442,26 @@ function showSettings() {
   if (
     !$menuSettingsMusicLabel ||
     !$menuSettingsMusicInput ||
-    !$menuSettingsMusicValue
+    !$menuSettingsMusicValue ||
+    !$menuSettingsMusicMute
   )
     return;
   $menuSettingsMusicLabel.textContent = t('settings.music');
 
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
-  $menuSettingsMusicInput.value = String(Math.round(initialMusic * 100));
-  $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
+  let lastMusicVolume = initialMusic > 0 ? initialMusic : 0.5;
 
-  $menuSettingsMusicInput.oninput = () => {
-    const val = Number($menuSettingsMusicInput.value) / 100;
+  function renderMusicMuteLabel(value) {
+    $menuSettingsMusicMute.textContent = t(
+      value <= 0 ? 'settings.unmute' : 'settings.mute',
+    );
+  }
+
+  function applyMusicVolume(val) {
+    if (val > 0) lastMusicVolume = val;
+    $menuSettingsMusicInput.value = String(Math.round(val * 100));
     $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
+    renderMusicMuteLabel(val);
     S.musicVolume = val;
     if (S.musicSound) {
       void syncLoopingAudio(S.musicSound, MUSIC_VOLUME * val);
@@ -459,23 +469,48 @@ function showSettings() {
     try {
       localStorage.setItem('lighthouse_music_vol', String(val));
     } catch (_) {}
+  }
+
+  $menuSettingsMusicInput.value = String(Math.round(initialMusic * 100));
+  $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
+  renderMusicMuteLabel(initialMusic);
+
+  $menuSettingsMusicInput.oninput = () => {
+    applyMusicVolume(Number($menuSettingsMusicInput.value) / 100);
+  };
+
+  $menuSettingsMusicMute.onclick = () => {
+    playMenuClick();
+    if (S.musicVolume <= 0) {
+      applyMusicVolume(lastMusicVolume > 0 ? lastMusicVolume : 0.5);
+    } else {
+      applyMusicVolume(0);
+    }
   };
 
   if (
     !$menuSettingsSfxLabel ||
     !$menuSettingsSfxInput ||
-    !$menuSettingsSfxValue
+    !$menuSettingsSfxValue ||
+    !$menuSettingsSfxMute
   )
     return;
   $menuSettingsSfxLabel.textContent = t('settings.sfx');
 
   const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
-  $menuSettingsSfxInput.value = String(Math.round(initialSfx * 100));
-  $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
+  let lastSfxVolume = initialSfx > 0 ? initialSfx : 1;
 
-  $menuSettingsSfxInput.oninput = () => {
-    const val = Number($menuSettingsSfxInput.value) / 100;
+  function renderSfxMuteLabel(value) {
+    $menuSettingsSfxMute.textContent = t(
+      value <= 0 ? 'settings.unmute' : 'settings.mute',
+    );
+  }
+
+  function applySfxVolume(val) {
+    if (val > 0) lastSfxVolume = val;
+    $menuSettingsSfxInput.value = String(Math.round(val * 100));
     $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
+    renderSfxMuteLabel(val);
     S.sfxVolume = val;
     if (S.wavesSound) {
       void syncLoopingAudio(S.wavesSound, WAVES_VOLUME * val);
@@ -483,6 +518,23 @@ function showSettings() {
     try {
       localStorage.setItem('lighthouse_sfx_vol', String(val));
     } catch (_) {}
+  }
+
+  $menuSettingsSfxInput.value = String(Math.round(initialSfx * 100));
+  $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
+  renderSfxMuteLabel(initialSfx);
+
+  $menuSettingsSfxInput.oninput = () => {
+    applySfxVolume(Number($menuSettingsSfxInput.value) / 100);
+  };
+
+  $menuSettingsSfxMute.onclick = () => {
+    playMenuClick();
+    if (S.sfxVolume <= 0) {
+      applySfxVolume(lastSfxVolume > 0 ? lastSfxVolume : 1);
+    } else {
+      applySfxVolume(0);
+    }
   };
 
   // ===== Display Name =====
