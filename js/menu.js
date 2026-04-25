@@ -61,6 +61,8 @@ let onStartGame = null;
 let backBtnEl = null;
 let keyHandlerBound = false;
 let i18nBound = false;
+let bgManMotion = null;
+let bgManMotionKeyframes = null;
 
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
@@ -113,11 +115,77 @@ function initMenu() {
     $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
   }
   if ($menuBgMan) {
-    $menuBgMan.style.backgroundImage = `url("${MENU_BG_MAN_FILE}")`;
+    $menuBgMan.src = MENU_BG_MAN_FILE;
   }
 
   initMenuButtons();
   updateSelection();
+}
+
+function buildBgManMotionKeyframes() {
+  return [
+    {
+      offset: 0,
+      transform: 'translate3d(0.00%, 0.00%, 0) rotate(0deg) scale(1.004)',
+    },
+    {
+      offset: 0.125,
+      transform: 'translate3d(0.22%, -0.16%, 0) rotate(0.38deg) scale(1.007)',
+    },
+    {
+      offset: 0.25,
+      transform: 'translate3d(0.42%, -0.30%, 0) rotate(0.72deg) scale(1.009)',
+    },
+    {
+      offset: 0.375,
+      transform: 'translate3d(0.22%, -0.16%, 0) rotate(0.38deg) scale(1.007)',
+    },
+    {
+      offset: 0.5,
+      transform: 'translate3d(0.00%, 0.00%, 0) rotate(0deg) scale(1.004)',
+    },
+    {
+      offset: 0.625,
+      transform: 'translate3d(-0.22%, 0.18%, 0) rotate(-0.40deg) scale(1.001)',
+    },
+    {
+      offset: 0.75,
+      transform: 'translate3d(-0.44%, 0.34%, 0) rotate(-0.78deg) scale(0.998)',
+    },
+    {
+      offset: 0.875,
+      transform: 'translate3d(-0.22%, 0.18%, 0) rotate(-0.40deg) scale(1.001)',
+    },
+    {
+      offset: 1,
+      transform: 'translate3d(0.00%, 0.00%, 0) rotate(0deg) scale(1.004)',
+    },
+  ];
+}
+
+function startBgManMotion() {
+  if (bgManMotion || !$menuBgMan) return;
+
+  if (!bgManMotionKeyframes) {
+    bgManMotionKeyframes = buildBgManMotionKeyframes();
+  }
+
+  bgManMotion = $menuBgMan.animate(bgManMotionKeyframes, {
+    duration: 12000,
+    iterations: Infinity,
+    easing: 'linear',
+    fill: 'both',
+  });
+}
+
+function stopBgManMotion() {
+  if (bgManMotion) {
+    bgManMotion.cancel();
+    bgManMotion = null;
+  }
+  if ($menuBgMan) {
+    $menuBgMan.style.transform = '';
+  }
 }
 
 function initMenuButtons() {
@@ -260,6 +328,7 @@ export async function buildMenu(app, startGameCb) {
   onStartGame = startGameCb;
 
   initMenu();
+  startBgManMotion();
   initBackBtn();
   $menuOverlay.hidden = false;
   showMainMenu();
@@ -643,6 +712,7 @@ function stopCreditsAnimation() {
 // ===== Show / Hide =====
 function hideMenu() {
   if ($menuOverlay) $menuOverlay.hidden = true;
+  stopBgManMotion();
   clearSubScreen();
   if ($menuSettings) $menuSettings.hidden = true;
   hideBackBtn();
@@ -653,6 +723,7 @@ function hideMenu() {
 export function showMenu() {
   if (!$menuOverlay) return;
   $menuOverlay.hidden = false;
+  startBgManMotion();
   selectedIndex = 0;
   showMainMenu();
   currentScreen = 'main';
@@ -670,33 +741,3 @@ export function repositionMenu() {
   $menuOverlay.style.setProperty('--menu-vw', `${S.gameW}px`);
   $menuOverlay.style.setProperty('--menu-vh', `${S.gameH}px`);
 }
-
-// ===== parallax =====
-function parallaxBg() {
-  if ($menuBgMan) {
-    const MAX_SHIFT = 2;
-
-    let targetX = 0;
-    let currentX = 0;
-    let raf;
-
-    function onMouseMove(e) {
-      /* Нормализуем: -1 (левый край) … +1 (правый) */
-      const norm = (e.clientX / window.innerWidth) * 2 - 1;
-
-      /* Смещение слоя — обратное движению (эффект глубины) */
-      targetX = -norm * MAX_SHIFT;
-    }
-
-    /* Плавная анимация через lerp */
-    function animate() {
-      currentX += (targetX - currentX) * 0.07;
-      $menuBgMan.style.transform = `translateX(${currentX.toFixed(2)}%)`;
-      raf = requestAnimationFrame(animate);
-    }
-
-    document.addEventListener('mousemove', onMouseMove);
-    animate();
-  }
-}
-parallaxBg();

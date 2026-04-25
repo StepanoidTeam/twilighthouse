@@ -143,7 +143,13 @@
     <!-- ===== Menu overlay ===== -->
     <div id="$menuOverlay" class="menu-overlay" hidden>
       <div id="$menuBg" class="menu-overlay-bg"></div>
-      <div id="$menuBgMan" class="menu-overlay-bg-man"></div>
+      <img
+        id="$menuBgMan"
+        class="menu-overlay-bg-man"
+        src=""
+        alt=""
+        aria-hidden="true"
+      />
       <div class="menu-overlay-dim" hidden></div>
       <div class="menu-overlay-panel">
         <div class="menu-title">
@@ -249,151 +255,142 @@
         </template>
       </div>
       <p id="$menuHint" class="menu-hint"></p>
-      <section id="$menuTutorial" class="menu-tutorial fullscreen" hidden>
-        <div class="menu-screen-shell">
-          <h2 class="menu-screen-title"></h2>
-          <div class="menu-card menu-howtoplay blur-bg">
-            <!-- Items will be populated here -->
-          </div>
+    </div>
+
+    <section id="$menuTutorial" class="menu-tutorial fullscreen" hidden>
+      <div class="menu-screen-shell">
+        <h2 class="menu-screen-title"></h2>
+        <div class="menu-card menu-howtoplay blur-bg">
+          <!-- Items will be populated here -->
         </div>
-        <p class="menu-sub-hint"></p>
-      </section>
-      <section id="$menuSettings" class="menu-settings fullscreen" hidden>
-        <div class="menu-screen-shell">
-          <h2 id="$menuSettingsTitle" class="menu-screen-title"></h2>
-          <div id="$menuSettingsCard" class="menu-card menu-settings blur-bg">
-            <!-- Language row -->
-            <div class="menu-setting-row">
+      </div>
+      <p class="menu-sub-hint"></p>
+    </section>
+    <section id="$menuSettings" class="menu-settings fullscreen" hidden>
+      <div class="menu-screen-shell">
+        <h2 id="$menuSettingsTitle" class="menu-screen-title"></h2>
+        <div id="$menuSettingsCard" class="menu-card menu-settings blur-bg">
+          <!-- Language row -->
+          <div class="menu-setting-row">
+            <span id="$menuSettingsLangLabel" class="menu-setting-label"></span>
+            <button
+              id="$menuSettingsLangBtn"
+              type="button"
+              class="menu-setting-toggle"
+            ></button>
+          </div>
+          <!-- Music row -->
+          <div class="menu-setting-row menu-setting-row--slider">
+            <span
+              id="$menuSettingsMusicLabel"
+              class="menu-setting-label"
+            ></span>
+            <div class="menu-slider">
+              <input
+                id="$menuSettingsMusicInput"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+              />
               <span
-                id="$menuSettingsLangLabel"
-                class="menu-setting-label"
+                id="$menuSettingsMusicValue"
+                class="menu-slider-value"
               ></span>
               <button
-                id="$menuSettingsLangBtn"
+                id="$menuSettingsMusicMute"
                 type="button"
-                class="menu-setting-toggle"
+                class="menu-setting-toggle menu-slider-toggle"
               ></button>
             </div>
-            <!-- Music row -->
-            <div class="menu-setting-row menu-setting-row--slider">
-              <span
-                id="$menuSettingsMusicLabel"
-                class="menu-setting-label"
-              ></span>
-              <div class="menu-slider">
-                <input
-                  id="$menuSettingsMusicInput"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
-                />
-                <span
-                  id="$menuSettingsMusicValue"
-                  class="menu-slider-value"
-                ></span>
-                <button
-                  id="$menuSettingsMusicMute"
-                  type="button"
-                  class="menu-setting-toggle menu-slider-toggle"
-                ></button>
-              </div>
+          </div>
+          <!-- SFX row -->
+          <div class="menu-setting-row menu-setting-row--slider">
+            <span id="$menuSettingsSfxLabel" class="menu-setting-label"></span>
+            <div class="menu-slider">
+              <input
+                id="$menuSettingsSfxInput"
+                type="range"
+                min="0"
+                max="100"
+                step="1"
+              />
+              <span id="$menuSettingsSfxValue" class="menu-slider-value"></span>
+              <button
+                id="$menuSettingsSfxMute"
+                type="button"
+                class="menu-setting-toggle menu-slider-toggle"
+              ></button>
             </div>
-            <!-- SFX row -->
-            <div class="menu-setting-row menu-setting-row--slider">
-              <span
-                id="$menuSettingsSfxLabel"
-                class="menu-setting-label"
-              ></span>
-              <div class="menu-slider">
+          </div>
+          <!-- Display Name row -->
+          <div class="menu-setting-row menu-setting-row--name">
+            <span id="$menuSettingsNameLabel" class="menu-setting-label"></span>
+            <span
+              id="$menuSettingsNameNote"
+              class="menu-setting-note"
+              hidden
+            ></span>
+            <form id="$menuDisplayNameForm" class="menu-setting-name-group">
+              <div class="flex-row" style="gap: 10px">
                 <input
-                  id="$menuSettingsSfxInput"
-                  type="range"
-                  min="0"
-                  max="100"
-                  step="1"
+                  id="$menuDisplayNameInput"
+                  type="text"
+                  name="displayName"
+                  class="menu-setting-name-input"
+                  maxlength="30"
+                  autocomplete="nickname"
                 />
-                <span
-                  id="$menuSettingsSfxValue"
-                  class="menu-slider-value"
-                ></span>
-                <button
-                  id="$menuSettingsSfxMute"
-                  type="button"
-                  class="menu-setting-toggle menu-slider-toggle"
-                ></button>
-              </div>
-            </div>
-            <!-- Display Name row -->
-            <div class="menu-setting-row menu-setting-row--name">
-              <span
-                id="$menuSettingsNameLabel"
-                class="menu-setting-label"
-              ></span>
-              <span
-                id="$menuSettingsNameNote"
-                class="menu-setting-note"
-                hidden
-              ></span>
-              <form id="$menuDisplayNameForm" class="menu-setting-name-group">
-                <div class="flex-row">
-                  <input
-                    id="$menuDisplayNameInput"
-                    type="text"
-                    name="displayName"
-                    class="menu-setting-name-input"
-                    maxlength="30"
-                    autocomplete="nickname"
-                  />
-                  <div class="menu-setting-name-actions">
-                    <button
-                      id="$menuDisplayNameSave"
-                      type="submit"
-                      class="menu-setting-name-save"
-                    ></button>
-                    <span
-                      id="$menuDisplayNameStatus"
-                      class="menu-setting-name-status"
-                    ></span>
-                  </div>
+                <div class="menu-setting-name-actions">
+                  <button
+                    id="$menuDisplayNameSave"
+                    type="submit"
+                    class="menu-setting-name-save"
+                  ></button>
+                  <span
+                    id="$menuDisplayNameStatus"
+                    class="menu-setting-name-status"
+                  ></span>
                 </div>
+              </div>
 
-                <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
-              </form>
-            </div>
+              <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
+            </form>
           </div>
         </div>
-        <p id="$menuSettingsHint" class="menu-sub-hint"></p>
-      </section>
-      <section
-        id="$menuLeaderboard"
-        class="menu-leaderboard blur fullscreen"
-        hidden
-      >
-        <div class="menu-screen-shell">
-          <h2 class="menu-screen-title"></h2>
-          <p class="menu-screen-subtitle"></p>
-          <div class="menu-card blur-bg">
-            <p class="menu-state-label"></p>
-            <div class="menu-leaderboard-list"></div>
-          </div>
+      </div>
+      <p id="$menuSettingsHint" class="menu-sub-hint"></p>
+    </section>
+    <section
+      id="$menuLeaderboard"
+      class="menu-leaderboard blur fullscreen"
+      hidden
+    >
+      <div class="menu-screen-shell">
+        <h2 class="menu-screen-title"></h2>
+        <p class="menu-screen-subtitle"></p>
+        <div class="menu-card blur-bg">
+          <p class="menu-state-label"></p>
+          <div class="menu-leaderboard-list"></div>
         </div>
-        <p class="menu-sub-hint"></p>
-      </section>
-      <section id="$menuAuthors" class="menu-authors" hidden>
-        <div class="menu-authors-bg"></div>
-        <div class="menu-authors-dim"></div>
-        <div class="menu-authors-scroll">
-          <pre class="menu-authors-text"></pre>
-        </div>
-        <p class="menu-sub-hint"></p>
-      </section>
-    </div>
+      </div>
+      <p class="menu-sub-hint"></p>
+    </section>
+    <section id="$menuAuthors" class="menu-authors" hidden>
+      <div class="menu-authors-bg"></div>
+      <div class="menu-authors-dim"></div>
+      <div class="menu-authors-scroll">
+        <pre class="menu-authors-text"></pre>
+      </div>
+      <p class="menu-sub-hint"></p>
+    </section>
 
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
     <button type="button" id="$backBtn" class="menu-btn back-btn blur-bg">
       <span class="back-btn-arrow">←</span
       ><span id="$backBtnLabel" class="back-btn-label"></span>
+
+      <div class="hotkey">Q</div>
     </button>
 
     <!-- ===== Auth modal ===== -->

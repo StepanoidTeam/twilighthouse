@@ -14,12 +14,10 @@
 .menu-overlay {
   position: fixed;
   inset: 0;
-  z-index: 2;
   color: var(--color-menu-text);
 }
 
 .menu-overlay-bg,
-.menu-overlay-bg-man,
 .menu-overlay-dim,
 .menu-authors-bg,
 .menu-authors-blackout,
@@ -29,15 +27,27 @@
 }
 
 .menu-overlay-bg-man {
-  /* z-index: 2; */
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  width: 50%;
   pointer-events: none;
   will-change: transform;
-  transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-  filter: drop-shadow(0 10px 50px hsla(0, 0%, 0%, 0.25));
+  /* filter: drop-shadow(0 10px 50px hsla(0, 0%, 0%, 0.25)); */
+
+  filter: drop-shadow(0px -2px 1px var(--color-main-menu-text));
+
+  margin-right: -1%;
+  margin-bottom: -1%;
 }
 
-.menu-overlay-bg,
-.menu-overlay-bg-man,
+.menu-overlay-bg {
+  background-position: center;
+  background-repeat: no-repeat;
+  background-size: cover;
+
+  background-position-x: right;
+}
 .menu-authors-bg {
   background-position: center;
   background-repeat: no-repeat;
@@ -164,6 +174,7 @@
 .menu-sub-hint {
   position: absolute;
   left: 50%;
+  bottom: 0;
   transform: translateX(-50%);
   color: var(--color-menu-muted);
   font-size: 14px;
@@ -254,6 +265,9 @@
   display: flex;
   flex-direction: column;
   gap: 18px;
+
+  align-items: center;
+  justify-content: center;
 }
 
 /* ===== How to Play ===== */
@@ -563,4 +577,53 @@
   .menu-slider input {
     width: 100%;
   }
+}
+
+.hotkey {
+  position: relative;
+  display: flex;
+  padding-inline: 10px;
+  min-width: 36px;
+  height: 36px;
+  font-size: 23px;
+  text-transform: uppercase;
+  color: #000000;
+  background: #f7e3c2;
+  border-radius: 4px;
+  corner-shape: bevel;
+  align-items: center;
+  justify-content: center;
+  padding-bottom: 1px;
+  font-weight: bold;
+  box-shadow: 0 0 0px 1px #a2793791;
+
+  &:after,
+  &:before {
+    content: '';
+    inset: 0;
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    display: flex;
+    padding: 14px;
+    justify-self: center;
+    align-self: center;
+    border: 2px solid #000000;
+    box-sizing: border-box;
+    corner-shape: notch;
+    border-radius: 3px;
+    width: calc(100% - 4px);
+  }
+
+  &:after {
+    border-radius: 3px;
+    corner-shape: bevel;
+    border-width: 2px;
+    padding: 14px;
+    border-color: #000000;
+  }
+}
+
+.cutout {
+  position: absolute;
 }
