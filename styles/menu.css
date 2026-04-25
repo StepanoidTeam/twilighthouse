@@ -29,7 +29,7 @@
 }
 
 .menu-overlay-bg-man {
-  z-index: 2;
+  /* z-index: 2; */
   pointer-events: none;
   will-change: transform;
   transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
