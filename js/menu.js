@@ -18,6 +18,7 @@ import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 const {
   $menuOverlay,
   $menuBg,
+  $menuBgMan,
   $menuMain,
   $menuSub,
   $menuHint,
@@ -62,7 +63,8 @@ let keyHandlerBound = false;
 let i18nBound = false;
 
 // ===== Assets =====
-const MENU_BG_FILE = 'sprites/mainmenu.PNG';
+const MENU_BG_FILE = 'sprites/mainmenu-bg.PNG';
+const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.PNG';
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -109,6 +111,9 @@ function playMenuClick() {
 function initMenu() {
   if ($menuBg) {
     $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
+  }
+  if ($menuBgMan) {
+    $menuBgMan.style.backgroundImage = `url("${MENU_BG_MAN_FILE}")`;
   }
 
   initMenuButtons();
@@ -665,3 +670,33 @@ export function repositionMenu() {
   $menuOverlay.style.setProperty('--menu-vw', `${S.gameW}px`);
   $menuOverlay.style.setProperty('--menu-vh', `${S.gameH}px`);
 }
+
+// ===== parallax =====
+function parallaxBg() {
+  if ($menuBgMan) {
+    const MAX_SHIFT = 2;
+
+    let targetX = 0;
+    let currentX = 0;
+    let raf;
+
+    function onMouseMove(e) {
+      /* Нормализуем: -1 (левый край) … +1 (правый) */
+      const norm = (e.clientX / window.innerWidth) * 2 - 1;
+
+      /* Смещение слоя — обратное движению (эффект глубины) */
+      targetX = -norm * MAX_SHIFT;
+    }
+
+    /* Плавная анимация через lerp */
+    function animate() {
+      currentX += (targetX - currentX) * 0.07;
+      $menuBgMan.style.transform = `translateX(${currentX.toFixed(2)}%)`;
+      raf = requestAnimationFrame(animate);
+    }
+
+    document.addEventListener('mousemove', onMouseMove);
+    animate();
+  }
+}
+parallaxBg();

@@ -19,12 +19,21 @@
 }
 
 .menu-overlay-bg,
+.menu-overlay-bg-man,
 .menu-overlay-dim,
 .menu-authors-bg,
 .menu-authors-blackout,
 .menu-authors-dim {
   position: absolute;
   inset: 0;
+}
+
+.menu-overlay-bg-man {
+  z-index: 2;
+  pointer-events: none;
+  will-change: transform;
+  transition: transform 0.08s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  filter: drop-shadow(0 10px 50px hsla(0, 0%, 0%, 0.25));
 }
 
 .menu-overlay-bg,
