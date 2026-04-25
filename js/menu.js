@@ -63,8 +63,8 @@ let keyHandlerBound = false;
 let i18nBound = false;
 
 // ===== Assets =====
-const MENU_BG_FILE = 'sprites/mainmenu-bg.PNG';
-const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.PNG';
+const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
+const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.png';
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
