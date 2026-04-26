@@ -8,6 +8,7 @@ import {
   ARRIVAL_RADIUS,
 } from './config.js';
 import S from './state.js';
+import { updateDebugBeam, getBeamConvergencePoint } from './lighthouse.js';
 
 export function buildDebug() {
   S.debugGfx = new PIXI.Graphics();
@@ -30,54 +31,10 @@ export function buildDebug() {
 }
 
 export function updateDebug() {
-  const ox = S.lhX + S.BEAM_ORIGIN_OFFSET_X;
-  const oy = S.lhY + S.BEAM_ORIGIN_OFFSET_Y;
-  const bLen = BEAM_LEN;
-
   S.debugGfx.clear();
 
-  // Crosshair at lighthouse center (lhX, lhY)
-  S.debugGfx.lineStyle(1, 0x888888, 0.5);
-  S.debugGfx.moveTo(S.lhX - 20, S.lhY);
-  S.debugGfx.lineTo(S.lhX + 20, S.lhY);
-  S.debugGfx.moveTo(S.lhX, S.lhY - 20);
-  S.debugGfx.lineTo(S.lhX, S.lhY + 20);
-
-  // Beam origin point
-  S.debugGfx.lineStyle(0);
-  S.debugGfx.beginFill(0x00ff00, 1);
-  S.debugGfx.drawCircle(ox, oy, 4);
-  S.debugGfx.endFill();
-
-  // Line from lhCenter to beam origin
-  S.debugGfx.lineStyle(1, 0x00ff00, 0.6);
-  S.debugGfx.moveTo(S.lhX, S.lhY);
-  S.debugGfx.lineTo(ox, oy);
-
-  // Beam cone edges
-  S.debugGfx.lineStyle(2, 0xffff00, 0.7);
-  S.debugGfx.moveTo(ox, oy);
-  S.debugGfx.lineTo(
-    ox + Math.cos(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
-    oy + Math.sin(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
-  );
-  S.debugGfx.moveTo(ox, oy);
-  S.debugGfx.lineTo(
-    ox + Math.cos(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
-    oy + Math.sin(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
-  );
-
-  // Beam center line
-  S.debugGfx.lineStyle(1, 0xff8800, 0.5);
-  S.debugGfx.moveTo(ox, oy);
-  S.debugGfx.lineTo(
-    ox + Math.cos(S.beamAngle) * bLen,
-    oy + Math.sin(S.beamAngle) * bLen,
-  );
-
-  // Glow radius circle
-  S.debugGfx.lineStyle(1, 0x00aaff, 0.5);
-  S.debugGfx.drawCircle(ox, oy, S.LH_GLOW_RADIUS);
+  // Beam debug drawing
+  updateDebugBeam();
 
   // Arrival radius
   S.debugGfx.lineStyle(1, 0x88ff88, 0.3);
@@ -97,11 +54,11 @@ export function updateDebug() {
   S.debugGfx.lineStyle(2, 0xaaaaff, 0.35);
   S.debugGfx.drawCircle(S.lhX, S.lhY, MOB_SPAWN_RING);
 
-  // Update glow position live
-  S.lhGlow.position.set(S.lhX, S.lhY + S.BEAM_ORIGIN_OFFSET_Y);
-
   // Debug text
+  const convergence = getBeamConvergencePoint(S.beamAngle);
+  const ox = S.lhX + convergence.x;
+  const oy = S.lhY + convergence.y;
   S.debugText.text =
-    `[~] Debug  |  ↑↓ offsetY: ${S.BEAM_ORIGIN_OFFSET_Y}  |  [] halfAngle: ${S.BEAM_HALF_ANGLE.toFixed(2)}  |  -+ glowR: ${S.LH_GLOW_RADIUS}\n` +
-    `beamAngle: ${((S.beamAngle * 180) / Math.PI).toFixed(1)}°  |  origin: (${ox}, ${oy})`;
+    `[~] Debug  |  [] halfAngle: ${S.BEAM_HALF_ANGLE.toFixed(2)}  |  -+ glowR: ${S.LH_GLOW_RADIUS}\n` +
+    `beamAngle: ${((S.beamAngle * 180) / Math.PI).toFixed(1)}°  |  origin: (${ox.toFixed(0)}, ${oy.toFixed(0)})`;
 }
