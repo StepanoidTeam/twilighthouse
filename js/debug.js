@@ -120,11 +120,19 @@ export function updateDebug() {
     S.debugGfx.drawCircle(p.spr.x, p.spr.y, BOAT_RADIUS);
   }
 
-  // Kraken colliders (purple, larger, offset down)
+  // Kraken colliders: attack (purple, larger, offset down)
+  // and illumination trigger (cyan, exact point used by isInBeam).
   for (const k of S.krakens) {
     if (k.gone) continue;
     S.debugGfx.lineStyle(2, 0xcc44ff, 0.9);
     S.debugGfx.drawCircle(k.spr.x, k.spr.y + KRAKEN_RADIUS, KRAKEN_RADIUS);
+
+    S.debugGfx.lineStyle(2, 0x00e5ff, 0.95);
+    S.debugGfx.drawCircle(k.spr.x, k.spr.y, BOAT_RADIUS);
+    S.debugGfx.moveTo(k.spr.x - 6, k.spr.y);
+    S.debugGfx.lineTo(k.spr.x + 6, k.spr.y);
+    S.debugGfx.moveTo(k.spr.x, k.spr.y - 6);
+    S.debugGfx.lineTo(k.spr.x, k.spr.y + 6);
   }
 
   // Rock colliders
