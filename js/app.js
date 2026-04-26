@@ -19,6 +19,7 @@ import {
   initializeAmbientAudio,
   playClickSound,
   bindAmbientAudioUnlock,
+  bindAmbientAudioVisibilityPause,
   startWavesSound,
   startMenuMusic,
   primeBootAmbientAudio,
@@ -536,6 +537,7 @@ async function loadTextures() {
 async function init() {
   renderBootLoaderText();
   bindAmbientAudioUnlock();
+  bindAmbientAudioVisibilityPause();
 
   S.gameW = window.innerWidth;
   S.gameH = window.innerHeight;

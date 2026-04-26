@@ -36,6 +36,9 @@ const audioBufferCache = new Map();
 let audioUnlockPromise = null;
 let musicTrackIndex = 0;
 let ambientUnlockBound = false;
+let visibilityPauseBound = false;
+let musicWasPlayingBeforeHide = false;
+let wavesWasPlayingBeforeHide = false;
 
 const CRASH_VOLUME = 0.06;
 const CRASH_SOUNDS = [
@@ -412,6 +415,57 @@ async function startMenuMusic({ restartPlayback = false } = {}) {
   }
 }
 
+function bindAmbientAudioVisibilityPause() {
+  if (visibilityPauseBound) return;
+  if (typeof document === 'undefined') return;
+  visibilityPauseBound = true;
+
+  const onVisibilityChange = () => {
+    if (document.hidden) {
+      // Запоминаем состояние перед скрытием, чтобы не возобновлять
+      // звуки, которые сам игрок выключил или которые стояли на game-over.
+      musicWasPlayingBeforeHide = !!(S.musicSound && !S.musicSound.paused);
+      wavesWasPlayingBeforeHide = !!(S.wavesSound && !S.wavesSound.paused);
+      if (S.musicSound && !S.musicSound.paused) {
+        S.musicSound.pause();
+      }
+      if (S.wavesSound && !S.wavesSound.paused) {
+        S.wavesSound.pause();
+      }
+      // Останавливаем все короткие SFX, привязанные к AudioContext.
+      const ctx = audioContext;
+      if (ctx && ctx.state === 'running') {
+        void ctx.suspend().catch(() => {});
+      }
+    } else {
+      const ctx = audioContext;
+      if (ctx && ctx.state === 'suspended') {
+        void ctx.resume().catch(() => {});
+      }
+      if (musicWasPlayingBeforeHide) {
+        musicWasPlayingBeforeHide = false;
+        if (
+          S.musicSound &&
+          getMusicVolume(MUSIC_VOLUME) > AMBIENT_SILENT_THRESHOLD
+        ) {
+          void S.musicSound.play();
+        }
+      }
+      if (wavesWasPlayingBeforeHide) {
+        wavesWasPlayingBeforeHide = false;
+        if (
+          S.wavesSound &&
+          getSfxVolume(WAVES_VOLUME) > AMBIENT_SILENT_THRESHOLD
+        ) {
+          void S.wavesSound.play();
+        }
+      }
+    }
+  };
+
+  document.addEventListener('visibilitychange', onVisibilityChange);
+}
+
 function bindAmbientAudioUnlock() {
   if (ambientUnlockBound) return;
   ambientUnlockBound = true;
@@ -572,6 +626,7 @@ export {
   playClickSound,
   playFailSound,
   bindAmbientAudioUnlock,
+  bindAmbientAudioVisibilityPause,
   stopWavesSound,
   startWavesSound,
   startMenuMusic,
