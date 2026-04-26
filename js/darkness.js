@@ -6,6 +6,7 @@ import {
   BEAM_VISUAL_NARROW_ANGLE,
 } from './config.js';
 import S from './state.js';
+import { getBeamConvergencePoint } from './lighthouse.js';
 
 // Логические размеры RT затемнения: покрываем видимую область мира вокруг
 // маяка (gameW / worldScale) + padding с каждой стороны. Маяк лежит по центру
@@ -51,11 +52,15 @@ export function updateDarkness() {
     0.001,
     S.BEAM_HALF_ANGLE - BEAM_VISUAL_NARROW_ANGLE,
   );
-  // Маяк всегда в центре RT. Луч сдвинут на BEAM_ORIGIN_OFFSET_*.
+  // Маяк всегда в центре RT. Точка схождения луча — на радиусе от центра.
   const cxLH = w / 2;
   const cyLH = h / 2;
-  const cx = cxLH + S.BEAM_ORIGIN_OFFSET_X;
-  const cy = cyLH + S.BEAM_ORIGIN_OFFSET_Y;
+  const convergence = getBeamConvergencePoint(S.beamAngle);
+  const cx = cxLH + convergence.x;
+  const cy = cyLH + convergence.y;
+
+  const cxCircle = cxLH + S.BEAM_ORIGIN_OFFSET_X;
+  const cyCircle = cyLH + S.BEAM_ORIGIN_OFFSET_Y;
 
   // Заливка полной темноты
   S.darkFill.clear();
@@ -79,9 +84,11 @@ export function updateDarkness() {
   S.beamErase.closePath();
   S.beamErase.endFill();
 
+  // glow circle
   S.beamErase.beginFill(0xffffff, 1);
-  S.beamErase.drawCircle(cx, cy, S.LH_GLOW_RADIUS);
+  S.beamErase.drawCircle(cxCircle, cyCircle, S.LH_GLOW_RADIUS);
   S.beamErase.endFill();
+
   S.app.renderer.render(S.beamErase, { renderTexture: S.darkRT, clear: false });
 
   // Снова заливаем чёрным вне радиуса спавна: луч туда не дотянется
