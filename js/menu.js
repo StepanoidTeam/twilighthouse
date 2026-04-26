@@ -8,7 +8,10 @@ import {
 } from './sound.js';
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
-import { renderLeaderboardScreen } from './leaderboard.js';
+import {
+  renderLeaderboardScreen,
+  syncCurrentUserLeaderboardDisplayName,
+} from './leaderboard.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
@@ -666,6 +669,7 @@ function showSettings() {
       $menuDisplayNameStatus.className = 'menu-setting-name-status';
       try {
         await updateDisplayName(name);
+        await syncCurrentUserLeaderboardDisplayName();
         $menuDisplayNameStatus.textContent = t('settings.displayNameSaved');
         $menuDisplayNameStatus.className =
           'menu-setting-name-status is-success';

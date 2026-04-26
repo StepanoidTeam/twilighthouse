@@ -12,23 +12,42 @@ import {
 } from '../firebase.js';
 import { currentUser, isSignedInReal } from './auth.js';
 import { t } from './i18n.js';
+import { resolveUserDisplayName } from './profile-store.js';
 
 const COLLECTION = 'leaderboard';
 
 /**
- * Подбирает отображаемое имя для записи в лидерборд.
- * - Для email-юзеров: displayName, иначе часть email до @.
- * - Для анонимных: "Гость-ABCD" (4 первых символа uid в верхнем регистре).
+ * Sync current user's displayName to leaderboard doc when the row already exists.
+ * Does not create new rows and does not touch bestTimeMs / updatedAt.
  */
-function resolveDisplayName(user) {
-  if (user.displayName && user.displayName.trim()) {
-    return user.displayName.trim();
+export async function syncCurrentUserLeaderboardDisplayName(
+  user = currentUser,
+) {
+  if (!user || !user.uid) return false;
+
+  const uid = user.uid;
+  const nextDisplayName = resolveUserDisplayName(user);
+  const ref = doc(db, COLLECTION, uid);
+
+  try {
+    const snap = await getDoc(ref);
+    if (!snap.exists()) return false;
+
+    const prevDisplayName = String(snap.data().displayName || '');
+    if (prevDisplayName === nextDisplayName) return false;
+
+    await setDoc(
+      ref,
+      {
+        displayName: nextDisplayName,
+      },
+      { merge: true },
+    );
+    return true;
+  } catch (e) {
+    console.warn('Failed to sync leaderboard displayName', e);
+    return false;
   }
-  if (user.email) {
-    return user.email.split('@')[0];
-  }
-  const tag = (user.uid || '').slice(0, 4).toUpperCase() || 'XXXX';
-  return `Гость-${tag}`;
 }
 
 /**
@@ -58,7 +77,7 @@ export async function submitScore(survivalMs) {
     return { written: false, best: prevBest };
   }
 
-  const displayName = resolveDisplayName(currentUser);
+  const displayName = resolveUserDisplayName(currentUser);
 
   await setDoc(
     ref,
@@ -254,6 +273,7 @@ export async function renderLeaderboardScreen({ buildScreenShell, isActive }) {
   let leaderboardView = { rows: [], currentUid: null };
   let error = null;
   try {
+    await syncCurrentUserLeaderboardDisplayName(currentUser);
     leaderboardView = await fetchLeaderboardView(50, currentUser?.uid);
   } catch (e) {
     console.warn('Failed to load leaderboard', e);
