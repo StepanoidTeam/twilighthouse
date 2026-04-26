@@ -30,7 +30,7 @@
   position: absolute;
   right: 0;
   bottom: 0;
-  width: 50%;
+  width: 60%;
   pointer-events: none;
   will-change: transform;
   /* filter: drop-shadow(0 10px 50px hsla(0, 0%, 0%, 0.25)); */

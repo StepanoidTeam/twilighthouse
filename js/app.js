@@ -59,6 +59,8 @@ import { currentUser } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
 
+import './ip-tracker.js';
+
 const ENTITY_SYSTEMS = [
   { entity: rockEntity, updatePhase: 'preCamera' },
   { entity: boatEntity, updatePhase: 'main' },

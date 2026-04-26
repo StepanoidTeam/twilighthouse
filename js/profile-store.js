@@ -19,13 +19,21 @@ export function resolveUserDisplayName(user) {
 export async function syncUserProfileDoc(user) {
   if (!user || !user.uid) return false;
 
+  return updateUserProfile(user, {
+    uid: user.uid,
+    displayName: resolveUserDisplayName(user),
+    email: user.email || null,
+    isAnonymous: user.isAnonymous === true,
+  });
+}
+
+export async function updateUserProfile(user, data) {
+  if (!user || !user.uid) return false;
+
   await setDoc(
     doc(db, PROFILES_COLLECTION, user.uid),
     {
-      uid: user.uid,
-      displayName: resolveUserDisplayName(user),
-      email: user.email || null,
-      isAnonymous: user.isAnonymous === true,
+      ...data,
       updatedAt: serverTimestamp(),
     },
     { merge: true },
