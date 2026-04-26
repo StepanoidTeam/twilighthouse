@@ -1,7 +1,5 @@
 import {
   PIXI,
-  BOAT_RADIUS,
-  KRAKEN_RADIUS,
   BEAM_LEN,
   ROCK_SAFE_ZONE,
   ROCK_SPAWN_RADIUS,
@@ -98,55 +96,6 @@ export function updateDebug() {
   // Mob spawn ring
   S.debugGfx.lineStyle(2, 0xaaaaff, 0.35);
   S.debugGfx.drawCircle(S.lhX, S.lhY, MOB_SPAWN_RING);
-
-  // Boat colliders (green)
-  for (const b of S.boats) {
-    if (b.arrived || b.sinking) continue;
-    S.debugGfx.lineStyle(1, 0x00ff88, 0.8);
-    S.debugGfx.drawCircle(b.spr.x, b.spr.y, BOAT_RADIUS);
-  }
-
-  // Mermaid colliders (yellow)
-  for (const m of S.mermaids) {
-    if (m.gone) continue;
-    S.debugGfx.lineStyle(1, 0xffee00, 0.8);
-    S.debugGfx.drawCircle(m.spr.x, m.spr.y, BOAT_RADIUS);
-  }
-
-  // Police colliders (blue)
-  for (const p of S.policeBoats) {
-    if (p.arrived || p.sinking) continue;
-    S.debugGfx.lineStyle(1, 0x44aaff, 0.8);
-    S.debugGfx.drawCircle(p.spr.x, p.spr.y, BOAT_RADIUS);
-  }
-
-  // Kraken colliders: attack (purple, larger, offset down)
-  // and illumination trigger (cyan, exact point used by isInBeam).
-  for (const k of S.krakens) {
-    if (k.gone) continue;
-    S.debugGfx.lineStyle(2, 0xcc44ff, 0.9);
-    S.debugGfx.drawCircle(k.spr.x, k.spr.y + KRAKEN_RADIUS, KRAKEN_RADIUS);
-
-    S.debugGfx.lineStyle(2, 0x00e5ff, 0.95);
-    S.debugGfx.drawCircle(k.spr.x, k.spr.y, BOAT_RADIUS);
-    S.debugGfx.moveTo(k.spr.x - 6, k.spr.y);
-    S.debugGfx.lineTo(k.spr.x + 6, k.spr.y);
-    S.debugGfx.moveTo(k.spr.x, k.spr.y - 6);
-    S.debugGfx.lineTo(k.spr.x, k.spr.y + 6);
-  }
-
-  // Rock colliders
-  for (const rock of S.rockColliders) {
-    S.debugGfx.lineStyle(2, 0xff2222, 0.8);
-    S.debugGfx.drawCircle(rock.x, rock.y, rock.radius);
-    S.debugGfx.lineStyle(0);
-    S.debugGfx.beginFill(0xff2222, 0.3);
-    S.debugGfx.drawCircle(rock.x, rock.y, rock.radius);
-    S.debugGfx.endFill();
-    S.debugGfx.beginFill(0xff0000, 1);
-    S.debugGfx.drawCircle(rock.x, rock.y, 2);
-    S.debugGfx.endFill();
-  }
 
   // Update glow position live
   S.lhGlow.position.set(S.lhX, S.lhY + S.BEAM_ORIGIN_OFFSET_Y);
