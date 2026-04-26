@@ -374,7 +374,7 @@ async function trySubmitScore() {
   if (S.scoreSubmitted) return;
   S.scoreSubmitted = true;
   if (!S.gameWon) return;
-  const survivalMs = S.runSurvivalMs || performance.now() - S.runStartTime;
+  const survivalMs = S.runSurvivalMs;
   if (!currentUser) {
     console.log(
       `🏁 Run: ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`,
@@ -397,15 +397,18 @@ async function trySubmitScore() {
 
 // ===== Game Loop =====
 function gameLoop(delta) {
-  if (!S.gameSessionActive) return;
+  if (!S.gameSessionActive) {
+    S.lastSurvivalTick = 0;
+    return;
+  }
 
   // Detect a fresh game-over transition: freeze survival time and submit once
   if (S.gameOver) {
     if (!S.scoreSubmitted) {
-      S.runSurvivalMs = performance.now() - S.runStartTime;
       updateHUD();
       trySubmitScore();
     }
+    S.lastSurvivalTick = 0;
     if (S.gameWon && !S.gameOverTimeoutId) {
       S.gameOverTimeoutId = window.setTimeout(() => {
         S.gameOverTimeoutId = null;
@@ -416,8 +419,22 @@ function gameLoop(delta) {
     }
     return;
   }
-  if (isMenuVisible()) return;
-  if (S.exitConfirm) return;
+  if (isMenuVisible() || S.exitConfirm) {
+    // Пауза: не накапливаем выживание и сбрасываем точку отсчёта,
+    // чтобы при resume первый тик не залил большую дельту.
+    S.lastSurvivalTick = 0;
+    return;
+  }
+
+  // Накопление времени выживания только во время активного тика.
+  // Если вкладка была свёрнута, rAF не тикал — отбрасываем огромную
+  // дельту первым кадром (>1000мс) после возврата.
+  const tickNow = performance.now();
+  if (S.lastSurvivalTick) {
+    const dtMs = tickNow - S.lastSurvivalTick;
+    if (dtMs > 0 && dtMs < 1000) S.runSurvivalMs += dtMs;
+  }
+  S.lastSurvivalTick = tickNow;
 
   // Beam rotation via keyboard (no easing)
   if (S.keys['KeyA'] || S.keys['ArrowLeft'])

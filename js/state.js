@@ -75,8 +75,11 @@ const State = {
   gameOverTimeoutId: null,
 
   // Run timing (survival)
+  // runSurvivalMs накапливается только в активных тиках геймплея —
+  // при паузе (exit confirm, game over, свёрнутая вкладка) время не идёт.
   runStartTime: 0,
   runSurvivalMs: 0,
+  lastSurvivalTick: 0,
   scoreSubmitted: false,
 
   // Entities
@@ -171,6 +174,7 @@ const State = {
     this.nextSpawnTime = performance.now() + 1000;
     this.runStartTime = performance.now();
     this.runSurvivalMs = 0;
+    this.lastSurvivalTick = 0;
     this.scoreSubmitted = false;
   },
 };

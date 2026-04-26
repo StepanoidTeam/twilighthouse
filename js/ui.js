@@ -119,10 +119,7 @@ export function updateHUD() {
   S.txtLamp.text = bulbs > 0 ? '💡'.repeat(bulbs) : '🔦';
   S.txtSunk.text = `⛵💥 ${S.boatsSunk}/6`;
   if (S.txtTime) {
-    const ms = S.gameOver
-      ? S.runSurvivalMs
-      : performance.now() - (S.runStartTime || performance.now());
-    S.txtTime.text = `⏱ ${formatSurvivalTime(ms)}`;
+    S.txtTime.text = `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`;
   }
 }
 
@@ -366,9 +363,7 @@ export function showGameOver() {
 }
 
 export async function showWin() {
-  const finalTime = formatSurvivalTime(
-    S.runSurvivalMs || performance.now() - S.runStartTime,
-  );
+  const finalTime = formatSurvivalTime(S.runSurvivalMs);
   await showGameOverScreen({
     message: t('win.messageTime', {
       total: WIN_SCORE,
