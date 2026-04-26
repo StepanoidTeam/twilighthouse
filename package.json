@@ -2,6 +2,11 @@
   "name": "demo-lighthouse",
   "private": true,
   "scripts": {
-    "start": "npx --yes serve@14 . -l 8080"
+    "start": "http-server . -p 8080 -c-1",
+    "admin:grant": "node scripts/set-admin-claim.mjs",
+    "admin:revoke": "node scripts/set-admin-claim.mjs --revoke"
+  },
+  "dependencies": {
+    "firebase-admin": "^13.0.0"
   }
 }
