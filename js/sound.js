@@ -40,12 +40,32 @@ let visibilityPauseBound = false;
 let musicWasPlayingBeforeHide = false;
 let wavesWasPlayingBeforeHide = false;
 
-const CRASH_VOLUME = 0.06;
+const CRASH_VOLUME = 0.25;
 const CRASH_SOUNDS = [
   'audio/crash/horror-bone-crack.mp3',
   'audio/crash/rubble-crash.mp3',
   'audio/crash/small-rock-break.mp3',
   'audio/crash/wooden-ship-break.mp3',
+];
+const COP_SOUNDS = [
+  'audio/cop/police-intro-siren.mp3',
+  'audio/cop/police-siren-one-loop.mp3',
+  'audio/cop/radio-thats-correct.mp3',
+  'audio/cop/radio-turn.mp3',
+];
+const BOAT_SONAR_SOUNDS = [
+  'audio/boat/submarine_sonar-1.mp3',
+  'audio/boat/submarine_sonar-2.mp3',
+  'audio/boat/submarine_sonar-3.mp3',
+];
+const SHORT_SFX_PATHS = [
+  'audio/button-click.mp3',
+  'audio/menu-select.mp3',
+  'audio/book.mp3',
+  'audio/fail-1.mp3',
+  ...CRASH_SOUNDS,
+  ...COP_SOUNDS,
+  ...BOAT_SONAR_SOUNDS,
 ];
 const COP_VOLUME = 0.06;
 const BOAT_SONAR_VOLUME = 0.3;
@@ -444,19 +464,13 @@ function bindAmbientAudioVisibilityPause() {
       }
       if (musicWasPlayingBeforeHide) {
         musicWasPlayingBeforeHide = false;
-        if (
-          S.musicSound &&
-          getMusicVolume(MUSIC_VOLUME) > AMBIENT_SILENT_THRESHOLD
-        ) {
+        if (S.musicSound && getMusicVolume(MUSIC_VOLUME) > AMBIENT_SILENT_THRESHOLD) {
           void S.musicSound.play();
         }
       }
       if (wavesWasPlayingBeforeHide) {
         wavesWasPlayingBeforeHide = false;
-        if (
-          S.wavesSound &&
-          getSfxVolume(WAVES_VOLUME) > AMBIENT_SILENT_THRESHOLD
-        ) {
+        if (S.wavesSound && getSfxVolume(WAVES_VOLUME) > AMBIENT_SILENT_THRESHOLD) {
           void S.wavesSound.play();
         }
       }
@@ -543,9 +557,14 @@ async function primeAmbientAudioBuffers(paths) {
 }
 
 async function primeBootAmbientAudio() {
+  // Прогреваем Web Audio буферы и для амбиента, и для всех one-shot SFX.
+  // Иначе первое воспроизведение конкретного сэмпла идёт через
+  // fetch + decodeAudioData прямо в момент события (например, удар
+  // кракена об лодку), и звук попросту не успевает заиграть.
   await primeAmbientAudioBuffers([
     'audio/ocean-sea-soft-waves.mp3',
     ...MUSIC_PLAYLIST,
+    ...SHORT_SFX_PATHS,
   ]);
 }
 

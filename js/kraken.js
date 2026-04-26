@@ -170,6 +170,7 @@ export function updateKrakens(delta) {
       ) {
         m.gone = true;
         spawnTooltip(m.spr.x, m.spr.y - 20, '🦑🧜', TOOLTIP_STYLE_OK);
+        playCrashSound();
         console.log(`🦑 Кракен уничтожил русалку`);
         S.boatLayer.removeChild(m.spr);
         S.mermaids.splice(mi, 1);
@@ -187,6 +188,7 @@ export function updateKrakens(delta) {
         p.sinking = true;
         p.sinkTimer = 0;
         spawnTooltip(p.spr.x, p.spr.y - 20, '🦑🚔', TOOLTIP_STYLE_OK);
+        playCrashSound();
         console.log(`🦑 Кракен уничтожил полицейского`);
       }
     }
