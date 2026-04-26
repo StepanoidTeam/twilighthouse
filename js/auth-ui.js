@@ -7,6 +7,7 @@ import {
   isSignedInReal,
 } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
+import { getAdminStatus } from './browser-tools.js';
 
 const { $authModal, $authWidget } = globalThis;
 
@@ -155,7 +156,7 @@ function buildWidget() {
   $signinBtn.addEventListener('click', () => showAuthModal('signin'));
   $signoutBtn.addEventListener('click', () => doSignOut());
 
-  onAuthChange((user) => {
+  onAuthChange(async (user) => {
     // Анонимных юзеров не показываем в виджете — для пользователя они =
     // "не залогинен". Кнопка "Войти" остаётся видна, но счёт за ним всё
     // равно пишется в Firestore под его анонимным uid.
@@ -165,7 +166,20 @@ function buildWidget() {
       const label =
         (user.displayName && user.displayName.trim()) ||
         (user.email ? user.email.split('@')[0] : 'Капитан');
-      $nameEl.textContent = `👤 ${label}`;
+
+      let displayText = `👤 ${label}`;
+
+      // Check if user has admin claim
+      try {
+        const adminStatus = await getAdminStatus();
+        if (adminStatus.admin) {
+          displayText += ' 🛡️';
+        }
+      } catch (e) {
+        // Silently fail if admin status check doesn't work
+      }
+
+      $nameEl.textContent = displayText;
     } else {
       $signinBtn.style.display = '';
       $userEl.style.display = 'none';

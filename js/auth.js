@@ -8,6 +8,7 @@ import {
   updateProfile,
 } from '../firebase.js';
 import { t } from './i18n.js';
+import { syncUserProfileDoc } from './profile-store.js';
 
 /**
  * Current signed-in user, or null.
@@ -30,6 +31,13 @@ let anonSignInTried = false;
 
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
+
+  if (user) {
+    void syncUserProfileDoc(user).catch((e) => {
+      console.warn('profile doc sync failed', e);
+    });
+  }
+
   for (const fn of listeners) {
     try {
       fn(user);
@@ -77,6 +85,7 @@ export async function signIn(email, password) {
 export async function updateDisplayName(name) {
   if (!currentUser) throw new Error('Not signed in');
   await updateProfile(currentUser, { displayName: name });
+  await syncUserProfileDoc(currentUser);
   // Re-trigger listeners so widgets update
   for (const fn of listeners) {
     try {
