@@ -27,7 +27,7 @@ import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
 import { buildLighthouse, buildGlow } from './lighthouse.js';
-import { buildRocks, updateRocks, cleanupRocks } from './rocks.js';
+import { buildRocks, cleanupRocks, rockEntity } from './rocks.js';
 import {
   buildDarkness,
   updateDarkness,
@@ -42,10 +42,10 @@ import {
   showExitConfirm,
   hideExitConfirm,
 } from './ui.js';
-import { spawnBoat, updateBoats, drawWakes, cleanupBoats } from './boat.js';
-import { spawnMermaid, updateMermaids, cleanupMermaids } from './mermaid.js';
-import { spawnKraken, updateKrakens, cleanupKrakens } from './kraken.js';
-import { spawnPoliceBoat, updatePoliceBoats, cleanupPolice } from './police.js';
+import { spawnBoat, cleanupBoats, boatEntity } from './boat.js';
+import { spawnMermaid, cleanupMermaids, mermaidEntity } from './mermaid.js';
+import { spawnKraken, cleanupKrakens, krakenEntity } from './kraken.js';
+import { spawnPoliceBoat, cleanupPolice, policeEntity } from './police.js';
 import { buildDebug, updateDebug } from './debug.js';
 import {
   buildMenu,
@@ -57,6 +57,15 @@ import {
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
+import { registerBrowserTools } from './browser-tools.js';
+
+const ENTITY_SYSTEMS = [
+  { entity: rockEntity, updatePhase: 'preCamera' },
+  { entity: boatEntity, updatePhase: 'main' },
+  { entity: mermaidEntity, updatePhase: 'main' },
+  { entity: krakenEntity, updatePhase: 'main' },
+  { entity: policeEntity, updatePhase: 'main' },
+];
 
 const {
   $gameContainer,
@@ -416,8 +425,10 @@ function gameLoop(delta) {
   if (S.keys['KeyD'] || S.keys['ArrowRight'])
     S.beamAngle += BEAM_ROTATE_SPEED * delta;
 
-  // Animate rocks (ice floes)
-  updateRocks();
+  // Early entity updates that affect camera-relative visuals (e.g. rocks).
+  for (const { entity, updatePhase } of ENTITY_SYSTEMS) {
+    if (updatePhase === 'preCamera') entity.update(delta);
+  }
 
   // Camera
   updateCamera(delta);
@@ -462,14 +473,17 @@ function gameLoop(delta) {
       Math.random() * (SPAWN_INTERVAL_MAX - SPAWN_INTERVAL_MIN);
   }
 
-  updateBoats(delta);
-  updateMermaids(delta);
-  updateKrakens(delta);
-  updatePoliceBoats(delta);
-  drawWakes();
+  for (const { entity, updatePhase } of ENTITY_SYSTEMS) {
+    if (updatePhase === 'main') entity.update(delta);
+  }
   updateDarkness();
   updateTooltips(delta);
   if (S.debugMode) updateDebug();
+
+  const drawCtx = { debug: S.debugMode, gfx: S.debugGfx };
+  for (const { entity } of ENTITY_SYSTEMS) {
+    entity.draw(drawCtx);
+  }
 }
 
 // ===== Load Textures =====
@@ -634,6 +648,7 @@ async function init() {
 
 renderBootLoaderText();
 onLanguageChange(renderBootLoaderText);
+registerBrowserTools();
 
 init().catch((e) => {
   console.error('init failed', e);

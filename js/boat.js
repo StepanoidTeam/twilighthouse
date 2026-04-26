@@ -333,6 +333,30 @@ export function drawWakes() {
   }
 }
 
+export function drawBoatDebug(gfx) {
+  // Boat colliders (green)
+  for (const b of S.boats) {
+    if (b.arrived || b.sinking) continue;
+    gfx.lineStyle(1, 0x00ff88, 0.8);
+    gfx.drawCircle(b.spr.x, b.spr.y, BOAT_RADIUS);
+  }
+}
+
+function draw({ debug = false, gfx = null } = {}) {
+  drawWakes();
+  if (!debug || !gfx) return;
+  drawBoatDebug(gfx);
+}
+
+function update(delta) {
+  updateBoats(delta);
+}
+
+export const boatEntity = {
+  update,
+  draw,
+};
+
 // ===== Cleanup for restart =====
 export function cleanupBoats() {
   for (const b of S.boats) {

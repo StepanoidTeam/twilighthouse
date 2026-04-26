@@ -225,6 +225,37 @@ export function updateKrakens(delta) {
   }
 }
 
+export function drawKrakenDebug(gfx) {
+  // Kraken colliders: attack (purple, larger, offset down)
+  // and illumination trigger (cyan, exact point used by isInBeam).
+  for (const k of S.krakens) {
+    if (k.gone) continue;
+    gfx.lineStyle(2, 0xcc44ff, 0.9);
+    gfx.drawCircle(k.spr.x, k.spr.y + KRAKEN_RADIUS, KRAKEN_RADIUS);
+
+    gfx.lineStyle(2, 0x00e5ff, 0.95);
+    gfx.drawCircle(k.spr.x, k.spr.y, BOAT_RADIUS);
+    gfx.moveTo(k.spr.x - 6, k.spr.y);
+    gfx.lineTo(k.spr.x + 6, k.spr.y);
+    gfx.moveTo(k.spr.x, k.spr.y - 6);
+    gfx.lineTo(k.spr.x, k.spr.y + 6);
+  }
+}
+
+function draw({ debug = false, gfx = null } = {}) {
+  if (!debug || !gfx) return;
+  drawKrakenDebug(gfx);
+}
+
+function update(delta) {
+  updateKrakens(delta);
+}
+
+export const krakenEntity = {
+  update,
+  draw,
+};
+
 export function cleanupKrakens() {
   for (const k of S.krakens) {
     S.boatLayer.removeChild(k.spr);

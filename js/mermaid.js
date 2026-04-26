@@ -1,6 +1,7 @@
 import {
   PIXI,
   BOAT_SPEED,
+  BOAT_RADIUS,
   BOAT_WIDTH,
   ARRIVAL_RADIUS,
   MOB_SPAWN_RING,
@@ -131,6 +132,29 @@ export function updateMermaids(delta) {
     m.spr.rotation += rDiff * 0.08 * delta;
   }
 }
+
+export function drawMermaidDebug(gfx) {
+  // Mermaid colliders (yellow)
+  for (const m of S.mermaids) {
+    if (m.gone) continue;
+    gfx.lineStyle(1, 0xffee00, 0.8);
+    gfx.drawCircle(m.spr.x, m.spr.y, BOAT_RADIUS);
+  }
+}
+
+function draw({ debug = false, gfx = null } = {}) {
+  if (!debug || !gfx) return;
+  drawMermaidDebug(gfx);
+}
+
+function update(delta) {
+  updateMermaids(delta);
+}
+
+export const mermaidEntity = {
+  update,
+  draw,
+};
 
 export function cleanupMermaids() {
   for (const m of S.mermaids) {

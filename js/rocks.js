@@ -68,6 +68,35 @@ export function updateRocks() {
   }
 }
 
+export function drawRockDebug(gfx) {
+  // Rock colliders
+  for (const rock of S.rockColliders) {
+    gfx.lineStyle(2, 0xff2222, 0.8);
+    gfx.drawCircle(rock.x, rock.y, rock.radius);
+    gfx.lineStyle(0);
+    gfx.beginFill(0xff2222, 0.3);
+    gfx.drawCircle(rock.x, rock.y, rock.radius);
+    gfx.endFill();
+    gfx.beginFill(0xff0000, 1);
+    gfx.drawCircle(rock.x, rock.y, 2);
+    gfx.endFill();
+  }
+}
+
+function draw({ debug = false, gfx = null } = {}) {
+  if (!debug || !gfx) return;
+  drawRockDebug(gfx);
+}
+
+function update(_delta) {
+  updateRocks();
+}
+
+export const rockEntity = {
+  update,
+  draw,
+};
+
 // ===== Cleanup for restart =====
 // Камни могут быть уничтожены кракенами во время игры, поэтому между
 // забегами нужно полностью сносить их и генерировать заново.

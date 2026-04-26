@@ -1,4 +1,10 @@
-import { PIXI, DARKNESS_PAD, DARK_ALPHA, DARKNESS_RADIUS } from './config.js';
+import {
+  PIXI,
+  DARKNESS_PAD,
+  DARK_ALPHA,
+  DARKNESS_RADIUS,
+  BEAM_VISUAL_NARROW_ANGLE,
+} from './config.js';
 import S from './state.js';
 
 // Логические размеры RT затемнения: покрываем видимую область мира вокруг
@@ -41,6 +47,10 @@ export function buildDarkness(parent) {
 export function updateDarkness() {
   const { w, h } = getDarknessLogicalSize();
   const bLen = Math.max(w, h) * 2;
+  const visualHalfAngle = Math.max(
+    0.001,
+    S.BEAM_HALF_ANGLE - BEAM_VISUAL_NARROW_ANGLE,
+  );
   // Маяк всегда в центре RT. Луч сдвинут на BEAM_ORIGIN_OFFSET_*.
   const cxLH = w / 2;
   const cyLH = h / 2;
@@ -59,12 +69,12 @@ export function updateDarkness() {
   S.beamErase.beginFill(0xffffff, S.lampFlicker);
   S.beamErase.moveTo(cx, cy);
   S.beamErase.lineTo(
-    cx + Math.cos(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
-    cy + Math.sin(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
+    cx + Math.cos(S.beamAngle - visualHalfAngle) * bLen,
+    cy + Math.sin(S.beamAngle - visualHalfAngle) * bLen,
   );
   S.beamErase.lineTo(
-    cx + Math.cos(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
-    cy + Math.sin(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
+    cx + Math.cos(S.beamAngle + visualHalfAngle) * bLen,
+    cy + Math.sin(S.beamAngle + visualHalfAngle) * bLen,
   );
   S.beamErase.closePath();
   S.beamErase.endFill();

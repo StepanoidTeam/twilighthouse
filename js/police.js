@@ -247,6 +247,29 @@ export function updatePoliceBoats(delta) {
   }
 }
 
+export function drawPoliceDebug(gfx) {
+  // Police colliders (blue)
+  for (const p of S.policeBoats) {
+    if (p.arrived || p.sinking) continue;
+    gfx.lineStyle(1, 0x44aaff, 0.8);
+    gfx.drawCircle(p.spr.x, p.spr.y, BOAT_RADIUS);
+  }
+}
+
+function draw({ debug = false, gfx = null } = {}) {
+  if (!debug || !gfx) return;
+  drawPoliceDebug(gfx);
+}
+
+function update(delta) {
+  updatePoliceBoats(delta);
+}
+
+export const policeEntity = {
+  update,
+  draw,
+};
+
 export function cleanupPolice() {
   for (const p of S.policeBoats) {
     S.boatLayer.removeChild(p.spr);
