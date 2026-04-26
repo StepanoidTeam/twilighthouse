@@ -73,6 +73,8 @@ export async function signUp(email, password, displayName) {
   if (displayName) {
     await updateProfile(cred.user, { displayName });
   }
+  // Sync to profiles collection
+  await syncUserProfileDoc(cred.user);
   return cred.user;
 }
 
