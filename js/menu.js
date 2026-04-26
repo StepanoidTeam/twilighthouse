@@ -669,13 +669,20 @@ function showSettings() {
       $menuDisplayNameStatus.className = 'menu-setting-name-status';
       try {
         await updateDisplayName(name);
-        await syncCurrentUserLeaderboardDisplayName();
+
+        // Keep leaderboard row name in sync when possible, but do not fail
+        // the profile name update UX if this optional sync is blocked by rules.
+        const synced = await syncCurrentUserLeaderboardDisplayName();
+        if (!synced) {
+          console.info('Leaderboard displayName sync skipped or unchanged');
+        }
+
         $menuDisplayNameStatus.textContent = t('settings.displayNameSaved');
         $menuDisplayNameStatus.className =
           'menu-setting-name-status is-success';
         console.log(`👤 Display name saved: ${name}`);
       } catch (e) {
-        console.warn('updateDisplayName failed', e);
+        console.warn('Display name update failed', e);
         $menuDisplayNameStatus.textContent = t('settings.displayNameError');
         $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
       } finally {

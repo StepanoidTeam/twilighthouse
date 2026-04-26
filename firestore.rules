@@ -13,6 +13,27 @@ service cloud.firestore {
       return signedIn() && request.auth.token.admin == true;
     }
 
+    function uidMatchesOrMissing(data) {
+      return !("uid" in data) || data.uid == request.auth.uid;
+    }
+
+    function scoreNotDecreased() {
+      return request.resource.data.bestTimeMs is number
+        && resource.data.bestTimeMs is number
+        && request.resource.data.bestTimeMs >= resource.data.bestTimeMs;
+    }
+
+    function ownerLeaderboardUpdateAllowed(uid) {
+      return isOwner(uid)
+        && uidMatchesOrMissing(request.resource.data)
+        && (
+          // Allow profile-only updates on the owner's row.
+          !request.resource.data.diff(resource.data).changedKeys().hasAny(["bestTimeMs"])
+          // If score is being changed, it must never decrease.
+          || scoreNotDecreased()
+        );
+    }
+
     match /profiles/{uid} {
       allow read: if signedIn();
       allow create, update: if isOwner(uid) || isAdmin();
@@ -23,12 +44,7 @@ service cloud.firestore {
       allow read: if signedIn();
       allow create: if isOwner(uid)
         && request.resource.data.uid == request.auth.uid;
-      allow update: if isAdmin()
-        || (isOwner(uid)
-          && request.resource.data.uid == request.auth.uid
-          && request.resource.data.bestTimeMs is number
-          && resource.data.bestTimeMs is number
-          && request.resource.data.bestTimeMs >= resource.data.bestTimeMs);
+      allow update: if isAdmin() || ownerLeaderboardUpdateAllowed(uid);
       allow delete: if isAdmin();
     }
 
