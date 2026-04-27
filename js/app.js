@@ -1,4 +1,4 @@
-import { analytics, logEvent } from '../firebase.init.js';
+import { trackGameStart } from './analytics.js';
 
 import {
   PIXI,
@@ -656,13 +656,10 @@ async function init() {
   startWavesSound({ restartPlayback: true });
   void startMenuMusic({ restartPlayback: true });
 
-  if (analytics) {
-    logEvent(analytics, 'game_start', {
-      game_name: 'lighthouse',
-      viewport_w: S.gameW,
-      viewport_h: S.gameH,
-    });
-  }
+  trackGameStart({
+    viewport_w: S.gameW,
+    viewport_h: S.gameH,
+  });
 
   console.log('🔦 Lighthouse game initialized');
 }

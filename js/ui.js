@@ -21,6 +21,7 @@ import {
 import S from './state.js';
 import { t } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
+import { trackGameEnd } from './analytics.js';
 
 const {
   $btnLeft,
@@ -279,9 +280,16 @@ const SPLASH_IMAGES = {
   splashPeremoha: 'sprites/wasted/peremoha.png',
 };
 
-async function showGameOverScreen({ message, splashKey, playFail = true }) {
+async function showGameOverScreen({
+  message,
+  splashKey,
+  playFail = true,
+  reason,
+}) {
   S.gameOver = true;
   if (playFail) playFailSound();
+
+  if (reason) trackGameEnd(reason, S);
 
   // Hide gameplay buttons
   if ($btnLeft) $btnLeft.hidden = true;
@@ -310,6 +318,7 @@ export function showBoatGameOver() {
   return showGameOverScreen({
     message: t('gameOver.boats', { n: S.boatsSunk }),
     splashKey: 'splashIceberg',
+    reason: 'boats_sunk',
   });
 }
 
@@ -317,6 +326,7 @@ export function showPoliceGameOver() {
   return showGameOverScreen({
     message: t('gameOver.police'),
     splashKey: 'splashPolice',
+    reason: 'police',
   });
 }
 
@@ -324,6 +334,7 @@ export function showPattinsonGameOver() {
   return showGameOverScreen({
     message: t('gameOver.pattinson'),
     splashKey: 'splashPattinson',
+    reason: 'pattinson',
   });
 }
 
@@ -331,6 +342,7 @@ export function showMermaidGameOver() {
   return showGameOverScreen({
     message: t('gameOver.mermaids', { n: S.mermaidsArrived }),
     splashKey: 'splashMermaid',
+    reason: 'mermaid',
   });
 }
 
@@ -338,12 +350,14 @@ export function showKrakenGameOver() {
   return showGameOverScreen({
     message: t('gameOver.kraken'),
     splashKey: 'splashKraken',
+    reason: 'kraken',
   });
 }
 
 export function showGameOver() {
   S.gameOver = true;
   playFailSound();
+  trackGameEnd('lives_lost', S);
 
   // Hide gameplay buttons
   if ($btnLeft) $btnLeft.hidden = true;
@@ -371,6 +385,7 @@ export async function showWin() {
     }),
     splashKey: 'splashPeremoha',
     playFail: false,
+    reason: 'win',
   });
   $resultRestartLabel.textContent = t('menu.leaderboard');
   $resultMenuLabel.textContent = t('menu.leaderboard');

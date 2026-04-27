@@ -9,6 +9,7 @@ import {
 } from '../firebase.js';
 import { t } from './i18n.js';
 import { syncUserProfileDoc } from './profile-store.js';
+import { setAnalyticsUser } from './analytics.js';
 
 /**
  * Current signed-in user, or null.
@@ -31,6 +32,8 @@ let anonSignInTried = false;
 
 onAuthStateChanged(auth, (user) => {
   currentUser = user;
+
+  setAnalyticsUser(user);
 
   if (user) {
     void syncUserProfileDoc(user).catch((e) => {

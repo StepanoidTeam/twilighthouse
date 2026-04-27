@@ -5,6 +5,8 @@ import {
   getAuth,
   isSupported,
   logEvent,
+  setUserId,
+  setUserProperties,
   initializeApp,
 } from './firebase.js';
 
@@ -15,4 +17,4 @@ export const auth = getAuth(app);
 /** null if Analytics is not supported in this environment (e.g. some private modes). */
 export const analytics = (await isSupported()) ? getAnalytics(app) : null;
 
-export { logEvent };
+export { logEvent, setUserId, setUserProperties };
