@@ -12,7 +12,10 @@ import {
 } from '../firebase.js';
 import { currentUser, isSignedInReal } from './auth.js';
 import { t } from './i18n.js';
-import { resolveUserDisplayName } from './profile-store.js';
+import {
+  resolveUserDisplayName,
+  pickStoredDisplayName,
+} from './profile-store.js';
 
 const COLLECTION = 'leaderboard';
 
@@ -27,13 +30,15 @@ export async function syncCurrentUserLeaderboardDisplayName(
 
   const uid = user.uid;
   const nextDisplayName = resolveUserDisplayName(user);
+  if (!nextDisplayName) return false;
+
   const ref = doc(db, COLLECTION, uid);
 
   try {
     const snap = await getDoc(ref);
     if (!snap.exists()) return false;
 
-    const prevDisplayName = String(snap.data().displayName || '');
+    const prevDisplayName = snap.data().displayName || null;
     if (prevDisplayName === nextDisplayName) return false;
 
     await setDoc(
@@ -77,18 +82,16 @@ export async function submitScore(survivalMs) {
     return { written: false, best: prevBest };
   }
 
-  const displayName = resolveUserDisplayName(currentUser);
+  const payload = {
+    uid,
+    bestTimeMs: Math.round(survivalMs),
+    updatedAt: serverTimestamp(),
+  };
 
-  await setDoc(
-    ref,
-    {
-      uid,
-      displayName,
-      bestTimeMs: Math.round(survivalMs),
-      updatedAt: serverTimestamp(),
-    },
-    { merge: true },
-  );
+  const displayName = resolveUserDisplayName(currentUser);
+  if (displayName) payload.displayName = displayName;
+
+  await setDoc(ref, payload, { merge: true });
 
   return { written: true, best: Math.round(survivalMs) };
 }
@@ -107,9 +110,10 @@ export async function fetchTopLeaderboard(n = 10) {
   const rows = [];
   snap.forEach((d) => {
     const data = d.data();
+    const uid = data.uid || d.id;
     rows.push({
-      uid: data.uid || d.id,
-      displayName: data.displayName || 'Аноним',
+      uid,
+      displayName: pickStoredDisplayName(data.displayName, uid),
       bestTimeMs: Number(data.bestTimeMs) || 0,
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
     });
@@ -129,9 +133,10 @@ export async function fetchLeaderboardView(n = 50, uid = currentUser?.uid) {
 
   snap.forEach((d) => {
     const data = d.data();
+    const uid = data.uid || d.id;
     allRows.push({
-      uid: data.uid || d.id,
-      displayName: data.displayName || 'Аноним',
+      uid,
+      displayName: pickStoredDisplayName(data.displayName, uid),
       bestTimeMs: Number(data.bestTimeMs) || 0,
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
     });

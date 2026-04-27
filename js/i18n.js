@@ -120,6 +120,7 @@ Photopea — image editor
     'settings.displayNameEmpty': 'Enter a name to save',
     'lang.russian': 'Русский',
     'lang.english': 'English',
+    'profile.guest': 'Guest',
 
     // How to play
     'howtoplay.title': 'How to Play',
@@ -294,6 +295,7 @@ Photopea — image editor
     'settings.displayNameTooLong': 'Имя не должно превышать 30 символов',
     'settings.displayNameSaving': 'Сохранение…',
     'settings.displayNameEmpty': 'Введите имя для сохранения',
+    'profile.guest': 'Гость',
     'lang.russian': 'Русский',
 
     // How to play

@@ -159,7 +159,12 @@ export async function syncLeaderboardDisplayNamesFromProfiles({
     const nextDisplayName = resolveUserDisplayName(
       buildProfileLike(profileData, uid),
     );
-    const prevDisplayName = String(row.displayName || '');
+    const prevDisplayName = row.displayName || null;
+
+    if (!nextDisplayName) {
+      summary.unchanged += 1;
+      continue;
+    }
 
     if (prevDisplayName === nextDisplayName) {
       summary.unchanged += 1;
