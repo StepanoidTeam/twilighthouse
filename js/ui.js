@@ -291,12 +291,6 @@ async function showGameOverScreen({
 
   if (reason) trackGameEnd(reason, S);
 
-  // Hide gameplay buttons
-  if ($btnLeft) $btnLeft.hidden = true;
-  if ($btnRight) $btnRight.hidden = true;
-  if ($btnEsc) $btnEsc.hidden = true;
-  if ($volControls) $volControls.hidden = true;
-
   $gameContainer.hidden = true;
 
   $resultMsg.textContent = message;
@@ -359,11 +353,7 @@ export function showGameOver() {
   playFailSound();
   trackGameEnd('lives_lost', S);
 
-  // Hide gameplay buttons
-  if ($btnLeft) $btnLeft.hidden = true;
-  if ($btnRight) $btnRight.hidden = true;
-  if ($btnEsc) $btnEsc.hidden = true;
-  if ($volControls) $volControls.hidden = true;
+
 
   $gameContainer.hidden = true;
   $resultMsg.textContent = t('gameOver.score', {
@@ -394,13 +384,6 @@ export async function showWin() {
 // ===== Exit Confirmation =====
 export function showExitConfirm() {
   S.exitConfirm = true;
-
-  // Hide gameplay buttons
-  if ($btnLeft) $btnLeft.hidden = true;
-  if ($btnRight) $btnRight.hidden = true;
-  if ($btnEsc) $btnEsc.hidden = true;
-  if ($volControls) $volControls.hidden = true;
-
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
   $exitResumeLabel.textContent = t('overlay.resume');
@@ -410,10 +393,4 @@ export function showExitConfirm() {
 export function hideExitConfirm() {
   S.exitConfirm = false;
   $screenExitConfirm.hidden = true;
-
-  // Restore gameplay buttons
-  if ($btnLeft) $btnLeft.hidden = false;
-  if ($btnRight) $btnRight.hidden = false;
-  if ($btnEsc) $btnEsc.hidden = false;
-  if ($volControls) $volControls.hidden = false;
 }
