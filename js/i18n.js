@@ -373,10 +373,23 @@ function readSaved() {
     const v = localStorage.getItem(STORAGE_KEY);
     if (v && SUPPORTED.includes(v)) return v;
   } catch (_) {}
+  return null;
+}
+
+// Pick a default based on browser/OS language. Russian wins if any of the
+// user's preferred locales is Russian; everything else falls back to English.
+function detectSystemLanguage() {
+  const candidates = [
+    ...(Array.isArray(navigator?.languages) ? navigator.languages : []),
+    navigator?.language,
+  ].filter(Boolean);
+  for (const tag of candidates) {
+    if (String(tag).toLowerCase().startsWith('ru')) return 'ru';
+  }
   return DEFAULT_LANG;
 }
 
-let currentLang = readSaved();
+let currentLang = readSaved() ?? detectSystemLanguage();
 const listeners = new Set();
 
 export function getLanguage() {
