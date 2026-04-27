@@ -38,7 +38,6 @@ import {
   updateHUD,
   scheduleGameOver,
   showBoatGameOver,
-  showGameOver,
   showWin,
   playCrashSound,
 } from './ui.js';
@@ -259,20 +258,15 @@ export function updateBoats(delta) {
       if (!b.lit) {
         b.sinking = true;
         b.sinkTimer = 0;
-        S.lives--;
         S.boatsSunk++;
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
         playCrashSound();
-        // 🛥️ Корабль затонул
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
-        // Если три корабля затонуло — проигрыш
         if (S.boatsSunk >= 6) {
           scheduleGameOver(showBoatGameOver);
-        } else if (S.lives <= 0) {
-          scheduleGameOver(showGameOver);
         }
       } else {
         // Push away from rock

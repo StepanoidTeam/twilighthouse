@@ -1,6 +1,5 @@
 import {
   PIXI,
-  MAX_LIVES,
   MAX_CRATES,
   LAMP_FULL_ANGLE,
   BOAT_CARGO_TYPES,
@@ -91,10 +90,9 @@ const State = {
   rockColliders: [],
   rockSprites: [],
 
-  // Score / lives
+  // Score
   score: 0,
   deliveredCargo: { '💡': 0, '🛢️': 0, '📦': 0 },
-  lives: MAX_LIVES,
   boatsSunk: 0,
   mermaidsArrived: 0,
   policeArrived: 0,
@@ -132,7 +130,6 @@ const State = {
   // UI
   hudLayer: null,
   overlayLayer: null,
-  txtLives: null,
   txtScore: null,
   txtMermaids: null,
   txtPolice: null,
@@ -155,7 +152,6 @@ const State = {
 
     this.score = 0;
     this.deliveredCargo = { '💡': 0, '🛢️': 0, '📦': 0 };
-    this.lives = MAX_LIVES;
     this.mermaidsArrived = 0;
     this.policeArrived = 0;
     this.krakensArrived = 0;

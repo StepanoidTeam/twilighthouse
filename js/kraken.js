@@ -24,7 +24,6 @@ import {
   scheduleGameOver,
   showKrakenGameOver,
   showBoatGameOver,
-  showGameOver,
   playCrashSound,
 } from './ui.js';
 
@@ -149,14 +148,12 @@ export function updateKrakens(delta) {
       ) {
         b.sinking = true;
         b.sinkTimer = 0;
-        S.lives--;
         S.boatsSunk++;
         updateHUD();
         spawnTooltip(b.spr.x, b.spr.y - 20, '🦑💀', TOOLTIP_STYLE_FAIL);
         playCrashSound();
         console.log(`🦑 Кракен уничтожил корабль`);
         if (S.boatsSunk >= 6) scheduleGameOver(showBoatGameOver);
-        else if (S.lives <= 0) scheduleGameOver(showGameOver);
       }
     }
 

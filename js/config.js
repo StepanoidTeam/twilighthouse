@@ -2,7 +2,6 @@ const PIXI = globalThis.PIXI;
 
 // ===== Game Rules =====
 const GAME_OVER_DELAY = 2000;
-const MAX_LIVES = 10;
 const MAX_CRATES = 3; // сколько ящиков колумбийского у Паттисона на старте
 const WIN_SCORE = 10;
 const SPAWN_MARGIN = 60;
@@ -193,7 +192,6 @@ const CARGO_LABEL_STYLE = new PIXI.TextStyle({
 export {
   PIXI,
   GAME_OVER_DELAY,
-  MAX_LIVES,
   MAX_CRATES,
   WIN_SCORE,
   SPAWN_MARGIN,

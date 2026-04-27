@@ -108,7 +108,6 @@ export function updateHUD() {
     .filter(Boolean)
     .join(' ');
   S.txtScore.text = cargoStr || '📦×0';
-  S.txtLives.text = '❤️'.repeat(Math.max(0, S.lives));
   S.txtMermaids.text = `🧜 ${S.mermaidsArrived}/3`;
   // Ящики колумбийского, которые прячет Паттисон.
   // Каждый освещённый коп = -1 ящик. Ноль — Дефо выкидывает Паттисона.
@@ -127,10 +126,6 @@ export function updateHUD() {
 // ===== Build HUD =====
 export function buildHUD() {
   S.hudLayer = new PIXI.Container();
-
-  S.txtLives = new PIXI.Text('❤️❤️❤️', new PIXI.TextStyle(UI_STYLE));
-  S.txtLives.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtLives);
 
   S.txtScore = new PIXI.Text('📦×0', new PIXI.TextStyle(UI_STYLE));
   S.txtScore.anchor.set(1, 0);
@@ -254,13 +249,12 @@ function positionSplashSprite() {}
 export function repositionUI() {
   const HUD_RIGHT = S.gameW - 12;
   const HUD_LINE = 28;
-  S.txtLives.position.set(HUD_RIGHT, 12);
-  S.txtScore.position.set(HUD_RIGHT, 12 + HUD_LINE);
-  S.txtMermaids.position.set(HUD_RIGHT, 12 + HUD_LINE * 2);
-  S.txtPolice.position.set(HUD_RIGHT, 12 + HUD_LINE * 3);
-  S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
-  S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
-  if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 6);
+  S.txtScore.position.set(HUD_RIGHT, 12);
+  S.txtMermaids.position.set(HUD_RIGHT, 12 + HUD_LINE);
+  S.txtPolice.position.set(HUD_RIGHT, 12 + HUD_LINE * 2);
+  S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 3);
+  S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
+  if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
 }
 
 export function buildUI() {
@@ -346,24 +340,6 @@ export function showKrakenGameOver() {
     splashKey: 'splashKraken',
     reason: 'kraken',
   });
-}
-
-export function showGameOver() {
-  S.gameOver = true;
-  playFailSound();
-  trackGameEnd('lives_lost', S);
-
-
-
-  $gameContainer.hidden = true;
-  $resultMsg.textContent = t('gameOver.score', {
-    score: S.score,
-    total: WIN_SCORE,
-  });
-  $resultRestartLabel.textContent = t('overlay.restart');
-  $resultMenuLabel.textContent = t('overlay.toMenu');
-  $resultSplash.style.backgroundImage = '';
-  $screenGameOver.hidden = false;
 }
 
 export async function showWin() {

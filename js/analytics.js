@@ -21,8 +21,8 @@ export function track(eventName, params = {}) {
 
 /**
  * Снимок параметров игры для game_end / level_end. Берётся в момент
- * показа экрана game over — лайвы, потопленные корабли и т.п. уже
- * учтены. survival_ms берём из state, чтобы цифра совпадала с HUD.
+ * показа экрана game over — потопленные корабли и т.п. уже учтены.
+ * survival_ms берём из state, чтобы цифра совпадала с HUD.
  */
 function buildRunSnapshot(state) {
   const survivalMs = Math.round(state.runSurvivalMs || 0);
@@ -33,13 +33,12 @@ function buildRunSnapshot(state) {
     boats_sunk: state.boatsSunk | 0,
     mermaids_arrived: state.mermaidsArrived | 0,
     crates_remaining: state.crates | 0,
-    lives_remaining: state.lives | 0,
   };
 }
 
 /**
  * Логирует завершение раунда. reason — одно из:
- *   'win' | 'boats_sunk' | 'pattinson' | 'police' | 'mermaid' | 'kraken' | 'lives_lost'
+ *   'win' | 'boats_sunk' | 'pattinson' | 'police' | 'mermaid' | 'kraken'
  * Дополнительно отправляем GA4-рекомендуемое событие level_end,
  * чтобы успехи/провалы было удобно смотреть в стандартных отчётах.
  */
