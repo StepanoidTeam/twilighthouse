@@ -30,6 +30,7 @@ const {
   $menuBtnSettings,
   $menuBtnAuthors,
   $menuBtnTutorial,
+  $discordLink,
   $backBtn,
   $backBtnLabel,
   $menuSettings,
@@ -355,6 +356,7 @@ export async function buildMenu(app, startGameCb) {
   currentScreen = 'main';
 
   showAuthWidget();
+  showDiscordLink();
 
   // Новых игроков сразу ведём на экран "Как играть": главное меню остаётся
   // под низом, по Back игрок попадает на пункт Tutorial с уже прокрученным
@@ -753,6 +755,14 @@ function stopCreditsAnimation() {
 }
 
 // ===== Show / Hide =====
+function showDiscordLink() {
+  if ($discordLink) $discordLink.classList.add('is-visible');
+}
+
+function hideDiscordLink() {
+  if ($discordLink) $discordLink.classList.remove('is-visible');
+}
+
 function hideMenu() {
   if ($menuOverlay) $menuOverlay.hidden = true;
   stopBgManMotion();
@@ -761,6 +771,7 @@ function hideMenu() {
   hideBackBtn();
   currentScreen = null;
   hideAuthWidget();
+  hideDiscordLink();
 }
 
 export function showMenu() {
@@ -772,6 +783,7 @@ export function showMenu() {
   currentScreen = 'main';
   repositionMenu();
   showAuthWidget();
+  showDiscordLink();
 }
 
 export function isMenuVisible() {

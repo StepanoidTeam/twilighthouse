@@ -276,6 +276,52 @@
   line-height: 1;
 }
 
+/* ===== Discord link (bottom-right, shown on menu) ===== */
+.discord-link {
+  position: fixed;
+  bottom: var(--size-edge-gap);
+  right: var(--size-edge-gap);
+  z-index: 2;
+  display: none;
+  align-items: center;
+  gap: 6px;
+  background: rgba(10, 20, 40, 0.75);
+  border: 1px solid #2a3f5f;
+  color: var(--color-text);
+  padding: 8px 14px;
+  border-radius: 20px;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: inherit;
+  text-decoration: none;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition:
+    background var(--duration-ui),
+    border-color var(--duration-ui),
+    transform var(--duration-press);
+  user-select: none;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.discord-link.is-visible {
+  display: inline-flex;
+}
+
+.discord-link:hover {
+  background: rgba(30, 50, 80, 0.9);
+  border-color: #5599cc;
+}
+
+.discord-link:active {
+  transform: translateY(1px);
+}
+
+.discord-link-icon {
+  font-size: 16px;
+  line-height: 1;
+}
+
 @media (max-width: 720px) {
   .auth-widget {
     top: var(--size-edge-gap-mobile);
@@ -285,5 +331,10 @@
   .back-btn {
     top: var(--size-edge-gap-mobile);
     left: var(--size-edge-gap-mobile);
+  }
+
+  .discord-link {
+    bottom: var(--size-edge-gap-mobile);
+    right: var(--size-edge-gap-mobile);
   }
 }
