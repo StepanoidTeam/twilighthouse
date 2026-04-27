@@ -71,6 +71,23 @@ let bgManMotionKeyframes = null;
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
 const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.png';
 
+// ===== First-run tutorial flag =====
+const TUTORIAL_SEEN_KEY = 'lighthouse_tutorial_seen';
+
+function hasSeenTutorial() {
+  try {
+    return localStorage.getItem(TUTORIAL_SEEN_KEY) === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+function markTutorialSeen() {
+  try {
+    localStorage.setItem(TUTORIAL_SEEN_KEY, '1');
+  } catch (_) {}
+}
+
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
   { key: 'menu.newGame', action: 'start' },
@@ -338,6 +355,21 @@ export async function buildMenu(app, startGameCb) {
   currentScreen = 'main';
 
   showAuthWidget();
+
+  // Новых игроков сразу ведём на экран "Как играть": главное меню остаётся
+  // под низом, по Back игрок попадает на пункт Tutorial с уже прокрученным
+  // выделением.
+  if (!hasSeenTutorial()) {
+    const tutorialIdx = MAIN_MENU_ACTIONS.findIndex(
+      (item) => item.action === 'tutorial',
+    );
+    if (tutorialIdx >= 0) {
+      selectedIndex = tutorialIdx;
+      updateSelection();
+    }
+    markTutorialSeen();
+    showTutorial();
+  }
 
   if (!keyHandlerBound) {
     window.addEventListener('keydown', handleMenuKey);
