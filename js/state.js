@@ -92,7 +92,7 @@ const State = {
 
   // Score
   score: 0,
-  deliveredCargo: { '💡': 0, '🛢️': 0, '📦': 0 },
+  deliveredCargo: { '💡': 0, '📦': 0 },
   boatsSunk: 0,
   mermaidsArrived: 0,
   policeArrived: 0,
@@ -151,7 +151,7 @@ const State = {
     }
 
     this.score = 0;
-    this.deliveredCargo = { '💡': 0, '🛢️': 0, '📦': 0 };
+    this.deliveredCargo = { '💡': 0, '📦': 0 };
     this.mermaidsArrived = 0;
     this.policeArrived = 0;
     this.krakensArrived = 0;

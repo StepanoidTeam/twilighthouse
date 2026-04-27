@@ -102,7 +102,7 @@ const KRAKEN_RETREAT_FRAMES = [
 const KRAKEN_FRAME_DURATION = 15;
 
 // ===== Boat Lit Debounce =====
-const LIT_DEBOUNCE = 180; // ms — минимальное время стабильного состояния перед сменой
+const LIT_DEBOUNCE = 100; // ms — минимальное время стабильного состояния перед сменой
 
 // ===== Tooltips =====
 const TOOLTIP_RISE_SPEED = 0.5;
@@ -146,7 +146,7 @@ const SPRITE_FILES = {
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 
 // ===== Cargo =====
-const BOAT_CARGO_TYPES = ['💡', '🛢️', '📦'];
+const BOAT_CARGO_TYPES = ['💡', '📦'];
 
 // ===== UI Styles =====
 const UI_STYLE = {
