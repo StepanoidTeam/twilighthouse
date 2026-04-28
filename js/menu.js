@@ -38,10 +38,10 @@ const {
   $menuBtnTutorial,
   $discordLink,
   $backBtn,
-  $backBtnLabel,
   $menuSettings,
   $menuSettingsTitle,
   $menuSettingsHint,
+  $menuTutorialHint,
   $menuSettingsLangLabel,
   $menuSettingsLangBtn,
   $menuSettingsMusicLabel,
@@ -241,10 +241,6 @@ function updateSelection() {
   }
 }
 
-function setHint(text) {
-  if ($menuHint) $menuHint.textContent = text;
-}
-
 function clearSubScreen() {
   if (!$menuSub) return;
 
@@ -262,12 +258,12 @@ function hideMainItems() {
 function showMainItems() {
   if ($menuMain) $menuMain.hidden = false;
   if ($menuHint) $menuHint.hidden = false;
-  setHint(t('hint.main'));
 }
 
-function buildBackHint() {
-  const $hint = document.createElement('p');
-  $hint.className = 'menu-sub-hint';
+function getBackHint() {
+  const template = $backHintTemplate;
+  if (!template) return null;
+  const $hint = template.content.cloneNode(true).firstElementChild;
   $hint.textContent = t('hint.back');
   return $hint;
 }
@@ -295,7 +291,8 @@ function buildScreenShell(title, subtitle = '') {
   }
 
   $menuSub.appendChild($screen);
-  $menuSub.appendChild(buildBackHint());
+  const $backHint = getBackHint();
+  if ($backHint) $menuSub.appendChild($backHint);
   return $screen;
 }
 
@@ -311,7 +308,6 @@ function showMainMenu() {
 // ===== HTML Back Button =====
 function initBackBtn() {
   backBtnEl = $backBtn;
-  if ($backBtnLabel) $backBtnLabel.textContent = t('btn.back');
   backBtnEl.addEventListener('click', (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -321,7 +317,6 @@ function initBackBtn() {
 }
 
 function showBackBtn() {
-  if ($backBtnLabel) $backBtnLabel.textContent = t('btn.back');
   backBtnEl.classList.add('is-visible');
 }
 
@@ -370,7 +365,6 @@ export async function buildMenu(app, startGameCb) {
 
       applyI18nToDOM();
       updateSelection();
-      setHint(currentScreen === 'main' ? t('hint.main') : t('hint.back'));
 
       if (currentScreen === 'settings') showSettings();
       else if (currentScreen === 'leaderboard') showLeaderboard();
@@ -447,7 +441,6 @@ function showTutorial() {
   hideMainItems();
   showBackBtn();
   currentScreen = 'tutorial';
-  setHint(t('hint.back'));
 
   const $screen = buildScreenShell(t('howtoplay.title'));
   if (!$screen) return;
@@ -489,7 +482,6 @@ async function showLeaderboard() {
   hideMainItems();
   showBackBtn();
   currentScreen = 'leaderboard';
-  setHint(t('hint.back'));
   await renderLeaderboardScreen({
     buildScreenShell,
     isActive: () => currentScreen === 'leaderboard',
@@ -506,7 +498,6 @@ function showSettings() {
   hideMainItems();
   showBackBtn();
   currentScreen = 'settings';
-  setHint(t('hint.back'));
 
   clearSubScreen();
   if (!$menuSettings) return;
@@ -702,7 +693,6 @@ async function showAuthors() {
   hideMainItems();
   showBackBtn();
   currentScreen = 'authors';
-  setHint(t('hint.back'));
 
   clearSubScreen();
   if (!$menuSub) return;
@@ -710,7 +700,7 @@ async function showAuthors() {
   renderAuthorsScreen({
     container: $menuSub,
     creditsText: getCreditsText(),
-    backHint: buildBackHint(),
+    backHint: getBackHint(),
   });
   $creditsScroll = $menuSub.querySelector('.menu-authors-scroll');
   startCreditsAnimation();

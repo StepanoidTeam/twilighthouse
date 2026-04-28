@@ -25,6 +25,12 @@
   display: none !important;
 }
 
+@media (pointer: coarse) {
+  .hidden-mobile {
+    display: none !important;
+  }
+}
+
 button {
   -webkit-touch-callout: none;
   -webkit-user-select: none;

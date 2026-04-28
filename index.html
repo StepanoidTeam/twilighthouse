@@ -13,6 +13,18 @@
     <script type="module" src="js/app.js" defer></script>
   </head>
   <body>
+    <!-- templates -->
+    <template id="$backHintTemplate">
+      <p class="menu-hint hidden-mobile">
+        <span class="hotkey">Q</span>
+        <span class="hint-text">/</span>
+        <span class="hotkey">esc</span>
+        <span class="hint-text"> — </span>
+        <span class="hint-text" data-i18n="hint.back"></span>
+      </p>
+    </template>
+    <!-- END templates -->
+
     <div id="$bootLoader" class="boot-loader">
       <div class="boot-loader-panel flex-col blur-bg">
         <h1 id="$bootLoaderTitle" class="boot-loader-title">TWILIGHTHOUSE</h1>
@@ -78,7 +90,7 @@
         aria-label="Turn left"
       >
         <span class="turn-btn-arrow">←</span>
-        <span class="turn-btn-key">A</span>
+        <span class="turn-btn-key hidden-mobile">A</span>
       </button>
       <button
         type="button"
@@ -87,7 +99,7 @@
         aria-label="Turn right"
       >
         <span class="turn-btn-arrow">→</span>
-        <span class="turn-btn-key">D</span>
+        <span class="turn-btn-key hidden-mobile">D</span>
       </button>
     </div>
 
@@ -263,7 +275,7 @@
           </div>
         </template>
       </div>
-      <p id="$menuHint" class="menu-hint"></p>
+      <p id="$menuHint" class="menu-hint" data-i18n="hint.main"></p>
     </div>
 
     <section id="$menuTutorial" class="menu-tutorial fullscreen" hidden>
@@ -273,7 +285,7 @@
           <!-- Items will be populated here -->
         </div>
       </div>
-      <p class="menu-sub-hint"></p>
+      <p id="$menuTutorialHint" class="menu-hint" data-i18n="hint.intro"></p>
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
       <div class="menu-screen-shell">
@@ -387,8 +399,15 @@
           </div>
         </div>
       </div>
-      <p id="$menuSettingsHint" class="menu-sub-hint" data-i18n="hint.back"></p>
+      <p id="$menuSettingsHint" class="menu-hint">
+        <!-- <span class="hotkey">Q</span>
+        <span class="hint-text">/</span>
+        <span class="hotkey">esc</span>
+        <span class="hint-text"> — </span> -->
+        <span class="hint-text" data-i18n="hint.back"></span>
+      </p>
     </section>
+
     <section
       id="$menuLeaderboard"
       class="menu-leaderboard blur fullscreen"
@@ -402,15 +421,16 @@
           <div class="menu-leaderboard-list"></div>
         </div>
       </div>
-      <p class="menu-sub-hint"></p>
+      <p id="$menuLeaderboardHint" class="menu-hint" data-i18n="hint.back"></p>
     </section>
+
     <section id="$menuAuthors" class="menu-authors" hidden>
       <div class="menu-authors-bg"></div>
       <div class="menu-authors-dim"></div>
       <div class="menu-authors-scroll">
         <pre class="menu-authors-text"></pre>
       </div>
-      <p class="menu-sub-hint"></p>
+      <p id="$menuAuthorsHint" class="menu-hint" data-i18n="hint.back"></p>
     </section>
 
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
