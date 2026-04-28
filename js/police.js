@@ -21,7 +21,7 @@ import {
   spawnTooltip,
   updateHUD,
   scheduleGameOver,
-  showPattinsonGameOver,
+  showPoliceGameOver,
   playCrashSound,
 } from './ui.js';
 
@@ -141,7 +141,7 @@ export function updatePoliceBoats(delta) {
       S.shakeTime = 0.5;
       S.shakeIntensity = 18;
       if (S.crates <= 0) {
-        scheduleGameOver(showPattinsonGameOver);
+        scheduleGameOver(showPoliceGameOver);
       }
       const fadeOut = () => {
         spr.alpha -= 0.02;
