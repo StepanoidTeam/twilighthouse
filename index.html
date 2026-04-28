@@ -189,7 +189,7 @@
               src="sprites/icons/lighthouse.png"
               alt=""
               aria-hidden="true"
-            /><span class="menu-main-btn-label"></span>
+            /><span class="menu-main-btn-label" data-i18n="menu.newGame"></span>
           </button>
           <button
             type="button"
@@ -202,7 +202,10 @@
               src="sprites/icons/compass.png"
               alt=""
               aria-hidden="true"
-            /><span class="menu-main-btn-label"></span>
+            /><span
+              class="menu-main-btn-label"
+              data-i18n="menu.leaderboard"
+            ></span>
           </button>
           <button
             type="button"
@@ -215,7 +218,10 @@
               src="sprites/icons/wheel.png"
               alt=""
               aria-hidden="true"
-            /><span class="menu-main-btn-label"></span>
+            /><span
+              class="menu-main-btn-label"
+              data-i18n="menu.settings"
+            ></span>
           </button>
           <button
             type="button"
@@ -228,7 +234,7 @@
               src="sprites/icons/chest.png"
               alt=""
               aria-hidden="true"
-            /><span class="menu-main-btn-label"></span>
+            /><span class="menu-main-btn-label" data-i18n="menu.authors"></span>
           </button>
           <button
             type="button"
@@ -241,7 +247,10 @@
               src="sprites/icons/map.png"
               alt=""
               aria-hidden="true"
-            /><span class="menu-main-btn-label"></span>
+            /><span
+              class="menu-main-btn-label"
+              data-i18n="menu.tutorial"
+            ></span>
           </button>
         </div>
         <section id="$menuSub" class="menu-sub" hidden></section>
@@ -268,11 +277,19 @@
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
       <div class="menu-screen-shell">
-        <h2 id="$menuSettingsTitle" class="menu-screen-title"></h2>
+        <h2
+          id="$menuSettingsTitle"
+          class="menu-screen-title"
+          data-i18n="settings.title"
+        ></h2>
         <div id="$menuSettingsCard" class="menu-card menu-settings blur-bg">
           <!-- Language row -->
           <div class="menu-setting-row">
-            <span id="$menuSettingsLangLabel" class="menu-setting-label"></span>
+            <span
+              id="$menuSettingsLangLabel"
+              class="menu-setting-label"
+              data-i18n="settings.language"
+            ></span>
             <button
               id="$menuSettingsLangBtn"
               type="button"
@@ -284,6 +301,7 @@
             <span
               id="$menuSettingsMusicLabel"
               class="menu-setting-label"
+              data-i18n="settings.music"
             ></span>
             <div class="menu-slider">
               <input
@@ -306,7 +324,11 @@
           </div>
           <!-- SFX row -->
           <div class="menu-setting-row menu-setting-row--slider">
-            <span id="$menuSettingsSfxLabel" class="menu-setting-label"></span>
+            <span
+              id="$menuSettingsSfxLabel"
+              class="menu-setting-label"
+              data-i18n="settings.sfx"
+            ></span>
             <div class="menu-slider">
               <input
                 id="$menuSettingsSfxInput"
@@ -325,7 +347,11 @@
           </div>
           <!-- Display Name row -->
           <div class="menu-setting-row menu-setting-row--name">
-            <span id="$menuSettingsNameLabel" class="menu-setting-label"></span>
+            <span
+              id="$menuSettingsNameLabel"
+              class="menu-setting-label"
+              data-i18n="settings.displayName"
+            ></span>
             <span
               id="$menuSettingsNameNote"
               class="menu-setting-note"
@@ -340,12 +366,14 @@
                   class="menu-setting-name-input"
                   maxlength="30"
                   autocomplete="nickname"
+                  data-i18n-placeholder="settings.displayNamePlaceholder"
                 />
                 <div class="menu-setting-name-actions">
                   <button
                     id="$menuDisplayNameSave"
                     type="submit"
                     class="menu-setting-name-save"
+                    data-i18n="settings.displayNameSave"
                   ></button>
                   <span
                     id="$menuDisplayNameStatus"
@@ -359,7 +387,7 @@
           </div>
         </div>
       </div>
-      <p id="$menuSettingsHint" class="menu-sub-hint"></p>
+      <p id="$menuSettingsHint" class="menu-sub-hint" data-i18n="hint.back"></p>
     </section>
     <section
       id="$menuLeaderboard"
@@ -388,7 +416,11 @@
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
     <button type="button" id="$backBtn" class="menu-btn back-btn blur-bg">
       <span class="back-btn-arrow">←</span
-      ><span id="$backBtnLabel" class="back-btn-label"></span>
+      ><span
+        id="$backBtnLabel"
+        class="back-btn-label"
+        data-i18n="btn.back"
+      ></span>
 
       <div class="hotkey">Q</div>
     </button>

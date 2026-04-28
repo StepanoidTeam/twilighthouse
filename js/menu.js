@@ -16,7 +16,13 @@ import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
 import { showIntro } from './intro.js';
-import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
+import {
+  t,
+  getLanguage,
+  setLanguage,
+  onLanguageChange,
+  applyI18nToDOM,
+} from './i18n.js';
 
 const {
   $menuOverlay,
@@ -98,18 +104,9 @@ const MAIN_MENU_ACTIONS = [
   { key: 'menu.tutorial', action: 'tutorial' },
 ];
 
-function getMenuLabels() {
-  return MAIN_MENU_ACTIONS.map((item) => ({
-    label: t(item.key),
-    action: item.action,
-  }));
-}
-
 function getCreditsText() {
   return t('credits.text');
 }
-
-// ===== Sound Helpers =====
 function ensureMenuAmbient() {
   if (S.wavesSound) {
     void syncLoopingAudio(S.wavesSound, getSfxVolume(WAVES_VOLUME));
@@ -217,11 +214,8 @@ function initMenuButtons() {
     $menuBtnAuthors,
     $menuBtnTutorial,
   ].filter(Boolean);
-  const labels = getMenuLabels();
   for (let i = 0; i < $$menuItems.length; i++) {
     const $button = $$menuItems[i];
-    const $label = $button.querySelector('.menu-main-btn-label');
-    if ($label) $label.textContent = labels[i]?.label ?? '';
     const idx = i;
     $button.addEventListener('pointerover', () => {
       if (selectedIndex === idx) return;
@@ -235,14 +229,6 @@ function initMenuButtons() {
       playMenuClick();
       activateMenuItem();
     });
-  }
-}
-
-function renderMainMenuButtons() {
-  const labels = getMenuLabels();
-  for (let i = 0; i < $$menuItems.length; i++) {
-    const $label = $$menuItems[i].querySelector('.menu-main-btn-label');
-    if ($label) $label.textContent = labels[i]?.label ?? '';
   }
 }
 
@@ -382,11 +368,9 @@ export async function buildMenu(app, startGameCb) {
     onLanguageChange(() => {
       if (!$menuOverlay) return;
 
-      renderMainMenuButtons();
+      applyI18nToDOM();
       updateSelection();
       setHint(currentScreen === 'main' ? t('hint.main') : t('hint.back'));
-
-      if (backBtnEl && $backBtnLabel) $backBtnLabel.textContent = t('btn.back');
 
       if (currentScreen === 'settings') showSettings();
       else if (currentScreen === 'leaderboard') showLeaderboard();
@@ -529,9 +513,6 @@ function showSettings() {
 
   $menuSettings.hidden = false;
 
-  if ($menuSettingsTitle) $menuSettingsTitle.textContent = t('settings.title');
-  if ($menuSettingsHint) $menuSettingsHint.textContent = t('hint.back');
-
   const langs = [
     { code: 'en', label: t('lang.english') },
     { code: 'ru', label: t('lang.russian') },
@@ -542,7 +523,6 @@ function showSettings() {
   );
 
   if (!$menuSettingsLangLabel || !$menuSettingsLangBtn) return;
-  $menuSettingsLangLabel.textContent = t('settings.language');
   $menuSettingsLangBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
   $menuSettingsLangBtn.onclick = () => {
     playMenuClick();
@@ -557,7 +537,6 @@ function showSettings() {
     !$menuSettingsMusicMute
   )
     return;
-  $menuSettingsMusicLabel.textContent = t('settings.music');
 
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
   let lastMusicVolume = initialMusic > 0 ? initialMusic : 0.5;
@@ -606,7 +585,6 @@ function showSettings() {
     !$menuSettingsSfxMute
   )
     return;
-  $menuSettingsSfxLabel.textContent = t('settings.sfx');
 
   const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
   let lastSfxVolume = initialSfx > 0 ? initialSfx : 1;
@@ -650,7 +628,6 @@ function showSettings() {
 
   // ===== Display Name =====
   if (!$menuSettingsNameLabel || !$menuSettingsNameNote) return;
-  $menuSettingsNameLabel.textContent = t('settings.displayName');
 
   if (!currentUser) {
     $menuSettingsNameNote.textContent = t('settings.displayNameGuestNote');
@@ -674,12 +651,6 @@ function showSettings() {
 
     $menuDisplayNameForm.hidden = false;
     $menuDisplayNameInput.value = currentName;
-    $menuDisplayNameInput.placeholder = t('settings.displayNamePlaceholder');
-
-    $menuDisplayNameHint.textContent = isAnon
-      ? t('settings.displayNameAnon')
-      : t('settings.displayNameEmail');
-    $menuDisplayNameSave.textContent = t('settings.displayNameSave');
 
     $menuDisplayNameStatus.textContent = '';
     $menuDisplayNameStatus.className = 'menu-setting-name-status';

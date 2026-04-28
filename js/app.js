@@ -57,7 +57,7 @@ import {
 } from './menu.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
-import { t, onLanguageChange } from './i18n.js';
+import { t, onLanguageChange, applyI18nToDOM } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
 
 import './ip-tracker.js';
@@ -647,6 +647,8 @@ async function init() {
   // Build menu (on top of everything) and show it
   await buildMenu(S.app, startGame);
 
+  applyI18nToDOM();
+
   await primeBootAmbientAudio();
 
   S.gameSessionActive = false;
@@ -666,6 +668,7 @@ async function init() {
 
 renderBootLoaderText();
 onLanguageChange(renderBootLoaderText);
+onLanguageChange(applyI18nToDOM);
 registerBrowserTools();
 
 init().catch((e) => {

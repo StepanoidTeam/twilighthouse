@@ -403,6 +403,7 @@ export function setLanguage(lang) {
   try {
     localStorage.setItem(STORAGE_KEY, lang);
   } catch (_) {}
+  applyI18nToDOM();
   for (const fn of listeners) {
     try {
       fn(lang);
@@ -435,4 +436,17 @@ export function t(key, params) {
     );
   }
   return str;
+}
+
+/** Apply translations to all elements with data-i18n attribute */
+export function applyI18nToDOM() {
+  document.querySelectorAll('[data-i18n]').forEach((element) => {
+    const key = element.getAttribute('data-i18n');
+    element.textContent = t(key);
+  });
+
+  document.querySelectorAll('[data-i18n-placeholder]').forEach((element) => {
+    const key = element.getAttribute('data-i18n-placeholder');
+    element.placeholder = t(key);
+  });
 }
