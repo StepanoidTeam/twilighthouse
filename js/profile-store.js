@@ -41,9 +41,13 @@ export function pickStoredDisplayName(stored, uid) {
  * Picks `displayName` (trimmed) or the local part of `email`.
  * Returns `null` when the user has no real name — guest labels are NEVER
  * persisted; they are formatted on the client at render time.
+ *
+ * Anonymous users are allowed to have a stored displayName when they
+ * explicitly set one in settings — without that, leaderboard rows for
+ * guests would never reflect a custom name.
  */
 export function resolveUserDisplayName(user) {
-  if (!user || user.isAnonymous) return null;
+  if (!user) return null;
 
   const displayName =
     typeof user.displayName === 'string' ? user.displayName.trim() : '';
