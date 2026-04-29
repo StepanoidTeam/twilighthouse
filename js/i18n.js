@@ -124,28 +124,31 @@ Photopea — image editor
 
     // How to play
     'howtoplay.title': 'How to Play',
+    'howtoplay.prev': 'Prev',
+    'howtoplay.next': 'Next',
+    'howtoplay.finish': 'Play',
+    'howtoplay.skip': 'Skip',
     'howtoplay.items': [
       {
-        icon: 'sprites/icons/wreck.png',
-        text: 'Rotate the beam to light up approaching boats — they use your signal to navigate safely to shore',
+        video: 'tutorial-vids/smugglers.mp4',
+        title: 'Smugglers',
+        text: 'Lit boats find the harbor safe. Help the smugglers.',
       },
       {
-        icon: 'sprites/icons/mermaid.png',
-        text: "Mermaids swim toward the lighthouse in the dark — illuminate them to scare them off. Let 3 reach you and it's over",
+        video: 'tutorial-vids/cops.mp4',
+        title: 'Cops',
+        text: "Don't light the cops. They steal your crates.",
       },
       {
-        icon: 'sprites/icons/kraken.png',
-        text: 'The Kraken lurks in darkness and charges at you — shine the beam on it to drive it away',
+        video: 'tutorial-vids/kraken.mp4',
+        title: 'Kraken',
+        text: 'Repel the kraken with your beam.',
       },
       {
-        icon: 'sprites/icons/warning.png',
-        text: "Police boats are different — don't light them up. Every cop you illuminate confiscates a crate. Lose all 3 and the game ends very badly",
+        video: 'tutorial-vids/mermaid.mp4',
+        title: 'Mermaids',
+        text: 'SCARE MERMAIDS AWAY!',
       },
-      {
-        icon: 'sprites/icons/lantern.png',
-        text: 'The lamp burns out over time — the beam narrows and flickers. Keep an eye on it',
-      },
-      { icon: 'sprites/icons/trophy.png', text: 'Save 10 boats to win' },
     ],
 
     // Game over / overlay
@@ -300,28 +303,31 @@ Photopea — image editor
 
     // How to play
     'howtoplay.title': 'Как играть',
+    'howtoplay.prev': 'Назад',
+    'howtoplay.next': 'Дальше',
+    'howtoplay.finish': 'Играть',
+    'howtoplay.skip': 'Пропустить',
     'howtoplay.items': [
       {
-        icon: 'sprites/icons/wreck.png',
-        text: 'Поворачивай луч, чтобы освещать приближающиеся лодки — они используют твой сигнал, чтобы добраться до берега',
+        video: 'tutorial-vids/smugglers.mp4',
+        title: 'Контрабандисты',
+        text: 'Освещённые лодки доходят до бухты. Помоги контрабандистам.',
       },
       {
-        icon: 'sprites/icons/mermaid.png',
-        text: 'Русалки плывут к маяку в темноте — освети их, чтобы отпугнуть. Если 3 доберутся до маяка — конец',
+        video: 'tutorial-vids/cops.mp4',
+        title: 'Копы',
+        text: 'Не свети на копов — они забирают ящики.',
       },
       {
-        icon: 'sprites/icons/kraken.png',
-        text: 'Кракен таится в темноте и атакует маяк — направь луч на него, чтобы отогнать',
+        video: 'tutorial-vids/kraken.mp4',
+        title: 'Кракен',
+        text: 'Отгоняй кракена лучом маяка.',
       },
       {
-        icon: 'sprites/icons/warning.png',
-        text: 'Полицейские катера — другая история. Не свети на них! Каждый освещённый коп забирает ящик. Потеряешь все 3 — плохой финал',
+        video: 'tutorial-vids/mermaid.mp4',
+        title: 'Русалки',
+        text: 'ОТПУГИВАЙ РУСАЛОК!',
       },
-      {
-        icon: 'sprites/icons/lantern.png',
-        text: 'Лампа постепенно сгорает — луч сужается и мигает. Следи за ней',
-      },
-      { icon: 'sprites/icons/trophy.png', text: 'Спаси 10 лодок — и победишь' },
     ],
     'lang.english': 'English',
 

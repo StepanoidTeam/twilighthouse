@@ -288,13 +288,22 @@
       <p id="$menuHint" class="menu-hint" data-i18n="hint.main"></p>
     </div>
 
-    <section id="$menuTutorial" class="menu-tutorial fullscreen" hidden>
-      <div class="menu-screen-shell">
-        <h2 class="menu-screen-title"></h2>
-        <div class="menu-card menu-howtoplay blur-bg">
-          <!-- Items will be populated here -->
-        </div>
+    <section
+      id="$menuTutorial"
+      class="menu-tutorial menu-screen fullscreen"
+      hidden
+    >
+      <div id="$menuTutorialShell" class="menu-screen-shell">
+        <!-- populated by js/menu.js -->
       </div>
+      <button
+        id="$menuTutorialSkip"
+        type="button"
+        class="menu-btn skip-btn blur-bg"
+      >
+        <span id="$menuTutorialSkipLabel" class="skip-btn-label"></span>
+        <span class="skip-btn-key hidden-mobile">esc</span>
+      </button>
       <p id="$menuTutorialHint" class="menu-hint" data-i18n="hint.intro"></p>
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>

@@ -41,6 +41,10 @@ const {
   $menuSettings,
   $menuSettingsTitle,
   $menuSettingsHint,
+  $menuTutorial,
+  $menuTutorialShell,
+  $menuTutorialSkip,
+  $menuTutorialSkipLabel,
   $menuTutorialHint,
   $menuSettingsLangLabel,
   $menuSettingsLangBtn,
@@ -245,6 +249,7 @@ function clearSubScreen() {
   if (!$menuSub) return;
 
   stopCreditsAnimation();
+  clearTutorialState();
   $menuSub.innerHTML = '';
   $menuSub.hidden = true;
   $menuSub.className = 'menu-sub';
@@ -299,6 +304,7 @@ function buildScreenShell(title, subtitle = '') {
 function showMainMenu() {
   clearSubScreen();
   if ($menuSettings) $menuSettings.hidden = true;
+  hideTutorialScreen();
   showMainItems();
   hideBackBtn();
   currentScreen = 'main';
@@ -408,6 +414,22 @@ function handleMenuKey(e) {
       playMenuClick();
       activateMenuItem();
     }
+  } else if (currentScreen === 'tutorial' && tutorialState) {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+      e.preventDefault();
+      goToStep(tutorialState.index - 1);
+    } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+      e.preventDefault();
+      if (tutorialState.index >= tutorialState.items.length - 1) {
+        playMenuClick();
+        finishTutorial();
+      } else {
+        goToStep(tutorialState.index + 1);
+      }
+    } else if (isBackKey(e.code)) {
+      playMenuClick();
+      showMainMenu();
+    }
   } else if (isBackKey(e.code)) {
     playMenuClick();
     showMainMenu();
@@ -437,44 +459,227 @@ function activateMenuItem() {
 }
 
 // ===== Tutorial / How to Play =====
+let tutorialState = null;
+let tutorialSkipBound = false;
+
+function hideTutorialScreen() {
+  clearTutorialState();
+  if ($menuTutorial) $menuTutorial.hidden = true;
+  if ($menuTutorialShell) $menuTutorialShell.innerHTML = '';
+}
+
 function showTutorial() {
   hideMainItems();
-  showBackBtn();
+  hideBackBtn();
+  const prevScreen = currentScreen;
+  const savedIndex =
+    prevScreen === 'tutorial' && tutorialState ? tutorialState.index : 0;
+  clearSubScreen();
   currentScreen = 'tutorial';
 
-  const $screen = buildScreenShell(t('howtoplay.title'));
-  if (!$screen) return;
-
-  const $card = document.createElement('div');
-  $card.className = 'menu-card menu-howtoplay';
+  if (!$menuTutorial || !$menuTutorialShell) return;
 
   const items = t('howtoplay.items');
-  for (const item of items) {
-    const $row = document.createElement('div');
-    $row.className = 'howtoplay-row';
+  if (!Array.isArray(items) || items.length === 0) return;
 
-    const $icon = document.createElement('span');
-    $icon.className = 'howtoplay-icon';
-    if (item.icon.includes('/')) {
-      const $img = document.createElement('img');
-      $img.src = item.icon;
-      $img.alt = '';
-      $img.setAttribute('aria-hidden', 'true');
-      $icon.appendChild($img);
-    } else {
-      $icon.textContent = item.icon;
+  const startIndex = Math.min(savedIndex, items.length - 1);
+
+  $menuTutorial.hidden = false;
+  $menuTutorialShell.innerHTML = '';
+
+  if ($menuTutorialSkipLabel) {
+    $menuTutorialSkipLabel.textContent = t('howtoplay.skip');
+  }
+  if ($menuTutorialSkip) {
+    $menuTutorialSkip.hidden = false;
+    if (!tutorialSkipBound) {
+      $menuTutorialSkip.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        playMenuClick();
+        showMainMenu();
+      });
+      tutorialSkipBound = true;
     }
-
-    const $text = document.createElement('span');
-    $text.className = 'howtoplay-text';
-    $text.textContent = item.text;
-
-    $row.appendChild($icon);
-    $row.appendChild($text);
-    $card.appendChild($row);
   }
 
-  $screen.appendChild($card);
+  const $title = document.createElement('h2');
+  $title.className = 'menu-screen-title';
+  $title.textContent = t('howtoplay.title');
+  $menuTutorialShell.appendChild($title);
+
+  const $card = document.createElement('div');
+  $card.className = 'menu-card menu-howtoplay blur-bg';
+
+  const $stepHeader = document.createElement('div');
+  $stepHeader.className = 'howtoplay-step-header';
+
+  const $stepCounter = document.createElement('span');
+  $stepCounter.className = 'howtoplay-step-counter';
+  $stepHeader.appendChild($stepCounter);
+
+  const $stepTitle = document.createElement('h3');
+  $stepTitle.className = 'howtoplay-step-title';
+  $stepHeader.appendChild($stepTitle);
+
+  const $stepText = document.createElement('p');
+  $stepText.className = 'howtoplay-step-text';
+  $stepHeader.appendChild($stepText);
+
+  $card.appendChild($stepHeader);
+
+  const $videoWrap = document.createElement('div');
+  $videoWrap.className = 'howtoplay-video-wrap';
+
+  const $video = document.createElement('video');
+  $video.className = 'howtoplay-video';
+  $video.muted = true;
+  $video.autoplay = true;
+  $video.loop = true;
+  $video.playsInline = true;
+  $video.setAttribute('playsinline', '');
+  $video.setAttribute('muted', '');
+  $video.preload = 'auto';
+  $videoWrap.appendChild($video);
+
+  $card.appendChild($videoWrap);
+
+  const $controls = document.createElement('div');
+  $controls.className = 'howtoplay-controls';
+
+  const $prevBtn = document.createElement('button');
+  $prevBtn.type = 'button';
+  $prevBtn.className = 'menu-btn howtoplay-nav-btn howtoplay-nav-btn--prev';
+  $prevBtn.innerHTML =
+    '<span class="howtoplay-nav-arrow">◀</span>' +
+    '<span class="howtoplay-nav-label"></span>';
+
+  const $dots = document.createElement('div');
+  $dots.className = 'howtoplay-dots';
+  const $dotEls = items.map((_, i) => {
+    const $d = document.createElement('button');
+    $d.type = 'button';
+    $d.className = 'howtoplay-dot';
+    $d.setAttribute('aria-label', String(i + 1));
+    $d.addEventListener('click', () => goToStep(i));
+    $dots.appendChild($d);
+    return $d;
+  });
+
+  const $nextBtn = document.createElement('button');
+  $nextBtn.type = 'button';
+  $nextBtn.className = 'menu-btn howtoplay-nav-btn howtoplay-nav-btn--next';
+  $nextBtn.innerHTML =
+    '<span class="howtoplay-nav-label"></span>' +
+    '<span class="howtoplay-nav-arrow">▶</span>';
+
+  $controls.appendChild($prevBtn);
+  $controls.appendChild($dots);
+  $controls.appendChild($nextBtn);
+  $card.appendChild($controls);
+
+  $menuTutorialShell.appendChild($card);
+
+  tutorialState = {
+    index: startIndex,
+    items,
+    $stepCounter,
+    $stepTitle,
+    $stepText,
+    $video,
+    $prevBtn,
+    $nextBtn,
+    $dotEls,
+  };
+
+  $prevBtn.addEventListener('click', () => {
+    playMenuClick();
+    goToStep(tutorialState.index - 1);
+  });
+  $nextBtn.addEventListener('click', () => {
+    playMenuClick();
+    if (tutorialState.index >= tutorialState.items.length - 1) {
+      finishTutorial();
+    } else {
+      goToStep(tutorialState.index + 1);
+    }
+  });
+
+  renderTutorialStep();
+}
+
+function finishTutorial() {
+  hideMenu();
+  if (onStartGame) onStartGame();
+}
+
+function goToStep(nextIndex) {
+  if (!tutorialState) return;
+  const { items } = tutorialState;
+  const clamped = Math.max(0, Math.min(items.length - 1, nextIndex));
+  if (clamped === tutorialState.index) return;
+  tutorialState.index = clamped;
+  renderTutorialStep();
+  playMenuSelect();
+}
+
+function renderTutorialStep() {
+  if (!tutorialState) return;
+  const {
+    index,
+    items,
+    $stepCounter,
+    $stepTitle,
+    $stepText,
+    $video,
+    $prevBtn,
+    $nextBtn,
+    $dotEls,
+  } = tutorialState;
+
+  const item = items[index];
+
+  $stepCounter.textContent = `${index + 1} / ${items.length}`;
+  $stepTitle.textContent = item.title || '';
+  $stepText.textContent = item.text || '';
+
+  if ($video.dataset.src !== item.video) {
+    $video.dataset.src = item.video;
+    $video.src = item.video;
+    const tryPlay = $video.play();
+    if (tryPlay && typeof tryPlay.catch === 'function') {
+      tryPlay.catch(() => {});
+    }
+  }
+
+  const isLast = index === items.length - 1;
+  $prevBtn.disabled = index === 0;
+  $nextBtn.disabled = false;
+  $nextBtn.classList.toggle('howtoplay-nav-btn--finish', isLast);
+
+  $prevBtn.querySelector('.howtoplay-nav-label').textContent = t(
+    'howtoplay.prev',
+  );
+  $nextBtn.querySelector('.howtoplay-nav-label').textContent = t(
+    isLast ? 'howtoplay.finish' : 'howtoplay.next',
+  );
+  const $nextArrow = $nextBtn.querySelector('.howtoplay-nav-arrow');
+  if ($nextArrow) $nextArrow.textContent = isLast ? '▶▶' : '▶';
+
+  for (let i = 0; i < $dotEls.length; i++) {
+    $dotEls[i].classList.toggle('is-active', i === index);
+  }
+}
+
+function clearTutorialState() {
+  if (tutorialState && tutorialState.$video) {
+    try {
+      tutorialState.$video.pause();
+      tutorialState.$video.removeAttribute('src');
+      tutorialState.$video.load();
+    } catch (_) {}
+  }
+  tutorialState = null;
 }
 
 // ===== Leaderboard =====
@@ -729,6 +934,7 @@ function hideMenu() {
   stopBgManMotion();
   clearSubScreen();
   if ($menuSettings) $menuSettings.hidden = true;
+  hideTutorialScreen();
   hideBackBtn();
   currentScreen = null;
   hideAuthWidget();
