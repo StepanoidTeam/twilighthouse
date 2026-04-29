@@ -32,6 +32,7 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+
 }
 
 .menu-leaderboard-row {
@@ -44,6 +45,10 @@
 .menu-leaderboard-row.is-highlight {
   color: var(--color-menu-accent);
   background: rgba(201, 74, 54, 0.18);
+  @media (max-width: 600px) {
+    display: flex;
+    justify-content: space-between;
+  }
 }
 
 .menu-leaderboard-rank,
@@ -81,6 +86,8 @@
       var(--leaderboard-rank-col)
       minmax(0, 1fr)
       var(--leaderboard-time-col);
+      display: flex;
+      justify-content: space-between;
   }
 
   .menu-leaderboard-time {

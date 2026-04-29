@@ -124,7 +124,7 @@
             id="$btnResultRestart"
             class="menu-btn result-btn blur-bg"
           >
-            <span class="result-btn-key">E</span>
+            <span class="result-btn-key hidden-mobile">E</span>
             <span class="result-btn-label" id="$resultRestartLabel"></span>
           </button>
           <button
@@ -132,7 +132,7 @@
             id="$btnResultMenu"
             class="menu-btn result-btn blur-bg"
           >
-            <span class="result-btn-key">Esc</span>
+            <span class="result-btn-key hidden-mobile">Esc</span>
             <span class="result-btn-label" id="$resultMenuLabel"></span>
           </button>
         </div>
@@ -148,7 +148,7 @@
           id="$btnExitConfirm"
           class="menu-btn result-btn blur-bg"
         >
-          <span class="result-btn-key">E</span>
+          <span class="result-btn-key hidden-mobile">E</span>
           <span class="result-btn-label" id="$exitConfirmLabel"></span>
         </button>
         <button
@@ -156,7 +156,7 @@
           id="$btnExitResume"
           class="menu-btn result-btn blur-bg"
         >
-          <span class="result-btn-key">Esc</span>
+          <span class="result-btn-key hidden-mobile">Esc</span>
           <span class="result-btn-label" id="$exitResumeLabel"></span>
         </button>
       </div>
@@ -285,7 +285,7 @@
           </div>
         </template>
       </div>
-      <p id="$menuHint" class="menu-hint" data-i18n="hint.main"></p>
+      <p id="$menuHint" class="menu-hint hidden-mobile" data-i18n="hint.main"></p>
     </div>
 
     <section
@@ -304,7 +304,7 @@
         <span id="$menuTutorialSkipLabel" class="skip-btn-label"></span>
         <span class="skip-btn-key hidden-mobile">esc</span>
       </button>
-      <p id="$menuTutorialHint" class="menu-hint" data-i18n="hint.intro"></p>
+      <p id="$menuTutorialHint" class="menu-hint hidden-mobile" data-i18n="hint.intro"></p>
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
       <div class="menu-screen-shell">
@@ -418,7 +418,7 @@
           </div>
         </div>
       </div>
-      <p id="$menuSettingsHint" class="menu-hint">
+      <p id="$menuSettingsHint" class="menu-hint hidden-mobile"
         <!-- <span class="hotkey">Q</span>
         <span class="hint-text">/</span>
         <span class="hotkey">esc</span>
@@ -440,7 +440,7 @@
           <div class="menu-leaderboard-list"></div>
         </div>
       </div>
-      <p id="$menuLeaderboardHint" class="menu-hint" data-i18n="hint.back"></p>
+      <p id="$menuLeaderboardHint" class="menu-hint hidden-mobile" data-i18n="hint.back"></p>
     </section>
 
     <section id="$menuAuthors" class="menu-authors" hidden>
@@ -449,7 +449,7 @@
       <div class="menu-authors-scroll">
         <pre class="menu-authors-text"></pre>
       </div>
-      <p id="$menuAuthorsHint" class="menu-hint" data-i18n="hint.back"></p>
+      <p id="$menuAuthorsHint" class="menu-hint hidden-mobile" data-i18n="hint.back"></p>
     </section>
 
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
@@ -461,7 +461,7 @@
         data-i18n="btn.back"
       ></span>
 
-      <div class="hotkey">Q</div>
+      <div class="hotkey hidden-mobile">Q</div>
     </button>
 
     <!-- ===== Auth modal ===== -->
