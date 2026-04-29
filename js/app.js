@@ -307,10 +307,7 @@ function bindEvents() {
       }
       if (isBackKey(e.code)) {
         playClickSound();
-        requestAnimationFrame(() => {
-          if (S.gameWon) exitToLeaderboard();
-          else exitToMenu();
-        });
+        requestAnimationFrame(() => exitToMenu());
         return;
       }
     }
@@ -428,7 +425,7 @@ function gameLoop(delta) {
         if (S.gameWon && S.gameOver && !isMenuVisible()) {
           exitToLeaderboard();
         }
-      }, 4000);
+      }, 8000);
     }
     return;
   }
@@ -628,10 +625,7 @@ async function init() {
   });
   $btnResultMenu.addEventListener('pointerdown', () => {
     playClickSound();
-    requestAnimationFrame(() => {
-      if (S.gameWon) exitToLeaderboard();
-      else exitToMenu();
-    });
+    requestAnimationFrame(() => exitToMenu());
   });
   $screenGameOver.addEventListener('pointerdown', (e) => {
     if (!S.gameWon) return;

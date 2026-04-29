@@ -33,6 +33,7 @@ const {
   $volMusicVal,
   $gameContainer,
   $resultMsg,
+  $resultStats,
   $resultRestartLabel,
   $resultMenuLabel,
   $resultSplash,
@@ -284,6 +285,11 @@ async function showGameOverScreen({
   if ($btnResultRestart) $btnResultRestart.hidden = false;
   if ($btnResultMenu) $btnResultMenu.hidden = false;
 
+  if ($resultStats) {
+    $resultStats.hidden = true;
+    $resultStats.replaceChildren();
+  }
+
   if (splashKey && SPLASH_IMAGES[splashKey]) {
     $resultSplash.style.backgroundImage = `url("${SPLASH_IMAGES[splashKey]}")`;
   } else {
@@ -291,6 +297,24 @@ async function showGameOverScreen({
   }
 
   $screenGameOver.hidden = false;
+}
+
+function renderResultStats(items) {
+  if (!$resultStats) return;
+  $resultStats.replaceChildren();
+  for (const { icon, label, value } of items) {
+    const stat = document.createElement('div');
+    stat.className = 'screen-result-stat';
+    const iconEl = document.createElement('span');
+    iconEl.className = 'screen-result-stat-icon';
+    iconEl.textContent = icon;
+    const text = document.createElement('span');
+    text.textContent = `${label}: ${value}`;
+    stat.appendChild(iconEl);
+    stat.appendChild(text);
+    $resultStats.appendChild(stat);
+  }
+  $resultStats.hidden = items.length === 0;
 }
 
 export function showBoatGameOver() {
@@ -336,16 +360,26 @@ export function showKrakenGameOver() {
 export async function showWin() {
   const finalTime = formatSurvivalTime(S.runSurvivalMs);
   await showGameOverScreen({
-    message: t('win.messageTime', {
-      total: WIN_SCORE,
-      time: finalTime,
-    }),
+    message: t('win.message', { total: WIN_SCORE }),
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
   });
   $resultRestartLabel.textContent = t('menu.leaderboard');
-  $resultMenuLabel.textContent = t('menu.leaderboard');
+  $resultMenuLabel.textContent = t('overlay.toMenu');
+  renderResultStats([
+    {
+      icon: '💡',
+      label: t('win.statLamps'),
+      value: S.deliveredCargo['💡'] || 0,
+    },
+    {
+      icon: '📦',
+      label: t('win.statCrates'),
+      value: S.deliveredCargo['📦'] || 0,
+    },
+    { icon: '⏱', label: t('win.statTime'), value: finalTime },
+  ]);
 }
 
 // ===== Exit Confirmation =====

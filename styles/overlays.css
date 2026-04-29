@@ -39,6 +39,36 @@
     margin: 0;
   }
 
+  .screen-result-stats {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 14px 28px;
+    font-family: var(--font-ui);
+    font-size: clamp(18px, 2.6vw, 26px);
+    font-weight: bold;
+    color: #ffe9a8;
+    text-align: center;
+    text-shadow:
+      0 0 14px #000,
+      0 2px 6px #000;
+    margin: 0;
+  }
+
+  .screen-result-stat {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    padding: 6px 14px;
+    border-radius: 10px;
+    background: rgba(7, 20, 32, 0.55);
+    backdrop-filter: blur(6px);
+  }
+
+  .screen-result-stat-icon {
+    font-size: 1.1em;
+  }
+
   .screen-result-actions {
     display: flex;
     gap: 24px;

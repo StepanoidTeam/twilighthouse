@@ -170,6 +170,9 @@ Photopea — image editor
     'win.message': '🎉 You Win! All {total} boats saved!',
     'win.messageTime':
       '🎉 You Win! All {total} boats saved! Final time: {time}',
+    'win.statLamps': 'Lamps delivered',
+    'win.statCrates': 'Crates delivered',
+    'win.statTime': 'Final time',
 
     // Auth modal
     'auth.signIn': 'Sign in',
@@ -350,6 +353,9 @@ Photopea — image editor
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
     'win.messageTime':
       '🎉 Победа! Спасены все {total} кораблей! Финальное время: {time}',
+    'win.statLamps': 'Доставлено ламп',
+    'win.statCrates': 'Доставлено ящиков',
+    'win.statTime': 'Финальное время',
 
     'auth.signIn': 'Вход',
     'auth.signUp': 'Регистрация',
