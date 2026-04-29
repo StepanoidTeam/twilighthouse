@@ -38,14 +38,15 @@
     </div>
 
     <div id="$gameContainer" hidden>
+      <div class="hud-row hud-time" id="$hudTime">⏱ 0:00</div>
+
       <!-- ===== In-game HUD (top-right) ===== -->
       <div id="$hud" class="hud" aria-hidden="true">
-        <div class="hud-row" id="$hudScore">📦×0</div>
-        <div class="hud-row" id="$hudMermaids">🧜 0/3</div>
+        <div class="hud-row " id="$hudScore" hidden>📦×0</div>
         <div class="hud-row" id="$hudPolice">❄️📦📦📦</div>
         <div class="hud-row" id="$hudLamp">💡💡💡💡💡</div>
         <div class="hud-row" id="$hudSunk">⛵💥 0/6</div>
-        <div class="hud-row" id="$hudTime">⏱ 0:00</div>
+        <div class="hud-row" id="$hudMermaids">🧜 0/3</div>
       </div>
 
       <!-- ===== In-game Escape button ===== -->
@@ -59,7 +60,7 @@
       </button>
 
       <!-- ===== In-game volume controls ===== -->
-      <div id="$volControls" class="vol-controls">
+      <div id="$volControls" class="vol-controls hidden-mobile">
         <div class="vol-row">
           <button type="button" class="vol-btn" data-target="sfx" data-dir="-1">
             ◀
