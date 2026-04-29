@@ -14,6 +14,10 @@ import {
   computeWorldScale,
 } from './config.js';
 import {
+  TUTORIAL_VIDEO_ASSETS,
+  preloadTutorialVideos,
+} from './tutorial-videos.js';
+import {
   BOOT_AUDIO_ASSETS,
   preloadBootAudioAssets,
   initializeAmbientAudio,
@@ -101,7 +105,8 @@ let bootLoaderState = {
   total:
     Object.keys(SPRITE_FILES).length +
     BOOT_TEXTURE_ASSETS.length +
-    BOOT_AUDIO_ASSETS.length,
+    BOOT_AUDIO_ASSETS.length +
+    TUTORIAL_VIDEO_ASSETS.length,
   status: 'loading',
   currentAsset: null,
 };
@@ -111,7 +116,12 @@ function getBootAssetLabel(asset) {
     return bootLoaderState.status === 'ready' ? t('boot.finalizing') : '';
   }
 
-  const kindKey = asset.kind === 'audio' ? 'boot.audio' : 'boot.texture';
+  const kindKey =
+    asset.kind === 'audio'
+      ? 'boot.audio'
+      : asset.kind === 'video'
+        ? 'boot.video'
+        : 'boot.texture';
   const fileName = asset.path.split('/').pop() || asset.path;
   return `${t(kindKey)} - ${fileName}`;
 }
@@ -527,6 +537,12 @@ async function loadTextures() {
   }
 
   loaded = await preloadBootAudioAssets({
+    loaded,
+    total,
+    onProgress: setBootLoaderProgress,
+  });
+
+  loaded = await preloadTutorialVideos({
     loaded,
     total,
     onProgress: setBootLoaderProgress,

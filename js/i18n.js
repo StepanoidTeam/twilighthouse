@@ -96,6 +96,7 @@ Photopea — image editor
     'boot.failed': 'Failed to load game assets',
     'boot.texture': 'Texture',
     'boot.audio': 'Sound',
+    'boot.video': 'Video',
     'boot.finalizing': 'Finalizing startup…',
 
     // Settings
@@ -277,6 +278,7 @@ Photopea — image editor
     'boot.failed': 'Не удалось загрузить ресурсы игры',
     'boot.texture': 'Текстура',
     'boot.audio': 'Звук',
+    'boot.video': 'Видео',
     'boot.finalizing': 'Завершаем запуск…',
 
     'settings.title': '⚙️ Настройки',

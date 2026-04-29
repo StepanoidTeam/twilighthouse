@@ -16,6 +16,7 @@ import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
 import { showIntro } from './intro.js';
+import { getTutorialVideoSrc } from './tutorial-videos.js';
 import {
   t,
   getLanguage,
@@ -645,7 +646,7 @@ function renderTutorialStep() {
 
   if ($video.dataset.src !== item.video) {
     $video.dataset.src = item.video;
-    $video.src = item.video;
+    $video.src = getTutorialVideoSrc(item.video);
     const tryPlay = $video.play();
     if (tryPlay && typeof tryPlay.catch === 'function') {
       tryPlay.catch(() => {});
