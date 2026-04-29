@@ -229,6 +229,7 @@
   font-size: 20px;
   text-align: center;
   font-weight: 900;
+  text-shadow: 1px 1px 1px black;
 }
 
 .menu-card {
@@ -479,7 +480,7 @@
 }
 
 .howtoplay-dot.is-active {
-  background: var(--color-menu-accent);
+  background: var(--color-menu-selected);
   transform: scale(1.25);
 }
 
@@ -510,7 +511,7 @@
 }
 
 .menu-setting-row--slider {
-  align-items: flex-start;
+  align-items: center;
 }
 
 .menu-setting-row--name {
@@ -597,6 +598,7 @@
 .menu-setting-label {
   font-size: 18px;
   font-weight: 700;
+  white-space: nowrap;
   color: var(--color-menu-text);
 }
 
@@ -615,7 +617,7 @@
   display: flex;
   align-items: center;
   gap: 14px;
-  flex-wrap: wrap;
+
   min-width: min(100%, 320px);
 }
 
