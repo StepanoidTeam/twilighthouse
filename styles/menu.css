@@ -483,6 +483,19 @@
   transform: scale(1.25);
 }
 
+@media (max-width: 400px) {
+  .howtoplay-nav-btn {
+    gap: 6px;
+    padding: 8px 12px;
+    font-size: 13px;
+    letter-spacing: 0.04em;
+  }
+
+  .howtoplay-nav-arrow {
+    font-size: 12px;
+  }
+}
+
 .menu-setting-row {
   display: flex;
   align-items: center;
@@ -716,6 +729,7 @@
   .menu-main-btn {
     min-height: 68px;
     font-size: 19px;
+    padding: 8px 16px;
   }
 
   .menu-main-btn-icon {

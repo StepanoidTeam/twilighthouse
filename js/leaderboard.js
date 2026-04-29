@@ -10,7 +10,7 @@ import {
   limit,
   getDocs,
 } from '../firebase.js';
-import { currentUser, isSignedInReal } from './auth.js';
+import { currentUser } from './auth.js';
 import { t } from './i18n.js';
 import {
   resolveUserDisplayName,
@@ -333,10 +333,4 @@ export async function renderLeaderboardScreen({ buildScreenShell, isActive }) {
     });
   }
 
-  if (!isSignedInReal(currentUser)) {
-    const $note = document.createElement('p');
-    $note.className = 'menu-card-note';
-    $note.textContent = t('leaderboard.signInPrompt');
-    $body.appendChild($note);
-  }
 }
