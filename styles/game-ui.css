@@ -6,6 +6,32 @@
   user-select: none;
 }
 
+/* ===== In-game HUD (top-right) ===== */
+.hud {
+  position: fixed;
+  top: 12px;
+  right: 12px;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+  z-index: 1;
+  pointer-events: none;
+  font-family: var(--font-ui);
+  font-weight: bold;
+  font-size: 22px;
+  color: #c8d8e8;
+  text-shadow:
+    0 0 6px #000,
+    0 0 6px #000,
+    0 1px 3px #000;
+  line-height: 1;
+}
+
+.hud-row {
+  white-space: nowrap;
+}
+
 /* ===== In-game Escape button (top-left) ===== */
 .esc-btn {
   position: fixed;

@@ -1,6 +1,5 @@
 import {
   PIXI,
-  UI_STYLE,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
   BOAT_CARGO_TYPES,
@@ -42,6 +41,12 @@ const {
   $exitConfirmLabel,
   $exitResumeLabel,
   $screenExitConfirm,
+  $hudScore,
+  $hudMermaids,
+  $hudPolice,
+  $hudLamp,
+  $hudSunk,
+  $hudTime,
 } = globalThis;
 
 // ===== Tooltips =====
@@ -101,57 +106,50 @@ export function scheduleGameOver(fn) {
 }
 
 // ===== HUD =====
+// Пишем в DOM только при смене значения — иначе на каждом тике дёргаем
+// textContent впустую (лишние реплейс-ноды + layout).
+const hudCache = {
+  score: null,
+  mermaids: null,
+  police: null,
+  lamp: null,
+  sunk: null,
+  time: null,
+};
+
+function setIfChanged(key, $el, value) {
+  if (hudCache[key] === value) return;
+  hudCache[key] = value;
+  $el.textContent = value;
+}
+
 export function updateHUD() {
   const cargoStr = BOAT_CARGO_TYPES.map((t) =>
     S.deliveredCargo[t] > 0 ? `${t}${S.deliveredCargo[t]}` : null,
   )
     .filter(Boolean)
     .join(' ');
-  S.txtScore.text = cargoStr || '📦×0';
-  S.txtMermaids.text = `🧜 ${S.mermaidsArrived}/3`;
+  setIfChanged('score', $hudScore, cargoStr || '📦×0');
+  setIfChanged('mermaids', $hudMermaids, `🧜 ${S.mermaidsArrived}/3`);
   // Ящики колумбийского, которые прячет Паттисон.
   // Каждый освещённый коп = -1 ящик. Ноль — Дефо выкидывает Паттисона.
-  S.txtPolice.text = `❄️${'📦'.repeat(Math.max(0, S.crates))}`;
+  setIfChanged(
+    'police',
+    $hudPolice,
+    `❄️${'📦'.repeat(Math.max(0, S.crates))}`,
+  );
   const bulbs = Math.max(
     0,
     Math.round((1 - S.lampTimer / LAMP_BURNOUT_TIME) * 5),
   );
-  S.txtLamp.text = bulbs > 0 ? '💡'.repeat(bulbs) : '🔦';
-  S.txtSunk.text = `⛵💥 ${S.boatsSunk}/6`;
-  if (S.txtTime) {
-    S.txtTime.text = `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`;
-  }
+  setIfChanged('lamp', $hudLamp, bulbs > 0 ? '💡'.repeat(bulbs) : '🔦');
+  setIfChanged('sunk', $hudSunk, `⛵💥 ${S.boatsSunk}/6`);
+  setIfChanged('time', $hudTime, `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`);
 }
 
 // ===== Build HUD =====
 export function buildHUD() {
-  S.hudLayer = new PIXI.Container();
-
-  S.txtScore = new PIXI.Text('📦×0', new PIXI.TextStyle(UI_STYLE));
-  S.txtScore.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtScore);
-
-  S.txtMermaids = new PIXI.Text('🧜 0/3', new PIXI.TextStyle(UI_STYLE));
-  S.txtMermaids.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtMermaids);
-
-  S.txtPolice = new PIXI.Text('❄️📦📦📦', new PIXI.TextStyle(UI_STYLE));
-  S.txtPolice.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtPolice);
-
-  S.txtLamp = new PIXI.Text('💡💡💡💡💡', new PIXI.TextStyle(UI_STYLE));
-  S.txtLamp.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtLamp);
-
-  S.txtSunk = new PIXI.Text('⛵💥 0/6', new PIXI.TextStyle(UI_STYLE));
-  S.txtSunk.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtSunk);
-
-  S.txtTime = new PIXI.Text('⏱ 0:00', new PIXI.TextStyle(UI_STYLE));
-  S.txtTime.anchor.set(1, 0);
-  S.hudLayer.addChild(S.txtTime);
-
-  S.app.stage.addChild(S.hudLayer);
+  // HUD now lives in HTML (#$hud). Nothing to build in PIXI.
 }
 
 // ===== Build Buttons =====
@@ -247,14 +245,7 @@ export function buildOverlay() {
 function positionSplashSprite() {}
 
 export function repositionUI() {
-  const HUD_RIGHT = S.gameW - 12;
-  const HUD_LINE = 28;
-  S.txtScore.position.set(HUD_RIGHT, 12);
-  S.txtMermaids.position.set(HUD_RIGHT, 12 + HUD_LINE);
-  S.txtPolice.position.set(HUD_RIGHT, 12 + HUD_LINE * 2);
-  S.txtLamp.position.set(HUD_RIGHT, 12 + HUD_LINE * 3);
-  S.txtSunk.position.set(HUD_RIGHT, 12 + HUD_LINE * 4);
-  if (S.txtTime) S.txtTime.position.set(HUD_RIGHT, 12 + HUD_LINE * 5);
+  // HUD positioning is handled by CSS (fixed top-right).
 }
 
 export function buildUI() {

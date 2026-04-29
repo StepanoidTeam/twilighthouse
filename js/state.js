@@ -128,14 +128,7 @@ const State = {
   debugText: null,
 
   // UI
-  hudLayer: null,
   overlayLayer: null,
-  txtScore: null,
-  txtMermaids: null,
-  txtPolice: null,
-  txtLamp: null,
-  txtSunk: null,
-  txtTime: null,
   txtMessage: null,
   txtRestart: null,
   overlayBg: null,
