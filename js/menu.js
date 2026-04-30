@@ -259,11 +259,13 @@ function clearSubScreen() {
 function hideMainItems() {
   if ($menuMain) $menuMain.hidden = true;
   if ($menuHint) $menuHint.hidden = true;
+  hideDiscordLink();
 }
 
 function showMainItems() {
   if ($menuMain) $menuMain.hidden = false;
   if ($menuHint) $menuHint.hidden = false;
+  showDiscordLink();
 }
 
 function getBackHint() {
@@ -344,7 +346,6 @@ export async function buildMenu(app, startGameCb) {
   currentScreen = 'main';
 
   showAuthWidget();
-  showDiscordLink();
 
   // Новых игроков сразу ведём на экран "Как играть": главное меню остаётся
   // под низом, по Back игрок попадает на пункт Tutorial с уже прокрученным
@@ -658,9 +659,8 @@ function renderTutorialStep() {
   $nextBtn.disabled = false;
   $nextBtn.classList.toggle('howtoplay-nav-btn--finish', isLast);
 
-  $prevBtn.querySelector('.howtoplay-nav-label').textContent = t(
-    'howtoplay.prev',
-  );
+  $prevBtn.querySelector('.howtoplay-nav-label').textContent =
+    t('howtoplay.prev');
   $nextBtn.querySelector('.howtoplay-nav-label').textContent = t(
     isLast ? 'howtoplay.finish' : 'howtoplay.next',
   );
@@ -951,7 +951,6 @@ export function showMenu() {
   currentScreen = 'main';
   repositionMenu();
   showAuthWidget();
-  showDiscordLink();
 }
 
 export function isMenuVisible() {
