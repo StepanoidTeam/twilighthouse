@@ -10,6 +10,7 @@ import {
   PROFILES_COLLECTION,
   resolveUserDisplayName,
   syncUserProfileDoc,
+  updateUserProfile,
 } from './profile-store.js';
 import { currentUser } from './auth.js';
 
@@ -36,6 +37,20 @@ function buildProfileLike(profileData, uid) {
     displayName: profileData.displayName || '',
     email: profileData.email || '',
   };
+}
+
+function getCurrentUserAuthDisplayNameForUid(uid) {
+  if (!currentUser || currentUser.uid !== uid) return null;
+  const displayName =
+    typeof currentUser.displayName === 'string'
+      ? currentUser.displayName.trim()
+      : '';
+  return displayName || null;
+}
+
+function getCurrentUserAuthEmailForUid(uid) {
+  if (!currentUser || currentUser.uid !== uid) return null;
+  return currentUser.email || null;
 }
 
 export async function getAdminStatus({ forceRefresh = false } = {}) {
@@ -137,6 +152,8 @@ export async function syncLeaderboardDisplayNamesFromProfiles({
     mode: write ? 'write' : 'dry-run',
     checked: 0,
     missingProfile: 0,
+    profilesCreated: 0,
+    profilesSkippedNoAuthData: 0,
     unchanged: 0,
     planned: 0,
     updated: 0,
@@ -153,12 +170,36 @@ export async function syncLeaderboardDisplayNamesFromProfiles({
 
     if (!profileData) {
       summary.missingProfile += 1;
+      if (write) {
+        const authDisplayName = getCurrentUserAuthDisplayNameForUid(uid);
+        const authEmail = getCurrentUserAuthEmailForUid(uid);
+        if (!authDisplayName && !authEmail) {
+          summary.profilesSkippedNoAuthData += 1;
+          continue;
+        }
+        try {
+          await updateUserProfile(
+            { uid },
+            {
+              uid,
+              displayName: authDisplayName,
+              email: authEmail,
+            },
+          );
+          summary.profilesCreated += 1;
+        } catch (e) {
+          console.warn(
+            `[leaderboard sync] failed to create profile for ${uid}`,
+            e,
+          );
+        }
+      }
       continue;
     }
 
-    const nextDisplayName = resolveUserDisplayName(
-      buildProfileLike(profileData, uid),
-    );
+    const nextDisplayName =
+      getCurrentUserAuthDisplayNameForUid(uid) ||
+      resolveUserDisplayName(buildProfileLike(profileData, uid));
     const prevDisplayName = row.displayName || null;
 
     if (!nextDisplayName) {

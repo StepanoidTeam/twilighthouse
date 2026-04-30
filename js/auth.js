@@ -83,6 +83,7 @@ export async function signUp(email, password, displayName) {
 
 export async function signIn(email, password) {
   const cred = await signInWithEmailAndPassword(auth, email, password);
+  await syncUserProfileDoc(cred.user);
   return cred.user;
 }
 

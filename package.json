@@ -4,7 +4,9 @@
   "scripts": {
     "start": "http-server . -p 8080 -c-1",
     "admin:grant": "node scripts/set-admin-claim.mjs",
-    "admin:revoke": "node scripts/set-admin-claim.mjs --revoke"
+    "admin:revoke": "node scripts/set-admin-claim.mjs --revoke",
+    "sync:names:auth:dry": "node scripts/sync-display-names-from-auth.mjs",
+    "sync:names:auth": "node scripts/sync-display-names-from-auth.mjs --write"
   },
   "dependencies": {
     "firebase-admin": "^13.0.0"
