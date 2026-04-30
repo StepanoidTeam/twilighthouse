@@ -204,6 +204,9 @@
   justify-content: center;
   align-items: flex-start;
   padding: 9vh 28px 96px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .menu-screen-shell {
@@ -340,7 +343,9 @@
   flex-direction: column;
   gap: 12px;
   max-height: calc(100vh - 9vh - 96px - 80px);
-  overflow: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 .howtoplay-step-header {
@@ -691,11 +696,12 @@
 
 @media (max-height: 760px) {
   .menu-main {
-    gap: 14px;
+    gap: 10px;
+    bottom: 10px;
   }
 
   .menu-main-btn {
-    min-height: 70px;
+    min-height: 60px;
     font-size: 20px;
   }
 
@@ -761,6 +767,24 @@
 
   .menu-slider input {
     width: 100%;
+  }
+}
+
+@media (max-width: 720px) and (orientation: landscape) {
+  .menu-screen {
+    padding: 56px 16px 24px;
+  }
+
+  .menu-screen-shell {
+    gap: 10px;
+  }
+
+  .menu-card {
+    padding: 14px;
+  }
+
+  .menu-howtoplay {
+    max-height: none;
   }
 }
 

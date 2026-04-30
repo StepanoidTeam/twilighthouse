@@ -66,4 +66,7 @@ svg[aria-hidden='true'] {
 .fullscreen {
   position: absolute;
   inset: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
