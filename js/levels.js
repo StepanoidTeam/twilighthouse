@@ -7,39 +7,41 @@ import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
 
 // ===== Level Definitions =====
-// spawn — сколько мобов выпускается на этом уровне всего за раунд (бюджет).
-// goal  — порог по подцелям; ключи совпадают с теми, что мобы пушат через notify().
-//         Уровень считается пройденным, когда ВСЕ подцели достигли своих порогов.
+// goal       — пороги подцелей (см. словарь GOAL_TO_KIND). Уровень
+//              пройден, когда ВСЕ подцели достигли своих порогов.
+//              Мобы целевого типа спавнятся АВТОМАТИЧЕСКИ до тех пор,
+//              пока их сумма "сделано + сейчас в воздухе" < target,
+//              чтобы провалившиеся (затонувшие, прорвавшиеся к маяку)
+//              не блокировали прохождение.
+// extraSpawn — фоновый бюджет (атмосфера/нон-цель). Тратится на спавне
+//              как обычный счётчик и не пополняется при провале.
 const SCRIPTED_LEVELS = [
   // L1 (микро-тутор #1): "Привези 1 контрабандиста"
   {
     introKey: 'level.l1',
-    spawn: { boats: 1 },
     goal: { delivered_boats: 1 },
   },
-  // L2 (микро-тутор #2): "Отпугни копа"
+  // L2 (микро-тутор #2): "Отпугни копа" + 1 фоновая лодка для контекста
   {
     introKey: 'level.l2',
-    spawn: { boats: 1, cops: 1 },
     goal: { repelled_cops: 1 },
+    extraSpawn: { boats: 1 },
   },
   // L3: "3 контры безопасно"
   {
     introKey: 'level.l3',
-    spawn: { boats: 3 },
     goal: { delivered_boats: 3 },
   },
   // L4: "контры + копы"
   {
     introKey: 'level.l4',
-    spawn: { boats: 3, cops: 2 },
     goal: { delivered_boats: 3, repelled_cops: 2 },
   },
-  // L5 (босс-уровень): "контры + копы + русалки + кракен"
+  // L5 (босс): отгони кракена + проведи 3 лодки. Копы и русалки — атмосферный шум.
   {
     introKey: 'level.l5',
-    spawn: { boats: 3, cops: 5, mermaids: 3, krakens: 1 },
     goal: { delivered_boats: 3, repelled_kraken: 1 },
+    extraSpawn: { cops: 5, mermaids: 3 },
   },
 ];
 
@@ -47,16 +49,18 @@ const SCRIPTED_LEVELS = [
 function makeProcedural(n) {
   const k = n - SCRIPTED_LEVELS.length;
   const boats = 3 + Math.floor(k / 2);
+  const cops = 1 + Math.floor(k / 2);
   return {
     introKey: 'level.proc',
     introParams: { n },
-    spawn: {
-      boats,
-      cops: 2 + k,
-      mermaids: 1 + Math.floor(k / 2),
-      krakens: k % 3 === 0 ? 1 : 0,
+    goal: {
+      delivered_boats: boats,
+      repelled_cops: cops,
+      ...(k % 3 === 0 ? { repelled_kraken: 1 } : {}),
     },
-    goal: { delivered_boats: boats },
+    extraSpawn: {
+      mermaids: 1 + Math.floor(k / 2),
+    },
   };
 }
 
@@ -82,20 +86,68 @@ const SPAWNERS = {
   krakens: spawnKraken,
 };
 
-// Выбираем тип моба пропорционально остатку в бюджете уровня —
-// тогда волны естественно перемешиваются, а не идут "сначала все лодки,
-// потом все копы".
+// Соответствие "тип спавна" ↔ "ключ подцели", который засчитывается
+// при успешном исходе (см. notify() в boat/police/mermaid/kraken).
+const KIND_TO_GOAL = {
+  boats: 'delivered_boats',
+  cops: 'repelled_cops',
+  mermaids: 'mermaids_scared',
+  krakens: 'repelled_kraken',
+};
+
+// "Живые" мобы каждого типа на сцене — те, что ещё могут стать успехом
+// или провалом, но не зафейлились/не зачлись окончательно.
+const LIVE_COUNTERS = {
+  boats: () => S.boats.filter((b) => !b.arrived && !b.sinking).length,
+  cops: () => S.policeBoats.filter((p) => !p.arrived && !p.sinking).length,
+  mermaids: () => S.mermaids.filter((m) => !m.gone).length,
+  krakens: () => S.krakens.filter((k) => !k.gone).length,
+};
+
+// Сколько ещё нужно заспавнить целевых мобов данного типа,
+// чтобы у игрока было достаточно "шансов" закрыть подцель.
+function deficitFor(kind) {
+  const goalKey = KIND_TO_GOAL[kind];
+  if (!goalKey) return 0;
+  const target = (S.levelGoal || {})[goalKey] || 0;
+  if (!target) return 0;
+  const done = (S.levelProgress || {})[goalKey] || 0;
+  const live = LIVE_COUNTERS[kind] ? LIVE_COUNTERS[kind]() : 0;
+  return Math.max(0, target - done - live);
+}
+
+// Решаем что спавнить:
+//   1) Сначала закрываем дефицит по любой невыполненной подцели —
+//      чтобы провалившиеся мобы не блокировали прогресс.
+//   2) Если все цели "обеспечены живыми мобами" — тратим ambient-бюджет
+//      (extraSpawn) на атмосферу.
 function pickSpawnKind() {
-  const left = S.levelSpawnLeft || {};
-  const entries = Object.entries(left).filter(([, v]) => v > 0);
-  if (entries.length === 0) return null;
-  const total = entries.reduce((s, [, v]) => s + v, 0);
-  let r = Math.random() * total;
-  for (const [kind, v] of entries) {
-    r -= v;
-    if (r <= 0) return kind;
+  const deficits = [];
+  for (const kind of Object.keys(KIND_TO_GOAL)) {
+    const d = deficitFor(kind);
+    if (d > 0) deficits.push([kind, d]);
   }
-  return entries[entries.length - 1][0];
+  if (deficits.length) {
+    const total = deficits.reduce((s, [, v]) => s + v, 0);
+    let r = Math.random() * total;
+    for (const [kind, v] of deficits) {
+      r -= v;
+      if (r <= 0) return { kind, source: 'goal' };
+    }
+    return { kind: deficits[deficits.length - 1][0], source: 'goal' };
+  }
+
+  const extras = Object.entries(S.levelSpawnLeft || {}).filter(
+    ([, v]) => v > 0,
+  );
+  if (extras.length === 0) return null;
+  const total = extras.reduce((s, [, v]) => s + v, 0);
+  let r = Math.random() * total;
+  for (const [kind, v] of extras) {
+    r -= v;
+    if (r <= 0) return { kind, source: 'extra' };
+  }
+  return { kind: extras[extras.length - 1][0], source: 'extra' };
 }
 
 function scheduleNextSpawn(now) {
@@ -109,9 +161,14 @@ function applyLevel(index, { showBanner } = { showBanner: true }) {
   S.levelIndex = index;
   S.levelGoal = { ...(def.goal || {}) };
   S.levelProgress = {};
-  S.levelSpawnLeft = { ...(def.spawn || {}) };
+  // Только ambient-бюджет; целевые мобы спавнятся через deficitFor().
+  S.levelSpawnLeft = { ...(def.extraSpawn || {}) };
   S.levelStartedAt = performance.now();
   S.maxLevelReached = Math.max(S.maxLevelReached || 0, index + 1);
+  // Счётчик разбитых лодок — лимит проигрыша (6) считается ПО УРОВНЮ:
+  // обнуляем при каждой смене, чтобы прошлые крушения не утаскивали
+  // в game over посреди новой задачи.
+  S.boatsSunk = 0;
 
   // Дать игроку секунду-полторы прочитать баннер, прежде чем посыпется
   // новая волна моба.
@@ -140,12 +197,15 @@ function init() {
 function tickSpawns(now) {
   if (S.gameOver || S.gameOverPending || S.levelTransitioning) return;
   if (now < S.nextSpawnTime) return;
-  const kind = pickSpawnKind();
-  if (!kind) return; // бюджет исчерпан — ждём notify-завершения
-  const fn = SPAWNERS[kind];
+  const pick = pickSpawnKind();
+  if (!pick) return; // ни целей с дефицитом, ни ambient-бюджета — ждём
+  const fn = SPAWNERS[pick.kind];
   if (fn) {
     fn();
-    S.levelSpawnLeft[kind] = (S.levelSpawnLeft[kind] || 0) - 1;
+    // Декрементим только ambient-бюджет; целевые "пополняются сами".
+    if (pick.source === 'extra') {
+      S.levelSpawnLeft[pick.kind] = (S.levelSpawnLeft[pick.kind] || 0) - 1;
+    }
   }
   scheduleNextSpawn(now);
 }

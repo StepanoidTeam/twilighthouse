@@ -5,9 +5,6 @@ import {
   setDoc,
   serverTimestamp,
   collection,
-  query,
-  orderBy,
-  limit,
   getDocs,
 } from '../firebase.js';
 import { currentUser } from './auth.js';
@@ -56,35 +53,47 @@ export async function syncCurrentUserLeaderboardDisplayName(
 }
 
 /**
- * Submit a winning run. Stores the user's best survival time in `leaderboard/{uid}`.
- * Only writes if the new winning time is greater than the previously stored best.
- * Returns { written: boolean, best: number } or null if not signed in.
+ * Submit a run. Stores the user's best (level, time) tuple in `leaderboard/{uid}`.
+ * Tie-break: higher level wins; at the same level, longer survival wins.
+ * Returns { written, bestLevel, bestTimeMs } or null if not signed in.
  */
-export async function submitScore(survivalMs) {
+export async function submitScore(survivalMs, maxLevelReached = 0) {
   if (!currentUser) return null;
   if (!Number.isFinite(survivalMs) || survivalMs <= 0) return null;
+  const newLevel = Math.max(
+    0,
+    Number.isFinite(maxLevelReached) ? Math.floor(maxLevelReached) : 0,
+  );
+  const newTime = Math.round(survivalMs);
 
   const uid = currentUser.uid;
   const ref = doc(db, COLLECTION, uid);
 
-  // Read existing best
-  let prevBest = 0;
+  let prevTime = 0;
+  let prevLevel = 0;
   try {
     const snap = await getDoc(ref);
     if (snap.exists()) {
-      prevBest = Number(snap.data().bestTimeMs) || 0;
+      prevTime = Number(snap.data().bestTimeMs) || 0;
+      prevLevel = Number(snap.data().bestLevel) || 0;
     }
   } catch (e) {
     console.warn('Failed to read previous best', e);
   }
 
-  if (prevBest > 0 && survivalMs <= prevBest) {
-    return { written: false, best: prevBest };
+  // Записываем, если выше уровень или (тот же уровень и дольше выжили).
+  const isBetter =
+    newLevel > prevLevel ||
+    (newLevel === prevLevel && newTime > prevTime);
+
+  if (!isBetter) {
+    return { written: false, bestLevel: prevLevel, bestTimeMs: prevTime };
   }
 
   const payload = {
     uid,
-    bestTimeMs: Math.round(survivalMs),
+    bestTimeMs: newTime,
+    bestLevel: newLevel,
     updatedAt: serverTimestamp(),
   };
 
@@ -93,20 +102,16 @@ export async function submitScore(survivalMs) {
 
   await setDoc(ref, payload, { merge: true });
 
-  return { written: true, best: Math.round(survivalMs) };
+  return { written: true, bestLevel: newLevel, bestTimeMs: newTime };
 }
 
 /**
- * Fetch top N winning entries ordered by bestTimeMs desc.
- * Returns array of { uid, displayName, bestTimeMs }.
+ * Fetch top N entries sorted by (bestLevel desc, bestTimeMs desc).
+ * Sort is done client-side because we need a composite key and the
+ * collection is small. Returns array of { uid, displayName, bestLevel, bestTimeMs }.
  */
 export async function fetchTopLeaderboard(n = 10) {
-  const q = query(
-    collection(db, COLLECTION),
-    orderBy('bestTimeMs', 'desc'),
-    limit(n),
-  );
-  const snap = await getDocs(q);
+  const snap = await getDocs(collection(db, COLLECTION));
   const rows = [];
   snap.forEach((d) => {
     const data = d.data();
@@ -114,11 +119,18 @@ export async function fetchTopLeaderboard(n = 10) {
     rows.push({
       uid,
       displayName: pickStoredDisplayName(data.displayName, uid),
+      bestLevel: Number(data.bestLevel) || 0,
       bestTimeMs: Number(data.bestTimeMs) || 0,
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
     });
   });
-  return rows;
+  rows.sort(compareEntries);
+  return rows.slice(0, n);
+}
+
+function compareEntries(a, b) {
+  if (b.bestLevel !== a.bestLevel) return b.bestLevel - a.bestLevel;
+  return b.bestTimeMs - a.bestTimeMs;
 }
 
 /**
@@ -127,8 +139,7 @@ export async function fetchTopLeaderboard(n = 10) {
  * Returns { rows, currentUid } where each row includes a 1-based rank.
  */
 export async function fetchLeaderboardView(n = 50, uid = currentUser?.uid) {
-  const q = query(collection(db, COLLECTION), orderBy('bestTimeMs', 'desc'));
-  const snap = await getDocs(q);
+  const snap = await getDocs(collection(db, COLLECTION));
   const allRows = [];
 
   snap.forEach((d) => {
@@ -137,10 +148,13 @@ export async function fetchLeaderboardView(n = 50, uid = currentUser?.uid) {
     allRows.push({
       uid,
       displayName: pickStoredDisplayName(data.displayName, uid),
+      bestLevel: Number(data.bestLevel) || 0,
       bestTimeMs: Number(data.bestTimeMs) || 0,
       updatedAt: data.updatedAt ? data.updatedAt.toDate() : null,
     });
   });
+
+  allRows.sort(compareEntries);
 
   const topRows = allRows.slice(0, n).map((row, index) => ({
     ...row,
@@ -208,11 +222,13 @@ function createLeaderboardHeader() {
 
   const $headerRank = $header.querySelector('[data-col="rank"]');
   const $headerName = $header.querySelector('[data-col="name"]');
+  const $headerLevel = $header.querySelector('[data-col="level"]');
   const $headerTime = $header.querySelector('[data-col="time"]');
   const $headerDate = $header.querySelector('[data-col="date"]');
 
   if ($headerRank) $headerRank.textContent = t('leaderboard.col.rank');
   if ($headerName) $headerName.textContent = t('leaderboard.col.name');
+  if ($headerLevel) $headerLevel.textContent = t('leaderboard.col.level');
   if ($headerTime) $headerTime.textContent = t('leaderboard.col.time');
   if ($headerDate) $headerDate.textContent = t('leaderboard.col.date');
 
@@ -244,6 +260,11 @@ function createLeaderboardRow(entry, myUid) {
   $name.className = 'menu-leaderboard-name';
   $name.textContent = label;
 
+  const $level = document.createElement('span');
+  $level.className = 'menu-leaderboard-level';
+  // Старые записи без bestLevel — показываем 0 (как и просили).
+  $level.textContent = t('hud.level.prefix', { n: entry.bestLevel || 0 });
+
   const $time = document.createElement('span');
   $time.className = 'menu-leaderboard-time';
   $time.textContent = formatSurvivalTime(entry.bestTimeMs);
@@ -254,6 +275,7 @@ function createLeaderboardRow(entry, myUid) {
 
   $row.appendChild($rank);
   $row.appendChild($name);
+  $row.appendChild($level);
   $row.appendChild($time);
   $row.appendChild($date);
 

@@ -1,5 +1,6 @@
 .menu-leaderboard {
   --leaderboard-rank-col: 56px;
+  --leaderboard-level-col: 64px;
   --leaderboard-time-col: 92px;
   --leaderboard-date-col: 156px;
   max-height: calc(100vh - 9vh - 96px - 80px);
@@ -19,6 +20,7 @@
   grid-template-columns:
     var(--leaderboard-rank-col)
     minmax(0, 1fr)
+    var(--leaderboard-level-col)
     var(--leaderboard-time-col)
     var(--leaderboard-date-col);
   gap: 12px;
@@ -52,15 +54,27 @@
 }
 
 .menu-leaderboard-rank,
+.menu-leaderboard-level,
 .menu-leaderboard-time,
 .menu-leaderboard-date {
   white-space: nowrap;
 }
 
+.menu-leaderboard-level,
 .menu-leaderboard-time,
 .menu-leaderboard-date {
   justify-self: end;
   text-align: right;
+}
+
+.menu-leaderboard-level {
+  font-variant-numeric: tabular-nums;
+  color: #d8e6f4;
+  margin-right: 30px;
+}
+
+.menu-leaderboard-row .menu-leaderboard-level {
+  font-weight: 700;
 }
 
 .menu-leaderboard-name {
@@ -77,6 +91,7 @@
 @media (max-width: 720px) {
   .menu-leaderboard {
     --leaderboard-rank-col: 25px;
+    --leaderboard-level-col: 48px;
     --leaderboard-time-col: 84px;
   }
 
@@ -85,6 +100,7 @@
     grid-template-columns:
       var(--leaderboard-rank-col)
       minmax(0, 1fr)
+      var(--leaderboard-level-col)
       var(--leaderboard-time-col);
       display: flex;
       justify-content: space-between;

@@ -341,6 +341,13 @@ function clearGame() {
 
 // ===== Exit to menu =====
 function exitToMenu() {
+  // Засабмитить прогресс ДО сброса состояния — иначе достигнутый уровень
+  // и время выживания потеряются в state.reset(). trySubmitScore() читает
+  // S.runSurvivalMs / S.maxLevelReached синхронно в локальные переменные
+  // перед await, так что сброс ниже не повредит уже улетевшему запросу.
+  if (S.gameSessionActive && !S.scoreSubmitted) {
+    void trySubmitScore();
+  }
   clearGame();
   S.reset();
   updateHUD();
@@ -379,24 +386,29 @@ function startGame() {
 }
 
 // ===== Submit Score =====
+// Теперь сабмитим КАЖДЫЙ забег (включая game-over): в endless-режиме
+// "победы" нет, оценка = (макс. достигнутый уровень, время выживания).
 async function trySubmitScore() {
   if (S.scoreSubmitted) return;
   S.scoreSubmitted = true;
-  if (!S.gameWon) return;
   const survivalMs = S.runSurvivalMs;
+  const maxLevel = S.maxLevelReached || 0;
   if (!currentUser) {
     console.log(
-      `🏁 Run: ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`,
+      `🏁 Run: lvl ${maxLevel}, ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`,
     );
     return;
   }
   try {
-    const res = await submitScore(survivalMs);
+    const res = await submitScore(survivalMs, maxLevel);
     if (res && res.written) {
-      console.log(`🏆 New best saved: ${Math.round(res.best / 1000)}s`);
+      console.log(
+        `🏆 New best saved: lvl ${res.bestLevel}, ${Math.round(res.bestTimeMs / 1000)}s`,
+      );
     } else if (res) {
       console.log(
-        `🏁 Run: ${Math.round(survivalMs / 1000)}s (best remains ${Math.round(res.best / 1000)}s)`,
+        `🏁 Run: lvl ${maxLevel}, ${Math.round(survivalMs / 1000)}s ` +
+          `(best remains lvl ${res.bestLevel}, ${Math.round(res.bestTimeMs / 1000)}s)`,
       );
     }
   } catch (e) {
