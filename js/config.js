@@ -12,7 +12,22 @@ const BOAT_RADIUS = 14;
 const BOAT_WIDTH = 46;
 const KRAKEN_RADIUS = 72;
 const KRAKEN_WIDTH = 276;
-const WAKE_MAX = 30;
+const WAKE_MAX = 52;
+/** Wake trail samples spawn this far behind the boat center along velocity */
+const WAKE_SPAWN_BACK = 22;
+/** Splash blobs: radius = MIN + (age/WAKE_MAX) * GROWTH */
+const WAKE_DOT_R_MIN = 6;
+const WAKE_DOT_R_GROWTH = 20;
+/** Irregular wake: emit after this much travel (world units), randomized each time */
+const WAKE_EMIT_DIST_MIN = 2.2;
+const WAKE_EMIT_DIST_MAX = 9;
+/** Perpendicular foam scatter (± px) */
+const WAKE_SIDE_JITTER = 14;
+/** Extra stagger along wake axis (± px) */
+const WAKE_ALONG_JITTER = 10;
+/** Stern distance varies by this factor range × WAKE_SPAWN_BACK */
+const WAKE_ALONG_SCALE_MIN = 0.72;
+const WAKE_ALONG_SCALE_MAX = 1.38;
 const ARRIVAL_RADIUS = 55;
 
 // ===== Beam & Lamp =====
@@ -201,6 +216,15 @@ export {
   KRAKEN_RADIUS,
   KRAKEN_WIDTH,
   WAKE_MAX,
+  WAKE_SPAWN_BACK,
+  WAKE_DOT_R_MIN,
+  WAKE_DOT_R_GROWTH,
+  WAKE_EMIT_DIST_MIN,
+  WAKE_EMIT_DIST_MAX,
+  WAKE_SIDE_JITTER,
+  WAKE_ALONG_JITTER,
+  WAKE_ALONG_SCALE_MIN,
+  WAKE_ALONG_SCALE_MAX,
   ARRIVAL_RADIUS,
   BEAM_ROTATE_SPEED,
   BEAM_LEN,

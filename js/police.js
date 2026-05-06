@@ -27,6 +27,7 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
+import { createWakeEmitterState, tickWakeEmitter } from './wake.js';
 
 const COP_LIT_SOUNDS = [
   'audio/cop/police-intro-siren.mp3',
@@ -81,6 +82,7 @@ export function spawnPoliceBoat() {
     frameTick: Math.random() * BOAT_FRAME_DURATION,
     driftDir: Math.random() < 0.5 ? 1 : -1,
     wasLit: false,
+    wakeEmit: createWakeEmitterState(),
     // Hysteresis: raw lit state + how long it's been stable (in frames).
     // Prevents tooltip/sound spam when beam edge grazes the boat.
     lastRawLit: false,
@@ -192,6 +194,8 @@ export function updatePoliceBoats(delta) {
 
     const moveX = moveNx * p.speed * speedMult * delta;
     const moveY = moveNy * p.speed * speedMult * delta;
+    const prevX = spr.x;
+    const prevY = spr.y;
     spr.x += moveX;
     spr.y += moveY;
 
@@ -228,9 +232,18 @@ export function updatePoliceBoats(delta) {
       }
     }
 
-    // Wake trail
-    p.wake.unshift({ x: spr.x - moveNx * 14, y: spr.y - moveNy * 14, age: 0 });
-    if (p.wake.length > WAKE_MAX) p.wake.pop();
+    const stepLen = Math.hypot(moveX, moveY);
+    tickWakeEmitter(
+      p.wakeEmit,
+      p.wake,
+      prevX,
+      prevY,
+      spr.x,
+      spr.y,
+      moveNx,
+      moveNy,
+      stepLen,
+    );
 
     // Удалить копа, если он, не освещённый, дрейфует мимо за пределы зоны.
     // Считается отпугнутым — Паттисон его не подсветил, патруль ушёл ни с чем.

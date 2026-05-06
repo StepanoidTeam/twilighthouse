@@ -4,6 +4,8 @@ import {
   BOAT_RADIUS,
   BOAT_WIDTH,
   WAKE_MAX,
+  WAKE_DOT_R_MIN,
+  WAKE_DOT_R_GROWTH,
   ARRIVAL_RADIUS,
   BEACON_RADIUS,
   BEACON_PULSE_SPEED,
@@ -20,6 +22,7 @@ import {
 import { BOAT_SONAR_VOLUME, playRandomSound } from './sound.js';
 import S from './state.js';
 import { isInBeam, checkRockCollision, spawnOnRing } from './lighthouse.js';
+import { createWakeEmitterState, tickWakeEmitter } from './wake.js';
 
 const BOAT_SONAR_SOUNDS = [
   'audio/boat/submarine_sonar-1.mp3',
@@ -121,6 +124,7 @@ export function spawnBoat() {
     sinking: false,
     arrived: false,
     wake: [],
+    wakeEmit: createWakeEmitterState(),
     frameIndex: 0,
     frameTick: Math.random() * BOAT_FRAME_DURATION,
     cargo: randomCargo(),
@@ -238,6 +242,8 @@ export function updateBoats(delta) {
 
     const moveX = (nx + wx) * b.speed * speedMult * delta;
     const moveY = (ny + wy) * b.speed * speedMult * delta;
+    const prevX = spr.x;
+    const prevY = spr.y;
     spr.x += moveX;
     spr.y += moveY;
 
@@ -277,9 +283,25 @@ export function updateBoats(delta) {
       }
     }
 
-    // Wake trail
-    b.wake.unshift({ x: spr.x - nx * 14, y: spr.y - ny * 14, age: 0 });
-    if (b.wake.length > WAKE_MAX) b.wake.pop();
+    // Wake trail — uneven spacing (distance accumulator) + lateral jitter
+    const stepLen = Math.hypot(moveX, moveY);
+    let fx = nx;
+    let fy = ny;
+    if (stepLen > 1e-4) {
+      fx = moveX / stepLen;
+      fy = moveY / stepLen;
+    }
+    tickWakeEmitter(
+      b.wakeEmit,
+      b.wake,
+      prevX,
+      prevY,
+      spr.x,
+      spr.y,
+      fx,
+      fy,
+      stepLen,
+    );
 
     // Pulse beacon and follow boat
     const pulse = Math.max(
@@ -299,8 +321,11 @@ export function drawWakes() {
       w.age++;
       const t = w.age / WAKE_MAX;
       if (t >= 1) continue;
-      S.wakeGfx.beginFill(C.wake, (1 - t) * 0.15);
-      S.wakeGfx.drawCircle(w.x, w.y, 2 + t * 4);
+      const alpha = (1 - t) * 0.15 * (w.alphaMul ?? 1);
+      const r =
+        (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
+      S.wakeGfx.beginFill(C.wake, Math.min(0.22, alpha));
+      S.wakeGfx.drawCircle(w.x, w.y, r);
       S.wakeGfx.endFill();
     }
     while (b.wake.length > 0 && b.wake[b.wake.length - 1].age > WAKE_MAX) {
@@ -312,8 +337,11 @@ export function drawWakes() {
       w.age++;
       const t = w.age / WAKE_MAX;
       if (t >= 1) continue;
-      S.wakeGfx.beginFill(C.wake, (1 - t) * 0.15);
-      S.wakeGfx.drawCircle(w.x, w.y, 2 + t * 4);
+      const alpha = (1 - t) * 0.15 * (w.alphaMul ?? 1);
+      const r =
+        (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
+      S.wakeGfx.beginFill(C.wake, Math.min(0.22, alpha));
+      S.wakeGfx.drawCircle(w.x, w.y, r);
       S.wakeGfx.endFill();
     }
     while (p.wake.length > 0 && p.wake[p.wake.length - 1].age > WAKE_MAX) {
