@@ -85,7 +85,7 @@ export function updateDarkness() {
   S.beamErase.endFill();
 
   // glow circle
-  S.beamErase.beginFill(0xffffff, 1);
+  S.beamErase.beginFill(0xffffff, S.lampFlicker);
   S.beamErase.drawCircle(cxCircle, cyCircle, S.LH_GLOW_RADIUS);
   S.beamErase.endFill();
 
