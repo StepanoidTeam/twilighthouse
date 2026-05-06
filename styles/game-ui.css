@@ -40,6 +40,117 @@
   transform: translateX(-50%);
 }
 
+/* ===== Current level / goal HUD (top-center, под таймером) ===== */
+.hud-level {
+  position: fixed;
+  left: 50%;
+  top: 60px;
+  transform: translateX(-50%);
+  padding: 8px 16px;
+  border-radius: 10px;
+  background: rgba(10, 28, 46, 0.55);
+  border: 1px solid rgba(80, 140, 200, 0.35);
+  color: #c8d8e8;
+  font-family: var(--font-ui);
+  font-weight: bold;
+  font-size: 15px;
+  white-space: nowrap;
+  text-shadow:
+    0 0 6px #000,
+    0 1px 3px #000;
+  z-index: 1;
+  pointer-events: none;
+  letter-spacing: 0.3px;
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  min-width: 120px;
+}
+
+.hud-level-head {
+  font-size: 14px;
+  color: #8aabcc;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  text-align: center;
+  padding-bottom: 3px;
+  border-bottom: 1px solid rgba(80, 140, 200, 0.25);
+}
+
+.hud-level-row {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 16px;
+  line-height: 1.15;
+}
+
+.hud-level-row.is-done {
+  color: #88eebb;
+  text-decoration: line-through;
+  opacity: 0.7;
+}
+
+.hud-level-box {
+  width: 18px;
+  text-align: center;
+  font-size: 14px;
+}
+
+.hud-level-icon {
+  width: 20px;
+  text-align: center;
+}
+
+.hud-level-count {
+  flex: 1;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+/* ===== Level banner (mid-screen, transient at level start) ===== */
+.level-banner {
+  position: fixed;
+  left: 50%;
+  top: 38%;
+  transform: translate(-50%, -50%);
+  padding: 18px 36px;
+  border-radius: 14px;
+  background: rgba(8, 20, 36, 0.78);
+  border: 1.5px solid rgba(120, 180, 230, 0.5);
+  color: #eaf3ff;
+  font-family: var(--font-ui);
+  text-align: center;
+  z-index: 2;
+  pointer-events: none;
+  text-shadow:
+    0 0 10px #000,
+    0 2px 6px #000;
+  opacity: 0;
+  transition: opacity 0.45s ease-out;
+  backdrop-filter: blur(4px);
+  -webkit-backdrop-filter: blur(4px);
+  max-width: min(560px, 88vw);
+}
+
+.level-banner.is-visible {
+  opacity: 1;
+}
+
+.level-banner-title {
+  font-size: 30px;
+  font-weight: bold;
+  margin: 0 0 8px;
+  letter-spacing: 0.5px;
+}
+
+.level-banner-subtitle {
+  font-size: 17px;
+  margin: 0;
+  color: #b8d2ee;
+  font-weight: 500;
+}
+
 /* ===== In-game Escape button (top-left) ===== */
 .esc-btn {
   position: fixed;

@@ -9,6 +9,8 @@ import {
   BEACON_PULSE_SPEED,
   BOAT_FRAMES,
   BOAT_FRAME_DURATION,
+  MOB_SPAWN_RING,
+  SPAWN_MARGIN,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   scaleToWidth,
@@ -24,6 +26,7 @@ import {
   showPoliceGameOver,
   playCrashSound,
 } from './ui.js';
+import { levels } from './levels.js';
 
 const COP_LIT_SOUNDS = [
   'audio/cop/police-intro-siren.mp3',
@@ -209,6 +212,9 @@ export function updatePoliceBoats(delta) {
         console.log(
           `🚔 Полицейский катер разбился о камни (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
+        // Разбился без света — считаем, что цель уровня "отпугнуть копа"
+        // выполнена: до маяка он не доплыл.
+        levels.notify('repelled_cops');
       } else {
         for (const rock of S.rockColliders) {
           const rd = Math.hypot(spr.x - rock.x, spr.y - rock.y);
@@ -225,6 +231,21 @@ export function updatePoliceBoats(delta) {
     // Wake trail
     p.wake.unshift({ x: spr.x - moveNx * 14, y: spr.y - moveNy * 14, age: 0 });
     if (p.wake.length > WAKE_MAX) p.wake.pop();
+
+    // Удалить копа, если он, не освещённый, дрейфует мимо за пределы зоны.
+    // Считается отпугнутым — Паттисон его не подсветил, патруль ушёл ни с чем.
+    if (
+      !lit &&
+      Math.hypot(spr.x - S.lhX, spr.y - S.lhY) >
+        MOB_SPAWN_RING + SPAWN_MARGIN
+    ) {
+      console.log(`🚔 Полицейский катер ушёл за горизонт`);
+      S.boatLayer.removeChild(spr);
+      S.beaconLayer.removeChild(p.beacon);
+      S.policeBoats.splice(i, 1);
+      levels.notify('repelled_cops');
+      continue;
+    }
 
     // Pulse beacon: same sine as regular boats, color alternates by sign
     const t = Math.sin(Date.now() * BEACON_PULSE_SPEED + p.beaconPhase);

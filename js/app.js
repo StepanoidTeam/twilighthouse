@@ -9,8 +9,6 @@ import {
   LAMP_MIN_ANGLE,
   LAMP_BURNOUT_TIME,
   LAMP_FLICKER_START,
-  SPAWN_INTERVAL_MIN,
-  SPAWN_INTERVAL_MAX,
   computeWorldScale,
 } from './config.js';
 import {
@@ -47,10 +45,11 @@ import {
   showExitConfirm,
   hideExitConfirm,
 } from './ui.js';
-import { spawnBoat, cleanupBoats, boatEntity } from './boat.js';
-import { spawnMermaid, cleanupMermaids, mermaidEntity } from './mermaid.js';
-import { spawnKraken, cleanupKrakens, krakenEntity } from './kraken.js';
-import { spawnPoliceBoat, cleanupPolice, policeEntity } from './police.js';
+import { cleanupBoats, boatEntity } from './boat.js';
+import { cleanupMermaids, mermaidEntity } from './mermaid.js';
+import { cleanupKrakens, krakenEntity } from './kraken.js';
+import { cleanupPolice, policeEntity } from './police.js';
+import { levels } from './levels.js';
 import { buildDebug, updateDebug } from './debug.js';
 import {
   buildMenu,
@@ -209,9 +208,9 @@ function prepareFreshRun() {
   S.reset();
   buildRocks(S.rockLayer);
   S.gameSessionActive = true;
+  levels.init();
   updateHUD();
   clearTransientVisuals();
-  S.nextSpawnTime = performance.now() + 1000;
   snapCamera();
   updateDarkness();
   $gameContainer.hidden = false;
@@ -480,25 +479,9 @@ function gameLoop(delta) {
   S.lhGlow.alpha = S.lampFlicker;
   updateHUD();
 
-  // Spawn mobs
+  // Spawn mobs — теперь все спавны идут через бюджет текущего уровня.
   const now = performance.now();
-  if (now > S.nextSpawnTime) {
-    // Spawn: 40% boat, 20% mermaid, 30% police, 10% kraken
-    const roll = Math.random();
-    if (roll < 0.4) {
-      spawnBoat();
-    } else if (roll < 0.6) {
-      spawnMermaid();
-    } else if (roll < 0.9) {
-      spawnPoliceBoat();
-    } else {
-      if (S.krakens.length < 1) spawnKraken();
-    }
-    S.nextSpawnTime =
-      now +
-      SPAWN_INTERVAL_MIN +
-      Math.random() * (SPAWN_INTERVAL_MAX - SPAWN_INTERVAL_MIN);
-  }
+  levels.tickSpawns(now);
 
   for (const { entity, updatePhase } of ENTITY_SYSTEMS) {
     if (updatePhase === 'main') entity.update(delta);

@@ -105,6 +105,15 @@ const State = {
   // Spawning
   nextSpawnTime: 0,
 
+  // Levels
+  levelIndex: 0,
+  levelGoal: {},
+  levelProgress: {},
+  levelSpawnLeft: {},
+  levelStartedAt: 0,
+  levelTransitioning: false,
+  maxLevelReached: 0,
+
   // Lamp
   lampTimer: 0,
   lampFlicker: 1,
@@ -165,6 +174,13 @@ const State = {
     this.runSurvivalMs = 0;
     this.lastSurvivalTick = 0;
     this.scoreSubmitted = false;
+    this.levelIndex = 0;
+    this.levelGoal = {};
+    this.levelProgress = {};
+    this.levelSpawnLeft = {};
+    this.levelStartedAt = 0;
+    this.levelTransitioning = false;
+    this.maxLevelReached = 0;
   },
 };
 

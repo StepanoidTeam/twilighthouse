@@ -48,6 +48,10 @@ const {
   $hudLamp,
   $hudSunk,
   $hudTime,
+  $hudLevel,
+  $levelBanner,
+  $levelBannerTitle,
+  $levelBannerSubtitle,
 } = globalThis;
 
 // ===== Tooltips =====
@@ -116,7 +120,62 @@ const hudCache = {
   lamp: null,
   sunk: null,
   time: null,
+  level: null,
 };
+
+// ===== Level Goal HUD =====
+// Краткое визуальное представление подцелей текущего уровня.
+// Иконки совпадают с теми, что используются в HUD-строках мобов.
+const GOAL_ICONS = {
+  delivered_boats: '⛵',
+  repelled_cops: '🚔',
+  mermaids_scared: '🧜',
+  repelled_kraken: '🦑',
+};
+
+// Чек-лист подцелей: одна строка на подцель, выполненная — с галочкой
+// и зачёркнутая, текущая — с пустым чекбоксом и счётчиком cur/target.
+// Возвращает HTML, чтобы дать стилизовать строки независимо.
+function formatLevelHudHtml() {
+  if (!S.gameSessionActive) return '';
+  const idx = (S.levelIndex || 0) + 1;
+  const goal = S.levelGoal || {};
+  const progress = S.levelProgress || {};
+  const head = `<div class="hud-level-head">${escapeHtml(
+    t('hud.level.prefix', { n: idx }),
+  )}</div>`;
+  const rows = [];
+  for (const [key, target] of Object.entries(goal)) {
+    if (!target) continue;
+    const cur = Math.min(progress[key] || 0, target);
+    const done = cur >= target;
+    const icon = GOAL_ICONS[key] || '•';
+    const box = done ? '✅' : '☐';
+    rows.push(
+      `<div class="hud-level-row${done ? ' is-done' : ''}">` +
+        `<span class="hud-level-box">${box}</span>` +
+        `<span class="hud-level-icon">${icon}</span>` +
+        `<span class="hud-level-count">${cur}/${target}</span>` +
+        `</div>`,
+    );
+  }
+  if (rows.length === 0) {
+    rows.push(
+      `<div class="hud-level-row"><span class="hud-level-box">☐</span>` +
+        `<span class="hud-level-count">${escapeHtml(t('hud.level.idle'))}</span></div>`,
+    );
+  }
+  return head + rows.join('');
+}
+
+function escapeHtml(s) {
+  return String(s)
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;');
+}
+
+let levelBannerTimer = null;
 
 function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
@@ -146,6 +205,49 @@ export function updateHUD() {
   setIfChanged('lamp', $hudLamp, bulbs > 0 ? '💡'.repeat(bulbs) : '🔦');
   setIfChanged('sunk', $hudSunk, `⛵💥 ${S.boatsSunk}/6`);
   setIfChanged('time', $hudTime, `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`);
+  if ($hudLevel) {
+    const levelHtml = formatLevelHudHtml();
+    if (hudCache.level !== levelHtml) {
+      hudCache.level = levelHtml;
+      $hudLevel.innerHTML = levelHtml;
+      $hudLevel.hidden = !levelHtml;
+    }
+  }
+}
+
+// ===== Level Banner =====
+// Транзиентный оверлей по центру: появляется на старте уровня,
+// держится ~1.4с (видимо), затем плавно угасает. Не блокирует ввод.
+export function showLevelBanner({ titleKey, subtitleKey, params } = {}) {
+  if (!$levelBanner || !$levelBannerTitle || !$levelBannerSubtitle) return;
+  $levelBannerTitle.textContent = titleKey ? t(titleKey, params) : '';
+  $levelBannerSubtitle.textContent = subtitleKey ? t(subtitleKey, params) : '';
+  $levelBanner.hidden = false;
+  // Force reflow before adding class so the transition fires reliably.
+  void $levelBanner.offsetWidth;
+  $levelBanner.classList.add('is-visible');
+  if (levelBannerTimer) {
+    clearTimeout(levelBannerTimer);
+    levelBannerTimer = null;
+  }
+  levelBannerTimer = window.setTimeout(() => {
+    if (!$levelBanner) return;
+    $levelBanner.classList.remove('is-visible');
+    levelBannerTimer = window.setTimeout(() => {
+      if ($levelBanner) $levelBanner.hidden = true;
+      levelBannerTimer = null;
+    }, 600);
+  }, 4200);
+}
+
+export function hideLevelBanner() {
+  if (!$levelBanner) return;
+  if (levelBannerTimer) {
+    clearTimeout(levelBannerTimer);
+    levelBannerTimer = null;
+  }
+  $levelBanner.classList.remove('is-visible');
+  $levelBanner.hidden = true;
 }
 
 // ===== Build HUD =====

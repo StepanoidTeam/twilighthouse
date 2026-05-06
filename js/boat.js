@@ -11,7 +11,6 @@ import {
   BOAT_FRAME_DURATION,
   LIT_DEBOUNCE,
   BOAT_CARGO_TYPES,
-  WIN_SCORE,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   C,
@@ -38,9 +37,9 @@ import {
   updateHUD,
   scheduleGameOver,
   showBoatGameOver,
-  showWin,
   playCrashSound,
 } from './ui.js';
+import { levels } from './levels.js';
 
 // ===== Cargo Helpers =====
 function parseCargo(cargoStr) {
@@ -189,11 +188,7 @@ export function updateBoats(delta) {
       spawnTooltip(spr.x, spr.y - 20, b.cargo, TOOLTIP_STYLE_OK);
       // Restore lamp on boat arrival
       S.lampTimer = 0;
-      if (S.score >= WIN_SCORE) {
-        S.gameOver = true;
-        S.gameWon = true;
-        showWin();
-      }
+      levels.notify('delivered_boats');
       // Fade out
       const fadeOut = () => {
         spr.alpha -= 0.02;

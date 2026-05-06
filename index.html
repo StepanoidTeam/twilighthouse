@@ -39,6 +39,15 @@
   <div id="$gameContainer" hidden>
     <div class="hud-row hud-time" id="$hudTime">⏱ 0:00</div>
 
+    <!-- ===== Level goal banner (mid-screen, transient) ===== -->
+    <div id="$levelBanner" class="level-banner" hidden>
+      <p class="level-banner-title" id="$levelBannerTitle"></p>
+      <p class="level-banner-subtitle" id="$levelBannerSubtitle"></p>
+    </div>
+
+    <!-- ===== Current level / goal HUD (top-center, persistent) ===== -->
+    <div id="$hudLevel" class="hud-level" hidden></div>
+
     <!-- ===== In-game HUD (top-right) ===== -->
     <div id="$hud" class="hud" aria-hidden="true">
       <div class="hud-row " id="$hudScore" hidden>📦×0</div>

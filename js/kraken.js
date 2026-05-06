@@ -26,6 +26,7 @@ import {
   showBoatGameOver,
   playCrashSound,
 } from './ui.js';
+import { levels } from './levels.js';
 
 export function spawnKraken() {
   const { x, y } = spawnOnRing();
@@ -217,6 +218,7 @@ export function updateKrakens(delta) {
       console.log(`🦑 Кракен уплыл за экран`);
       S.boatLayer.removeChild(k.spr);
       S.krakens.splice(i, 1);
+      levels.notify('repelled_kraken');
       continue;
     }
 

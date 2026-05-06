@@ -20,6 +20,7 @@ import {
   scheduleGameOver,
   showMermaidGameOver,
 } from './ui.js';
+import { levels } from './levels.js';
 
 export function spawnMermaid() {
   const { x, y } = spawnOnRing();
@@ -121,6 +122,7 @@ export function updateMermaids(delta) {
       console.log(`🧜‍♀️ Русалка уплыла за экран`);
       S.boatLayer.removeChild(m.spr);
       S.mermaids.splice(i, 1);
+      levels.notify('mermaids_scared');
       continue;
     }
 

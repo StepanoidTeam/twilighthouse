@@ -174,6 +174,22 @@ Photopea — image editor
     'win.statCrates': 'Crates delivered',
     'win.statTime': 'Final time',
 
+    // Levels
+    'hud.level.prefix': 'Level {n}',
+    'hud.level.idle': 'survive',
+    'level.l1.title': 'Level 1 — First Run',
+    'level.l1.sub': 'Guide 1 smuggler boat into the harbor',
+    'level.l2.title': 'Level 2 — Cops on Patrol',
+    'level.l2.sub': "Don't light the cop — let him drift past",
+    'level.l3.title': 'Level 3 — Three Boats',
+    'level.l3.sub': 'Bring 3 smugglers home safe',
+    'level.l4.title': 'Level 4 — Heat Rises',
+    'level.l4.sub': '3 smugglers in, 2 cops repelled',
+    'level.l5.title': 'Level 5 — The Kraken Wakes',
+    'level.l5.sub': 'Repel the kraken with your beam, save 3 smugglers',
+    'level.proc.title': 'Level {n}',
+    'level.proc.sub': 'The storm grows stronger',
+
     // Auth modal
     'auth.signIn': 'Sign in',
     'auth.signUp': 'Sign up',
@@ -356,6 +372,22 @@ Photopea — image editor
     'win.statLamps': 'Доставлено ламп',
     'win.statCrates': 'Доставлено ящиков',
     'win.statTime': 'Финальное время',
+
+    // Levels
+    'hud.level.prefix': 'Уровень {n}',
+    'hud.level.idle': 'выжить',
+    'level.l1.title': 'Урок 1 — Первая ходка',
+    'level.l1.sub': 'Проведи 1 лодку контрабандистов до маяка',
+    'level.l2.title': 'Урок 2 — Копы на горизонте',
+    'level.l2.sub': 'Не свети на копа — пусть пройдёт мимо',
+    'level.l3.title': 'Уровень 3 — Три лодки',
+    'level.l3.sub': 'Доставь 3 контрабандистов целыми',
+    'level.l4.title': 'Уровень 4 — Жарко',
+    'level.l4.sub': '3 контры в порт, 2 копа отпугни',
+    'level.l5.title': 'Уровень 5 — Кракен пробудился',
+    'level.l5.sub': 'Отгони кракена лучом, спаси 3 контры',
+    'level.proc.title': 'Уровень {n}',
+    'level.proc.sub': 'Шторм усиливается',
 
     'auth.signIn': 'Вход',
     'auth.signUp': 'Регистрация',
