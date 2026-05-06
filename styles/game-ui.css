@@ -54,7 +54,6 @@
   font-family: var(--font-ui);
   font-weight: bold;
   font-size: 15px;
-  white-space: nowrap;
   text-shadow:
     0 0 6px #000,
     0 1px 3px #000;
@@ -64,7 +63,8 @@
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: 120px;
+  min-width: 220px;
+  max-width: min(440px, 92vw);
 }
 
 .hud-level-head {
@@ -80,9 +80,9 @@
 .hud-level-row {
   display: flex;
   align-items: center;
-  gap: 6px;
+  gap: 8px;
   font-size: 16px;
-  line-height: 1.15;
+  line-height: 1.2;
 }
 
 .hud-level-row.is-done {
@@ -93,19 +93,24 @@
 
 .hud-level-box {
   width: 18px;
+  flex: 0 0 auto;
   text-align: center;
   font-size: 14px;
 }
 
-.hud-level-icon {
-  width: 20px;
-  text-align: center;
+.hud-level-label {
+  flex: 1;
+  text-align: left;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 
 .hud-level-count {
-  flex: 1;
+  flex: 0 0 auto;
   text-align: right;
   font-variant-numeric: tabular-nums;
+  color: #9fb8d4;
+  font-weight: 700;
 }
 
 /* ===== Level banner (mid-screen, transient at level start) ===== */

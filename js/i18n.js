@@ -178,6 +178,17 @@ Photopea — image editor
     // Levels
     'hud.level.prefix': 'Level {n}',
     'hud.level.idle': 'survive',
+
+    // Goal checklist (HUD): verbs + nouns with EN plural forms (one/other)
+    'goal.delivered_boats.one': 'Escort {n} smuggler',
+    'goal.delivered_boats.other': 'Escort {n} smugglers',
+    'goal.repelled_cops.one': 'Sink {n} cop',
+    'goal.repelled_cops.other': 'Sink {n} cops',
+    'goal.repelled_kraken.one': 'Repel {n} kraken',
+    'goal.repelled_kraken.other': 'Repel {n} krakens',
+    'goal.mermaids_scared.one': 'Scare off {n} mermaid',
+    'goal.mermaids_scared.other': 'Scare off {n} mermaids',
+
     'level.l1.title': 'Level 1 — First Run',
     'level.l1.sub': 'Guide 1 smuggler boat into the harbor',
     'level.l2.title': 'Level 2 — Cops on Patrol',
@@ -378,6 +389,21 @@ Photopea — image editor
     // Levels
     'hud.level.prefix': 'Уровень {n}',
     'hud.level.idle': 'выжить',
+
+    // Чек-лист целей (HUD): глагол + существительное в нужной форме (1 / 2-4 / 5+)
+    'goal.delivered_boats.one': 'Сопроводи {n} контрабандиста',
+    'goal.delivered_boats.few': 'Сопроводи {n} контрабандиста',
+    'goal.delivered_boats.many': 'Сопроводи {n} контрабандистов',
+    'goal.repelled_cops.one': 'Потопи {n} копа',
+    'goal.repelled_cops.few': 'Потопи {n} копа',
+    'goal.repelled_cops.many': 'Потопи {n} копов',
+    'goal.repelled_kraken.one': 'Отгони {n} кракена',
+    'goal.repelled_kraken.few': 'Отгони {n} кракена',
+    'goal.repelled_kraken.many': 'Отгони {n} кракенов',
+    'goal.mermaids_scared.one': 'Отгони {n} русалку',
+    'goal.mermaids_scared.few': 'Отгони {n} русалки',
+    'goal.mermaids_scared.many': 'Отгони {n} русалок',
+
     'level.l1.title': 'Урок 1 — Первая ходка',
     'level.l1.sub': 'Проведи 1 лодку контрабандистов до маяка',
     'level.l2.title': 'Урок 2 — Копы на горизонте',
@@ -468,6 +494,26 @@ export function onLanguageChange(fn) {
 
 export function getSupportedLanguages() {
   return SUPPORTED.slice();
+}
+
+/**
+ * Pick the CLDR-style plural category for a count in the current language.
+ * Returns one of: 'one' | 'few' | 'many' | 'other'.
+ *   - ru: 1, 21, 31...   → 'one'
+ *         2-4, 22-24...  → 'few'
+ *         0, 5-20, 25-30 → 'many'
+ *   - en (and default):  1 → 'one', else → 'other'
+ */
+export function pluralCategory(n, lang = currentLang) {
+  const v = Math.abs(Math.trunc(n));
+  if (lang === 'ru') {
+    const mod10 = v % 10;
+    const mod100 = v % 100;
+    if (mod10 === 1 && mod100 !== 11) return 'one';
+    if (mod10 >= 2 && mod10 <= 4 && (mod100 < 12 || mod100 > 14)) return 'few';
+    return 'many';
+  }
+  return v === 1 ? 'one' : 'other';
 }
 
 /** Translate key with optional {placeholder} params. */

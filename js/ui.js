@@ -18,7 +18,7 @@ import {
   playFailSound,
 } from './sound.js';
 import S from './state.js';
-import { t } from './i18n.js';
+import { t, pluralCategory } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
 
@@ -124,18 +124,17 @@ const hudCache = {
 };
 
 // ===== Level Goal HUD =====
-// Краткое визуальное представление подцелей текущего уровня.
-// Иконки совпадают с теми, что используются в HUD-строках мобов.
-const GOAL_ICONS = {
-  delivered_boats: '⛵',
-  repelled_cops: '🚔',
-  mermaids_scared: '🧜',
-  repelled_kraken: '🦑',
-};
-
 // Чек-лист подцелей: одна строка на подцель, выполненная — с галочкой
-// и зачёркнутая, текущая — с пустым чекбоксом и счётчиком cur/target.
-// Возвращает HTML, чтобы дать стилизовать строки независимо.
+// и зачёркнутая, текущая — с пустым чекбоксом и конкретным заданием
+// ("Сопроводи 3 контрабандиста" и т.п. — глагол + существительное в нужной форме).
+function formatGoalLabel(key, target) {
+  const cat = pluralCategory(target);
+  const label = t(`goal.${key}.${cat}`, { n: target });
+  if (label && label !== `goal.${key}.${cat}`) return label;
+  // Fallback: ключ без перевода — покажем хотя бы счётчик.
+  return `${target}`;
+}
+
 function formatLevelHudHtml() {
   if (!S.gameSessionActive) return '';
   const idx = (S.levelIndex || 0) + 1;
@@ -149,12 +148,12 @@ function formatLevelHudHtml() {
     if (!target) continue;
     const cur = Math.min(progress[key] || 0, target);
     const done = cur >= target;
-    const icon = GOAL_ICONS[key] || '•';
     const box = done ? '✅' : '☐';
+    const label = escapeHtml(formatGoalLabel(key, target));
     rows.push(
       `<div class="hud-level-row${done ? ' is-done' : ''}">` +
         `<span class="hud-level-box">${box}</span>` +
-        `<span class="hud-level-icon">${icon}</span>` +
+        `<span class="hud-level-label">${label}</span>` +
         `<span class="hud-level-count">${cur}/${target}</span>` +
         `</div>`,
     );
@@ -162,7 +161,7 @@ function formatLevelHudHtml() {
   if (rows.length === 0) {
     rows.push(
       `<div class="hud-level-row"><span class="hud-level-box">☐</span>` +
-        `<span class="hud-level-count">${escapeHtml(t('hud.level.idle'))}</span></div>`,
+        `<span class="hud-level-label">${escapeHtml(t('hud.level.idle'))}</span></div>`,
     );
   }
   return head + rows.join('');
