@@ -16,32 +16,20 @@ import { showLevelBanner } from './ui.js';
 // extraSpawn — фоновый бюджет (атмосфера/нон-цель). Тратится на спавне
 //              как обычный счётчик и не пополняется при провале.
 const SCRIPTED_LEVELS = [
-  // L1 (микро-тутор #1): "Привези 1 контрабандиста"
+  // L1 (интерактивный туториал #1): проведи 3 лодки контрабандистов.
   {
     introKey: 'level.l1',
-    goal: { delivered_boats: 1 },
-  },
-  // L2 (микро-тутор #2): "Отпугни копа" + 1 фоновая лодка для контекста
-  {
-    introKey: 'level.l2',
-    goal: { repelled_cops: 1 },
-    extraSpawn: { boats: 1 },
-  },
-  // L3: "3 контры безопасно"
-  {
-    introKey: 'level.l3',
     goal: { delivered_boats: 3 },
   },
-  // L4: "контры + копы"
+  // L2 (интерактивный туториал #2): потопи 3 лодки копов.
   {
-    introKey: 'level.l4',
-    goal: { delivered_boats: 3, repelled_cops: 2 },
+    introKey: 'level.l2',
+    goal: { repelled_cops: 3 },
   },
-  // L5 (босс): отгони кракена + проведи 3 лодки. Копы и русалки — атмосферный шум.
+  // L3 (интерактивный туториал #3): отпугни русалок и кракена.
   {
-    introKey: 'level.l5',
-    goal: { delivered_boats: 3, repelled_kraken: 1 },
-    extraSpawn: { cops: 5, mermaids: 3 },
+    introKey: 'level.l3',
+    goal: { mermaids_scared: 3, repelled_kraken: 1 },
   },
 ];
 
@@ -210,6 +198,19 @@ function tickSpawns(now) {
   scheduleNextSpawn(now);
 }
 
+function refillGoalDeficit(kind, { onlyLevelIndex = null } = {}) {
+  if (S.gameOver || S.gameOverPending || S.levelTransitioning) return false;
+  if (onlyLevelIndex != null && S.levelIndex !== onlyLevelIndex) return false;
+  if (deficitFor(kind) <= 0) return false;
+
+  const fn = SPAWNERS[kind];
+  if (!fn) return false;
+
+  fn();
+  scheduleNextSpawn(performance.now());
+  return true;
+}
+
 function advance() {
   if (S.levelTransitioning) return;
   S.levelTransitioning = true;
@@ -242,6 +243,7 @@ export const levels = {
   init,
   tickSpawns,
   notify,
+  refillGoalDeficit,
   advance,
   current,
   isGoalComplete,

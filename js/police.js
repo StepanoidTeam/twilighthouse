@@ -147,6 +147,10 @@ export function updatePoliceBoats(delta) {
       S.shakeIntensity = 18;
       if (gameOver) {
         scheduleGameOver();
+      } else {
+        // Во втором уроке проваленный коп не должен оставлять уровень
+        // без достаточного количества целей для завершения задания.
+        levels.refillGoalDeficit('cops', { onlyLevelIndex: 1 });
       }
       const fadeOut = () => {
         spr.alpha -= 0.02;
