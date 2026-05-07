@@ -142,7 +142,7 @@ export function updatePoliceBoats(delta) {
       console.log(
         `🚔 Полицейский катер доплыл до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)}). Осталось жизней: ${S.heartsRemaining}`,
       );
-      spawnTooltip(spr.x, spr.y - 20, '🚔 −❤️', TOOLTIP_STYLE_FAIL);
+      spawnTooltip(spr.x, spr.y - 20, '🚔 −💔', TOOLTIP_STYLE_FAIL);
       S.shakeTime = 0.5;
       S.shakeIntensity = 18;
       if (gameOver) {

@@ -262,7 +262,7 @@ export function updateBoats(delta) {
         S.boatsSunk++;
         const gameOver = S.takeDamage('boat-sink', 1);
         updateHUD();
-        spawnTooltip(spr.x, spr.y - 20, '💀 −❤️', TOOLTIP_STYLE_FAIL);
+        spawnTooltip(spr.x, spr.y - 20, '💀 −💔', TOOLTIP_STYLE_FAIL);
         playCrashSound();
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,

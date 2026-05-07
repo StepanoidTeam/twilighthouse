@@ -161,7 +161,7 @@ const State = {
   },
 
   getHeartDisplay() {
-    // Return HTML with heart spans — lost hearts get faded class
+    // Return HTML with heart spans; spent hearts are shown as broken.
     const full = this.heartsRemaining;
     const max = this.heartsMax;
     let out = '';
@@ -169,7 +169,7 @@ const State = {
       if (i < full) {
         out += `<span class="hud-heart">❤️</span>`;
       } else {
-        out += `<span class="hud-heart hud-heart--lost">❤️</span>`;
+        out += `<span class="hud-heart hud-heart--lost">💔</span>`;
       }
     }
     return out;
