@@ -136,17 +136,17 @@ export function updatePoliceBoats(delta) {
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
       S.policeArrived++;
-      // Коп доплыл до маяка — Паттисон суёт взятку, теряем ящик колумбийского.
-      S.crates = Math.max(0, S.crates - 1);
+      // Police reached lighthouse - take 1 heart
+      const gameOver = S.takeDamage('police', 1);
       updateHUD();
       console.log(
-        `🚔 Полицейский катер доплыл до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)}). Ящиков осталось: ${S.crates}`,
+        `🚔 Полицейский катер доплыл до маяка (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)}). Осталось жизней: ${S.heartsRemaining}`,
       );
-      spawnTooltip(spr.x, spr.y - 20, '🚔 −❄️📦', TOOLTIP_STYLE_FAIL);
+      spawnTooltip(spr.x, spr.y - 20, '🚔 −❤️', TOOLTIP_STYLE_FAIL);
       S.shakeTime = 0.5;
       S.shakeIntensity = 18;
-      if (S.crates <= 0) {
-        scheduleGameOver(showPoliceGameOver);
+      if (gameOver) {
+        scheduleGameOver();
       }
       const fadeOut = () => {
         spr.alpha -= 0.02;
@@ -249,8 +249,7 @@ export function updatePoliceBoats(delta) {
     // Считается отпугнутым — Паттисон его не подсветил, патруль ушёл ни с чем.
     if (
       !lit &&
-      Math.hypot(spr.x - S.lhX, spr.y - S.lhY) >
-        MOB_SPAWN_RING + SPAWN_MARGIN
+      Math.hypot(spr.x - S.lhX, spr.y - S.lhY) > MOB_SPAWN_RING + SPAWN_MARGIN
     ) {
       console.log(`🚔 Полицейский катер ушёл за горизонт`);
       S.boatLayer.removeChild(spr);

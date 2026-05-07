@@ -260,14 +260,15 @@ export function updateBoats(delta) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.boatsSunk++;
+        const gameOver = S.takeDamage('boat-sink', 1);
         updateHUD();
-        spawnTooltip(spr.x, spr.y - 20, '💀', TOOLTIP_STYLE_FAIL);
+        spawnTooltip(spr.x, spr.y - 20, '💀 −❤️', TOOLTIP_STYLE_FAIL);
         playCrashSound();
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
-        if (S.boatsSunk >= 6) {
-          scheduleGameOver(showBoatGameOver);
+        if (gameOver) {
+          scheduleGameOver();
         }
       } else {
         // Push away from rock
@@ -322,8 +323,7 @@ export function drawWakes() {
       const t = w.age / WAKE_MAX;
       if (t >= 1) continue;
       const alpha = (1 - t) * 0.15 * (w.alphaMul ?? 1);
-      const r =
-        (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
+      const r = (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
       S.wakeGfx.beginFill(C.wake, Math.min(0.22, alpha));
       S.wakeGfx.drawCircle(w.x, w.y, r);
       S.wakeGfx.endFill();
@@ -338,8 +338,7 @@ export function drawWakes() {
       const t = w.age / WAKE_MAX;
       if (t >= 1) continue;
       const alpha = (1 - t) * 0.15 * (w.alphaMul ?? 1);
-      const r =
-        (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
+      const r = (WAKE_DOT_R_MIN + t * WAKE_DOT_R_GROWTH) * (w.rMul ?? 1);
       S.wakeGfx.beginFill(C.wake, Math.min(0.22, alpha));
       S.wakeGfx.drawCircle(w.x, w.y, r);
       S.wakeGfx.endFill();

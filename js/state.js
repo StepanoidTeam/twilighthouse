@@ -118,6 +118,11 @@ const State = {
   lampTimer: 0,
   lampFlicker: 1,
 
+  // Hearts / Lives System
+  heartsMax: 5,
+  heartsRemaining: 5,
+  lastEnemyType: null, // 'police', 'mermaid', 'kraken', 'boat-sink'
+
   // Layers
   rockLayer: null,
   boatLayer: null,
@@ -146,6 +151,30 @@ const State = {
   tooltips: [],
 
   // ===== Methods =====
+  takeDamage(enemyType, amount = 1) {
+    // Decrement hearts
+    this.heartsRemaining = Math.max(0, this.heartsRemaining - amount);
+    // Track which enemy caused the damage
+    this.lastEnemyType = enemyType;
+    // Return true if game should end (hearts <= 0)
+    return this.heartsRemaining <= 0;
+  },
+
+  getHeartDisplay() {
+    // Return HTML with heart spans — lost hearts get faded class
+    const full = this.heartsRemaining;
+    const max = this.heartsMax;
+    let out = '';
+    for (let i = 0; i < max; i++) {
+      if (i < full) {
+        out += `<span class="hud-heart">❤️</span>`;
+      } else {
+        out += `<span class="hud-heart hud-heart--lost">❤️</span>`;
+      }
+    }
+    return out;
+  },
+
   reset() {
     if (this.gameOverTimeoutId) {
       clearTimeout(this.gameOverTimeoutId);
@@ -160,6 +189,8 @@ const State = {
     this.crates = MAX_CRATES;
     this.lampTimer = 0;
     this.lampFlicker = 1;
+    this.heartsRemaining = this.heartsMax;
+    this.lastEnemyType = null;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
     this.beamAngle = -Math.PI / 2;
     this.gameSessionActive = false;

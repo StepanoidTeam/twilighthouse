@@ -305,3 +305,19 @@
   color: #8aabcc;
   text-shadow: 0 1px 3px #000;
 }
+
+/* HUD hearts */
+.hud-heart {
+  display: inline-block;
+  transform: translateY(0);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+.hud-heart + .hud-heart {
+  margin-left: 6px;
+}
+.hud-heart--lost {
+  opacity: 0.35;
+  filter: grayscale(30%);
+}

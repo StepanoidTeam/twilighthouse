@@ -105,8 +105,12 @@ export function updateKrakens(delta) {
         S.shakeIntensity = 28;
         k.gone = true;
         S.krakensArrived++;
-        spawnTooltip(k.spr.x, k.spr.y - 20, '🦑', TOOLTIP_STYLE_FAIL);
-        scheduleGameOver(showKrakenGameOver);
+        spawnTooltip(k.spr.x, k.spr.y - 20, '🦑 −ALL', TOOLTIP_STYLE_FAIL);
+        const gameOver = S.takeDamage('kraken', S.heartsRemaining);
+        updateHUD();
+        if (gameOver) {
+          scheduleGameOver();
+        }
         const fadeOut = () => {
           k.spr.alpha -= 0.04 * delta;
           if (k.spr.alpha <= 0) {
@@ -150,11 +154,13 @@ export function updateKrakens(delta) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.boatsSunk++;
+        // Kraken sink counts as boat-sink damage
+        const gameOver = S.takeDamage('boat-sink', 1);
         updateHUD();
-        spawnTooltip(b.spr.x, b.spr.y - 20, '🦑💀', TOOLTIP_STYLE_FAIL);
+        spawnTooltip(b.spr.x, b.spr.y - 20, '🦑💀 −❤️', TOOLTIP_STYLE_FAIL);
         playCrashSound();
         console.log(`🦑 Кракен уничтожил корабль`);
-        if (S.boatsSunk >= 6) scheduleGameOver(showBoatGameOver);
+        if (gameOver) scheduleGameOver();
       }
     }
 

@@ -43,7 +43,6 @@ const {
   $exitResumeLabel,
   $screenExitConfirm,
   $hudScore,
-  $hudMermaids,
   $hudPolice,
   $hudLamp,
   $hudSunk,
@@ -104,10 +103,48 @@ export function fadeInOverlay() {
   // no-op: game-over screen is now HTML
 }
 
-export function scheduleGameOver(fn) {
+export function scheduleGameOver() {
   if (S.gameOver || S.gameOverPending) return;
   S.gameOverPending = true;
-  setTimeout(fn, GAME_OVER_DELAY);
+  setTimeout(() => {
+    // Determine which game over screen to show based on lastEnemyType
+    switch (S.lastEnemyType) {
+      case 'police':
+        showGameOverScreen({
+          message: t('gameOver.police'),
+          splashKey: 'splashPolice',
+          reason: 'police',
+        });
+        break;
+      case 'mermaid':
+        showGameOverScreen({
+          message: t('gameOver.mermaids', { n: S.mermaidsArrived }),
+          splashKey: 'splashMermaid',
+          reason: 'mermaid',
+        });
+        break;
+      case 'kraken':
+        showGameOverScreen({
+          message: t('gameOver.kraken'),
+          splashKey: 'splashKraken',
+          reason: 'kraken',
+        });
+        break;
+      case 'boat-sink':
+        showGameOverScreen({
+          message: t('gameOver.boats', { n: S.boatsSunk }),
+          splashKey: 'splashIceberg',
+          reason: 'boats_sunk',
+        });
+        break;
+      default:
+        showGameOverScreen({
+          message: 'Game Over',
+          splashKey: 'splashIceberg',
+          reason: 'unknown',
+        });
+    }
+  }, GAME_OVER_DELAY);
 }
 
 // ===== HUD =====
@@ -115,7 +152,6 @@ export function scheduleGameOver(fn) {
 // textContent впустую (лишние реплейс-ноды + layout).
 const hudCache = {
   score: null,
-  mermaids: null,
   police: null,
   lamp: null,
   sunk: null,
@@ -179,7 +215,12 @@ let levelBannerTimer = null;
 function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
   hudCache[key] = value;
-  $el.textContent = value;
+  // For lamp/hearts we need HTML (spans with classes), otherwise plain text
+  if (key === 'lamp') {
+    $el.innerHTML = value;
+  } else {
+    $el.textContent = value;
+  }
 }
 
 export function updateHUD() {
@@ -189,19 +230,8 @@ export function updateHUD() {
     .filter(Boolean)
     .join(' ');
   setIfChanged('score', $hudScore, cargoStr || '📦×0');
-  setIfChanged('mermaids', $hudMermaids, `🧜 ${S.mermaidsArrived}/3`);
-  // Ящики колумбийского, которые прячет Паттисон.
-  // Каждый освещённый коп = -1 ящик. Ноль — Дефо выкидывает Паттисона.
-  setIfChanged(
-    'police',
-    $hudPolice,
-    `❄️${'📦'.repeat(Math.max(0, S.crates))}`,
-  );
-  const bulbs = Math.max(
-    0,
-    Math.round((1 - S.lampTimer / LAMP_BURNOUT_TIME) * 5),
-  );
-  setIfChanged('lamp', $hudLamp, bulbs > 0 ? '💡'.repeat(bulbs) : '🔦');
+  // Display hearts instead of lamp burnout timer
+  setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
   setIfChanged('sunk', $hudSunk, `⛵💥 ${S.boatsSunk}/6`);
   setIfChanged('time', $hudTime, `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`);
   if ($hudLevel) {

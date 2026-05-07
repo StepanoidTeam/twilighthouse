@@ -82,9 +82,10 @@ export function updateMermaids(delta) {
         S.shakeIntensity = 18;
         m.gone = true;
         S.mermaidsArrived++;
+        const gameOver = S.takeDamage('mermaid', 1);
         updateHUD();
-        if (S.mermaidsArrived >= 3) {
-          scheduleGameOver(showMermaidGameOver);
+        if (gameOver) {
+          scheduleGameOver();
         }
         const fadeOut = () => {
           m.spr.alpha -= 0.04 * delta;
