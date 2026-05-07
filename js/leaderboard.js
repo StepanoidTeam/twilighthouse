@@ -83,8 +83,7 @@ export async function submitScore(survivalMs, maxLevelReached = 0) {
 
   // Записываем, если выше уровень или (тот же уровень и дольше выжили).
   const isBetter =
-    newLevel > prevLevel ||
-    (newLevel === prevLevel && newTime > prevTime);
+    newLevel > prevLevel || (newLevel === prevLevel && newTime > prevTime);
 
   if (!isBetter) {
     return { written: false, bestLevel: prevLevel, bestTimeMs: prevTime };
@@ -282,20 +281,24 @@ function createLeaderboardRow(entry, myUid) {
   return { $row, isMe };
 }
 
-export async function renderLeaderboardScreen({ buildScreenShell, isActive }) {
-  const $screen = buildScreenShell(
-    t('leaderboard.title'),
-    t('leaderboard.subtitle'),
-  );
-  if (!$screen) return;
+export async function renderLeaderboardScreen({ container, isActive }) {
+  if (!container) return;
 
-  const $body = document.createElement('div');
-  $body.className = 'menu-card menu-leaderboard';
+  const $title = container.querySelector('.menu-screen-title');
+  const $subtitle = container.querySelector('.menu-screen-subtitle');
+  const $body = container.querySelector('.menu-card');
+
+  if (!$title || !$subtitle || !$body) return;
+
+  $title.textContent = t('leaderboard.title');
+  $subtitle.textContent = t('leaderboard.subtitle');
+
+  $body.innerHTML = '';
+
   const $loading = document.createElement('p');
   $loading.className = 'menu-state-label';
   $loading.textContent = t('leaderboard.loading');
   $body.appendChild($loading);
-  $screen.appendChild($body);
 
   let leaderboardView = { rows: [], currentUid: null };
   let error = null;
@@ -354,5 +357,4 @@ export async function renderLeaderboardScreen({ buildScreenShell, isActive }) {
       });
     });
   }
-
 }

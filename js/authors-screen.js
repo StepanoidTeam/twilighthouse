@@ -98,38 +98,27 @@ export function destroyAuthorsScreen() {
   activeState = null;
 }
 
-export function renderAuthorsScreen({ container, creditsText, backHint }) {
+export function renderAuthorsScreen({ container, creditsText }) {
   destroyAuthorsScreen();
   if (!container) return;
 
   container.hidden = false;
-  container.className = 'menu-sub menu-authors';
-  container.innerHTML = `
-    <div class="menu-authors-bg"></div>
-    <div class="menu-authors-dim"></div>
-    <div class="menu-authors-blackout"></div>
-    <div class="menu-authors-scroll">
-      <pre class="menu-authors-text"></pre>
-    </div>
-  `;
-
-  if (backHint) container.appendChild(backHint);
 
   const $background = container.querySelector('.menu-authors-bg');
+  const $dim = container.querySelector('.menu-authors-dim');
   const $blackout = container.querySelector('.menu-authors-blackout');
+  const $scroll = container.querySelector('.menu-authors-scroll');
   const $creditsText = container.querySelector('.menu-authors-text');
 
-  if ($background) {
-    $background.style.backgroundImage = `url("${AUTHORS_BG_FILES[0]}")`;
-  }
+  if (!$background || !$dim || !$scroll || !$creditsText) return;
+
+  $background.style.backgroundImage = `url("${AUTHORS_BG_FILES[0]}")`;
 
   if ($blackout) {
     $blackout.style.opacity = '0';
   }
 
-  if ($creditsText) {
-    $creditsText.textContent = creditsText;
-  }
+  $creditsText.textContent = creditsText;
 
   activeState = {
     container,

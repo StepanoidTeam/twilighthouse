@@ -30,7 +30,6 @@ const {
   $menuBg,
   $menuBgMan,
   $menuMain,
-  $menuSub,
   $menuHint,
   $menuBtnStart,
   $menuBtnLeaderboard,
@@ -40,13 +39,12 @@ const {
   $discordLink,
   $backBtn,
   $menuSettings,
-  $menuSettingsTitle,
-  $menuSettingsHint,
+  $menuLeaderboard,
+  $menuAuthors,
   $menuTutorial,
   $menuTutorialShell,
   $menuTutorialSkip,
   $menuTutorialSkipLabel,
-  $menuTutorialHint,
   $menuSettingsLangLabel,
   $menuSettingsLangBtn,
   $menuSettingsMusicLabel,
@@ -246,14 +244,14 @@ function updateSelection() {
   }
 }
 
-function clearSubScreen() {
-  if (!$menuSub) return;
-
+function hideOverlayScreens() {
   stopCreditsAnimation();
   clearTutorialState();
-  $menuSub.innerHTML = '';
-  $menuSub.hidden = true;
-  $menuSub.className = 'menu-sub';
+  if ($menuSettings) $menuSettings.hidden = true;
+  if ($menuLeaderboard) $menuLeaderboard.hidden = true;
+  if ($menuAuthors) $menuAuthors.hidden = true;
+  if ($menuTutorial) $menuTutorial.hidden = true;
+  if ($menuTutorialShell) $menuTutorialShell.innerHTML = '';
 }
 
 function hideMainItems() {
@@ -268,46 +266,8 @@ function showMainItems() {
   showDiscordLink();
 }
 
-function getBackHint() {
-  const template = $backHintTemplate;
-  if (!template) return null;
-  const $hint = template.content.cloneNode(true).firstElementChild;
-  $hint.textContent = t('hint.back');
-  return $hint;
-}
-
-function buildScreenShell(title, subtitle = '') {
-  clearSubScreen();
-  if (!$menuSub) return null;
-
-  $menuSub.hidden = false;
-  $menuSub.className = 'menu-sub menu-screen';
-
-  const $screen = document.createElement('div');
-  $screen.className = 'menu-screen-shell';
-
-  const $heading = document.createElement('h2');
-  $heading.className = 'menu-screen-title';
-  $heading.textContent = title;
-  $screen.appendChild($heading);
-
-  if (subtitle) {
-    const $subtitle = document.createElement('p');
-    $subtitle.className = 'menu-screen-subtitle';
-    $subtitle.textContent = subtitle;
-    $screen.appendChild($subtitle);
-  }
-
-  $menuSub.appendChild($screen);
-  const $backHint = getBackHint();
-  if ($backHint) $menuSub.appendChild($backHint);
-  return $screen;
-}
-
 function showMainMenu() {
-  clearSubScreen();
-  if ($menuSettings) $menuSettings.hidden = true;
-  hideTutorialScreen();
+  hideOverlayScreens();
   showMainItems();
   hideBackBtn();
   currentScreen = 'main';
@@ -476,7 +436,7 @@ function showTutorial() {
   const prevScreen = currentScreen;
   const savedIndex =
     prevScreen === 'tutorial' && tutorialState ? tutorialState.index : 0;
-  clearSubScreen();
+  hideOverlayScreens();
   currentScreen = 'tutorial';
 
   if (!$menuTutorial || !$menuTutorialShell) return;
@@ -687,9 +647,11 @@ function clearTutorialState() {
 async function showLeaderboard() {
   hideMainItems();
   showBackBtn();
+  hideOverlayScreens();
   currentScreen = 'leaderboard';
+  if ($menuLeaderboard) $menuLeaderboard.hidden = false;
   await renderLeaderboardScreen({
-    buildScreenShell,
+    container: $menuLeaderboard,
     isActive: () => currentScreen === 'leaderboard',
   });
 }
@@ -703,9 +665,8 @@ export async function openLeaderboard() {
 function showSettings() {
   hideMainItems();
   showBackBtn();
+  hideOverlayScreens();
   currentScreen = 'settings';
-
-  clearSubScreen();
   if (!$menuSettings) return;
 
   $menuSettings.hidden = false;
@@ -898,17 +859,17 @@ function showSettings() {
 async function showAuthors() {
   hideMainItems();
   showBackBtn();
+  hideOverlayScreens();
   currentScreen = 'authors';
+  if (!$menuAuthors) return;
 
-  clearSubScreen();
-  if (!$menuSub) return;
+  $menuAuthors.hidden = false;
 
   renderAuthorsScreen({
-    container: $menuSub,
+    container: $menuAuthors,
     creditsText: getCreditsText(),
-    backHint: getBackHint(),
   });
-  $creditsScroll = $menuSub.querySelector('.menu-authors-scroll');
+  $creditsScroll = $menuAuthors.querySelector('.menu-authors-scroll');
   startCreditsAnimation();
 }
 
@@ -933,9 +894,7 @@ function hideDiscordLink() {
 function hideMenu() {
   if ($menuOverlay) $menuOverlay.hidden = true;
   stopBgManMotion();
-  clearSubScreen();
-  if ($menuSettings) $menuSettings.hidden = true;
-  hideTutorialScreen();
+  hideOverlayScreens();
   hideBackBtn();
   currentScreen = null;
   hideAuthWidget();

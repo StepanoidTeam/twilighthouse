@@ -68,7 +68,7 @@ Photopea — image editor
 
     // Hints
     'hint.main': '↑↓ / W S — navigate  •  Enter / E — select  •  Q — back',
-    'hint.back': 'Q / Escape — back',
+    'hint.back': 'back',
     'hint.intro': '◀ ▶ — pages  •  Esc — skip',
     'btn.back': 'Back',
 
@@ -283,8 +283,8 @@ Photopea — image editor
 🌊 Спасибо за игру! 🌊
 `,
 
-    'hint.main': '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
-    'hint.back': 'Q / Escape — назад',
+    f: '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
+    'hint.back': 'назад',
     'hint.intro': '◀ ▶ — страницы  •  Esc — пропустить',
     'btn.back': 'Назад',
 
@@ -407,7 +407,8 @@ Photopea — image editor
     'level.l1.title': 'Урок 1 — Первая ходка',
     'level.l1.sub': 'Проведи 1 лодку контрабандистов до маяка',
     'level.l2.title': 'Урок 2 — Копы на горизонте',
-    'level.l2.sub': 'Свети на копа, чтобы он разбился об скалы но не дай ему достигнуть маяка',
+    'level.l2.sub':
+      'Свети на копа, чтобы он разбился об скалы но не дай ему достигнуть маяка',
     'level.l3.title': 'Уровень 3 — Три лодки',
     'level.l3.sub': 'Доставь 3 контрабандистов целыми',
     'level.l4.title': 'Уровень 4 — Жарко',

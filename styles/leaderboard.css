@@ -3,15 +3,26 @@
   --leaderboard-level-col: 64px;
   --leaderboard-time-col: 92px;
   --leaderboard-date-col: 156px;
-  max-height: calc(100vh - 9vh - 96px - 80px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-}
+  max-height: 100vh;
 
+  display: flex;
+  justify-content: center;
+
+  .menu-card {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    height: 100%;
+  }
+}
 .menu-leaderboard-list {
+  flex: 1 1 auto;
+  min-height: 0;
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
 }
 
 .menu-leaderboard-header,
@@ -34,7 +45,6 @@
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-
 }
 
 .menu-leaderboard-row {
@@ -102,8 +112,8 @@
       minmax(0, 1fr)
       var(--leaderboard-level-col)
       var(--leaderboard-time-col);
-      display: flex;
-      justify-content: space-between;
+    display: flex;
+    justify-content: space-between;
   }
 
   .menu-leaderboard-time {
