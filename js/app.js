@@ -109,6 +109,7 @@ let bootLoaderState = {
   status: 'loading',
   currentAsset: null,
 };
+let resourcesReady = false;
 
 function getBootAssetLabel(asset) {
   if (!asset) {
@@ -377,12 +378,16 @@ function exitToLeaderboard() {
 
 // ===== Restart game (play again) =====
 function restartGame() {
+  if (!resourcesReady) return false;
   prepareFreshRun();
+  return true;
 }
 
 // ===== Start Game (called from menu) =====
 function startGame() {
+  if (!resourcesReady) return false;
   prepareFreshRun();
+  return true;
 }
 
 // ===== Submit Score =====
@@ -657,6 +662,7 @@ async function init() {
   await primeBootAmbientAudio();
 
   S.gameSessionActive = false;
+  resourcesReady = true;
   hideBootLoader();
 
   initializeAmbientAudio();
