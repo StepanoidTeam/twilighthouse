@@ -402,8 +402,7 @@ function activateMenuItem() {
   const action = MAIN_MENU_ACTIONS[selectedIndex].action;
   switch (action) {
     case 'start':
-      hideMenu();
-      if (onStartGame) onStartGame();
+      requestStartGame();
       break;
     case 'leaderboard':
       showLeaderboard();
@@ -418,6 +417,14 @@ function activateMenuItem() {
       showTutorial();
       break;
   }
+}
+
+function requestStartGame() {
+  if (!onStartGame) return false;
+  const started = onStartGame();
+  if (started === false) return false;
+  hideMenu();
+  return true;
 }
 
 // ===== Tutorial / How to Play =====
@@ -571,8 +578,7 @@ function showTutorial() {
 }
 
 function finishTutorial() {
-  hideMenu();
-  if (onStartGame) onStartGame();
+  requestStartGame();
 }
 
 function goToStep(nextIndex) {

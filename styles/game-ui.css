@@ -321,3 +321,25 @@
   opacity: 0.35;
   filter: grayscale(30%);
 }
+
+.hud-lamp-power {
+  display: inline-block;
+  transform: translateY(0);
+  transition:
+    opacity 160ms ease,
+    transform 160ms ease;
+}
+
+.hud-lamp-power + .hud-lamp-power {
+  margin-left: 6px;
+}
+
+.hud-lamp-power--spent {
+  opacity: 0.28;
+  filter: grayscale(70%);
+}
+
+.hud-lamp-power--minimum {
+  opacity: 0.8;
+  filter: grayscale(20%);
+}

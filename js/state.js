@@ -161,15 +161,16 @@ const State = {
   },
 
   getHeartDisplay() {
-    // Return HTML with heart spans; spent hearts are shown as broken.
+    // Return HTML with heart spans; spent hearts are shown from left to right.
     const full = this.heartsRemaining;
     const max = this.heartsMax;
+    const spent = max - full;
     let out = '';
     for (let i = 0; i < max; i++) {
-      if (i < full) {
-        out += `<span class="hud-heart">❤️</span>`;
-      } else {
+      if (i < spent) {
         out += `<span class="hud-heart hud-heart--lost">💔</span>`;
+      } else {
+        out += `<span class="hud-heart">❤️</span>`;
       }
     }
     return out;

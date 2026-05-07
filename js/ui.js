@@ -2,7 +2,6 @@ import {
   PIXI,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
-  BOAT_CARGO_TYPES,
   CARGO_LABEL_STYLE,
   WIN_SCORE,
   LAMP_BURNOUT_TIME,
@@ -42,10 +41,8 @@ const {
   $exitConfirmLabel,
   $exitResumeLabel,
   $screenExitConfirm,
-  $hudScore,
-  $hudPolice,
   $hudLamp,
-  $hudSunk,
+  $hudLamps,
   $hudTime,
   $hudLevel,
   $levelBanner,
@@ -151,10 +148,8 @@ export function scheduleGameOver() {
 // Пишем в DOM только при смене значения — иначе на каждом тике дёргаем
 // textContent впустую (лишние реплейс-ноды + layout).
 const hudCache = {
-  score: null,
-  police: null,
   lamp: null,
-  sunk: null,
+  lamps: null,
   time: null,
   level: null,
 };
@@ -216,23 +211,36 @@ function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
   hudCache[key] = value;
   // For lamp/hearts we need HTML (spans with classes), otherwise plain text
-  if (key === 'lamp') {
+  if (key === 'lamp' || key === 'lamps') {
     $el.innerHTML = value;
   } else {
     $el.textContent = value;
   }
 }
 
+function formatLampPowerHtml() {
+  const slots = 5;
+  const burnout = Math.max(0, Math.min(1, S.lampTimer / LAMP_BURNOUT_TIME));
+  const lit = Math.max(1, Math.ceil((1 - burnout) * slots));
+  const spent = slots - lit;
+  const atMinimum = burnout >= 1;
+  let out = '';
+  for (let i = 0; i < slots; i++) {
+    if (i < spent) {
+      out += `<span class="hud-lamp-power hud-lamp-power--spent">💡</span>`;
+    } else if (atMinimum && i === slots - 1) {
+      out += `<span class="hud-lamp-power hud-lamp-power--minimum">🔦</span>`;
+    } else {
+      out += `<span class="hud-lamp-power">💡</span>`;
+    }
+  }
+  return out;
+}
+
 export function updateHUD() {
-  const cargoStr = BOAT_CARGO_TYPES.map((t) =>
-    S.deliveredCargo[t] > 0 ? `${t}${S.deliveredCargo[t]}` : null,
-  )
-    .filter(Boolean)
-    .join(' ');
-  setIfChanged('score', $hudScore, cargoStr || '📦×0');
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
-  setIfChanged('sunk', $hudSunk, `⛵💥 ${S.boatsSunk}/6`);
+  setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
   setIfChanged('time', $hudTime, `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`);
   if ($hudLevel) {
     const levelHtml = formatLevelHudHtml();
