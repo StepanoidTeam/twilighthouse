@@ -73,6 +73,7 @@
   text-transform: uppercase;
   letter-spacing: 0.8px;
   text-align: center;
+  white-space: nowrap;
   padding-bottom: 3px;
   border-bottom: 1px solid rgba(80, 140, 200, 0.25);
 }
@@ -145,6 +146,7 @@
   letter-spacing: 1.5px;
   line-height: 1.05;
   text-transform: uppercase;
+  white-space: nowrap;
 }
 
 .level-banner-subtitle {
