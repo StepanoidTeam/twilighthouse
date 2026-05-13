@@ -49,9 +49,13 @@
   background-position-x: right;
 }
 .menu-authors-bg {
-  background-position: center;
+  background-position: right center;
   background-repeat: no-repeat;
   background-size: cover;
+}
+
+.menu-authors-bg.is-panning {
+  animation: authors-bg-pan 18s linear forwards;
 }
 
 .menu-overlay-dim {
@@ -650,6 +654,16 @@
 
 .menu-authors {
   overflow: hidden;
+}
+
+@keyframes authors-bg-pan {
+  from {
+    background-position: right center;
+  }
+
+  to {
+    background-position: left center;
+  }
 }
 
 .menu-authors-bg {

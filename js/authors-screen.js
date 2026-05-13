@@ -6,7 +6,7 @@ const AUTHORS_BG_FILES = [
   //   'sprites/wasted/pattinson.png',
   //   'sprites/wasted/peremoha.png',
 ];
-const AUTHORS_ROTATE_MS = 7000;
+const AUTHORS_ROTATE_MS = 18000;
 const AUTHORS_FADE_MS = 3000;
 const AUTHORS_FADE_HALF_MS = AUTHORS_FADE_MS / 2;
 
@@ -27,6 +27,13 @@ function cancelAuthorsAnimations(state) {
   }
 
   state.animations = [];
+}
+
+function restartAuthorsBackgroundPan($background) {
+  $background.classList.remove('is-panning');
+  $background.style.backgroundPosition = 'right center';
+  void $background.offsetWidth;
+  $background.classList.add('is-panning');
 }
 
 async function rotateAuthorsBackground(state) {
@@ -54,6 +61,7 @@ async function rotateAuthorsBackground(state) {
 
   state.bgIndex = (state.bgIndex + 1) % AUTHORS_BG_FILES.length;
   $background.style.backgroundImage = `url("${AUTHORS_BG_FILES[state.bgIndex]}")`;
+  restartAuthorsBackgroundPan($background);
 
   const fadeFromBlack = $blackout.animate([{ opacity: 1 }, { opacity: 0 }], {
     duration: AUTHORS_FADE_HALF_MS,
@@ -113,6 +121,7 @@ export function renderAuthorsScreen({ container, creditsText }) {
   if (!$background || !$dim || !$scroll || !$creditsText) return;
 
   $background.style.backgroundImage = `url("${AUTHORS_BG_FILES[0]}")`;
+  restartAuthorsBackgroundPan($background);
 
   if ($blackout) {
     $blackout.style.opacity = '0';
