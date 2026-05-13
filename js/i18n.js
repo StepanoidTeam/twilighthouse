@@ -172,11 +172,13 @@ Photopea — image editor
     'win.message': '🎉 You Win! All {total} boats saved!',
     'win.messageTime':
       '🎉 You Win! All {total} boats saved! Final time: {time}',
+    'win.nightMessage': '🎉 You Win! The night is over!',
     'win.statLamps': 'Lamps delivered',
     'win.statCrates': 'Crates delivered',
     'win.statTime': 'Final time',
 
     // Levels
+    'hud.night': 'Night',
     'hud.level.prefix': 'Level {n}',
     'hud.level.idle': 'survive',
 
@@ -384,11 +386,13 @@ Photopea — image editor
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
     'win.messageTime':
       '🎉 Победа! Спасены все {total} кораблей! Финальное время: {time}',
+    'win.nightMessage': '🎉 Победа! Ночь пережита!',
     'win.statLamps': 'Доставлено ламп',
     'win.statCrates': 'Доставлено ящиков',
     'win.statTime': 'Финальное время',
 
     // Levels
+    'hud.night': 'Ночь',
     'hud.level.prefix': 'Уровень {n}',
     'hud.level.idle': 'выжить',
 

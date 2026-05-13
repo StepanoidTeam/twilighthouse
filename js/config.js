@@ -4,6 +4,7 @@ const PIXI = globalThis.PIXI;
 const GAME_OVER_DELAY = 2000;
 const MAX_CRATES = 3; // сколько ящиков колумбийского у Паттисона на старте
 const WIN_SCORE = 10;
+const NIGHT_DURATION_MS = 5 * 60 * 1000;
 const SPAWN_MARGIN = 60;
 
 // ===== Boat / Mob =====
@@ -209,6 +210,7 @@ export {
   GAME_OVER_DELAY,
   MAX_CRATES,
   WIN_SCORE,
+  NIGHT_DURATION_MS,
   SPAWN_MARGIN,
   BOAT_SPEED,
   BOAT_RADIUS,

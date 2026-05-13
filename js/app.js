@@ -9,6 +9,7 @@ import {
   LAMP_MIN_ANGLE,
   LAMP_BURNOUT_TIME,
   LAMP_FLICKER_START,
+  NIGHT_DURATION_MS,
   computeWorldScale,
 } from './config.js';
 import {
@@ -44,6 +45,7 @@ import {
   repositionUI,
   showExitConfirm,
   hideExitConfirm,
+  showWin,
 } from './ui.js';
 import { cleanupBoats, boatEntity } from './boat.js';
 import { cleanupMermaids, mermaidEntity } from './mermaid.js';
@@ -462,6 +464,14 @@ function gameLoop(delta) {
   }
   S.lastSurvivalTick = tickNow;
 
+  if (S.runSurvivalMs >= NIGHT_DURATION_MS) {
+    S.runSurvivalMs = NIGHT_DURATION_MS;
+    S.gameWon = true;
+    updateHUD();
+    void showWin();
+    return;
+  }
+
   // Beam rotation via keyboard (no easing)
   if (S.keys['KeyA'] || S.keys['ArrowLeft'])
     S.beamAngle -= BEAM_ROTATE_SPEED * delta;
@@ -680,6 +690,7 @@ async function init() {
 renderBootLoaderText();
 onLanguageChange(renderBootLoaderText);
 onLanguageChange(applyI18nToDOM);
+onLanguageChange(updateHUD);
 registerBrowserTools();
 
 init().catch((e) => {

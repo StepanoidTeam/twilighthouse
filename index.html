@@ -27,7 +27,22 @@
     </div>
 
     <div id="$gameContainer" hidden>
-      <div class="hud-row hud-time" id="$hudTime">⏰ 0:00</div>
+      <div
+        class="hud-night"
+        id="$hudNight"
+        role="progressbar"
+        aria-valuemin="0"
+        aria-valuemax="100"
+        aria-valuenow="0"
+      >
+        <div class="hud-night-head">
+          <span id="$hudNightLabel">Night</span>
+          <span id="$hudNightTime">0:00</span>
+        </div>
+        <div class="hud-night-track" aria-hidden="true">
+          <div id="$hudNightFill" class="hud-night-fill"></div>
+        </div>
+      </div>
 
       <!-- ===== Level goal banner (mid-screen, transient) ===== -->
       <div id="$levelBanner" class="level-banner" hidden>

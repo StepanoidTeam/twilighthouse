@@ -3,9 +3,9 @@ import {
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
   CARGO_LABEL_STYLE,
-  WIN_SCORE,
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
+  NIGHT_DURATION_MS,
 } from './config.js';
 import {
   CRASH_VOLUME,
@@ -44,7 +44,10 @@ const {
   $screenExitConfirm,
   $hudLamp,
   $hudLamps,
-  $hudTime,
+  $hudNight,
+  $hudNightFill,
+  $hudNightLabel,
+  $hudNightTime,
   $hudLevel,
   $levelBanner,
   $levelBannerTitle,
@@ -160,7 +163,9 @@ export function scheduleGameOver() {
 const hudCache = {
   lamp: null,
   lamps: null,
-  time: null,
+  nightLabel: null,
+  nightTime: null,
+  nightRatio: null,
   level: null,
 };
 
@@ -247,11 +252,35 @@ function formatLampPowerHtml() {
   return out;
 }
 
+function updateNightProgress() {
+  if (!$hudNight || !$hudNightFill || !$hudNightTime) return;
+  const ratio = Math.max(0, Math.min(1, S.runSurvivalMs / NIGHT_DURATION_MS));
+  const ratioValue = ratio.toFixed(4);
+  const percent = Math.floor(ratio * 100);
+  const timeText = formatSurvivalTime(S.runSurvivalMs);
+  const label = t('hud.night');
+
+  if (hudCache.nightLabel !== label && $hudNightLabel) {
+    hudCache.nightLabel = label;
+    $hudNightLabel.textContent = label;
+  }
+  if (hudCache.nightTime !== timeText) {
+    hudCache.nightTime = timeText;
+    $hudNightTime.textContent = timeText;
+    $hudNight.setAttribute('aria-valuenow', String(percent));
+    $hudNight.setAttribute('aria-label', `${label}: ${timeText}`);
+  }
+  if (hudCache.nightRatio !== ratioValue) {
+    hudCache.nightRatio = ratioValue;
+    $hudNightFill.style.transform = `scaleX(${ratioValue})`;
+  }
+}
+
 export function updateHUD() {
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
   setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
-  setIfChanged('time', $hudTime, `⏰ ${formatSurvivalTime(S.runSurvivalMs)}`);
+  updateNightProgress();
   if ($hudLevel) {
     const levelHtml = formatLevelHudHtml();
     if (hudCache.level !== levelHtml) {
@@ -539,7 +568,7 @@ export function showKrakenGameOver() {
 
 export async function showWin() {
   await showGameOverScreen({
-    title: t('win.message', { total: WIN_SCORE }),
+    title: t('win.nightMessage'),
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
