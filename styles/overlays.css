@@ -27,9 +27,22 @@
     padding: 0 16px;
   }
 
+  .screen-result-title {
+    font-family: var(--font-ui);
+    font-size: clamp(42px, 8vw, 88px);
+    font-weight: bold;
+    line-height: 0.95;
+    color: #fff;
+    text-align: center;
+    text-shadow:
+      0 0 18px #000,
+      0 3px 10px #000;
+    margin: 0;
+  }
+
   .screen-result-msg {
     font-family: var(--font-ui);
-    font-size: clamp(20px, 4vw, 38px);
+    font-size: clamp(20px, 3.4vw, 34px);
     font-weight: bold;
     color: #fff;
     text-align: center;
@@ -41,6 +54,7 @@
 
   .screen-result-stats {
     display: flex;
+    flex-direction: column;
     flex-wrap: wrap;
     justify-content: center;
     gap: 14px 28px;

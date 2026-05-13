@@ -161,13 +161,14 @@ Photopea — image editor
     'overlay.pressToPlayAgain': 'Press to play again',
     'exit.confirm': '⏸️ Exit to menu?',
 
-    'gameOver.boats': '💀 Game Over — {n} boats sunk!',
-    'gameOver.mermaids': '💀 Game Over — {n} mermaids reached the lighthouse!',
+    'gameOver.title': 'Game Over',
+    'gameOver.boats': '💀 {n} boats sunk!',
+    'gameOver.mermaids': '💀 {n} mermaids reached the lighthouse!',
     'gameOver.police': '🚔 Arrested! Police captured the lighthouse!',
     'gameOver.kraken': '🦑 The Kraken captured the lighthouse!',
     'gameOver.pattinson':
       '📦 Out of powder! Lighthouse keeper threw intern off cliff!',
-    'gameOver.score': '💀 Game Over — {score}/{total} boats saved',
+    'gameOver.score': '💀 {score}/{total} boats saved',
     'win.message': '🎉 You Win! All {total} boats saved!',
     'win.messageTime':
       '🎉 You Win! All {total} boats saved! Final time: {time}',
@@ -372,13 +373,14 @@ Photopea — image editor
     'overlay.pressToPlayAgain': 'Нажмите, чтобы сыграть снова',
     'exit.confirm': '⏸️ Выйти в меню?',
 
-    'gameOver.boats': '💀 Game Over — потоплено кораблей: {n}!',
-    'gameOver.mermaids': '💀 Game Over — русалки добрались до маяка: {n}!',
+    'gameOver.title': 'Game Over',
+    'gameOver.boats': '💀 Потоплено кораблей: {n}!',
+    'gameOver.mermaids': '💀 Русалки добрались до маяка: {n}!',
     'gameOver.police': '🚔 Арест! Полиция захватила маяк!',
     'gameOver.kraken': '🦑 Кракен захватил маяк!',
     'gameOver.pattinson':
       '📦 Порошок закончился! Смотритель маяка сбросил стажера со скалы!',
-    'gameOver.score': '💀 Game Over — спасено {score}/{total} кораблей',
+    'gameOver.score': '💀 Спасено {score}/{total} кораблей',
     'win.message': '🎉 Победа! Спасены все {total} кораблей!',
     'win.messageTime':
       '🎉 Победа! Спасены все {total} кораблей! Финальное время: {time}',

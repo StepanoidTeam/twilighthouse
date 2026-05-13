@@ -31,7 +31,8 @@ const {
   $volSfxVal,
   $volMusicVal,
   $gameContainer,
-  $resultMsg,
+  $resultTitle,
+  $resultReason,
   $resultStats,
   $resultRestartLabel,
   $resultMenuLabel,
@@ -108,37 +109,46 @@ export function scheduleGameOver() {
     switch (S.lastEnemyType) {
       case 'police':
         showGameOverScreen({
-          message: t('gameOver.police'),
+          title: t('gameOver.title'),
+          reasonText: t('gameOver.police'),
           splashKey: 'splashPolice',
           reason: 'police',
+          statsItems: getRunStatsItems(),
         });
         break;
       case 'mermaid':
         showGameOverScreen({
-          message: t('gameOver.mermaids', { n: S.mermaidsArrived }),
+          title: t('gameOver.title'),
+          reasonText: t('gameOver.mermaids', { n: S.mermaidsArrived }),
           splashKey: 'splashMermaid',
           reason: 'mermaid',
+          statsItems: getRunStatsItems(),
         });
         break;
       case 'kraken':
         showGameOverScreen({
-          message: t('gameOver.kraken'),
+          title: t('gameOver.title'),
+          reasonText: t('gameOver.kraken'),
           splashKey: 'splashKraken',
           reason: 'kraken',
+          statsItems: getRunStatsItems(),
         });
         break;
       case 'boat-sink':
         showGameOverScreen({
-          message: t('gameOver.boats', { n: S.boatsSunk }),
+          title: t('gameOver.title'),
+          reasonText: t('gameOver.boats', { n: S.boatsSunk }),
           splashKey: 'splashIceberg',
           reason: 'boats_sunk',
+          statsItems: getRunStatsItems(),
         });
         break;
       default:
         showGameOverScreen({
-          message: 'Game Over',
+          title: t('gameOver.title'),
           splashKey: 'splashIceberg',
           reason: 'unknown',
+          statsItems: getRunStatsItems(),
         });
     }
   }, GAME_OVER_DELAY);
@@ -241,7 +251,7 @@ export function updateHUD() {
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
   setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
-  setIfChanged('time', $hudTime, `⏱ ${formatSurvivalTime(S.runSurvivalMs)}`);
+  setIfChanged('time', $hudTime, `⏰ ${formatSurvivalTime(S.runSurvivalMs)}`);
   if ($hudLevel) {
     const levelHtml = formatLevelHudHtml();
     if (hudCache.level !== levelHtml) {
@@ -406,10 +416,12 @@ const SPLASH_IMAGES = {
 };
 
 async function showGameOverScreen({
-  message,
+  title,
+  reasonText = '',
   splashKey,
   playFail = true,
   reason,
+  statsItems = [],
 }) {
   S.gameOver = true;
   if (playFail) playFailSound();
@@ -418,16 +430,15 @@ async function showGameOverScreen({
 
   $gameContainer.hidden = true;
 
-  $resultMsg.textContent = message;
+  $resultTitle.textContent = title;
+  $resultReason.textContent = reasonText;
+  $resultReason.hidden = !reasonText;
   $resultRestartLabel.textContent = t('overlay.restart');
   $resultMenuLabel.textContent = t('overlay.toMenu');
   if ($btnResultRestart) $btnResultRestart.hidden = false;
   if ($btnResultMenu) $btnResultMenu.hidden = false;
 
-  if ($resultStats) {
-    $resultStats.hidden = true;
-    $resultStats.replaceChildren();
-  }
+  renderResultStats(statsItems);
 
   if (splashKey && SPLASH_IMAGES[splashKey]) {
     $resultSplash.style.backgroundImage = `url("${SPLASH_IMAGES[splashKey]}")`;
@@ -436,6 +447,26 @@ async function showGameOverScreen({
   }
 
   $screenGameOver.hidden = false;
+}
+
+function getRunStatsItems() {
+  return [
+    {
+      icon: '💡',
+      label: t('win.statLamps'),
+      value: S.deliveredCargo['💡'] || 0,
+    },
+    {
+      icon: '📦',
+      label: t('win.statCrates'),
+      value: S.deliveredCargo['📦'] || 0,
+    },
+    {
+      icon: '⏰',
+      label: t('win.statTime'),
+      value: formatSurvivalTime(S.runSurvivalMs),
+    },
+  ];
 }
 
 function renderResultStats(items) {
@@ -458,67 +489,64 @@ function renderResultStats(items) {
 
 export function showBoatGameOver() {
   return showGameOverScreen({
-    message: t('gameOver.boats', { n: S.boatsSunk }),
+    title: t('gameOver.title'),
+    reasonText: t('gameOver.boats', { n: S.boatsSunk }),
     splashKey: 'splashIceberg',
     reason: 'boats_sunk',
+    statsItems: getRunStatsItems(),
   });
 }
 
 export function showPoliceGameOver() {
   return showGameOverScreen({
-    message: t('gameOver.police'),
+    title: t('gameOver.title'),
+    reasonText: t('gameOver.police'),
     splashKey: 'splashPolice',
     reason: 'police',
+    statsItems: getRunStatsItems(),
   });
 }
 
 export function showPattinsonGameOver() {
   return showGameOverScreen({
-    message: t('gameOver.pattinson'),
+    title: t('gameOver.title'),
+    reasonText: t('gameOver.pattinson'),
     splashKey: 'splashPattinson',
     reason: 'pattinson',
+    statsItems: getRunStatsItems(),
   });
 }
 
 export function showMermaidGameOver() {
   return showGameOverScreen({
-    message: t('gameOver.mermaids', { n: S.mermaidsArrived }),
+    title: t('gameOver.title'),
+    reasonText: t('gameOver.mermaids', { n: S.mermaidsArrived }),
     splashKey: 'splashMermaid',
     reason: 'mermaid',
+    statsItems: getRunStatsItems(),
   });
 }
 
 export function showKrakenGameOver() {
   return showGameOverScreen({
-    message: t('gameOver.kraken'),
+    title: t('gameOver.title'),
+    reasonText: t('gameOver.kraken'),
     splashKey: 'splashKraken',
     reason: 'kraken',
+    statsItems: getRunStatsItems(),
   });
 }
 
 export async function showWin() {
-  const finalTime = formatSurvivalTime(S.runSurvivalMs);
   await showGameOverScreen({
-    message: t('win.message', { total: WIN_SCORE }),
+    title: t('win.message', { total: WIN_SCORE }),
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
+    statsItems: getRunStatsItems(),
   });
   $resultRestartLabel.textContent = t('menu.leaderboard');
   $resultMenuLabel.textContent = t('overlay.toMenu');
-  renderResultStats([
-    {
-      icon: '💡',
-      label: t('win.statLamps'),
-      value: S.deliveredCargo['💡'] || 0,
-    },
-    {
-      icon: '📦',
-      label: t('win.statCrates'),
-      value: S.deliveredCargo['📦'] || 0,
-    },
-    { icon: '⏱', label: t('win.statTime'), value: finalTime },
-  ]);
 }
 
 // ===== Exit Confirmation =====
