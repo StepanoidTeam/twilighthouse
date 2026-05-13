@@ -26,10 +26,10 @@ const SCRIPTED_LEVELS = [
     introKey: 'level.l2',
     goal: { repelled_cops: 3 },
   },
-  // L3 (интерактивный туториал #3): отпугни русалок и кракена.
+  // L3 (интерактивный туториал #3): отпугни русалок.
   {
     introKey: 'level.l3',
-    goal: { mermaids_scared: 3, repelled_kraken: 1 },
+    goal: { mermaids_scared: 3 },
   },
 ];
 
