@@ -18,6 +18,7 @@ import {
 } from './config.js';
 import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
+import { spawnMermaid } from './mermaid.js';
 import {
   spawnTooltip,
   updateHUD,
@@ -66,6 +67,7 @@ export function updateKrakens(delta) {
       } else if (now - k.litPendingAt >= LIT_DEBOUNCE) {
         k.fleeing = rawLit;
         k.litPending = null;
+        if (rawLit) spawnMermaid();
       }
     } else {
       k.litPending = null;
