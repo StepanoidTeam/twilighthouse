@@ -8,6 +8,10 @@ import {
   LH_GLOW_RADIUS_DEFAULT,
 } from './config.js';
 
+function makeEmptyCargoInventory() {
+  return Object.fromEntries(BOAT_CARGO_TYPES.map((type) => [type, 0]));
+}
+
 // ===== Shared Mutable Game State =====
 const State = {
   // Pixi app
@@ -92,7 +96,7 @@ const State = {
 
   // Score
   score: 0,
-  deliveredCargo: { '💡': 0, '📦': 0 },
+  deliveredCargo: makeEmptyCargoInventory(),
   boatsSunk: 0,
   mermaidsArrived: 0,
   policeArrived: 0,
@@ -183,7 +187,7 @@ const State = {
     }
 
     this.score = 0;
-    this.deliveredCargo = { '💡': 0, '📦': 0 };
+    this.deliveredCargo = makeEmptyCargoInventory();
     this.mermaidsArrived = 0;
     this.policeArrived = 0;
     this.krakensArrived = 0;

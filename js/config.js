@@ -162,7 +162,7 @@ const SPRITE_FILES = {
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
 
 // ===== Cargo =====
-const BOAT_CARGO_TYPES = ['💡', '📦'];
+const BOAT_CARGO_TYPES = ['💡', '📦', '⚙️', '🧨', '🥃', '🛢️'];
 
 // ===== UI Styles =====
 const UI_STYLE = {

@@ -177,8 +177,16 @@ Photopea — image editor
     'win.statCrates': 'Crates delivered',
     'win.statTime': 'Final time',
 
+    'cargo.💡': 'Lamps',
+    'cargo.📦': 'Crates',
+    'cargo.⚙️': 'Parts',
+    'cargo.🧨': 'Dynamite',
+    'cargo.🥃': 'Rum',
+    'cargo.🛢️': 'Fuel',
+
     // Levels
     'hud.night': 'Night',
+    'hud.lesson.prefix': 'Lesson {n}',
     'hud.level.prefix': 'Level {n}',
     'hud.level.idle': 'survive',
 
@@ -198,13 +206,8 @@ Photopea — image editor
     'level.l2.sub': 'Sink the cops before they reach the lighthouse',
     'level.l3.title': 'Lesson 3',
     'level.l3.sub': 'Scare off mermaids before they reach the lighthouse',
-    'level.l4.title': 'Level 4',
-    'level.l4.sub': 'The night turns harsher',
-    'level.l5.title': 'Level 5',
-    'level.l5.sub': 'Something ancient stirs in the dark',
-    'level.proc.title': 'Level {n}',
-    'level.proc.sub': 'The storm grows stronger',
-
+    'level.freeplay.title': 'Hold Out Until Dawn',
+    'level.freeplay.sub': '',
     // Auth modal
     'auth.signIn': 'Sign in',
     'auth.signUp': 'Sign up',
@@ -391,8 +394,16 @@ Photopea — image editor
     'win.statCrates': 'Доставлено ящиков',
     'win.statTime': 'Финальное время',
 
+    'cargo.💡': 'Лампы',
+    'cargo.📦': 'Ящики',
+    'cargo.⚙️': 'Детали',
+    'cargo.🧨': 'Динамит',
+    'cargo.🥃': 'Ром',
+    'cargo.🛢️': 'Топливо',
+
     // Levels
     'hud.night': 'Ночь',
+    'hud.lesson.prefix': 'Урок {n}',
     'hud.level.prefix': 'Уровень {n}',
     'hud.level.idle': 'выжить',
 
@@ -416,13 +427,8 @@ Photopea — image editor
     'level.l2.sub': 'Топи копов, пока они не добрались до маяка',
     'level.l3.title': 'Урок 3',
     'level.l3.sub': 'Отпугни русалок, прежде чем они доберутся до маяка',
-    'level.l4.title': 'Уровень 4',
-    'level.l4.sub': 'Ночь становится все суровее',
-    'level.l5.title': 'Уровень 5',
-    'level.l5.sub': 'Во тьме пробуждается древняя угроза',
-    'level.proc.title': 'Уровень {n}',
-    'level.proc.sub': 'Шторм усиливается',
-
+    'level.freeplay.title': 'Продержись до рассвета',
+    'level.freeplay.sub': '',
     'auth.signIn': 'Вход',
     'auth.signUp': 'Регистрация',
     'auth.tabSignIn': 'Войти',

@@ -6,6 +6,7 @@ import {
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
   NIGHT_DURATION_MS,
+  BOAT_CARGO_TYPES,
 } from './config.js';
 import {
   CRASH_VOLUME,
@@ -185,9 +186,11 @@ function formatLevelHudHtml() {
   if (!S.gameSessionActive) return '';
   const idx = (S.levelIndex || 0) + 1;
   const goal = S.levelGoal || {};
+  if (Object.keys(goal).length === 0) return '';
   const progress = S.levelProgress || {};
+  const headKey = idx <= 3 ? 'hud.lesson.prefix' : 'hud.level.prefix';
   const head = `<div class="hud-level-head">${escapeHtml(
-    t('hud.level.prefix', { n: idx }),
+    t(headKey, { n: idx }),
   )}</div>`;
   const rows = [];
   for (const [key, target] of Object.entries(goal)) {
@@ -479,17 +482,13 @@ async function showGameOverScreen({
 }
 
 function getRunStatsItems() {
+  const cargoStats = BOAT_CARGO_TYPES.map((type) => ({
+    icon: type,
+    label: t(`cargo.${type}`),
+    value: S.deliveredCargo[type] || 0,
+  }));
   return [
-    {
-      icon: '💡',
-      label: t('win.statLamps'),
-      value: S.deliveredCargo['💡'] || 0,
-    },
-    {
-      icon: '📦',
-      label: t('win.statCrates'),
-      value: S.deliveredCargo['📦'] || 0,
-    },
+    ...cargoStats,
     {
       icon: '⏰',
       label: t('win.statTime'),
