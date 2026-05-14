@@ -24,8 +24,6 @@ import {
   spawnTooltip,
   updateHUD,
   scheduleGameOver,
-  showKrakenGameOver,
-  showBoatGameOver,
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
@@ -131,6 +129,7 @@ export function spawnKraken() {
     frameTick: Math.random() * KRAKEN_FRAME_DURATION,
     baseScaleX: spr.scale.x,
     indicator: createKrakenIndicator(),
+    fadeOut: null,
   });
 }
 
@@ -198,14 +197,17 @@ export function updateKrakens(delta) {
         if (gameOver) {
           scheduleGameOver();
         }
-        const fadeOut = () => {
-          k.spr.alpha -= 0.04 * delta;
+        const fadeOut = (fadeDelta) => {
+          k.spr.alpha -= 0.04 * fadeDelta;
           if (k.spr.alpha <= 0) {
-            S.boatLayer.removeChild(k.spr);
-            S.krakens.splice(i, 1);
+            if (k.spr.parent) k.spr.parent.removeChild(k.spr);
+            const idx = S.krakens.indexOf(k);
+            if (idx !== -1) S.krakens.splice(idx, 1);
             S.app.ticker.remove(fadeOut);
+            k.fadeOut = null;
           }
         };
+        k.fadeOut = fadeOut;
         S.app.ticker.add(fadeOut);
         continue;
       }
@@ -310,7 +312,7 @@ export function updateKrakens(delta) {
       k.gone = true;
       console.log(`🦑 Кракен уплыл за экран`);
       destroyKrakenIndicator(k);
-      S.boatLayer.removeChild(k.spr);
+      if (k.spr.parent) k.spr.parent.removeChild(k.spr);
       S.krakens.splice(i, 1);
       levels.notify('repelled_kraken');
       continue;
@@ -354,8 +356,9 @@ export const krakenEntity = {
 
 export function cleanupKrakens() {
   for (const k of S.krakens) {
+    if (k.fadeOut) S.app.ticker.remove(k.fadeOut);
     destroyKrakenIndicator(k);
-    S.boatLayer.removeChild(k.spr);
+    if (k.spr.parent) k.spr.parent.removeChild(k.spr);
   }
   S.krakens = [];
 }
