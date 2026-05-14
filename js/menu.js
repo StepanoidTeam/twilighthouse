@@ -12,6 +12,7 @@ import {
   renderLeaderboardScreen,
   syncCurrentUserLeaderboardDisplayName,
 } from './leaderboard.js';
+import { renderShopScreen } from './shop-screen.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
@@ -32,6 +33,7 @@ const {
   $menuMain,
   $menuHint,
   $menuBtnStart,
+  $menuBtnShop,
   $menuBtnLeaderboard,
   $menuBtnSettings,
   $menuBtnAuthors,
@@ -40,6 +42,7 @@ const {
   $backBtn,
   $menuSettings,
   $menuLeaderboard,
+  $menuShop,
   $menuAuthors,
   $menuTutorial,
   $menuTutorialShell,
@@ -68,7 +71,7 @@ const {
 let menuApp = null;
 let $$menuItems = [];
 let selectedIndex = 0;
-let currentScreen = 'main'; // 'main' | 'leaderboard' | 'settings' | 'authors' | null (game)
+let currentScreen = 'main'; // 'main' | 'shop' | 'leaderboard' | 'settings' | 'authors' | null (game)
 let $creditsScroll = null;
 let onStartGame = null;
 let backBtnEl = null;
@@ -101,6 +104,7 @@ function markTutorialSeen() {
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
   { key: 'menu.newGame', action: 'start' },
+  { key: 'menu.shop', action: 'shop' },
   { key: 'menu.leaderboard', action: 'leaderboard' },
   { key: 'menu.settings', action: 'settings' },
   { key: 'menu.authors', action: 'authors' },
@@ -212,6 +216,7 @@ function stopBgManMotion() {
 function initMenuButtons() {
   $$menuItems = [
     $menuBtnStart,
+    $menuBtnShop,
     $menuBtnLeaderboard,
     $menuBtnSettings,
     $menuBtnAuthors,
@@ -249,6 +254,7 @@ function hideOverlayScreens() {
   clearTutorialState();
   if ($menuSettings) $menuSettings.hidden = true;
   if ($menuLeaderboard) $menuLeaderboard.hidden = true;
+  if ($menuShop) $menuShop.hidden = true;
   if ($menuAuthors) $menuAuthors.hidden = true;
   if ($menuTutorial) $menuTutorial.hidden = true;
   if ($menuTutorialShell) $menuTutorialShell.innerHTML = '';
@@ -335,6 +341,7 @@ export async function buildMenu(app, startGameCb) {
       updateSelection();
 
       if (currentScreen === 'settings') showSettings();
+      else if (currentScreen === 'shop') showShop();
       else if (currentScreen === 'leaderboard') showLeaderboard();
       else if (currentScreen === 'authors') showAuthors();
       else if (currentScreen === 'tutorial') showTutorial();
@@ -403,6 +410,9 @@ function activateMenuItem() {
   switch (action) {
     case 'start':
       requestStartGame();
+      break;
+    case 'shop':
+      showShop();
       break;
     case 'leaderboard':
       showLeaderboard();
@@ -665,6 +675,19 @@ async function showLeaderboard() {
 export async function openLeaderboard() {
   showMenu();
   await showLeaderboard();
+}
+
+// ===== Shop =====
+function showShop() {
+  hideMainItems();
+  showBackBtn();
+  hideOverlayScreens();
+  currentScreen = 'shop';
+  if ($menuShop) $menuShop.hidden = false;
+  renderShopScreen({
+    container: $menuShop,
+    isActive: () => currentScreen === 'shop',
+  });
 }
 
 // ===== Settings =====

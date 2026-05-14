@@ -238,6 +238,19 @@
           </button>
           <button
             type="button"
+            id="$menuBtnShop"
+            class="menu-btn menu-main-btn blur-bg"
+            data-action="shop"
+          >
+            <img
+              class="menu-main-btn-icon"
+              src="sprites/icons/chest.png"
+              alt=""
+              aria-hidden="true"
+            /><span class="menu-main-btn-label" data-i18n="menu.shop"></span>
+          </button>
+          <button
+            type="button"
             id="$menuBtnLeaderboard"
             class="menu-btn menu-main-btn blur-bg"
             data-action="leaderboard"
@@ -462,6 +475,28 @@
         <div class="menu-card blur-bg">
           <p class="menu-state-label"></p>
           <div class="menu-leaderboard-list"></div>
+        </div>
+        <p class="menu-hint hidden-mobile">
+          <span class="hotkey">esc</span>
+          <span class="hotkey">Q</span>
+          <span class="hint-text">-</span>
+          <span class="hint-text" data-i18n="hint.back"></span>
+        </p>
+      </div>
+    </section>
+
+    <section
+      id="$menuShop"
+      class="menu-shop menu-leaderboard blur fullscreen"
+      hidden
+    >
+      <div class="menu-screen-shell">
+        <h2 class="menu-screen-title"></h2>
+        <p class="shop-nights-line menu-screen-subtitle"></p>
+        <div class="menu-card blur-bg shop-card-wrap">
+          <p class="shop-wallet-label menu-state-label"></p>
+          <div class="shop-wallet-row"></div>
+          <div class="shop-grid"></div>
         </div>
         <p class="menu-hint hidden-mobile">
           <span class="hotkey">esc</span>

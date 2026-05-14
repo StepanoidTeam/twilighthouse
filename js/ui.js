@@ -239,7 +239,8 @@ function setIfChanged(key, $el, value) {
 
 function formatLampPowerHtml() {
   const slots = 5;
-  const burnout = Math.max(0, Math.min(1, S.lampTimer / LAMP_BURNOUT_TIME));
+  const cap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
+  const burnout = Math.max(0, Math.min(1, S.lampTimer / cap));
   const lit = Math.max(1, Math.ceil((1 - burnout) * slots));
   const spent = slots - lit;
   const atMinimum = burnout >= 1;

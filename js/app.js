@@ -64,6 +64,10 @@ import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 import { t, onLanguageChange, applyI18nToDOM } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
+import {
+  commitRunToMeta,
+  applyMetaToRunState,
+} from './meta-progress.js';
 
 import './ip-tracker.js';
 
@@ -207,8 +211,12 @@ function clearTransientVisuals() {
 }
 
 function prepareFreshRun() {
+  if (S.gameSessionActive) {
+    commitRunToMeta(S);
+  }
   clearGame();
   S.reset();
+  applyMetaToRunState(S);
   buildRocks(S.rockLayer);
   S.gameSessionActive = true;
   levels.init({ bannerDelayMs: 500 });
@@ -352,6 +360,9 @@ function exitToMenu() {
   if (S.gameSessionActive && !S.scoreSubmitted) {
     void trySubmitScore();
   }
+  if (S.gameSessionActive) {
+    commitRunToMeta(S);
+  }
   clearGame();
   S.reset();
   updateHUD();
@@ -367,6 +378,9 @@ function exitToMenu() {
 function exitToLeaderboard() {
   if (!S.gameOver) return;
 
+  if (S.gameSessionActive) {
+    commitRunToMeta(S);
+  }
   clearGame();
   S.reset();
   updateHUD();
@@ -493,8 +507,9 @@ function gameLoop(delta) {
   updateCamera(delta);
 
   // Lamp burnout — flicker and narrow over time
-  S.lampTimer = Math.min(S.lampTimer + delta, LAMP_BURNOUT_TIME);
-  const burnout = S.lampTimer / LAMP_BURNOUT_TIME;
+  const lampCap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
+  S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
+  const burnout = S.lampTimer / lampCap;
   S.BEAM_HALF_ANGLE =
     LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
 

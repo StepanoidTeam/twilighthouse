@@ -13,6 +13,7 @@ const DICT = {
   en: {
     // Main menu
     'menu.newGame': 'New Game',
+    'menu.shop': 'Harbor Shop',
     'menu.leaderboard': 'Leaderboard',
     'menu.settings': 'Settings',
     'menu.authors': 'Credits',
@@ -88,6 +89,19 @@ Photopea — image editor
     'leaderboard.col.level': 'level',
     'leaderboard.col.time': 'best time',
     'leaderboard.col.date': 'date',
+
+    'shop.title': 'Harbor shop',
+    'shop.nightsWon': 'Nights survived (dawn reached): {n}',
+    'shop.wallet': 'Supplies in the warehouse',
+    'shop.buy': 'Buy',
+    'shop.owned': 'Owned',
+    'shop.cantAfford': 'Not enough supplies',
+    'shop.items.extra_heart.name': 'Spare lifebelt',
+    'shop.items.extra_heart.desc':
+      'Start each run with one extra heart — more room for mistakes at the lighthouse.',
+    'shop.items.quality_wick.name': 'Quality wick mix',
+    'shop.items.quality_wick.desc':
+      'Your lamp burns out about 25% slower — a little more time before the beam fades.',
 
     // Boot loader
     'boot.title': 'TWILIGHTHOUSE',
@@ -236,6 +250,7 @@ Photopea — image editor
 
   ru: {
     'menu.newGame': 'Новая игра',
+    'menu.shop': 'Прилавок',
     'menu.leaderboard': 'Лидерборд',
     'menu.settings': 'Настройки',
     'menu.authors': 'Авторы',
@@ -289,7 +304,7 @@ Photopea — image editor
 🌊 Спасибо за игру! 🌊
 `,
 
-    f: '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
+    'hint.main': '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
     'hint.back': 'назад',
     'hint.intro': '◀ ▶ — страницы  •  Esc — пропустить',
     'btn.back': 'Назад',
@@ -308,6 +323,19 @@ Photopea — image editor
     'leaderboard.col.level': 'уровень',
     'leaderboard.col.time': 'лучшее время',
     'leaderboard.col.date': 'дата',
+
+    'shop.title': 'Прилавок в порту',
+    'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',
+    'shop.wallet': 'Запасы на складе',
+    'shop.buy': 'Купить',
+    'shop.owned': 'Уже куплено',
+    'shop.cantAfford': 'Не хватает товара',
+    'shop.items.extra_heart.name': 'Запасной пояс',
+    'shop.items.extra_heart.desc':
+      'Каждый забег начинается с одной дополнительной жизни — больше шансов удержать маяк.',
+    'shop.items.quality_wick.name': 'Качественная фитильная смесь',
+    'shop.items.quality_wick.desc':
+      'Лампа сгорает примерно на четверть дольше — чуть больше времени, пока луч не потускнеет.',
 
     'boot.title': 'Маяк',
     'boot.loading': 'Загрузка игровых ресурсов…',

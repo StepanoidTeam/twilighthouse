@@ -2,6 +2,7 @@ import {
   PIXI,
   MAX_CRATES,
   LAMP_FULL_ANGLE,
+  LAMP_BURNOUT_TIME,
   BOAT_CARGO_TYPES,
   BEAM_ORIGIN_OFFSET_X_DEFAULT,
   BEAM_ORIGIN_OFFSET_Y_DEFAULT,
@@ -121,6 +122,7 @@ const State = {
   // Lamp
   lampTimer: 0,
   lampFlicker: 1,
+  lampBurnoutMs: LAMP_BURNOUT_TIME,
 
   // Hearts / Lives System
   heartsMax: 5,
@@ -194,6 +196,8 @@ const State = {
     this.crates = MAX_CRATES;
     this.lampTimer = 0;
     this.lampFlicker = 1;
+    this.heartsMax = 5;
+    this.lampBurnoutMs = LAMP_BURNOUT_TIME;
     this.heartsRemaining = this.heartsMax;
     this.lastEnemyType = null;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
