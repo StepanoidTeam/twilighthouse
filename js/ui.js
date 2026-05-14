@@ -18,6 +18,7 @@ import {
   playFailSound,
 } from './sound.js';
 import S from './state.js';
+import { levels } from './levels.js';
 import { t, pluralCategory } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
@@ -257,6 +258,11 @@ function formatLampPowerHtml() {
 
 function updateNightProgress() {
   if (!$hudNight || !$hudNightFill || !$hudNightTime) return;
+
+  const showNightHud = levels.isFreeplay();
+  $hudNight.hidden = !showNightHud;
+  if (!showNightHud) return;
+
   const ratio = Math.max(0, Math.min(1, S.runSurvivalMs / NIGHT_DURATION_MS));
   const ratioValue = ratio.toFixed(4);
   const percent = Math.floor(ratio * 100);

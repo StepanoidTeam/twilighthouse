@@ -455,22 +455,27 @@ function gameLoop(delta) {
     return;
   }
 
-  // Накопление времени выживания только во время активного тика.
-  // Если вкладка была свёрнута, rAF не тикал — отбрасываем огромную
-  // дельту первым кадром (>1000мс) после возврата.
-  const tickNow = performance.now();
-  if (S.lastSurvivalTick) {
-    const dtMs = tickNow - S.lastSurvivalTick;
-    if (dtMs > 0 && dtMs < 1000) S.runSurvivalMs += dtMs;
-  }
-  S.lastSurvivalTick = tickNow;
+  // Часы «ночи» и победа по времени — только после скриптового туториала (freeplay).
+  if (!levels.isFreeplay()) {
+    S.lastSurvivalTick = 0;
+  } else {
+    // Накопление времени выживания только во время активного тика.
+    // Если вкладка была свёрнута, rAF не тикал — отбрасываем огромную
+    // дельту первым кадром (>1000мс) после возврата.
+    const tickNow = performance.now();
+    if (S.lastSurvivalTick) {
+      const dtMs = tickNow - S.lastSurvivalTick;
+      if (dtMs > 0 && dtMs < 1000) S.runSurvivalMs += dtMs;
+    }
+    S.lastSurvivalTick = tickNow;
 
-  if (S.runSurvivalMs >= NIGHT_DURATION_MS) {
-    S.runSurvivalMs = NIGHT_DURATION_MS;
-    S.gameWon = true;
-    updateHUD();
-    void showWin();
-    return;
+    if (S.runSurvivalMs >= NIGHT_DURATION_MS) {
+      S.runSurvivalMs = NIGHT_DURATION_MS;
+      S.gameWon = true;
+      updateHUD();
+      void showWin();
+      return;
+    }
   }
 
   // Beam rotation via keyboard (no easing)

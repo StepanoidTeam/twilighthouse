@@ -32,13 +32,25 @@
   white-space: nowrap;
 }
 
-.hud-night {
+/* Top-center stack: night progress + scripted level goals */
+.hud-top-cluster {
   position: fixed;
   left: 50%;
   top: 14px;
-  width: min(420px, calc(100vw - 32px));
-  padding: 8px 12px 10px;
   transform: translateX(-50%);
+  width: min(420px, calc(100vw - 32px));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  z-index: 1;
+  pointer-events: none;
+}
+
+.hud-night {
+  position: relative;
+  width: 100%;
+  padding: 8px 12px 10px;
   border: 1px solid rgba(128, 178, 218, 0.35);
   border-radius: 8px;
   background: rgba(8, 22, 38, 0.62);
@@ -49,7 +61,6 @@
   text-shadow:
     0 0 6px #000,
     0 1px 3px #000;
-  z-index: 1;
   pointer-events: none;
 }
 
@@ -117,12 +128,10 @@
   opacity: 0.45;
 }
 
-/* ===== Current level / goal HUD (top-center, под таймером) ===== */
+/* Scripted level goals (stacked under night timer in .hud-top-cluster) */
 .hud-level {
-  position: fixed;
-  left: 50%;
-  top: 74px;
-  transform: translateX(-50%);
+  position: relative;
+  width: 100%;
   padding: 8px 16px;
   border-radius: 10px;
   background: rgba(10, 28, 46, 0.55);
@@ -134,14 +143,13 @@
   text-shadow:
     0 0 6px #000,
     0 1px 3px #000;
-  z-index: 1;
   pointer-events: none;
   letter-spacing: 0.3px;
   display: flex;
   flex-direction: column;
   gap: 3px;
-  min-width: 220px;
-  max-width: min(440px, 92vw);
+  min-width: 0;
+  box-sizing: border-box;
 }
 
 .hud-level-head {

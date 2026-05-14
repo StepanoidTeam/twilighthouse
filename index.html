@@ -27,21 +27,25 @@
     </div>
 
     <div id="$gameContainer" hidden>
-      <div
-        class="hud-night"
-        id="$hudNight"
-        role="progressbar"
-        aria-valuemin="0"
-        aria-valuemax="100"
-        aria-valuenow="0"
-      >
-        <div class="hud-night-head">
-          <span id="$hudNightLabel">Night</span>
-          <span id="$hudNightTime">0:00</span>
+      <!-- ===== Top HUD cluster: night timer + lesson goals (hidden blocks collapse upward) ===== -->
+      <div class="hud-top-cluster">
+        <div
+          class="hud-night"
+          id="$hudNight"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <div class="hud-night-head">
+            <span id="$hudNightLabel">Night</span>
+            <span id="$hudNightTime">0:00</span>
+          </div>
+          <div class="hud-night-track" aria-hidden="true">
+            <div id="$hudNightFill" class="hud-night-fill"></div>
+          </div>
         </div>
-        <div class="hud-night-track" aria-hidden="true">
-          <div id="$hudNightFill" class="hud-night-fill"></div>
-        </div>
+        <div id="$hudLevel" class="hud-level" hidden></div>
       </div>
 
       <!-- ===== Level goal banner (mid-screen, transient) ===== -->
@@ -49,9 +53,6 @@
         <p class="level-banner-title" id="$levelBannerTitle"></p>
         <p class="level-banner-subtitle" id="$levelBannerSubtitle"></p>
       </div>
-
-      <!-- ===== Current level / goal HUD (top-center, persistent) ===== -->
-      <div id="$hudLevel" class="hud-level" hidden></div>
 
       <!-- ===== Debug controls ===== -->
       <div id="$debugControls" class="debug-controls" hidden>

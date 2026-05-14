@@ -288,4 +288,5 @@ export const levels = {
   advance,
   current,
   isGoalComplete,
+  isFreeplay,
 };
