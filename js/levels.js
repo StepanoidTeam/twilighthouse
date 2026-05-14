@@ -7,14 +7,9 @@ import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
 
 // ===== Level Definitions =====
-// goal       — пороги подцелей (см. словарь GOAL_TO_KIND). Уровень
-//              пройден, когда ВСЕ подцели достигли своих порогов.
-//              Мобы целевого типа спавнятся АВТОМАТИЧЕСКИ до тех пор,
-//              пока их сумма "сделано + сейчас в воздухе" < target,
-//              чтобы провалившиеся (затонувшие, прорвавшиеся к маяку)
-//              не блокировали прохождение.
-// extraSpawn — фоновый бюджет (атмосфера/нон-цель). Тратится на спавне
-//              как обычный счётчик и не пополняется при провале.
+// goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ
+// подцели достигли своих порогов. После туториала игра переходит в freeplay:
+// уровней и целей больше нет, мобы спавнятся бесконечно по весам ниже.
 const SCRIPTED_LEVELS = [
   // L1 (интерактивный туториал #1): проведи 3 лодки контрабандистов.
   {
@@ -33,33 +28,24 @@ const SCRIPTED_LEVELS = [
   },
 ];
 
-// Шаг волны после скриптовой кампании. k = 1 на L6.
-function makeProcedural(n) {
-  const k = n - SCRIPTED_LEVELS.length;
-  const boats = 3 + Math.floor(k / 2);
-  const cops = 1 + Math.floor(k / 2);
-  return {
-    introKey: 'level.proc',
-    introParams: { n },
-    goal: {
-      delivered_boats: boats,
-      repelled_cops: cops,
-      ...(k % 3 === 0 ? { repelled_kraken: 1 } : {}),
-    },
-    extraSpawn: {
-      mermaids: 1 + Math.floor(k / 2),
-    },
-  };
-}
+const FREEPLAY_SPAWN_WEIGHTS = {
+  boats: 4,
+  cops: 3,
+  mermaids: 2,
+  krakens: 1,
+};
 
 function getLevelDef(index) {
-  if (index < SCRIPTED_LEVELS.length) return SCRIPTED_LEVELS[index];
-  return makeProcedural(index + 1);
+  return SCRIPTED_LEVELS[index] || null;
+}
+
+function isFreeplay() {
+  return S.levelIndex >= SCRIPTED_LEVELS.length;
 }
 
 // ===== Goal helpers =====
 function isGoalComplete() {
-  const goal = getLevelDef(S.levelIndex).goal || {};
+  const goal = getLevelDef(S.levelIndex)?.goal || {};
   for (const key of Object.keys(goal)) {
     if ((S.levelProgress[key] || 0) < goal[key]) return false;
   }
@@ -104,12 +90,11 @@ function deficitFor(kind) {
   return Math.max(0, target - done - live);
 }
 
-// Решаем что спавнить:
-//   1) Сначала закрываем дефицит по любой невыполненной подцели —
-//      чтобы провалившиеся мобы не блокировали прогресс.
-//   2) Если все цели "обеспечены живыми мобами" — тратим ambient-бюджет
-//      (extraSpawn) на атмосферу.
+// Решаем что спавнить: в туториале закрываем дефицит текущей цели, после
+// туториала выбираем любой тип моба по freeplay-весам.
 function pickSpawnKind() {
+  if (isFreeplay()) return { kind: pickFreeplaySpawnKind() };
+
   const deficits = [];
   for (const kind of Object.keys(KIND_TO_GOAL)) {
     const d = deficitFor(kind);
@@ -138,6 +123,23 @@ function pickSpawnKind() {
   return { kind: extras[extras.length - 1][0], source: 'extra' };
 }
 
+function pickWeighted(weights) {
+  const entries = Object.entries(weights).filter(([, v]) => v > 0);
+  const total = entries.reduce((s, [, v]) => s + v, 0);
+  let r = Math.random() * total;
+  for (const [kind, weight] of entries) {
+    r -= weight;
+    if (r <= 0) return kind;
+  }
+  return entries[entries.length - 1][0];
+}
+
+function pickFreeplaySpawnKind() {
+  const weights = { ...FREEPLAY_SPAWN_WEIGHTS };
+  if (LIVE_COUNTERS.krakens() > 0) weights.krakens = 0;
+  return pickWeighted(weights);
+}
+
 function scheduleNextSpawn(now) {
   const jitter = Math.random() * (SPAWN_INTERVAL_MAX - SPAWN_INTERVAL_MIN);
   S.nextSpawnTime = now + SPAWN_INTERVAL_MIN + jitter;
@@ -146,6 +148,10 @@ function scheduleNextSpawn(now) {
 // ===== Public API =====
 function applyLevel(index, { showBanner } = { showBanner: true }) {
   const def = getLevelDef(index);
+  if (!def) {
+    enterFreeplay({ showBanner });
+    return;
+  }
   S.levelIndex = index;
   S.levelGoal = { ...(def.goal || {}) };
   S.levelProgress = {};
@@ -176,6 +182,27 @@ function applyLevel(index, { showBanner } = { showBanner: true }) {
     'goal:',
     def.goal,
   );
+}
+
+function enterFreeplay({ showBanner } = { showBanner: true }) {
+  S.levelIndex = SCRIPTED_LEVELS.length;
+  S.levelGoal = {};
+  S.levelProgress = {};
+  S.levelSpawnLeft = {};
+  S.levelStartedAt = performance.now();
+  S.maxLevelReached = Math.max(
+    S.maxLevelReached || 0,
+    SCRIPTED_LEVELS.length,
+  );
+  S.boatsSunk = 0;
+  S.nextSpawnTime = performance.now() + 1500;
+  if (showBanner) {
+    showLevelBanner({
+      titleKey: 'level.freeplay.title',
+      subtitleKey: 'level.freeplay.sub',
+    });
+  }
+  console.log('🌊 Freeplay started — spawn weights:', FREEPLAY_SPAWN_WEIGHTS);
 }
 
 function init() {
@@ -223,12 +250,11 @@ function advance() {
 
 function notify(goalKey) {
   if (S.gameOver || S.gameOverPending) return;
-  S.levelProgress[goalKey] = (S.levelProgress[goalKey] || 0) + 1;
   const def = getLevelDef(S.levelIndex);
+  if (!def || !def.goal || def.goal[goalKey] == null) return;
+  S.levelProgress[goalKey] = (S.levelProgress[goalKey] || 0) + 1;
   // Подцель уровня — бамп прогресса в HUD произойдёт на следующем updateHUD().
-  if (def.goal && def.goal[goalKey] != null) {
-    if (isGoalComplete()) advance();
-  }
+  if (isGoalComplete()) advance();
 }
 
 function current() {
@@ -236,6 +262,7 @@ function current() {
     index: S.levelIndex,
     def: getLevelDef(S.levelIndex),
     progress: S.levelProgress,
+    freeplay: isFreeplay(),
   };
 }
 
