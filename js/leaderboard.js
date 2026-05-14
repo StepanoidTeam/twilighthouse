@@ -340,6 +340,7 @@ export async function renderLeaderboardScreen({ container, isActive }) {
   for (const entry of leaderboardView.rows) {
     const { $row, isMe } = createLeaderboardRow(entry, myUid);
     if (isMe) {
+      $row.classList.add('current-user');
       $row.dataset.currentUser = 'true';
       $currentRow = $row;
     }
