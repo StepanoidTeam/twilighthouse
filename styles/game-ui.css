@@ -88,6 +88,35 @@
   transition: transform var(--duration-progress) ease;
 }
 
+.debug-controls {
+  position: fixed;
+  left: 10px;
+  top: 52px;
+  z-index: 3;
+  display: flex;
+  gap: 8px;
+  font-family: var(--font-ui);
+}
+
+.debug-btn {
+  min-height: 30px;
+  padding: 6px 10px;
+  border: 1px solid rgba(204, 68, 255, 0.9);
+  border-radius: 6px;
+  background: rgba(7, 20, 32, 0.82);
+  color: #fff;
+  font-family: inherit;
+  font-size: 13px;
+  font-weight: 700;
+  text-shadow: 0 0 4px #000;
+  cursor: pointer;
+}
+
+.debug-btn:disabled {
+  cursor: default;
+  opacity: 0.45;
+}
+
 /* ===== Current level / goal HUD (top-center, под таймером) ===== */
 .hud-level {
   position: fixed;

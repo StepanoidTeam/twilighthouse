@@ -206,8 +206,8 @@ Photopea — image editor
     'level.l2.sub': 'Sink the cops before they reach the lighthouse',
     'level.l3.title': 'Lesson 3',
     'level.l3.sub': 'Scare off mermaids before they reach the lighthouse',
-    'level.freeplay.title': 'Hold Out Until Dawn',
-    'level.freeplay.sub': '',
+    'level.freeplay.title': 'Night Watch',
+    'level.freeplay.sub': 'Hold out until dawn',
     // Auth modal
     'auth.signIn': 'Sign in',
     'auth.signUp': 'Sign up',
@@ -222,7 +222,7 @@ Photopea — image editor
 
     // Auth widget
     'widget.signIn': '👤 Sign in',
-    'widget.signOut': 'Sign out',
+    'widget.signOut': '🚪 Sign out',
 
     // Auth errors
     'err.invalidEmail': 'Invalid email',
@@ -427,8 +427,8 @@ Photopea — image editor
     'level.l2.sub': 'Топи копов, пока они не добрались до маяка',
     'level.l3.title': 'Урок 3',
     'level.l3.sub': 'Отпугни русалок, прежде чем они доберутся до маяка',
-    'level.freeplay.title': 'Продержись до рассвета',
-    'level.freeplay.sub': '',
+    'level.freeplay.title': 'Длинная ночь',
+    'level.freeplay.sub': 'Продержись до рассвета',
     'auth.signIn': 'Вход',
     'auth.signUp': 'Регистрация',
     'auth.tabSignIn': 'Войти',
@@ -441,7 +441,7 @@ Photopea — image editor
     'auth.close': 'Закрыть',
 
     'widget.signIn': '👤 Войти',
-    'widget.signOut': 'Выйти',
+    'widget.signOut': '🚪 Выйти',
 
     'err.invalidEmail': 'Некорректный email',
     'err.emailInUse': 'Этот email уже зарегистрирован',

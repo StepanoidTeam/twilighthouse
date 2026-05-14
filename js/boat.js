@@ -68,22 +68,14 @@ function addCargo(cargoStr) {
 }
 
 function randomCargo() {
-  const cargo = [];
-  const numTypes = 1 + Math.floor(Math.random() * BOAT_CARGO_TYPES.length);
+  const r = Math.random();
+  const numTypes = r < 0.5 ? 1 : r < 0.85 ? 2 : 3;
   const types = [...BOAT_CARGO_TYPES]
     .sort(() => Math.random() - 0.5)
     .slice(0, numTypes);
-  for (const type of types) {
-    const count = Math.floor(Math.random() * 6); // 0–5
-    if (count > 0) cargo.push(`${type}${count}`);
-  }
-  // Guarantee at least 1 item
-  if (cargo.length === 0) {
-    const type =
-      BOAT_CARGO_TYPES[Math.floor(Math.random() * BOAT_CARGO_TYPES.length)];
-    cargo.push(`${type}1`);
-  }
-  return cargo.join(' ');
+  return types
+    .map((type) => `${type}${1 + Math.floor(Math.random() * 5)}`)
+    .join(' ');
 }
 
 // ===== Spawn =====

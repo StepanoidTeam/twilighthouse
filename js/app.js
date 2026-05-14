@@ -52,7 +52,7 @@ import { cleanupMermaids, mermaidEntity } from './mermaid.js';
 import { cleanupKrakens, krakenEntity } from './kraken.js';
 import { cleanupPolice, policeEntity } from './police.js';
 import { levels } from './levels.js';
-import { buildDebug, updateDebug } from './debug.js';
+import { buildDebug, setDebugControlsVisible, updateDebug } from './debug.js';
 import {
   buildMenu,
   showMenu,
@@ -211,7 +211,7 @@ function prepareFreshRun() {
   S.reset();
   buildRocks(S.rockLayer);
   S.gameSessionActive = true;
-  levels.init();
+  levels.init({ bannerDelayMs: 500 });
   updateHUD();
   clearTransientVisuals();
   snapCamera();
@@ -260,6 +260,7 @@ function bindEvents() {
       S.debugMode = !S.debugMode;
       S.debugGfx.visible = S.debugMode;
       S.debugText.visible = S.debugMode;
+      setDebugControlsVisible(S.debugMode);
       S.darknessGfx.visible = !S.debugMode;
       console.log(`🔧 Debug mode: ${S.debugMode}`);
     }

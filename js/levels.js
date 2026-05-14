@@ -16,10 +16,10 @@ const SCRIPTED_LEVELS = [
     introKey: 'level.l1',
     goal: { delivered_boats: 3 },
   },
-  // L2 (интерактивный туториал #2): потопи 3 лодки копов.
+  // L2 (интерактивный туториал #2): потопи 1 лодку копов.
   {
     introKey: 'level.l2',
-    goal: { repelled_cops: 3 },
+    goal: { repelled_cops: 1 },
   },
   // L3 (интерактивный туториал #3): отпугни русалок.
   {
@@ -184,6 +184,16 @@ function applyLevel(index, { showBanner } = { showBanner: true }) {
   );
 }
 
+function showLevelIntro(index = S.levelIndex) {
+  const def = getLevelDef(index);
+  if (!def || !S.gameSessionActive || S.levelIndex !== index) return;
+  showLevelBanner({
+    titleKey: `${def.introKey}.title`,
+    subtitleKey: `${def.introKey}.sub`,
+    params: { ...(def.introParams || {}), n: index + 1 },
+  });
+}
+
 function enterFreeplay({ showBanner } = { showBanner: true }) {
   S.levelIndex = SCRIPTED_LEVELS.length;
   S.levelGoal = {};
@@ -205,8 +215,12 @@ function enterFreeplay({ showBanner } = { showBanner: true }) {
   console.log('🌊 Freeplay started — spawn weights:', FREEPLAY_SPAWN_WEIGHTS);
 }
 
-function init() {
-  applyLevel(0, { showBanner: true });
+function init({ showBanner = true, bannerDelayMs = 0 } = {}) {
+  applyLevel(0, { showBanner: showBanner && bannerDelayMs <= 0 });
+  if (showBanner && bannerDelayMs > 0) {
+    S.nextSpawnTime += bannerDelayMs;
+    window.setTimeout(() => showLevelIntro(0), bannerDelayMs);
+  }
 }
 
 function tickSpawns(now) {

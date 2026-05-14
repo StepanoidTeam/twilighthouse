@@ -7,6 +7,7 @@ import {
   ARRIVAL_RADIUS,
   MOB_SPAWN_RING,
   SPAWN_MARGIN,
+  DARKNESS_RADIUS,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
   KRAKEN_CHASE_FRAMES,
@@ -29,6 +30,88 @@ import {
 } from './ui.js';
 import { levels } from './levels.js';
 
+const KRAKEN_INDICATOR_MARGIN = 34;
+const KRAKEN_INDICATOR_STYLE = new PIXI.TextStyle({
+  fontFamily: 'Segoe UI Emoji, Apple Color Emoji, sans-serif',
+  fontSize: 34,
+  fontWeight: 'bold',
+  fill: '#ffffff',
+  dropShadow: true,
+  dropShadowColor: '#000000',
+  dropShadowBlur: 6,
+  dropShadowDistance: 0,
+});
+
+function createKrakenIndicator() {
+  const container = new PIXI.Container();
+  container.visible = false;
+
+  const icon = new PIXI.Text('🦑', KRAKEN_INDICATOR_STYLE);
+  icon.anchor.set(0.5);
+
+  container.addChild(icon);
+  S.app.stage.addChild(container);
+  return container;
+}
+
+function destroyKrakenIndicator(k) {
+  if (!k.indicator) return;
+  S.app.stage.removeChild(k.indicator);
+  k.indicator.destroy({ children: true });
+  k.indicator = null;
+}
+
+function updateKrakenIndicator(k) {
+  if (!k.indicator) return;
+  const screenPos = k.spr.getGlobalPosition();
+  const onScreen =
+    screenPos.x >= 0 &&
+    screenPos.x <= S.gameW &&
+    screenPos.y >= 0 &&
+    screenPos.y <= S.gameH;
+  const outsideDarknessRadius =
+    Math.hypot(k.spr.x - S.lhX, k.spr.y - S.lhY) > DARKNESS_RADIUS;
+
+  k.indicator.visible = !onScreen || outsideDarknessRadius;
+  if (!k.indicator.visible) return;
+
+  if (onScreen) {
+    k.indicator.position.set(
+      Math.max(
+        KRAKEN_INDICATOR_MARGIN,
+        Math.min(S.gameW - KRAKEN_INDICATOR_MARGIN, screenPos.x),
+      ),
+      Math.max(
+        KRAKEN_INDICATOR_MARGIN,
+        Math.min(S.gameH - KRAKEN_INDICATOR_MARGIN, screenPos.y),
+      ),
+    );
+    return;
+  }
+
+  const cx = S.gameW / 2;
+  const cy = S.gameH / 2;
+  const dx = screenPos.x - cx;
+  const dy = screenPos.y - cy;
+  const dist = Math.hypot(dx, dy) || 1;
+  const nx = dx / dist;
+  const ny = dy / dist;
+  const edgeX =
+    nx === 0
+      ? Infinity
+      : ((nx > 0 ? S.gameW - KRAKEN_INDICATOR_MARGIN : KRAKEN_INDICATOR_MARGIN) -
+          cx) /
+        nx;
+  const edgeY =
+    ny === 0
+      ? Infinity
+      : ((ny > 0 ? S.gameH - KRAKEN_INDICATOR_MARGIN : KRAKEN_INDICATOR_MARGIN) -
+          cy) /
+        ny;
+  const edgeDist = Math.min(Math.abs(edgeX), Math.abs(edgeY));
+  k.indicator.position.set(cx + nx * edgeDist, cy + ny * edgeDist);
+}
+
 export function spawnKraken() {
   const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(S.textures.krakenChase1);
@@ -47,6 +130,7 @@ export function spawnKraken() {
     frameIndex: 0,
     frameTick: Math.random() * KRAKEN_FRAME_DURATION,
     baseScaleX: spr.scale.x,
+    indicator: createKrakenIndicator(),
   });
 }
 
@@ -106,6 +190,7 @@ export function updateKrakens(delta) {
         S.shakeTime = 0.7;
         S.shakeIntensity = 28;
         k.gone = true;
+        destroyKrakenIndicator(k);
         S.krakensArrived++;
         spawnTooltip(k.spr.x, k.spr.y - 20, '🦑 −💔×ALL', TOOLTIP_STYLE_FAIL);
         const gameOver = S.takeDamage('kraken', S.heartsRemaining);
@@ -224,6 +309,7 @@ export function updateKrakens(delta) {
     ) {
       k.gone = true;
       console.log(`🦑 Кракен уплыл за экран`);
+      destroyKrakenIndicator(k);
       S.boatLayer.removeChild(k.spr);
       S.krakens.splice(i, 1);
       levels.notify('repelled_kraken');
@@ -231,6 +317,7 @@ export function updateKrakens(delta) {
     }
 
     // Кракен не вращается
+    updateKrakenIndicator(k);
   }
 }
 
@@ -267,6 +354,7 @@ export const krakenEntity = {
 
 export function cleanupKrakens() {
   for (const k of S.krakens) {
+    destroyKrakenIndicator(k);
     S.boatLayer.removeChild(k.spr);
   }
   S.krakens = [];
