@@ -5,6 +5,7 @@ import { spawnPoliceBoat } from './police.js';
 import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
+import { recordAchievementProgress } from './meta-progress.js';
 
 // ===== Level Definitions =====
 // goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ
@@ -200,10 +201,7 @@ function enterFreeplay({ showBanner } = { showBanner: true }) {
   S.levelProgress = {};
   S.levelSpawnLeft = {};
   S.levelStartedAt = performance.now();
-  S.maxLevelReached = Math.max(
-    S.maxLevelReached || 0,
-    SCRIPTED_LEVELS.length,
-  );
+  S.maxLevelReached = Math.max(S.maxLevelReached || 0, SCRIPTED_LEVELS.length);
   S.boatsSunk = 0;
   S.nextSpawnTime = performance.now() + 1500;
   if (showBanner) {
@@ -264,6 +262,7 @@ function advance() {
 
 function notify(goalKey) {
   if (S.gameOver || S.gameOverPending) return;
+  recordAchievementProgress(goalKey, 1);
   const def = getLevelDef(S.levelIndex);
   if (!def || !def.goal || def.goal[goalKey] == null) return;
   S.levelProgress[goalKey] = (S.levelProgress[goalKey] || 0) + 1;

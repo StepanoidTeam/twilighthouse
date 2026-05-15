@@ -15,6 +15,7 @@ const DICT = {
     'menu.newGame': 'New Game',
     'menu.shop': 'Harbor Shop',
     'menu.leaderboard': 'Leaderboard',
+    'menu.achievements': 'Achievements',
     'menu.settings': 'Settings',
     'menu.authors': 'Credits',
     'menu.tutorial': 'How to Play',
@@ -89,6 +90,26 @@ Photopea — image editor
     'leaderboard.col.level': 'level',
     'leaderboard.col.time': 'best time',
     'leaderboard.col.date': 'date',
+
+    'achievements.title': '🏅 Achievements',
+    'achievements.subtitle': 'Long-term milestones for your runs',
+    'achievements.progress': '{value}/{target}',
+    'achievements.complete': 'Completed',
+    'achievements.done': 'Unlocked',
+    'achievements.locked': 'Keep going',
+    'achievements.items.repelled_cops.title': 'Wave Rider',
+    'achievements.items.repelled_cops.desc': 'Repel 500 cops across all runs.',
+    'achievements.items.repelled_kraken.title': 'Deep Sea Hunter',
+    'achievements.items.repelled_kraken.desc':
+      'Repel 100 krakens across all runs.',
+    'achievements.items.mermaids_scared.title': 'Siren Whisperer',
+    'achievements.items.mermaids_scared.desc':
+      'Scare away 200 mermaids across all runs.',
+    'achievements.items.delivered_boats.title': 'Harbor Master',
+    'achievements.items.delivered_boats.desc':
+      'Escort 300 friendly boats to the harbor across all runs.',
+    'achievements.items.nights_won.title': 'Night Watch',
+    'achievements.items.nights_won.desc': 'Survive to dawn 50 times.',
 
     'shop.title': 'Harbor shop',
     'shop.nightsWon': 'Nights survived (dawn reached): {n}',
@@ -252,6 +273,7 @@ Photopea — image editor
     'menu.newGame': 'Новая игра',
     'menu.shop': 'Прилавок',
     'menu.leaderboard': 'Лидерборд',
+    'menu.achievements': 'Ачивки',
     'menu.settings': 'Настройки',
     'menu.authors': 'Авторы',
     'menu.tutorial': 'Как играть',
@@ -323,6 +345,27 @@ Photopea — image editor
     'leaderboard.col.level': 'уровень',
     'leaderboard.col.time': 'лучшее время',
     'leaderboard.col.date': 'дата',
+
+    'achievements.title': '🏅 Ачивки',
+    'achievements.subtitle': 'Долгие цели на все забеги',
+    'achievements.progress': '{value}/{target}',
+    'achievements.complete': 'Выполнено',
+    'achievements.done': 'Открыто',
+    'achievements.locked': 'Продолжай',
+    'achievements.items.repelled_cops.title': 'Волна на воде',
+    'achievements.items.repelled_cops.desc':
+      'Отогнать 500 копов за все забеги.',
+    'achievements.items.repelled_kraken.title': 'Охотник на глубинных',
+    'achievements.items.repelled_kraken.desc':
+      'Отогнать 100 кракенов за все забеги.',
+    'achievements.items.mermaids_scared.title': 'Шепот сирен',
+    'achievements.items.mermaids_scared.desc':
+      'Отогнать 200 русалок за все забеги.',
+    'achievements.items.delivered_boats.title': 'Хозяин порта',
+    'achievements.items.delivered_boats.desc':
+      'Провести 300 лодок в гавань за все забеги.',
+    'achievements.items.nights_won.title': 'Ночной дозор',
+    'achievements.items.nights_won.desc': 'Дожить до рассвета 50 раз.',
 
     'shop.title': 'Прилавок в порту',
     'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',

@@ -12,6 +12,7 @@ import {
   renderLeaderboardScreen,
   syncCurrentUserLeaderboardDisplayName,
 } from './leaderboard.js';
+import { renderAchievementsScreen } from './achievements-screen.js';
 import { renderShopScreen } from './shop-screen.js';
 import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
@@ -35,6 +36,7 @@ const {
   $menuBtnStart,
   $menuBtnShop,
   $menuBtnLeaderboard,
+  $menuBtnAchievements,
   $menuBtnSettings,
   $menuBtnAuthors,
   $menuBtnTutorial,
@@ -42,6 +44,7 @@ const {
   $backBtn,
   $menuSettings,
   $menuLeaderboard,
+  $menuAchievements,
   $menuShop,
   $menuAuthors,
   $menuTutorial,
@@ -71,7 +74,7 @@ const {
 let menuApp = null;
 let $$menuItems = [];
 let selectedIndex = 0;
-let currentScreen = 'main'; // 'main' | 'shop' | 'leaderboard' | 'settings' | 'authors' | null (game)
+let currentScreen = 'main'; // 'main' | 'shop' | 'leaderboard' | 'achievements' | 'settings' | 'authors' | 'tutorial' | null (game)
 let $creditsScroll = null;
 let onStartGame = null;
 let backBtnEl = null;
@@ -106,6 +109,7 @@ const MAIN_MENU_ACTIONS = [
   { key: 'menu.newGame', action: 'start' },
   { key: 'menu.shop', action: 'shop' },
   { key: 'menu.leaderboard', action: 'leaderboard' },
+  { key: 'menu.achievements', action: 'achievements' },
   { key: 'menu.settings', action: 'settings' },
   { key: 'menu.authors', action: 'authors' },
   { key: 'menu.tutorial', action: 'tutorial' },
@@ -218,6 +222,7 @@ function initMenuButtons() {
     $menuBtnStart,
     $menuBtnShop,
     $menuBtnLeaderboard,
+    $menuBtnAchievements,
     $menuBtnSettings,
     $menuBtnAuthors,
     $menuBtnTutorial,
@@ -254,6 +259,7 @@ function hideOverlayScreens() {
   clearTutorialState();
   if ($menuSettings) $menuSettings.hidden = true;
   if ($menuLeaderboard) $menuLeaderboard.hidden = true;
+  if ($menuAchievements) $menuAchievements.hidden = true;
   if ($menuShop) $menuShop.hidden = true;
   if ($menuAuthors) $menuAuthors.hidden = true;
   if ($menuTutorial) $menuTutorial.hidden = true;
@@ -343,6 +349,7 @@ export async function buildMenu(app, startGameCb) {
       if (currentScreen === 'settings') showSettings();
       else if (currentScreen === 'shop') showShop();
       else if (currentScreen === 'leaderboard') showLeaderboard();
+      else if (currentScreen === 'achievements') showAchievements();
       else if (currentScreen === 'authors') showAuthors();
       else if (currentScreen === 'tutorial') showTutorial();
       else if (currentScreen === 'main') showMainMenu();
@@ -416,6 +423,9 @@ function activateMenuItem() {
       break;
     case 'leaderboard':
       showLeaderboard();
+      break;
+    case 'achievements':
+      showAchievements();
       break;
     case 'settings':
       showSettings();
@@ -669,6 +679,19 @@ async function showLeaderboard() {
   await renderLeaderboardScreen({
     container: $menuLeaderboard,
     isActive: () => currentScreen === 'leaderboard',
+  });
+}
+
+// ===== Achievements =====
+function showAchievements() {
+  hideMainItems();
+  showBackBtn();
+  hideOverlayScreens();
+  currentScreen = 'achievements';
+  if ($menuAchievements) $menuAchievements.hidden = false;
+  renderAchievementsScreen({
+    container: $menuAchievements,
+    isActive: () => currentScreen === 'achievements',
   });
 }
 

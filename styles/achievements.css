@@ -1,0 +1,119 @@
+.menu-achievements {
+  max-height: 100vh;
+
+  display: flex;
+  justify-content: center;
+
+  .menu-card {
+    display: block;
+    padding: 18px;
+  }
+}
+
+.achievements-list {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.achievement-card {
+  padding: 16px 18px 14px;
+  border-radius: 18px;
+  border: 1px solid rgba(115, 156, 201, 0.22);
+  background:
+    linear-gradient(180deg, rgba(6, 14, 27, 0.82), rgba(10, 21, 39, 0.72)),
+    rgba(8, 20, 36, 0.38);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
+}
+
+.achievement-card.is-complete {
+  border-color: rgba(255, 221, 68, 0.35);
+  background:
+    linear-gradient(180deg, rgba(49, 35, 3, 0.9), rgba(17, 24, 39, 0.78)),
+    rgba(8, 20, 36, 0.38);
+}
+
+.achievement-card-header {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  gap: 14px;
+  align-items: center;
+}
+
+.achievement-card-icon {
+  display: grid;
+  place-items: center;
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.05);
+  font-size: 24px;
+}
+
+.achievement-card-title {
+  margin: 0;
+  color: #f4f7fb;
+  font-size: 1.1rem;
+  font-family: var(--font-menu);
+  letter-spacing: 0.03em;
+}
+
+.achievement-card-desc {
+  margin: 4px 0 0;
+  color: var(--color-menu-muted);
+  font-size: 0.96rem;
+  line-height: 1.35;
+}
+
+.achievement-card-badge {
+  justify-self: end;
+  padding: 8px 12px;
+  border-radius: 999px;
+  background: rgba(8, 20, 36, 0.7);
+  color: var(--color-main-menu-text);
+  font-size: 0.88rem;
+  font-weight: 800;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.achievement-card-track {
+  margin-top: 14px;
+  height: 10px;
+  border-radius: 999px;
+  overflow: hidden;
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.achievement-card-fill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #2bc3ff, #ffd94a);
+  box-shadow: 0 0 18px rgba(43, 195, 255, 0.25);
+}
+
+.achievement-card.is-complete .achievement-card-fill {
+  background: linear-gradient(90deg, #ffdd44, #ff9f1c);
+}
+
+.achievement-card-foot {
+  margin-top: 10px;
+  color: var(--color-menu-muted);
+  font-size: 0.9rem;
+}
+
+.achievement-card.is-complete .achievement-card-foot {
+  color: #ffd978;
+}
+
+@media (max-width: 720px) {
+  .achievement-card-header {
+    grid-template-columns: 38px minmax(0, 1fr);
+  }
+
+  .achievement-card-badge {
+    grid-column: 1 / -1;
+    justify-self: start;
+  }
+}
