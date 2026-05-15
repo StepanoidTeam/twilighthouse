@@ -54,14 +54,14 @@
 
   .screen-result-stats {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    width: min(760px, calc(100vw - 32px));
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    align-items: start;
+    width: min(1120px, calc(100vw - 32px));
     max-height: min(46vh, 420px);
-    overflow: auto;
-    gap: 0;
-    padding: 18px 24px 20px;
+    gap: 16px;
+    overflow: visible;
     font-family: var(--font-ui);
-    font-size: clamp(17px, 2.2vw, 25px);
+    font-size: clamp(15px, 1.65vw, 22px);
     font-weight: bold;
     color: #ead8b7;
     text-align: left;
@@ -69,6 +69,13 @@
       0 0 14px #000,
       0 2px 6px #000;
     margin: 0;
+  }
+
+  .screen-result-stats-panel {
+    min-width: 0;
+    max-height: min(46vh, 420px);
+    overflow: auto;
+    padding: 18px 20px 20px;
     background: rgba(5, 16, 22, 0.74);
     border: 1px solid rgba(218, 171, 111, 0.42);
     border-radius: 8px;
@@ -82,7 +89,7 @@
     margin: 0 0 8px;
     padding-bottom: 12px;
     color: #ffe3a8;
-    font-size: clamp(22px, 3vw, 34px);
+    font-size: clamp(19px, 2vw, 28px);
     line-height: 1;
     text-align: center;
     text-transform: uppercase;
@@ -92,10 +99,10 @@
 
   .screen-result-stat {
     display: grid;
-    grid-template-columns: 48px minmax(0, 1fr) minmax(2ch, max-content);
+    grid-template-columns: 42px minmax(0, 1fr) minmax(2ch, max-content);
     align-items: center;
-    gap: 16px;
-    min-height: 58px;
+    gap: 12px;
+    min-height: 50px;
     padding: 9px 6px;
     border-bottom: 1px solid rgba(218, 171, 111, 0.2);
   }
@@ -124,6 +131,20 @@
   .screen-result-actions {
     display: flex;
     gap: 24px;
+  }
+}
+
+@media (max-width: 760px) {
+  .screen-result {
+    .screen-result-stats {
+      grid-template-columns: minmax(0, 1fr);
+      max-height: min(48vh, 480px);
+      overflow: auto;
+    }
+
+    .screen-result-stats-panel {
+      max-height: none;
+    }
   }
 }
 

@@ -496,7 +496,6 @@ function getRunStatsItems({ includeTime = false } = {}) {
       label: t('resultStats.deliveredBoats'),
       value: stats.deliveredBoats || S.score || 0,
     },
-    ...getCollectedCargoItems(),
     {
       icon: '💀',
       label: t('resultStats.smugglersSunk'),
@@ -555,30 +554,47 @@ function getCollectedCargoItems() {
 function renderResultStats(items) {
   if (!$resultStats) return;
   $resultStats.replaceChildren();
-  if (items.length > 0) {
+
+  const cargoItems = getCollectedCargoItems();
+  const sections = [
+    { title: t('resultStats.cargoTitle'), items: cargoItems },
+    { title: t('resultStats.title'), items },
+  ].filter((section) => section.items.length > 0);
+
+  for (const section of sections) {
+    const panel = document.createElement('section');
+    panel.className = 'screen-result-stats-panel';
+
     const title = document.createElement('h2');
     title.className = 'screen-result-stats-title';
-    title.textContent = t('resultStats.title');
-    $resultStats.appendChild(title);
+    title.textContent = section.title;
+    panel.appendChild(title);
+
+    for (const item of section.items) {
+      panel.appendChild(createResultStatRow(item));
+    }
+
+    $resultStats.appendChild(panel);
   }
-  for (const { icon, label, value } of items) {
-    const stat = document.createElement('div');
-    stat.className = 'screen-result-stat';
-    const iconEl = document.createElement('span');
-    iconEl.className = 'screen-result-stat-icon';
-    iconEl.textContent = icon;
-    const text = document.createElement('span');
-    text.className = 'screen-result-stat-label';
-    text.textContent = label;
-    const valueEl = document.createElement('span');
-    valueEl.className = 'screen-result-stat-value';
-    valueEl.textContent = value;
-    stat.appendChild(iconEl);
-    stat.appendChild(text);
-    stat.appendChild(valueEl);
-    $resultStats.appendChild(stat);
-  }
-  $resultStats.hidden = items.length === 0;
+  $resultStats.hidden = sections.length === 0;
+}
+
+function createResultStatRow({ icon, label, value }) {
+  const stat = document.createElement('div');
+  stat.className = 'screen-result-stat';
+  const iconEl = document.createElement('span');
+  iconEl.className = 'screen-result-stat-icon';
+  iconEl.textContent = icon;
+  const text = document.createElement('span');
+  text.className = 'screen-result-stat-label';
+  text.textContent = label;
+  const valueEl = document.createElement('span');
+  valueEl.className = 'screen-result-stat-value';
+  valueEl.textContent = value;
+  stat.appendChild(iconEl);
+  stat.appendChild(text);
+  stat.appendChild(valueEl);
+  return stat;
 }
 
 export function showBoatGameOver() {
