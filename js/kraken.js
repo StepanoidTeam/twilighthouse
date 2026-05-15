@@ -27,6 +27,7 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
+import { recordAchievementEvent } from './achievements/index.js';
 
 const KRAKEN_INDICATOR_MARGIN = 34;
 const KRAKEN_INDICATOR_STYLE = new PIXI.TextStyle({
@@ -97,13 +98,17 @@ function updateKrakenIndicator(k) {
   const edgeX =
     nx === 0
       ? Infinity
-      : ((nx > 0 ? S.gameW - KRAKEN_INDICATOR_MARGIN : KRAKEN_INDICATOR_MARGIN) -
+      : ((nx > 0
+          ? S.gameW - KRAKEN_INDICATOR_MARGIN
+          : KRAKEN_INDICATOR_MARGIN) -
           cx) /
         nx;
   const edgeY =
     ny === 0
       ? Infinity
-      : ((ny > 0 ? S.gameH - KRAKEN_INDICATOR_MARGIN : KRAKEN_INDICATOR_MARGIN) -
+      : ((ny > 0
+          ? S.gameH - KRAKEN_INDICATOR_MARGIN
+          : KRAKEN_INDICATOR_MARGIN) -
           cy) /
         ny;
   const edgeDist = Math.min(Math.abs(edgeX), Math.abs(edgeY));
@@ -253,6 +258,7 @@ export function updateKrakens(delta) {
         updateHUD();
         spawnTooltip(b.spr.x, b.spr.y - 20, '🦑💀 −💔', TOOLTIP_STYLE_FAIL);
         playCrashSound();
+        recordAchievementEvent('boat.sunk', 1);
         console.log(`🦑 Кракен уничтожил корабль`);
         if (gameOver) scheduleGameOver();
       }

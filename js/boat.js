@@ -42,6 +42,7 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
+import { recordAchievementEvent } from './achievements/index.js';
 
 const LAMP_RESTORE_FRAMES = 14;
 
@@ -260,6 +261,7 @@ export function updateBoats(delta) {
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀 −💔', TOOLTIP_STYLE_FAIL);
         playCrashSound();
+        recordAchievementEvent('boat.sunk', 1);
         console.log(
           `🛥️ Корабль затонул на (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
