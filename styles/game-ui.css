@@ -530,9 +530,14 @@
 
 .achievement-toast-points {
   justify-self: end;
+  align-self: stretch;
+  display: inline-flex;
+  align-items: center;
+  padding: 0 12px 0 12px;
+  border-left: 1px solid rgba(127, 242, 190, 0.24);
   white-space: nowrap;
   font-family: var(--font-ui);
-  font-size: 13px;
+  font-size: 20px;
   font-weight: 800;
   color: #7ff2be;
 }
@@ -551,6 +556,11 @@
   .achievement-toast-points {
     grid-column: 1 / -1;
     justify-self: start;
+    align-self: start;
+    display: inline-flex;
+    align-items: center;
+    padding: 0;
+    border-left: 0;
     margin-left: 52px;
   }
 }

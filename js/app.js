@@ -480,6 +480,7 @@ function gameLoop(delta) {
   // Detect a fresh game-over transition: freeze survival time and submit once
   if (S.gameOver) {
     if (!S.scoreSubmitted) {
+      commitRunToMeta(S);
       updateHUD();
       trySubmitScore();
     }
@@ -514,6 +515,7 @@ function gameLoop(delta) {
     if (S.runSurvivalMs >= NIGHT_DURATION_MS) {
       S.runSurvivalMs = NIGHT_DURATION_MS;
       S.gameWon = true;
+      commitRunToMeta(S);
       S.beamMultiLitLastTick = 0;
       S.beamMultiLitStreakMs = 0;
       updateHUD();

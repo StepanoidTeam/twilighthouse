@@ -188,7 +188,7 @@ function escapeHtml(s) {
 
 let levelBannerTimer = null;
 
-const ACHIEVEMENT_TOAST_VISIBLE_MS = 3400;
+const ACHIEVEMENT_TOAST_VISIBLE_MS = 4600;
 const ACHIEVEMENT_TOAST_TRANSITION_MS = 280;
 let achievementToastRoot = null;
 let achievementToastTimer = null;

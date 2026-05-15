@@ -154,14 +154,6 @@
   border-left: 1px solid rgba(115, 156, 201, 0.22);
 }
 
-.achievement-card-points-label {
-  color: var(--color-menu-muted);
-  font-size: 0.84rem;
-  font-weight: 700;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-}
-
 .achievement-card-points-value {
   color: #ffd978;
   font-family: var(--font-menu);
