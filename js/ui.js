@@ -110,52 +110,14 @@ export function scheduleGameOver() {
   if (S.gameOver || S.gameOverPending) return;
   S.gameOverPending = true;
   setTimeout(() => {
-    // Determine which game over screen to show based on lastEnemyType
-    switch (S.lastEnemyType) {
-      case 'police':
-        showGameOverScreen({
-          title: t('gameOver.title'),
-          reasonText: t('gameOver.police'),
-          splashKey: 'splashPolice',
-          reason: 'police',
-          statsItems: getRunStatsItems(),
-        });
-        break;
-      case 'mermaid':
-        showGameOverScreen({
-          title: t('gameOver.title'),
-          reasonText: t('gameOver.mermaids', { n: S.mermaidsArrived }),
-          splashKey: 'splashMermaid',
-          reason: 'mermaid',
-          statsItems: getRunStatsItems(),
-        });
-        break;
-      case 'kraken':
-        showGameOverScreen({
-          title: t('gameOver.title'),
-          reasonText: t('gameOver.kraken'),
-          splashKey: 'splashKraken',
-          reason: 'kraken',
-          statsItems: getRunStatsItems(),
-        });
-        break;
-      case 'boat-sink':
-        showGameOverScreen({
-          title: t('gameOver.title'),
-          reasonText: t('gameOver.boats', { n: S.boatsSunk }),
-          splashKey: 'splashIceberg',
-          reason: 'boats_sunk',
-          statsItems: getRunStatsItems(),
-        });
-        break;
-      default:
-        showGameOverScreen({
-          title: t('gameOver.title'),
-          splashKey: 'splashIceberg',
-          reason: 'unknown',
-          statsItems: getRunStatsItems(),
-        });
-    }
+    const config = getGameOverReasonConfig(S.lastEnemyType);
+    showGameOverScreen({
+      title: t('gameOver.title'),
+      reasonText: config.reasonText ? config.reasonText() : '',
+      splashKey: config.splashKey,
+      reason: config.reason,
+      statsItems: getRunStatsItems(),
+    });
   }, GAME_OVER_DELAY);
 }
 
@@ -450,9 +412,39 @@ const SPLASH_IMAGES = {
   splashMermaid: 'sprites/wasted/mermaid.png',
   splashKraken: 'sprites/wasted/kraken.png',
   splashPolice: 'sprites/wasted/police.png',
-  splashPattinson: 'sprites/wasted/pattinson.png',
   splashPeremoha: 'sprites/wasted/peremoha.png',
 };
+
+const GAME_OVER_REASONS = {
+  police: {
+    reasonText: () => t('gameOver.police'),
+    splashKey: 'splashPolice',
+    reason: 'police',
+  },
+  mermaid: {
+    reasonText: () => t('gameOver.mermaids', { n: S.mermaidsArrived }),
+    splashKey: 'splashMermaid',
+    reason: 'mermaid',
+  },
+  kraken: {
+    reasonText: () => t('gameOver.kraken'),
+    splashKey: 'splashKraken',
+    reason: 'kraken',
+  },
+  'boat-sink': {
+    reasonText: () => t('gameOver.boats', { n: S.boatsSunk }),
+    splashKey: 'splashIceberg',
+    reason: 'boats_sunk',
+  },
+  unknown: {
+    splashKey: 'splashIceberg',
+    reason: 'unknown',
+  },
+};
+
+function getGameOverReasonConfig(enemyType) {
+  return GAME_OVER_REASONS[enemyType] || GAME_OVER_REASONS.unknown;
+}
 
 async function showGameOverScreen({
   title,
@@ -488,9 +480,9 @@ async function showGameOverScreen({
   $screenGameOver.hidden = false;
 }
 
-function getRunStatsItems({ includeTime = false } = {}) {
+function getRunStatsItems() {
   const stats = S.runStats || {};
-  const items = [
+  return [
     {
       icon: '🛥️',
       label: t('resultStats.deliveredBoats'),
@@ -531,15 +523,13 @@ function getRunStatsItems({ includeTime = false } = {}) {
       label: t('resultStats.krakensArrived'),
       value: stats.krakensArrived || S.krakensArrived || 0,
     },
-  ];
-  if (includeTime) {
-    items.push({
+    {
+      section: 'time',
       icon: '⏰',
       label: t('win.statTime'),
       value: formatSurvivalTime(S.runSurvivalMs),
-    });
-  }
-  return items;
+    },
+  ];
 }
 
 function getCollectedCargoItems() {
@@ -556,9 +546,12 @@ function renderResultStats(items) {
   $resultStats.replaceChildren();
 
   const cargoItems = getCollectedCargoItems();
+  const timeItems = items.filter((item) => item.section === 'time');
+  const runItems = items.filter((item) => item.section !== 'time');
   const sections = [
     { title: t('resultStats.cargoTitle'), items: cargoItems },
-    { title: t('resultStats.title'), items },
+    { title: t('resultStats.title'), items: runItems },
+    { title: t('win.statTime'), items: timeItems },
   ].filter((section) => section.items.length > 0);
 
   for (const section of sections) {
@@ -597,56 +590,6 @@ function createResultStatRow({ icon, label, value }) {
   return stat;
 }
 
-export function showBoatGameOver() {
-  return showGameOverScreen({
-    title: t('gameOver.title'),
-    reasonText: t('gameOver.boats', { n: S.boatsSunk }),
-    splashKey: 'splashIceberg',
-    reason: 'boats_sunk',
-    statsItems: getRunStatsItems(),
-  });
-}
-
-export function showPoliceGameOver() {
-  return showGameOverScreen({
-    title: t('gameOver.title'),
-    reasonText: t('gameOver.police'),
-    splashKey: 'splashPolice',
-    reason: 'police',
-    statsItems: getRunStatsItems(),
-  });
-}
-
-export function showPattinsonGameOver() {
-  return showGameOverScreen({
-    title: t('gameOver.title'),
-    reasonText: t('gameOver.pattinson'),
-    splashKey: 'splashPattinson',
-    reason: 'pattinson',
-    statsItems: getRunStatsItems(),
-  });
-}
-
-export function showMermaidGameOver() {
-  return showGameOverScreen({
-    title: t('gameOver.title'),
-    reasonText: t('gameOver.mermaids', { n: S.mermaidsArrived }),
-    splashKey: 'splashMermaid',
-    reason: 'mermaid',
-    statsItems: getRunStatsItems(),
-  });
-}
-
-export function showKrakenGameOver() {
-  return showGameOverScreen({
-    title: t('gameOver.title'),
-    reasonText: t('gameOver.kraken'),
-    splashKey: 'splashKraken',
-    reason: 'kraken',
-    statsItems: getRunStatsItems(),
-  });
-}
-
 export async function showWin() {
   await showGameOverScreen({
     title: t('win.title'),
@@ -654,7 +597,7 @@ export async function showWin() {
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
-    statsItems: getRunStatsItems({ includeTime: true }),
+    statsItems: getRunStatsItems(),
   });
   $resultRestartLabel.textContent = t('overlay.continue');
   $resultMenuLabel.textContent = t('overlay.toMenu');

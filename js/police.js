@@ -23,7 +23,6 @@ import {
   spawnTooltip,
   updateHUD,
   scheduleGameOver,
-  showPoliceGameOver,
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';

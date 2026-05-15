@@ -19,7 +19,6 @@ import {
   spawnTooltip,
   updateHUD,
   scheduleGameOver,
-  showMermaidGameOver,
 } from './ui.js';
 import { levels } from './levels.js';
 

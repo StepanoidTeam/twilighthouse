@@ -39,7 +39,6 @@ import {
   createCargoLabel,
   updateHUD,
   scheduleGameOver,
-  showBoatGameOver,
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';

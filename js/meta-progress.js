@@ -16,6 +16,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.sunk_cops.title',
     descKey: 'achievements.items.sunk_cops.desc',
     target: 10,
+    points: 25,
   },
   {
     id: 'repelled_kraken',
@@ -24,6 +25,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.repelled_kraken.title',
     descKey: 'achievements.items.repelled_kraken.desc',
     target: 3,
+    points: 30,
   },
   {
     id: 'repelled_mermaids',
@@ -32,6 +34,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.repelled_mermaids.title',
     descKey: 'achievements.items.repelled_mermaids.desc',
     target: 10,
+    points: 25,
   },
   {
     id: 'delivered_boats',
@@ -40,6 +43,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.delivered_boats.title',
     descKey: 'achievements.items.delivered_boats.desc',
     target: 20,
+    points: 20,
   },
   {
     id: 'nights_won',
@@ -48,13 +52,9 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.nights_won.title',
     descKey: 'achievements.items.nights_won.desc',
     target: 10,
+    points: 10,
   },
 ];
-
-const ACHIEVEMENT_PROGRESS_MIGRATIONS = {
-  sunk_cops: ['repelled_cops'],
-  repelled_mermaids: ['mermaids_scared'],
-};
 
 const BASE_HEARTS_MAX = 5;
 const HEARTS_WITH_BONUS = 6;
@@ -100,14 +100,9 @@ export function loadMeta() {
     const achievements = emptyAchievements();
     if (data.achievements && typeof data.achievements === 'object') {
       for (const def of ACHIEVEMENT_DEFS) {
-        const keys = [
-          def.goalKey,
-          ...(ACHIEVEMENT_PROGRESS_MIGRATIONS[def.goalKey] || []),
-        ];
-        achievements[def.goalKey] = keys.reduce((sum, key) => {
-          const n = Number(data.achievements[key]);
-          return sum + (Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0);
-        }, 0);
+        const n = Number(data.achievements[def.goalKey]);
+        achievements[def.goalKey] =
+          Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
       }
     }
     return { wallet, nightsWon, unlocks, achievements };
