@@ -97,19 +97,19 @@ Photopea — image editor
     'achievements.complete': 'Completed',
     'achievements.done': 'Unlocked',
     'achievements.locked': 'Keep going',
-    'achievements.items.repelled_cops.title': 'Wave Rider',
-    'achievements.items.repelled_cops.desc': 'Repel 500 cops across all runs.',
+    'achievements.items.sunk_cops.title': 'Harbor Saboteur',
+    'achievements.items.sunk_cops.desc': 'Sink 10 cop boats across all runs.',
     'achievements.items.repelled_kraken.title': 'Deep Sea Hunter',
     'achievements.items.repelled_kraken.desc':
-      'Repel 100 krakens across all runs.',
-    'achievements.items.mermaids_scared.title': 'Siren Whisperer',
-    'achievements.items.mermaids_scared.desc':
-      'Scare away 200 mermaids across all runs.',
+      'Repel 3 krakens across all runs.',
+    'achievements.items.repelled_mermaids.title': 'Siren Whisperer',
+    'achievements.items.repelled_mermaids.desc':
+      'Scare away 10 mermaids across all runs.',
     'achievements.items.delivered_boats.title': 'Harbor Master',
     'achievements.items.delivered_boats.desc':
-      'Escort 300 friendly boats to the harbor across all runs.',
+      'Escort 20 smuggler boats to the harbor across all runs.',
     'achievements.items.nights_won.title': 'Night Watch',
-    'achievements.items.nights_won.desc': 'Survive to dawn 50 times.',
+    'achievements.items.nights_won.desc': 'Survive to dawn 10 times.',
 
     'shop.title': 'Harbor shop',
     'shop.nightsWon': 'Nights survived (dawn reached): {n}',
@@ -364,20 +364,20 @@ Photopea — image editor
     'achievements.complete': 'Выполнено',
     'achievements.done': 'Открыто',
     'achievements.locked': 'Продолжай',
-    'achievements.items.repelled_cops.title': 'Волна на воде',
-    'achievements.items.repelled_cops.desc':
-      'Отогнать 500 копов за все забеги.',
+    'achievements.items.sunk_cops.title': 'Портовый диверсант',
+    'achievements.items.sunk_cops.desc':
+      'Потопить 10 копов за все забеги.',
     'achievements.items.repelled_kraken.title': 'Охотник на глубинных',
     'achievements.items.repelled_kraken.desc':
-      'Отогнать 100 кракенов за все забеги.',
-    'achievements.items.mermaids_scared.title': 'Шепот сирен',
-    'achievements.items.mermaids_scared.desc':
-      'Отогнать 200 русалок за все забеги.',
+      'Отогнать 3 кракена за все забеги.',
+    'achievements.items.repelled_mermaids.title': 'Шепот сирен',
+    'achievements.items.repelled_mermaids.desc':
+      'Отогнать 10 русалок за все забеги.',
     'achievements.items.delivered_boats.title': 'Хозяин порта',
     'achievements.items.delivered_boats.desc':
-      'Провести 300 лодок в гавань за все забеги.',
+      'Провести 20 лодок контрабандистов в гавань за все забеги.',
     'achievements.items.nights_won.title': 'Ночной дозор',
-    'achievements.items.nights_won.desc': 'Дожить до рассвета 50 раз.',
+    'achievements.items.nights_won.desc': 'Дожить до рассвета 10 раз.',
 
     'shop.title': 'Прилавок в порту',
     'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',

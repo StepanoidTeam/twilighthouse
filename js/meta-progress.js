@@ -10,12 +10,12 @@ export const UNLOCK_QUALITY_WICK = 'qualityWick';
 
 export const ACHIEVEMENT_DEFS = [
   {
-    id: 'repelled_cops',
-    goalKey: 'repelled_cops',
+    id: 'sunk_cops',
+    goalKey: 'sunk_cops',
     icon: '🚔',
-    titleKey: 'achievements.items.repelled_cops.title',
-    descKey: 'achievements.items.repelled_cops.desc',
-    target: 500,
+    titleKey: 'achievements.items.sunk_cops.title',
+    descKey: 'achievements.items.sunk_cops.desc',
+    target: 10,
   },
   {
     id: 'repelled_kraken',
@@ -23,15 +23,15 @@ export const ACHIEVEMENT_DEFS = [
     icon: '🦑',
     titleKey: 'achievements.items.repelled_kraken.title',
     descKey: 'achievements.items.repelled_kraken.desc',
-    target: 100,
+    target: 3,
   },
   {
     id: 'repelled_mermaids',
-    goalKey: 'mermaids_scared',
+    goalKey: 'repelled_mermaids',
     icon: '🧜',
-    titleKey: 'achievements.items.mermaids_scared.title',
-    descKey: 'achievements.items.mermaids_scared.desc',
-    target: 200,
+    titleKey: 'achievements.items.repelled_mermaids.title',
+    descKey: 'achievements.items.repelled_mermaids.desc',
+    target: 10,
   },
   {
     id: 'delivered_boats',
@@ -39,7 +39,7 @@ export const ACHIEVEMENT_DEFS = [
     icon: '📦',
     titleKey: 'achievements.items.delivered_boats.title',
     descKey: 'achievements.items.delivered_boats.desc',
-    target: 300,
+    target: 20,
   },
   {
     id: 'nights_won',
@@ -47,9 +47,14 @@ export const ACHIEVEMENT_DEFS = [
     icon: '🌅',
     titleKey: 'achievements.items.nights_won.title',
     descKey: 'achievements.items.nights_won.desc',
-    target: 50,
+    target: 10,
   },
 ];
+
+const ACHIEVEMENT_PROGRESS_MIGRATIONS = {
+  sunk_cops: ['repelled_cops'],
+  repelled_mermaids: ['mermaids_scared'],
+};
 
 const BASE_HEARTS_MAX = 5;
 const HEARTS_WITH_BONUS = 6;
@@ -95,9 +100,14 @@ export function loadMeta() {
     const achievements = emptyAchievements();
     if (data.achievements && typeof data.achievements === 'object') {
       for (const def of ACHIEVEMENT_DEFS) {
-        const n = Number(data.achievements[def.goalKey]);
-        achievements[def.goalKey] =
-          Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
+        const keys = [
+          def.goalKey,
+          ...(ACHIEVEMENT_PROGRESS_MIGRATIONS[def.goalKey] || []),
+        ];
+        achievements[def.goalKey] = keys.reduce((sum, key) => {
+          const n = Number(data.achievements[key]);
+          return sum + (Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0);
+        }, 0);
       }
     }
     return { wallet, nightsWon, unlocks, achievements };
@@ -192,6 +202,26 @@ export function recordAchievementProgress(goalKey, amount = 1) {
     meta.achievements[goalKey] = 0;
   }
   meta.achievements[goalKey] += step;
+  saveMeta(meta);
+}
+
+/**
+ * @param {string} goalKey
+ * @param {number} value
+ */
+export function setAchievementProgress(goalKey, value) {
+  if (!goalKey) return;
+  const meta = loadMeta();
+  if (!meta.achievements || typeof meta.achievements !== 'object') {
+    meta.achievements = emptyAchievements();
+  }
+  meta.achievements[goalKey] = Math.max(0, Math.floor(Number(value)) || 0);
+  saveMeta(meta);
+}
+
+export function resetAllAchievementProgress() {
+  const meta = loadMeta();
+  meta.achievements = emptyAchievements();
   saveMeta(meta);
 }
 
