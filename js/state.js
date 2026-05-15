@@ -1,6 +1,5 @@
 import {
   PIXI,
-  MAX_CRATES,
   LAMP_FULL_ANGLE,
   LAMP_BURNOUT_TIME,
   BOAT_CARGO_TYPES,
@@ -11,6 +10,19 @@ import {
 
 function makeEmptyCargoInventory() {
   return Object.fromEntries(BOAT_CARGO_TYPES.map((type) => [type, 0]));
+}
+
+function makeEmptyRunStats() {
+  return {
+    deliveredBoats: 0,
+    smugglersSunk: 0,
+    sunkCops: 0,
+    repelledMermaids: 0,
+    repelledKraken: 0,
+    copsArrived: 0,
+    mermaidsArrived: 0,
+    krakensArrived: 0,
+  };
 }
 
 // ===== Shared Mutable Game State =====
@@ -98,14 +110,11 @@ const State = {
   // Score
   score: 0,
   deliveredCargo: makeEmptyCargoInventory(),
+  runStats: makeEmptyRunStats(),
   boatsSunk: 0,
   mermaidsArrived: 0,
   policeArrived: 0,
   krakensArrived: 0,
-  // Колумбийский порошок — ящики, которые Паттисон прячет от Дефо.
-  // Каждый пропущенный (освещённый) коп забирает ящик.
-  // Ящиков 0 → Дефо выкидывает Паттисона со скалы.
-  crates: MAX_CRATES,
 
   // Spawning
   nextSpawnTime: 0,
@@ -190,10 +199,10 @@ const State = {
 
     this.score = 0;
     this.deliveredCargo = makeEmptyCargoInventory();
+    this.runStats = makeEmptyRunStats();
     this.mermaidsArrived = 0;
     this.policeArrived = 0;
     this.krakensArrived = 0;
-    this.crates = MAX_CRATES;
     this.lampTimer = 0;
     this.lampFlicker = 1;
     this.heartsMax = 5;

@@ -20,12 +20,12 @@ const SCRIPTED_LEVELS = [
   // L2 (интерактивный туториал #2): потопи 1 лодку копов.
   {
     introKey: 'level.l2',
-    goal: { repelled_cops: 1 },
+    goal: { sunk_cops: 1 },
   },
   // L3 (интерактивный туториал #3): отпугни русалок.
   {
     introKey: 'level.l3',
-    goal: { mermaids_scared: 3 },
+    goal: { repelled_mermaids: 3 },
   },
 ];
 
@@ -65,8 +65,8 @@ const SPAWNERS = {
 // при успешном исходе (см. notify() в boat/police/mermaid/kraken).
 const KIND_TO_GOAL = {
   boats: 'delivered_boats',
-  cops: 'repelled_cops',
-  mermaids: 'mermaids_scared',
+  cops: 'sunk_cops',
+  mermaids: 'repelled_mermaids',
   krakens: 'repelled_kraken',
 };
 
@@ -260,9 +260,28 @@ function advance() {
   applyLevel(S.levelIndex + 1, { showBanner: true });
 }
 
+function recordRunStat(goalKey) {
+  if (!S.runStats) return;
+  switch (goalKey) {
+    case 'delivered_boats':
+      S.runStats.deliveredBoats++;
+      break;
+    case 'sunk_cops':
+      S.runStats.sunkCops++;
+      break;
+    case 'repelled_mermaids':
+      S.runStats.repelledMermaids++;
+      break;
+    case 'repelled_kraken':
+      S.runStats.repelledKraken++;
+      break;
+  }
+}
+
 function notify(goalKey) {
   if (S.gameOver || S.gameOverPending) return;
   recordAchievementProgress(goalKey, 1);
+  recordRunStat(goalKey);
   const def = getLevelDef(S.levelIndex);
   if (!def || !def.goal || def.goal[goalKey] == null) return;
   S.levelProgress[goalKey] = (S.levelProgress[goalKey] || 0) + 1;

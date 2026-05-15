@@ -22,6 +22,10 @@ import {
 } from './ui.js';
 import { levels } from './levels.js';
 
+// Number of stable frames before the beam scare is committed.
+// Matches cops, so a quick beam sweep does not instantly scare mermaids.
+const LIT_HYSTERESIS_FRAMES = 10;
+
 export function spawnMermaid() {
   const { x, y } = spawnOnRing();
   const spr = new PIXI.Sprite(S.textures.mermaid1);
@@ -34,6 +38,8 @@ export function spawnMermaid() {
     speed: BOAT_SPEED + Math.random() * 0.4,
     gone: false,
     fleeing: false,
+    lastRawLit: false,
+    rawLitStableFor: 0,
     wavePhase: Math.random() * Math.PI * 2,
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION,
@@ -48,10 +54,19 @@ export function updateMermaids(delta) {
     // Frame animation
     tickAnim(m, delta, MERMAID_FRAMES, MERMAID_FRAME_DURATION, S.textures);
 
-    const lit = isInBeam(m.spr.x, m.spr.y);
+    const rawLit = isInBeam(m.spr.x, m.spr.y);
+    if (rawLit !== m.lastRawLit) {
+      m.lastRawLit = rawLit;
+      m.rawLitStableFor = 0;
+    }
+    m.rawLitStableFor += delta;
 
     // Однажды засвечена — убегает навсегда
-    if (lit && !m.fleeing) {
+    if (
+      rawLit &&
+      !m.fleeing &&
+      m.rawLitStableFor >= LIT_HYSTERESIS_FRAMES
+    ) {
       spawnTooltip(m.spr.x, m.spr.y - 30, '🙈', TOOLTIP_STYLE_OK);
       m.fleeing = true;
     }
@@ -80,6 +95,7 @@ export function updateMermaids(delta) {
         S.shakeIntensity = 18;
         m.gone = true;
         S.mermaidsArrived++;
+        if (S.runStats) S.runStats.mermaidsArrived++;
         const gameOver = S.takeDamage('mermaid', 1);
         updateHUD();
         if (gameOver) {
@@ -121,7 +137,7 @@ export function updateMermaids(delta) {
       console.log(`🧜‍♀️ Русалка уплыла за экран`);
       S.boatLayer.removeChild(m.spr);
       S.mermaids.splice(i, 1);
-      levels.notify('mermaids_scared');
+      levels.notify('repelled_mermaids');
       continue;
     }
 

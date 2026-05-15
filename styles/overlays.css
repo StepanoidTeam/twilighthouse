@@ -53,34 +53,72 @@
   }
 
   .screen-result-stats {
-    display: flex;
-    flex-direction: column;
-    flex-wrap: wrap;
-    justify-content: center;
-    gap: 14px 28px;
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    width: min(760px, calc(100vw - 32px));
+    max-height: min(46vh, 420px);
+    overflow: auto;
+    gap: 0;
+    padding: 18px 24px 20px;
     font-family: var(--font-ui);
-    font-size: clamp(18px, 2.6vw, 26px);
+    font-size: clamp(17px, 2.2vw, 25px);
     font-weight: bold;
-    color: #ffe9a8;
-    text-align: center;
+    color: #ead8b7;
+    text-align: left;
     text-shadow:
       0 0 14px #000,
       0 2px 6px #000;
     margin: 0;
+    background: rgba(5, 16, 22, 0.74);
+    border: 1px solid rgba(218, 171, 111, 0.42);
+    border-radius: 8px;
+    box-shadow:
+      inset 0 0 0 1px rgba(255, 232, 173, 0.08),
+      0 12px 38px rgba(0, 0, 0, 0.36);
+    backdrop-filter: blur(7px);
+  }
+
+  .screen-result-stats-title {
+    margin: 0 0 8px;
+    padding-bottom: 12px;
+    color: #ffe3a8;
+    font-size: clamp(22px, 3vw, 34px);
+    line-height: 1;
+    text-align: center;
+    text-transform: uppercase;
+    letter-spacing: 0;
+    border-bottom: 1px solid rgba(218, 171, 111, 0.24);
   }
 
   .screen-result-stat {
-    display: inline-flex;
-    align-items: baseline;
-    gap: 8px;
-    padding: 6px 14px;
-    border-radius: 10px;
-    background: rgba(7, 20, 32, 0.55);
-    backdrop-filter: blur(6px);
+    display: grid;
+    grid-template-columns: 48px minmax(0, 1fr) minmax(2ch, max-content);
+    align-items: center;
+    gap: 16px;
+    min-height: 58px;
+    padding: 9px 6px;
+    border-bottom: 1px solid rgba(218, 171, 111, 0.2);
+  }
+
+  .screen-result-stat:last-child {
+    border-bottom: 0;
   }
 
   .screen-result-stat-icon {
-    font-size: 1.1em;
+    font-size: 1.35em;
+    text-align: center;
+  }
+
+  .screen-result-stat-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+
+  .screen-result-stat-value {
+    color: #ffe3a8;
+    font-size: 1.15em;
+    text-align: right;
+    white-space: nowrap;
   }
 
   .screen-result-actions {

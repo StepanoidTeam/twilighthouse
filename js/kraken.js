@@ -194,6 +194,7 @@ export function updateKrakens(delta) {
         k.gone = true;
         destroyKrakenIndicator(k);
         S.krakensArrived++;
+        if (S.runStats) S.runStats.krakensArrived++;
         spawnTooltip(k.spr.x, k.spr.y - 20, '🦑 −💔×ALL', TOOLTIP_STYLE_FAIL);
         const gameOver = S.takeDamage('kraken', S.heartsRemaining);
         updateHUD();
@@ -246,6 +247,7 @@ export function updateKrakens(delta) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.boatsSunk++;
+        if (S.runStats) S.runStats.smugglersSunk++;
         // Kraken sink counts as boat-sink damage
         const gameOver = S.takeDamage('boat-sink', 1);
         updateHUD();
@@ -286,6 +288,7 @@ export function updateKrakens(delta) {
         spawnTooltip(p.spr.x, p.spr.y - 20, '🦑🚔', TOOLTIP_STYLE_OK);
         playCrashSound();
         console.log(`🦑 Кракен уничтожил полицейского`);
+        levels.notify('sunk_cops');
       }
     }
 

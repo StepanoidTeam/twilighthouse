@@ -26,13 +26,20 @@ export function track(eventName, params = {}) {
  */
 function buildRunSnapshot(state) {
   const survivalMs = Math.round(state.runSurvivalMs || 0);
+  const stats = state.runStats || {};
+  const smugglersSunk = stats.smugglersSunk ?? state.boatsSunk ?? 0;
   return {
     survival_ms: survivalMs,
     survival_seconds: Math.round(survivalMs / 1000),
     score: state.score | 0,
-    boats_sunk: state.boatsSunk | 0,
-    mermaids_arrived: state.mermaidsArrived | 0,
-    crates_remaining: state.crates | 0,
+    boats_sunk: smugglersSunk | 0,
+    smugglers_sunk: smugglersSunk | 0,
+    cops_sunk: stats.sunkCops | 0,
+    mermaids_repelled: stats.repelledMermaids | 0,
+    krakens_repelled: stats.repelledKraken | 0,
+    cops_arrived: stats.copsArrived ?? state.policeArrived ?? 0,
+    mermaids_arrived: stats.mermaidsArrived ?? state.mermaidsArrived ?? 0,
+    krakens_arrived: stats.krakensArrived ?? state.krakensArrived ?? 0,
   };
 }
 

@@ -6,7 +6,6 @@ import {
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
   NIGHT_DURATION_MS,
-  BOAT_CARGO_TYPES,
 } from './config.js';
 import {
   CRASH_VOLUME,
@@ -488,25 +487,69 @@ async function showGameOverScreen({
   $screenGameOver.hidden = false;
 }
 
-function getRunStatsItems() {
-  const cargoStats = BOAT_CARGO_TYPES.map((type) => ({
-    icon: type,
-    label: t(`cargo.${type}`),
-    value: S.deliveredCargo[type] || 0,
-  }));
-  return [
-    ...cargoStats,
+function getRunStatsItems({ includeTime = false } = {}) {
+  const stats = S.runStats || {};
+  const items = [
     {
+      icon: '🛥️',
+      label: t('resultStats.deliveredBoats'),
+      value: stats.deliveredBoats || S.score || 0,
+    },
+    {
+      icon: '💀',
+      label: t('resultStats.smugglersSunk'),
+      value: stats.smugglersSunk || 0,
+    },
+    {
+      icon: '🚔',
+      label: t('resultStats.sunkCops'),
+      value: stats.sunkCops || 0,
+    },
+    {
+      icon: '🧜',
+      label: t('resultStats.repelledMermaids'),
+      value: stats.repelledMermaids || 0,
+    },
+    {
+      icon: '🦑',
+      label: t('resultStats.repelledKraken'),
+      value: stats.repelledKraken || 0,
+    },
+    {
+      icon: '🚨',
+      label: t('resultStats.copsArrived'),
+      value: stats.copsArrived || S.policeArrived || 0,
+    },
+    {
+      icon: '💀',
+      label: t('resultStats.mermaidsArrived'),
+      value: stats.mermaidsArrived || S.mermaidsArrived || 0,
+    },
+    {
+      icon: '🦑',
+      label: t('resultStats.krakensArrived'),
+      value: stats.krakensArrived || S.krakensArrived || 0,
+    },
+  ];
+  if (includeTime) {
+    items.push({
       icon: '⏰',
       label: t('win.statTime'),
       value: formatSurvivalTime(S.runSurvivalMs),
-    },
-  ];
+    });
+  }
+  return items;
 }
 
 function renderResultStats(items) {
   if (!$resultStats) return;
   $resultStats.replaceChildren();
+  if (items.length > 0) {
+    const title = document.createElement('h2');
+    title.className = 'screen-result-stats-title';
+    title.textContent = t('resultStats.title');
+    $resultStats.appendChild(title);
+  }
   for (const { icon, label, value } of items) {
     const stat = document.createElement('div');
     stat.className = 'screen-result-stat';
@@ -514,9 +557,14 @@ function renderResultStats(items) {
     iconEl.className = 'screen-result-stat-icon';
     iconEl.textContent = icon;
     const text = document.createElement('span');
-    text.textContent = `${label}: ${value}`;
+    text.className = 'screen-result-stat-label';
+    text.textContent = label;
+    const valueEl = document.createElement('span');
+    valueEl.className = 'screen-result-stat-value';
+    valueEl.textContent = value;
     stat.appendChild(iconEl);
     stat.appendChild(text);
+    stat.appendChild(valueEl);
     $resultStats.appendChild(stat);
   }
   $resultStats.hidden = items.length === 0;
@@ -578,9 +626,9 @@ export async function showWin() {
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
-    statsItems: getRunStatsItems(),
+    statsItems: getRunStatsItems({ includeTime: true }),
   });
-  $resultRestartLabel.textContent = t('menu.leaderboard');
+  $resultRestartLabel.textContent = t('overlay.continue');
   $resultMenuLabel.textContent = t('overlay.toMenu');
 }
 

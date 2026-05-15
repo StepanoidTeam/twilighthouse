@@ -136,6 +136,7 @@ export function updatePoliceBoats(delta) {
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;
       S.policeArrived++;
+      if (S.runStats) S.runStats.copsArrived++;
       // Police reached lighthouse - take 1 heart
       const gameOver = S.takeDamage('police', 1);
       updateHUD();
@@ -220,9 +221,8 @@ export function updatePoliceBoats(delta) {
         console.log(
           `🚔 Полицейский катер разбился о камни (${spr.x.toFixed(0)}, ${spr.y.toFixed(0)})`,
         );
-        // Разбился без света — считаем, что цель уровня "отпугнуть копа"
-        // выполнена: до маяка он не доплыл.
-        levels.notify('repelled_cops');
+        // Разбился без света — считаем, что коп потоплен.
+        levels.notify('sunk_cops');
       } else {
         for (const rock of S.rockColliders) {
           const rd = Math.hypot(spr.x - rock.x, spr.y - rock.y);
@@ -250,7 +250,7 @@ export function updatePoliceBoats(delta) {
     );
 
     // Удалить копа, если он, не освещённый, дрейфует мимо за пределы зоны.
-    // Считается отпугнутым — Паттисон его не подсветил, патруль ушёл ни с чем.
+    // Это не считается потоплением: патруль просто ушёл ни с чем.
     if (
       !lit &&
       Math.hypot(spr.x - S.lhX, spr.y - S.lhY) > MOB_SPAWN_RING + SPAWN_MARGIN
@@ -259,7 +259,6 @@ export function updatePoliceBoats(delta) {
       S.boatLayer.removeChild(spr);
       S.beaconLayer.removeChild(p.beacon);
       S.policeBoats.splice(i, 1);
-      levels.notify('repelled_cops');
       continue;
     }
 

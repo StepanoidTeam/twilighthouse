@@ -252,6 +252,7 @@ export function updateBoats(delta) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.boatsSunk++;
+        if (S.runStats) S.runStats.smugglersSunk++;
         const gameOver = S.takeDamage('boat-sink', 1);
         updateHUD();
         spawnTooltip(spr.x, spr.y - 20, '💀 −💔', TOOLTIP_STYLE_FAIL);
