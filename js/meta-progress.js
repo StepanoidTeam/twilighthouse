@@ -1,60 +1,16 @@
 // ===== Meta economy: wallet, nights survived, shop unlocks (localStorage) =====
 import { BOAT_CARGO_TYPES, LAMP_BURNOUT_TIME } from './config.js';
+import {
+  recordAchievementEvent,
+  recordAchievementRunMetrics,
+} from './achievements/index.js';
 
 const STORAGE_KEY = 'lighthouse_meta_v1';
 
-/** @typedef {{ wallet: Record<string, number>, nightsWon: number, unlocks: Record<string, boolean>, achievements: Record<string, number> }} MetaState */
+/** @typedef {{ wallet: Record<string, number>, nightsWon: number, unlocks: Record<string, boolean> }} MetaState */
 
 export const UNLOCK_EXTRA_HEART = 'extraHeart';
 export const UNLOCK_QUALITY_WICK = 'qualityWick';
-
-export const ACHIEVEMENT_DEFS = [
-  {
-    id: 'sunk_cops',
-    goalKey: 'sunk_cops',
-    icon: '🚔',
-    titleKey: 'achievements.items.sunk_cops.title',
-    descKey: 'achievements.items.sunk_cops.desc',
-    target: 10,
-    points: 25,
-  },
-  {
-    id: 'repelled_kraken',
-    goalKey: 'repelled_kraken',
-    icon: '🦑',
-    titleKey: 'achievements.items.repelled_kraken.title',
-    descKey: 'achievements.items.repelled_kraken.desc',
-    target: 3,
-    points: 30,
-  },
-  {
-    id: 'repelled_mermaids',
-    goalKey: 'repelled_mermaids',
-    icon: '🧜',
-    titleKey: 'achievements.items.repelled_mermaids.title',
-    descKey: 'achievements.items.repelled_mermaids.desc',
-    target: 10,
-    points: 25,
-  },
-  {
-    id: 'delivered_boats',
-    goalKey: 'delivered_boats',
-    icon: '📦',
-    titleKey: 'achievements.items.delivered_boats.title',
-    descKey: 'achievements.items.delivered_boats.desc',
-    target: 20,
-    points: 20,
-  },
-  {
-    id: 'nights_won',
-    goalKey: 'nightsWon',
-    icon: '🌅',
-    titleKey: 'achievements.items.nights_won.title',
-    descKey: 'achievements.items.nights_won.desc',
-    target: 10,
-    points: 10,
-  },
-];
 
 const BASE_HEARTS_MAX = 5;
 const HEARTS_WITH_BONUS = 6;
@@ -66,17 +22,12 @@ function emptyWallet() {
   return Object.fromEntries(BOAT_CARGO_TYPES.map((k) => [k, 0]));
 }
 
-function emptyAchievements() {
-  return Object.fromEntries(ACHIEVEMENT_DEFS.map((def) => [def.goalKey, 0]));
-}
-
 /** @returns {MetaState} */
 function defaultMeta() {
   return {
     wallet: emptyWallet(),
     nightsWon: 0,
     unlocks: {},
-    achievements: emptyAchievements(),
   };
 }
 
@@ -97,15 +48,7 @@ export function loadMeta() {
       data.unlocks && typeof data.unlocks === 'object'
         ? { ...data.unlocks }
         : {};
-    const achievements = emptyAchievements();
-    if (data.achievements && typeof data.achievements === 'object') {
-      for (const def of ACHIEVEMENT_DEFS) {
-        const n = Number(data.achievements[def.goalKey]);
-        achievements[def.goalKey] =
-          Number.isFinite(n) && n >= 0 ? Math.floor(n) : 0;
-      }
-    }
-    return { wallet, nightsWon, unlocks, achievements };
+    return { wallet, nightsWon, unlocks };
   } catch (_) {
     return defaultMeta();
   }
@@ -172,60 +115,12 @@ export function commitRunToMeta(S) {
     const add = Math.max(0, Math.floor(S.deliveredCargo[type] || 0));
     if (add) meta.wallet[type] = (meta.wallet[type] || 0) + add;
   }
+  recordAchievementRunMetrics({ cargo: S.deliveredCargo });
   if (S.gameWon) {
     meta.nightsWon += 1;
-    if (!meta.achievements) meta.achievements = emptyAchievements();
-    meta.achievements['nightsWon'] = (meta.achievements['nightsWon'] || 0) + 1;
+    recordAchievementEvent('run.won', 1);
   }
   saveMeta(meta);
-}
-
-/**
- * @param {string} goalKey
- * @param {number} [amount=1]
- */
-export function recordAchievementProgress(goalKey, amount = 1) {
-  if (!goalKey) return;
-  const step = Math.max(0, Math.floor(Number(amount)) || 0);
-  if (!step) return;
-
-  const meta = loadMeta();
-  if (!meta.achievements || typeof meta.achievements !== 'object') {
-    meta.achievements = emptyAchievements();
-  }
-  if (!Object.prototype.hasOwnProperty.call(meta.achievements, goalKey)) {
-    meta.achievements[goalKey] = 0;
-  }
-  meta.achievements[goalKey] += step;
-  saveMeta(meta);
-}
-
-/**
- * @param {string} goalKey
- * @param {number} value
- */
-export function setAchievementProgress(goalKey, value) {
-  if (!goalKey) return;
-  const meta = loadMeta();
-  if (!meta.achievements || typeof meta.achievements !== 'object') {
-    meta.achievements = emptyAchievements();
-  }
-  meta.achievements[goalKey] = Math.max(0, Math.floor(Number(value)) || 0);
-  saveMeta(meta);
-}
-
-export function resetAllAchievementProgress() {
-  const meta = loadMeta();
-  meta.achievements = emptyAchievements();
-  saveMeta(meta);
-}
-
-/**
- * @returns {Record<string, number>}
- */
-export function loadAchievementProgress() {
-  const meta = loadMeta();
-  return { ...emptyAchievements(), ...(meta.achievements || {}) };
 }
 
 /**

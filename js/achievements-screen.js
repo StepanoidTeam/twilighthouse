@@ -3,7 +3,7 @@ import {
   loadAchievementProgress,
   resetAllAchievementProgress,
   setAchievementProgress,
-} from './meta-progress.js';
+} from './achievements/index.js';
 import { t } from './i18n.js';
 import S from './state.js';
 
@@ -84,7 +84,7 @@ function createAchievementCard(def, progress, { debug = false } = {}) {
       const $btn = document.createElement('button');
       $btn.type = 'button';
       $btn.className = 'achievement-debug-btn';
-      $btn.dataset.goalKey = def.goalKey;
+      $btn.dataset.achievementId = def.id;
       $btn.dataset.action = action;
       $btn.textContent = label;
       $debug.appendChild($btn);
@@ -140,9 +140,7 @@ export function renderAchievementsScreen({ container, isActive }) {
   $list.className = 'achievements-list';
 
   for (const def of ACHIEVEMENT_DEFS) {
-    $list.appendChild(
-      createAchievementCard(def, progress[def.goalKey] || 0, { debug }),
-    );
+    $list.appendChild(createAchievementCard(def, progress[def.id] || 0, { debug }));
   }
 
   $body.appendChild($list);
@@ -161,15 +159,15 @@ export function renderAchievementsScreen({ container, isActive }) {
         return;
       }
 
-      const goalKey = btn.dataset.goalKey;
-      if (!goalKey) return;
-      const current = loadAchievementProgress()[goalKey] || 0;
+      const achievementId = btn.dataset.achievementId;
+      if (!achievementId) return;
+      const current = loadAchievementProgress()[achievementId] || 0;
       if (action === 'increment') {
-        setAchievementProgress(goalKey, current + 1);
+        setAchievementProgress(achievementId, current + 1);
       } else if (action === 'decrement') {
-        setAchievementProgress(goalKey, Math.max(0, current - 1));
+        setAchievementProgress(achievementId, Math.max(0, current - 1));
       } else if (action === 'reset') {
-        setAchievementProgress(goalKey, 0);
+        setAchievementProgress(achievementId, 0);
       }
       renderAchievementsScreen({ container, isActive });
     };

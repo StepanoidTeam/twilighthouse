@@ -5,7 +5,7 @@ import { spawnPoliceBoat } from './police.js';
 import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
-import { recordAchievementProgress } from './meta-progress.js';
+import { recordAchievementEvent } from './achievements/index.js';
 
 // ===== Level Definitions =====
 // goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ
@@ -280,7 +280,7 @@ function recordRunStat(goalKey) {
 
 function notify(goalKey) {
   if (S.gameOver || S.gameOverPending) return;
-  recordAchievementProgress(goalKey, 1);
+  recordAchievementEvent(`goal.${goalKey}`, 1);
   recordRunStat(goalKey);
   const def = getLevelDef(S.levelIndex);
   if (!def || !def.goal || def.goal[goalKey] == null) return;
