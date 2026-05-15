@@ -44,6 +44,8 @@ import {
 } from './ui.js';
 import { levels } from './levels.js';
 
+const LAMP_RESTORE_FRAMES = 14;
+
 // ===== Cargo Helpers =====
 function parseCargo(cargoStr) {
   const result = {};
@@ -183,7 +185,9 @@ export function updateBoats(delta) {
       updateHUD();
       spawnTooltip(spr.x, spr.y - 20, b.cargo, TOOLTIP_STYLE_OK);
       // Restore lamp on boat arrival
-      S.lampTimer = 0;
+      S.lampRestoreStartTimer = S.lampTimer;
+      S.lampRestoreFramesTotal = LAMP_RESTORE_FRAMES;
+      S.lampRestoreFramesLeft = LAMP_RESTORE_FRAMES;
       levels.notify('delivered_boats');
       // Fade out
       const fadeOut = () => {

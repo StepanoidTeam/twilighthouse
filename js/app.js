@@ -499,7 +499,20 @@ function gameLoop(delta) {
 
   // Lamp burnout — flicker and narrow over time
   const lampCap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
-  S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
+  if (S.lampRestoreFramesLeft > 0) {
+    S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
+    const restoreTotal = Math.max(1, S.lampRestoreFramesTotal || 1);
+    const restoreProgress = 1 - S.lampRestoreFramesLeft / restoreTotal;
+    const easedProgress = 1 - Math.pow(1 - restoreProgress, 3);
+    S.lampTimer = S.lampRestoreStartTimer * (1 - easedProgress);
+    if (S.lampRestoreFramesLeft <= 0) {
+      S.lampTimer = 0;
+      S.lampRestoreFramesTotal = 0;
+      S.lampRestoreStartTimer = 0;
+    }
+  } else {
+    S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
+  }
   const burnout = S.lampTimer / lampCap;
   S.BEAM_HALF_ANGLE =
     LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;

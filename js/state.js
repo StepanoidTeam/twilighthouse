@@ -130,6 +130,9 @@ const State = {
 
   // Lamp
   lampTimer: 0,
+  lampRestoreFramesLeft: 0,
+  lampRestoreFramesTotal: 0,
+  lampRestoreStartTimer: 0,
   lampFlicker: 1,
   lampBurnoutMs: LAMP_BURNOUT_TIME,
 
@@ -204,6 +207,9 @@ const State = {
     this.policeArrived = 0;
     this.krakensArrived = 0;
     this.lampTimer = 0;
+    this.lampRestoreFramesLeft = 0;
+    this.lampRestoreFramesTotal = 0;
+    this.lampRestoreStartTimer = 0;
     this.lampFlicker = 1;
     this.heartsMax = 5;
     this.lampBurnoutMs = LAMP_BURNOUT_TIME;
