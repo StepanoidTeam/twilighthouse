@@ -86,8 +86,11 @@
   }
 
   .screen-result-stats-title {
+    position: sticky;
+    top: -18px;
+    z-index: 1;
     margin: 0 0 8px;
-    padding-bottom: 12px;
+    padding: 18px 0 12px;
     color: #ffe3a8;
     font-size: clamp(19px, 2vw, 28px);
     line-height: 1;
@@ -95,6 +98,8 @@
     text-transform: uppercase;
     letter-spacing: 0;
     border-bottom: 1px solid rgba(218, 171, 111, 0.24);
+    background: rgba(5, 16, 22, 0.96);
+    box-shadow: 0 10px 18px rgba(5, 16, 22, 0.64);
   }
 
   .screen-result-stat {
@@ -139,11 +144,11 @@
     .screen-result-stats {
       grid-template-columns: minmax(0, 1fr);
       max-height: min(48vh, 480px);
-      overflow: auto;
+      overflow: visible;
     }
 
     .screen-result-stats-panel {
-      max-height: none;
+      max-height: min(34vh, 300px);
     }
   }
 }
