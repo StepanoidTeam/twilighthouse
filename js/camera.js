@@ -9,7 +9,10 @@ function getBeamFollowOffsetLimit() {
   // при луче строго влево/вправо граница MOB_SPAWN_RING остаётся у края экрана,
   // а на диагоналях кламп ослабляется.
   const edgePeekWorld = 8 / s;
-  const horizontalRoom = Math.max(0, MOB_SPAWN_RING - halfW / s + edgePeekWorld);
+  const horizontalRoom = Math.max(
+    0,
+    MOB_SPAWN_RING - halfW / s + edgePeekWorld,
+  );
 
   const cosAbs = Math.abs(Math.cos(S.beamAngle));
   if (cosAbs < 1e-4) return CAM_BEAM_OFFSET;
