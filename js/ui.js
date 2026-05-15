@@ -622,7 +622,8 @@ export function showKrakenGameOver() {
 
 export async function showWin() {
   await showGameOverScreen({
-    title: t('win.nightMessage'),
+    title: t('win.title'),
+    reasonText: t('win.nightSubtitle'),
     splashKey: 'splashPeremoha',
     playFail: false,
     reason: 'win',
