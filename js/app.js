@@ -4,11 +4,6 @@ import {
   PIXI,
   C,
   SPRITE_FILES,
-  BEAM_ROTATE_SPEED,
-  LAMP_FULL_ANGLE,
-  LAMP_MIN_ANGLE,
-  LAMP_BURNOUT_TIME,
-  LAMP_FLICKER_START,
   NIGHT_DURATION_MS,
   computeWorldScale,
 } from './config.js';
@@ -30,7 +25,7 @@ import {
 import { isConfirmKey, isBackKey } from './input.js';
 import S from './state.js';
 
-import { buildLighthouse, buildGlow } from './lighthouse.js';
+import { buildLighthouse, buildGlow, updateLighthouse } from './lighthouse.js';
 import { buildRocks, cleanupRocks, rockEntity } from './rocks.js';
 import {
   buildDarkness,
@@ -483,11 +478,7 @@ function gameLoop(delta) {
     }
   }
 
-  // Beam rotation via keyboard (no easing)
-  if (S.keys['KeyA'] || S.keys['ArrowLeft'])
-    S.beamAngle -= BEAM_ROTATE_SPEED * delta;
-  if (S.keys['KeyD'] || S.keys['ArrowRight'])
-    S.beamAngle += BEAM_ROTATE_SPEED * delta;
+  updateLighthouse(delta);
 
   // Early entity updates that affect camera-relative visuals (e.g. rocks).
   for (const { entity, updatePhase } of ENTITY_SYSTEMS) {
@@ -497,38 +488,6 @@ function gameLoop(delta) {
   // Camera
   updateCamera(delta);
 
-  // Lamp burnout — flicker and narrow over time
-  const lampCap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
-  if (S.lampRestoreFramesLeft > 0) {
-    S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
-    const restoreTotal = Math.max(1, S.lampRestoreFramesTotal || 1);
-    const restoreProgress = 1 - S.lampRestoreFramesLeft / restoreTotal;
-    const easedProgress = 1 - Math.pow(1 - restoreProgress, 3);
-    S.lampTimer = S.lampRestoreStartTimer * (1 - easedProgress);
-    if (S.lampRestoreFramesLeft <= 0) {
-      S.lampTimer = 0;
-      S.lampRestoreFramesTotal = 0;
-      S.lampRestoreStartTimer = 0;
-    }
-  } else {
-    S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
-  }
-  const burnout = S.lampTimer / lampCap;
-  S.BEAM_HALF_ANGLE =
-    LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
-
-  if (burnout > LAMP_FLICKER_START) {
-    const flickerIntensity =
-      (burnout - LAMP_FLICKER_START) / (1 - LAMP_FLICKER_START);
-    const flick =
-      Math.sin(Date.now() * 0.02) *
-      Math.sin(Date.now() * 0.037) *
-      Math.sin(Date.now() * 0.007);
-    S.lampFlicker = 1 - flickerIntensity * 0.7 * Math.max(0, flick);
-  } else {
-    S.lampFlicker = 1;
-  }
-  S.lhGlow.alpha = S.lampFlicker;
   updateHUD();
 
   // Spawn mobs — теперь все спавны идут через бюджет текущего уровня.

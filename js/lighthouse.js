@@ -2,6 +2,11 @@ import {
   PIXI,
   C,
   BOAT_RADIUS,
+  BEAM_ROTATE_SPEED,
+  LAMP_FULL_ANGLE,
+  LAMP_MIN_ANGLE,
+  LAMP_BURNOUT_TIME,
+  LAMP_FLICKER_START,
   MOB_SPAWN_RING,
   LIGHTHOUSE_WIDTH,
   scaleToWidth,
@@ -26,6 +31,56 @@ export function buildGlow() {
 
   S.lhGlow.position.set(S.BEAM_ORIGIN_OFFSET_X, S.BEAM_ORIGIN_OFFSET_Y);
   S.lighthouseContainer.addChild(S.lhGlow);
+}
+
+function updateBeamRotation(delta) {
+  if (S.keys['KeyA'] || S.keys['ArrowLeft']) {
+    S.beamAngle -= BEAM_ROTATE_SPEED * delta;
+  }
+  if (S.keys['KeyD'] || S.keys['ArrowRight']) {
+    S.beamAngle += BEAM_ROTATE_SPEED * delta;
+  }
+}
+
+function updateLamp(delta) {
+  const lampCap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
+  if (S.lampRestoreFramesLeft > 0) {
+    S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
+    const restoreTotal = Math.max(1, S.lampRestoreFramesTotal || 1);
+    const restoreProgress = 1 - S.lampRestoreFramesLeft / restoreTotal;
+    const easedProgress = 1 - Math.pow(1 - restoreProgress, 3);
+    S.lampTimer = S.lampRestoreStartTimer * (1 - easedProgress);
+    if (S.lampRestoreFramesLeft <= 0) {
+      S.lampTimer = 0;
+      S.lampRestoreFramesTotal = 0;
+      S.lampRestoreStartTimer = 0;
+    }
+  } else {
+    S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
+  }
+
+  const burnout = S.lampTimer / lampCap;
+  S.BEAM_HALF_ANGLE =
+    LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
+
+  if (burnout > LAMP_FLICKER_START) {
+    const flickerIntensity =
+      (burnout - LAMP_FLICKER_START) / (1 - LAMP_FLICKER_START);
+    const flick =
+      Math.sin(Date.now() * 0.02) *
+      Math.sin(Date.now() * 0.037) *
+      Math.sin(Date.now() * 0.007);
+    S.lampFlicker = 1 - flickerIntensity * 0.7 * Math.max(0, flick);
+  } else {
+    S.lampFlicker = 1;
+  }
+
+  if (S.lhGlow) S.lhGlow.alpha = S.lampFlicker;
+}
+
+export function updateLighthouse(delta) {
+  updateBeamRotation(delta);
+  updateLamp(delta);
 }
 
 export function isInBeam(x, y) {
