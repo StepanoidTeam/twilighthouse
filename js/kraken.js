@@ -150,7 +150,10 @@ export function updateKrakens(delta) {
       } else if (now - k.litPendingAt >= LIT_DEBOUNCE) {
         k.fleeing = rawLit;
         k.litPending = null;
-        if (rawLit) spawnMermaid();
+        if (rawLit) {
+          spawnTooltip(k.spr.x, k.spr.y - 30, '🙈', TOOLTIP_STYLE_OK);
+          spawnMermaid();
+        }
       }
     } else {
       k.litPending = null;

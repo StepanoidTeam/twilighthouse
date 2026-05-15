@@ -34,7 +34,6 @@ export function spawnMermaid() {
     speed: BOAT_SPEED + Math.random() * 0.4,
     gone: false,
     fleeing: false,
-    wasLit: false,
     wavePhase: Math.random() * Math.PI * 2,
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION,
@@ -52,11 +51,10 @@ export function updateMermaids(delta) {
     const lit = isInBeam(m.spr.x, m.spr.y);
 
     // Однажды засвечена — убегает навсегда
-    if (lit && !m.wasLit) {
+    if (lit && !m.fleeing) {
       spawnTooltip(m.spr.x, m.spr.y - 30, '🙈', TOOLTIP_STYLE_OK);
+      m.fleeing = true;
     }
-    m.wasLit = lit;
-    if (lit) m.fleeing = true;
 
     let nx, ny, speedMult;
     if (m.fleeing) {
