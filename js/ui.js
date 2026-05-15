@@ -1,5 +1,6 @@
 import {
   PIXI,
+  BOAT_CARGO_TYPES,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
   CARGO_LABEL_STYLE,
@@ -495,6 +496,7 @@ function getRunStatsItems({ includeTime = false } = {}) {
       label: t('resultStats.deliveredBoats'),
       value: stats.deliveredBoats || S.score || 0,
     },
+    ...getCollectedCargoItems(),
     {
       icon: '💀',
       label: t('resultStats.smugglersSunk'),
@@ -539,6 +541,15 @@ function getRunStatsItems({ includeTime = false } = {}) {
     });
   }
   return items;
+}
+
+function getCollectedCargoItems() {
+  const deliveredCargo = S.deliveredCargo || {};
+  return BOAT_CARGO_TYPES.map((type) => ({
+    icon: type,
+    label: t(`cargo.${type}`),
+    value: Math.max(0, Math.floor(deliveredCargo[type] || 0)),
+  }));
 }
 
 function renderResultStats(items) {
