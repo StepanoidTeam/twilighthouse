@@ -5,7 +5,7 @@ import { spawnPoliceBoat } from './police.js';
 import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
-import { recordAchievementEvent } from './achievements/index.js';
+import { recordAchievementEvent } from './achievements.js';
 
 // ===== Level Definitions =====
 // goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ

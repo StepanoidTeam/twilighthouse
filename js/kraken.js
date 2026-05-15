@@ -27,7 +27,7 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
-import { recordAchievementEvent } from './achievements/index.js';
+import { recordAchievementEvent } from './achievements.js';
 
 const KRAKEN_INDICATOR_MARGIN = 34;
 const KRAKEN_INDICATOR_STYLE = new PIXI.TextStyle({

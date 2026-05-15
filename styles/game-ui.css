@@ -433,3 +433,124 @@
   opacity: 0.8;
   filter: grayscale(20%);
 }
+
+.achievement-toast-layer {
+  position: fixed;
+  top: 14px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: min(560px, calc(100vw - 24px));
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 10px;
+  z-index: 5;
+  pointer-events: none;
+}
+
+.achievement-toast {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid rgba(105, 204, 168, 0.5);
+  background:
+    linear-gradient(180deg, rgba(12, 36, 52, 0.96), rgba(8, 20, 30, 0.93)),
+    radial-gradient(
+      circle at 12% -20%,
+      rgba(118, 255, 210, 0.22),
+      transparent 42%
+    );
+  box-shadow:
+    0 12px 28px rgba(0, 0, 0, 0.45),
+    0 0 0 1px rgba(210, 255, 235, 0.1) inset;
+  color: #e7fff5;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
+  opacity: 0;
+  transform: translateY(-10px) scale(0.98);
+  transition:
+    opacity 280ms ease,
+    transform 280ms ease;
+}
+
+.achievement-toast.is-visible {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+}
+
+.achievement-toast-icon {
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 10px;
+  font-size: 26px;
+  background: rgba(130, 245, 207, 0.18);
+  border: 1px solid rgba(130, 245, 207, 0.35);
+}
+
+.achievement-toast-body {
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.achievement-toast-eyebrow {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: #8eeec3;
+}
+
+.achievement-toast-title {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 17px;
+  font-weight: 800;
+  line-height: 1.1;
+  color: #f7fffb;
+}
+
+.achievement-toast-desc {
+  margin: 0;
+  font-family: var(--font-ui);
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: #aed2c4;
+  opacity: 0.92;
+}
+
+.achievement-toast-points {
+  justify-self: end;
+  white-space: nowrap;
+  font-family: var(--font-ui);
+  font-size: 13px;
+  font-weight: 800;
+  color: #7ff2be;
+}
+
+@media (max-width: 640px) {
+  .achievement-toast {
+    grid-template-columns: 40px minmax(0, 1fr);
+  }
+
+  .achievement-toast-icon {
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
+  }
+
+  .achievement-toast-points {
+    grid-column: 1 / -1;
+    justify-self: start;
+    margin-left: 52px;
+  }
+}

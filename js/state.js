@@ -96,6 +96,9 @@ const State = {
   runStartTime: 0,
   runSurvivalMs: 0,
   lastSurvivalTick: 0,
+  beamMultiLitStreakMs: 0,
+  beamMultiLitBestMs: 0,
+  beamMultiLitLastTick: 0,
   scoreSubmitted: false,
 
   // Entities
@@ -228,6 +231,9 @@ const State = {
     this.runStartTime = performance.now();
     this.runSurvivalMs = 0;
     this.lastSurvivalTick = 0;
+    this.beamMultiLitStreakMs = 0;
+    this.beamMultiLitBestMs = 0;
+    this.beamMultiLitLastTick = 0;
     this.scoreSubmitted = false;
     this.levelIndex = 0;
     this.levelGoal = {};

@@ -37,6 +37,7 @@ import {
   buildUI,
   updateHUD,
   updateTooltips,
+  queueAchievementUnlockToast,
   repositionUI,
   showExitConfirm,
   hideExitConfirm,
@@ -59,10 +60,8 @@ import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
 import { t, onLanguageChange, applyI18nToDOM } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
-import {
-  commitRunToMeta,
-  applyMetaToRunState,
-} from './meta-progress.js';
+import { commitRunToMeta, applyMetaToRunState } from './meta-progress.js';
+import { onAchievementUnlocked } from './achievements.js';
 
 import './ip-tracker.js';
 
@@ -432,10 +431,49 @@ async function trySubmitScore() {
   }
 }
 
+function countSimultaneouslyLitTargets() {
+  let total = 0;
+
+  for (const boat of S.boats) {
+    if (boat.lit && !boat.arrived && !boat.sinking) total += 1;
+  }
+  for (const police of S.policeBoats) {
+    if (police.litStable && !police.arrived && !police.sinking) total += 1;
+  }
+  for (const mermaid of S.mermaids) {
+    if (mermaid.litStable && !mermaid.gone) total += 1;
+  }
+  for (const kraken of S.krakens) {
+    if (kraken.litStable && !kraken.gone) total += 1;
+  }
+
+  return total;
+}
+
+function updateBeamMultiLitTracker(now) {
+  if (countSimultaneouslyLitTargets() < 3) {
+    S.beamMultiLitStreakMs = 0;
+    S.beamMultiLitLastTick = 0;
+    return;
+  }
+
+  if (S.beamMultiLitLastTick) {
+    const dtMs = now - S.beamMultiLitLastTick;
+    if (dtMs > 0 && dtMs < 1000) S.beamMultiLitStreakMs += dtMs;
+  }
+  S.beamMultiLitLastTick = now;
+
+  if (S.beamMultiLitStreakMs > S.beamMultiLitBestMs) {
+    S.beamMultiLitBestMs = S.beamMultiLitStreakMs;
+  }
+}
+
 // ===== Game Loop =====
 function gameLoop(delta) {
   if (!S.gameSessionActive) {
     S.lastSurvivalTick = 0;
+    S.beamMultiLitLastTick = 0;
+    S.beamMultiLitStreakMs = 0;
     return;
   }
 
@@ -446,12 +484,16 @@ function gameLoop(delta) {
       trySubmitScore();
     }
     S.lastSurvivalTick = 0;
+    S.beamMultiLitLastTick = 0;
+    S.beamMultiLitStreakMs = 0;
     return;
   }
   if (isMenuVisible() || S.exitConfirm) {
     // Пауза: не накапливаем выживание и сбрасываем точку отсчёта,
     // чтобы при resume первый тик не залил большую дельту.
     S.lastSurvivalTick = 0;
+    S.beamMultiLitLastTick = 0;
+    S.beamMultiLitStreakMs = 0;
     return;
   }
 
@@ -472,6 +514,8 @@ function gameLoop(delta) {
     if (S.runSurvivalMs >= NIGHT_DURATION_MS) {
       S.runSurvivalMs = NIGHT_DURATION_MS;
       S.gameWon = true;
+      S.beamMultiLitLastTick = 0;
+      S.beamMultiLitStreakMs = 0;
       updateHUD();
       void showWin();
       return;
@@ -497,6 +541,7 @@ function gameLoop(delta) {
   for (const { entity, updatePhase } of ENTITY_SYSTEMS) {
     if (updatePhase === 'main') entity.update(delta);
   }
+  updateBeamMultiLitTracker(now);
   updateDarkness();
   updateTooltips(delta);
   if (S.debugMode) updateDebug();
@@ -600,6 +645,9 @@ async function init() {
   buildGlow();
 
   buildUI();
+  onAchievementUnlocked((achievement) => {
+    queueAchievementUnlockToast(achievement);
+  });
   $btnEsc.hidden = true; // hidden until game starts
   if ($volControls) $volControls.hidden = true;
 

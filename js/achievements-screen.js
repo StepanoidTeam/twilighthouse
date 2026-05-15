@@ -3,7 +3,7 @@ import {
   loadAchievementProgress,
   resetAllAchievementProgress,
   setAchievementProgress,
-} from './achievements/index.js';
+} from './achievements.js';
 import { t } from './i18n.js';
 import S from './state.js';
 
@@ -127,7 +127,8 @@ export function renderAchievementsScreen({ container, isActive }) {
 
     const $resetAll = document.createElement('button');
     $resetAll.type = 'button';
-    $resetAll.className = 'achievement-debug-btn achievement-debug-btn--reset-all';
+    $resetAll.className =
+      'achievement-debug-btn achievement-debug-btn--reset-all';
     $resetAll.dataset.action = 'resetAll';
     $resetAll.textContent = 'Reset all';
 
@@ -140,7 +141,9 @@ export function renderAchievementsScreen({ container, isActive }) {
   $list.className = 'achievements-list';
 
   for (const def of ACHIEVEMENT_DEFS) {
-    $list.appendChild(createAchievementCard(def, progress[def.id] || 0, { debug }));
+    $list.appendChild(
+      createAchievementCard(def, progress[def.id] || 0, { debug }),
+    );
   }
 
   $body.appendChild($list);

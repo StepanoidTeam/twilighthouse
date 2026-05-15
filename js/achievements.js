@@ -7,7 +7,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.first_night.title',
     descKey: 'achievements.items.first_night.desc',
     target: 1,
-    points: 10,
+    points: 5,
     rules: [{ type: 'event', event: 'run.won', step: 1 }],
   },
   {
@@ -16,7 +16,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.one_of_us.title',
     descKey: 'achievements.items.one_of_us.desc',
     target: 10,
-    points: 15,
+    points: 12,
     rules: [{ type: 'event', event: 'goal.delivered_boats', step: 1 }],
   },
   {
@@ -25,7 +25,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.not_today.title',
     descKey: 'achievements.items.not_today.desc',
     target: 1,
-    points: 10,
+    points: 8,
     rules: [{ type: 'event', event: 'goal.repelled_mermaids', step: 1 }],
   },
   {
@@ -34,16 +34,16 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.wrong_way.title',
     descKey: 'achievements.items.wrong_way.desc',
     target: 1,
-    points: 10,
+    points: 8,
     rules: [{ type: 'event', event: 'goal.sunk_cops', step: 1 }],
   },
   {
     id: 'it_exists',
-    icon: '🐙',
+    icon: '🦑',
     titleKey: 'achievements.items.it_exists.title',
     descKey: 'achievements.items.it_exists.desc',
     target: 1,
-    points: 20,
+    points: 12,
     rules: [{ type: 'event', event: 'goal.repelled_kraken', step: 1 }],
   },
   {
@@ -52,7 +52,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.full_tank.title',
     descKey: 'achievements.items.full_tank.desc',
     target: 10,
-    points: 15,
+    points: 18,
     rules: [{ type: 'run_max', metric: 'cargo.💡' }],
   },
   {
@@ -61,7 +61,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.cargo_delivered.title',
     descKey: 'achievements.items.cargo_delivered.desc',
     target: 15,
-    points: 15,
+    points: 20,
     rules: [{ type: 'run_max', metric: 'cargo.📦' }],
   },
   {
@@ -70,7 +70,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.for_courage.title',
     descKey: 'achievements.items.for_courage.desc',
     target: 10,
-    points: 15,
+    points: 20,
     rules: [{ type: 'run_max', metric: 'cargo.🥃' }],
   },
   {
@@ -79,7 +79,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.wave_of_law.title',
     descKey: 'achievements.items.wave_of_law.desc',
     target: 25,
-    points: 30,
+    points: 32,
     rules: [{ type: 'event', event: 'goal.sunk_cops', step: 1 }],
   },
   {
@@ -88,7 +88,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.siren_whisper.title',
     descKey: 'achievements.items.siren_whisper.desc',
     target: 50,
-    points: 30,
+    points: 40,
     rules: [{ type: 'event', event: 'goal.repelled_mermaids', step: 1 }],
   },
   {
@@ -97,7 +97,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.path_keeper.title',
     descKey: 'achievements.items.path_keeper.desc',
     target: 50,
-    points: 30,
+    points: 40,
     rules: [{ type: 'event', event: 'goal.delivered_boats', step: 1 }],
   },
   {
@@ -106,7 +106,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.last_lamp.title',
     descKey: 'achievements.items.last_lamp.desc',
     target: 1,
-    points: 25,
+    points: 35,
     rules: [{ type: 'event', event: 'run.won_one_heart', step: 1 }],
   },
   {
@@ -115,7 +115,7 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.not_a_boat.title',
     descKey: 'achievements.items.not_a_boat.desc',
     target: 1,
-    points: 15,
+    points: 12,
     rules: [{ type: 'event', event: 'boat.sunk', step: 1 }],
   },
   {
@@ -124,10 +124,14 @@ export const ACHIEVEMENT_DEFS = [
     titleKey: 'achievements.items.see_all.title',
     descKey: 'achievements.items.see_all.desc',
     target: 1000,
-    points: 25,
+    points: 30,
     rules: [{ type: 'run_max', metric: 'beam.maxMultiLitStreakMs' }],
   },
 ];
+
+const ACHIEVEMENT_DEF_BY_ID = new Map(
+  ACHIEVEMENT_DEFS.map((def) => [def.id, def]),
+);
 
 const EVENT_RULES = (() => {
   const map = new Map();
@@ -159,8 +163,54 @@ const RUN_MAX_RULES = (() => {
   return rules;
 })();
 
+const unlockListeners = new Set();
+
 function toNonNegativeInt(value) {
   return Math.max(0, Math.floor(Number(value)) || 0);
+}
+
+function normalizeTarget(def) {
+  return Math.max(1, toNonNegativeInt(def?.target) || 1);
+}
+
+function isUnlocked(def, progressValue) {
+  return toNonNegativeInt(progressValue) >= normalizeTarget(def);
+}
+
+function emitAchievementUnlocked(def, progressValue) {
+  const payload = {
+    id: def.id,
+    icon: def.icon,
+    titleKey: def.titleKey,
+    descKey: def.descKey,
+    points: toNonNegativeInt(def.points),
+    progress: toNonNegativeInt(progressValue),
+    target: normalizeTarget(def),
+  };
+
+  for (const listener of unlockListeners) {
+    try {
+      listener(payload);
+    } catch (e) {
+      console.error('achievement unlock listener error', e);
+    }
+  }
+}
+
+function emitUniqueUnlocks(unlocks) {
+  const seen = new Set();
+  for (const unlock of unlocks) {
+    if (!unlock || !unlock.def) continue;
+    if (seen.has(unlock.def.id)) continue;
+    seen.add(unlock.def.id);
+    emitAchievementUnlocked(unlock.def, unlock.progress);
+  }
+}
+
+function collectUnlockTransition({ def, previous, next, unlocks }) {
+  if (!def || !unlocks) return;
+  if (isUnlocked(def, previous) || !isUnlocked(def, next)) return;
+  unlocks.push({ def, progress: next });
 }
 
 function emptyAchievementProgress() {
@@ -200,11 +250,19 @@ export function setAchievementProgress(achievementId, value) {
   if (!achievementId) return;
 
   const progress = loadAchievementProgress();
+  const def = ACHIEVEMENT_DEF_BY_ID.get(achievementId) || null;
+  const previous = toNonNegativeInt(progress[achievementId]);
+  const next = toNonNegativeInt(value);
+
   if (!Object.prototype.hasOwnProperty.call(progress, achievementId)) {
     progress[achievementId] = 0;
   }
-  progress[achievementId] = toNonNegativeInt(value);
+  progress[achievementId] = next;
   saveAchievementProgress(progress);
+
+  const unlocks = [];
+  collectUnlockTransition({ def, previous, next, unlocks });
+  emitUniqueUnlocks(unlocks);
 }
 
 export function resetAllAchievementProgress() {
@@ -223,19 +281,25 @@ export function recordAchievementEvent(event, amount = 1) {
 
   const progress = loadAchievementProgress();
   let changed = false;
+  const unlocks = [];
 
   for (const rule of rules) {
     const key = rule.achievementId;
+    const def = ACHIEVEMENT_DEF_BY_ID.get(key) || null;
     const step = Math.max(1, Math.floor(Number(rule.step)) || 1);
     const previous = toNonNegativeInt(progress[key]);
     const next = previous + baseStep * step;
     if (next !== previous) {
       progress[key] = next;
       changed = true;
+      collectUnlockTransition({ def, previous, next, unlocks });
     }
   }
 
-  if (changed) saveAchievementProgress(progress);
+  if (changed) {
+    saveAchievementProgress(progress);
+    emitUniqueUnlocks(unlocks);
+  }
 }
 
 function readRunMetric(metrics, metricPath) {
@@ -259,15 +323,32 @@ export function recordAchievementRunMetrics(metrics) {
 
   const progress = loadAchievementProgress();
   let changed = false;
+  const unlocks = [];
 
   for (const rule of RUN_MAX_RULES) {
+    const def = ACHIEVEMENT_DEF_BY_ID.get(rule.achievementId) || null;
     const runValue = readRunMetric(metrics, rule.metric) * rule.step;
     const current = toNonNegativeInt(progress[rule.achievementId]);
     if (runValue > current) {
       progress[rule.achievementId] = runValue;
       changed = true;
+      collectUnlockTransition({
+        def,
+        previous: current,
+        next: runValue,
+        unlocks,
+      });
     }
   }
 
-  if (changed) saveAchievementProgress(progress);
+  if (changed) {
+    saveAchievementProgress(progress);
+    emitUniqueUnlocks(unlocks);
+  }
+}
+
+export function onAchievementUnlocked(listener) {
+  if (typeof listener !== 'function') return () => {};
+  unlockListeners.add(listener);
+  return () => unlockListeners.delete(listener);
 }

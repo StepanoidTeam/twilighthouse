@@ -188,6 +188,14 @@ function escapeHtml(s) {
 
 let levelBannerTimer = null;
 
+const ACHIEVEMENT_TOAST_VISIBLE_MS = 3400;
+const ACHIEVEMENT_TOAST_TRANSITION_MS = 280;
+let achievementToastRoot = null;
+let achievementToastTimer = null;
+let achievementToastHideTimer = null;
+let activeAchievementToast = null;
+const achievementToastQueue = [];
+
 function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
   hudCache[key] = value;
@@ -296,6 +304,102 @@ export function hideLevelBanner() {
   }
   $levelBanner.classList.remove('is-visible');
   $levelBanner.hidden = true;
+}
+
+function ensureAchievementToastRoot() {
+  if (achievementToastRoot && achievementToastRoot.isConnected) {
+    return achievementToastRoot;
+  }
+  const root = document.createElement('div');
+  root.className = 'achievement-toast-layer';
+  root.setAttribute('aria-live', 'polite');
+  root.setAttribute('aria-atomic', 'true');
+  document.body.appendChild(root);
+  achievementToastRoot = root;
+  return root;
+}
+
+function hideActiveAchievementToast() {
+  if (!activeAchievementToast) return;
+  const toast = activeAchievementToast;
+  activeAchievementToast = null;
+  toast.classList.remove('is-visible');
+  if (achievementToastHideTimer) clearTimeout(achievementToastHideTimer);
+  achievementToastHideTimer = window.setTimeout(() => {
+    if (toast.parentNode) toast.parentNode.removeChild(toast);
+    achievementToastHideTimer = null;
+    showNextAchievementToast();
+  }, ACHIEVEMENT_TOAST_TRANSITION_MS);
+}
+
+function showNextAchievementToast() {
+  if (activeAchievementToast || achievementToastQueue.length === 0) return;
+
+  const payload = achievementToastQueue.shift();
+  if (!payload) return;
+
+  const root = ensureAchievementToastRoot();
+  const toast = document.createElement('article');
+  toast.className = 'achievement-toast';
+
+  const icon = document.createElement('span');
+  icon.className = 'achievement-toast-icon';
+  icon.textContent = payload.icon || '🏅';
+
+  const body = document.createElement('div');
+  body.className = 'achievement-toast-body';
+
+  const eyebrow = document.createElement('p');
+  eyebrow.className = 'achievement-toast-eyebrow';
+  eyebrow.textContent = t('achievements.toast.unlocked');
+
+  const title = document.createElement('p');
+  title.className = 'achievement-toast-title';
+  title.textContent = payload.titleKey ? t(payload.titleKey) : '';
+
+  const desc = document.createElement('p');
+  desc.className = 'achievement-toast-desc';
+  desc.textContent = payload.descKey ? t(payload.descKey) : '';
+
+  body.appendChild(eyebrow);
+  body.appendChild(title);
+  body.appendChild(desc);
+
+  toast.appendChild(icon);
+  toast.appendChild(body);
+
+  if (payload.points > 0) {
+    const points = document.createElement('span');
+    points.className = 'achievement-toast-points';
+    points.textContent = t('achievements.toast.points', {
+      points: payload.points,
+    });
+    toast.appendChild(points);
+  }
+
+  root.appendChild(toast);
+  activeAchievementToast = toast;
+  requestAnimationFrame(() => {
+    if (toast === activeAchievementToast) toast.classList.add('is-visible');
+  });
+
+  if (achievementToastTimer) clearTimeout(achievementToastTimer);
+  achievementToastTimer = window.setTimeout(() => {
+    achievementToastTimer = null;
+    hideActiveAchievementToast();
+  }, ACHIEVEMENT_TOAST_VISIBLE_MS);
+}
+
+export function queueAchievementUnlockToast(payload) {
+  if (!payload || !payload.id || !payload.titleKey) return;
+  achievementToastQueue.push({
+    id: payload.id,
+    icon: payload.icon,
+    titleKey: payload.titleKey,
+    descKey: payload.descKey,
+    points: Number(payload.points) || 0,
+  });
+  showNextAchievementToast();
 }
 
 // ===== Build HUD =====

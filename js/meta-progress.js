@@ -3,7 +3,7 @@ import { BOAT_CARGO_TYPES, LAMP_BURNOUT_TIME } from './config.js';
 import {
   recordAchievementEvent,
   recordAchievementRunMetrics,
-} from './achievements/index.js';
+} from './achievements.js';
 
 const STORAGE_KEY = 'lighthouse_meta_v1';
 
@@ -115,10 +115,16 @@ export function commitRunToMeta(S) {
     const add = Math.max(0, Math.floor(S.deliveredCargo[type] || 0));
     if (add) meta.wallet[type] = (meta.wallet[type] || 0) + add;
   }
-  recordAchievementRunMetrics({ cargo: S.deliveredCargo });
+  recordAchievementRunMetrics({
+    cargo: S.deliveredCargo,
+    beam: { maxMultiLitStreakMs: S.beamMultiLitBestMs },
+  });
   if (S.gameWon) {
     meta.nightsWon += 1;
     recordAchievementEvent('run.won', 1);
+    if (S.heartsRemaining === 1) {
+      recordAchievementEvent('run.won_one_heart', 1);
+    }
   }
   saveMeta(meta);
 }

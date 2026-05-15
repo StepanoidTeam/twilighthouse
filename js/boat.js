@@ -42,7 +42,7 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
-import { recordAchievementEvent } from './achievements/index.js';
+import { recordAchievementEvent } from './achievements.js';
 
 const LAMP_RESTORE_FRAMES = 14;
 

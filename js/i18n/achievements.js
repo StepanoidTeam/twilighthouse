@@ -7,6 +7,8 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.points': 'Points',
     'achievements.done': 'Unlocked',
     'achievements.locked': 'Keep going',
+    'achievements.toast.unlocked': 'Achievement unlocked',
+    'achievements.toast.points': '+{points} ✦',
     'achievements.items.first_night.title': 'First Night',
     'achievements.items.first_night.desc': 'Survive your first night.',
     'achievements.items.one_of_us.title': 'One of Us',
@@ -19,23 +21,27 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.items.it_exists.desc':
       'Survive your first encounter with the kraken.',
     'achievements.items.full_tank.title': 'Full Tank',
-    'achievements.items.full_tank.desc':
-      'Collect 10 lamps in a single run.',
+    'achievements.items.full_tank.desc': 'Collect 10 lamps in a single run.',
     'achievements.items.cargo_delivered.title': 'Cargo Delivered',
     'achievements.items.cargo_delivered.desc':
       'Collect 15 contraband crates in a single run.',
     'achievements.items.for_courage.title': 'For Courage',
-    'achievements.items.for_courage.desc':
-      'Collect 10 rum in a single run.',
+    'achievements.items.for_courage.desc': 'Collect 10 rum in a single run.',
     'achievements.items.wave_of_law.title': 'Wave of Law',
-    'achievements.items.wave_of_law.desc':
-      'Repel 25 police boats.',
+    'achievements.items.wave_of_law.desc': 'Repel 25 police boats.',
     'achievements.items.siren_whisper.title': 'Siren Whisper',
-    'achievements.items.siren_whisper.desc':
-      'Repel 50 mermaids.',
+    'achievements.items.siren_whisper.desc': 'Repel 50 mermaids.',
     'achievements.items.path_keeper.title': 'Keeper of the Route',
     'achievements.items.path_keeper.desc':
       'Escort 50 smuggler boats to the harbor.',
+    'achievements.items.last_lamp.title': 'Last Lamp',
+    'achievements.items.last_lamp.desc':
+      'Win the night with exactly 1 life left.',
+    'achievements.items.not_a_boat.title': 'Those Were Not Cops',
+    'achievements.items.not_a_boat.desc': 'Accidentally sink a smuggler.',
+    'achievements.items.see_all.title': 'I See Everything',
+    'achievements.items.see_all.desc':
+      'Keep 3 targets in your beam at the same time for 1 second.',
   },
   ru: {
     'achievements.title': '🏅 Ачивки',
@@ -45,36 +51,38 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.points': 'Очки',
     'achievements.done': 'Открыто',
     'achievements.locked': 'Продолжай',
+    'achievements.toast.unlocked': 'Новая ачивка',
+    'achievements.toast.points': '+{points} ✦',
     'achievements.items.first_night.title': 'Первая ночь',
     'achievements.items.first_night.desc': 'Переживи свою первую ночь.',
     'achievements.items.one_of_us.title': 'Свой человек',
-    'achievements.items.one_of_us.desc':
-      'Сопроводи 10 контрабандистов.',
+    'achievements.items.one_of_us.desc': 'Сопроводи 10 контрабандистов.',
     'achievements.items.not_today.title': 'Не сегодня',
     'achievements.items.not_today.desc': 'Отпугни первую русалку.',
     'achievements.items.wrong_way.title': 'Не туда приплыл',
-    'achievements.items.wrong_way.desc':
-      'Потопи первый полицейский катер.',
+    'achievements.items.wrong_way.desc': 'Потопи первый полицейский катер.',
     'achievements.items.it_exists.title': 'Оно реально существует',
-    'achievements.items.it_exists.desc':
-      'Переживи первую встречу с кракеном.',
+    'achievements.items.it_exists.desc': 'Переживи первую встречу с кракеном.',
     'achievements.items.full_tank.title': 'Полный бак',
-    'achievements.items.full_tank.desc':
-      'Собери 10 ламп за один забег.',
+    'achievements.items.full_tank.desc': 'Собери 10 ламп за один забег.',
     'achievements.items.cargo_delivered.title': 'Груз доставлен',
     'achievements.items.cargo_delivered.desc':
       'Собери 15 ящиков контрабанды за один забег.',
     'achievements.items.for_courage.title': 'Для храбрости',
-    'achievements.items.for_courage.desc':
-      'Собери 10 рома за один забег.',
+    'achievements.items.for_courage.desc': 'Собери 10 рома за один забег.',
     'achievements.items.wave_of_law.title': 'Волна закона',
-    'achievements.items.wave_of_law.desc':
-      'Отпугни 25 полицейских катеров.',
+    'achievements.items.wave_of_law.desc': 'Отпугни 25 полицейских катеров.',
     'achievements.items.siren_whisper.title': 'Шепот сирен',
-    'achievements.items.siren_whisper.desc':
-      'Отпугни 50 русалок.',
+    'achievements.items.siren_whisper.desc': 'Отпугни 50 русалок.',
     'achievements.items.path_keeper.title': 'Хранитель пути',
     'achievements.items.path_keeper.desc':
       'Сопроводи 50 лодок контрабандистов до гавани.',
+    'achievements.items.last_lamp.title': 'Последняя лампа',
+    'achievements.items.last_lamp.desc': 'Выживи с 1 жизнью.',
+    'achievements.items.not_a_boat.title': 'Это были не копы',
+    'achievements.items.not_a_boat.desc': 'Потопи контрабандиста случайно.',
+    'achievements.items.see_all.title': 'Вижу всё',
+    'achievements.items.see_all.desc':
+      'Освети одновременно 3 цели в течение 1 секунды.',
   },
 };
