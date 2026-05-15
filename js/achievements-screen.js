@@ -58,15 +58,10 @@ function createAchievementCard(def, progress, { debug = false } = {}) {
   const $points = document.createElement('aside');
   $points.className = 'achievement-card-points';
 
-  const $pointsLabel = document.createElement('span');
-  $pointsLabel.className = 'achievement-card-points-label';
-  $pointsLabel.textContent = t('achievements.points');
-
   const $pointsValue = document.createElement('span');
   $pointsValue.className = 'achievement-card-points-value';
   $pointsValue.textContent = `${Math.max(0, Math.floor(Number(def.points)) || 0)} ✦`;
 
-  $points.appendChild($pointsLabel);
   $points.appendChild($pointsValue);
 
   $main.appendChild($copy);
