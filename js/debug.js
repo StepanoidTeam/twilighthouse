@@ -9,9 +9,29 @@ import {
 } from './config.js';
 import S from './state.js';
 import { updateDebugBeam, getBeamConvergencePoint } from './lighthouse.js';
+import { spawnBoat } from './boat.js';
+import { spawnPoliceBoat } from './police.js';
+import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 
-const { $debugControls, $debugSpawnKraken } = globalThis;
+const {
+  $debugControls,
+  $debugSpawnBoat,
+  $debugSpawnPolice,
+  $debugSpawnMermaid,
+  $debugSpawnKraken,
+} = globalThis;
+
+const DEBUG_SPAWNERS = [
+  { button: $debugSpawnBoat, spawn: spawnBoat },
+  { button: $debugSpawnPolice, spawn: spawnPoliceBoat },
+  { button: $debugSpawnMermaid, spawn: spawnMermaid },
+  { button: $debugSpawnKraken, spawn: spawnKraken },
+];
+
+function canUseDebugSpawner() {
+  return S.debugMode && S.gameSessionActive && !S.gameOver;
+}
 
 export function buildDebug() {
   S.debugGfx = new PIXI.Graphics();
@@ -32,10 +52,11 @@ export function buildDebug() {
   S.debugText.visible = false;
   S.debugText.position.set(10, 10);
 
-  if ($debugSpawnKraken) {
-    $debugSpawnKraken.addEventListener('pointerdown', () => {
-      if (!S.debugMode || !S.gameSessionActive || S.gameOver) return;
-      spawnKraken();
+  for (const { button, spawn } of DEBUG_SPAWNERS) {
+    if (!button) continue;
+    button.addEventListener('pointerdown', () => {
+      if (!canUseDebugSpawner()) return;
+      spawn();
     });
   }
   setDebugControlsVisible(false);
@@ -77,7 +98,7 @@ export function updateDebug() {
     `[~] Debug  |  [] halfAngle: ${S.BEAM_HALF_ANGLE.toFixed(2)}  |  -+ glowR: ${S.LH_GLOW_RADIUS}\n` +
     `beamAngle: ${((S.beamAngle * 180) / Math.PI).toFixed(1)}°  |  origin: (${ox.toFixed(0)}, ${oy.toFixed(0)})`;
 
-  if ($debugSpawnKraken) {
-    $debugSpawnKraken.disabled = !S.gameSessionActive || S.gameOver;
+  for (const { button } of DEBUG_SPAWNERS) {
+    if (button) button.disabled = !canUseDebugSpawner();
   }
 }

@@ -105,7 +105,9 @@
   top: 52px;
   z-index: 3;
   display: flex;
+  flex-wrap: wrap;
   gap: 8px;
+  max-width: min(520px, calc(100vw - 20px));
   font-family: var(--font-ui);
 }
 
