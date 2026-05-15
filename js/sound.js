@@ -9,6 +9,7 @@ const MUSIC_PLAYLIST = [
   'music/2-twilight-house.mp3',
   'music/3-silent-MARK-light.mp3',
 ];
+const MUSIC_TRACK_STORAGE_KEY = 'lighthouse_music_track_index';
 const BOOT_AUDIO_ASSETS = Array.from(
   new Set([
     'audio/button-click.mp3',
@@ -34,7 +35,7 @@ const BOOT_AUDIO_ASSETS = Array.from(
 let audioContext = null;
 const audioBufferCache = new Map();
 let audioUnlockPromise = null;
-let musicTrackIndex = 0;
+let musicTrackIndex = loadStoredMusicTrackIndex();
 let ambientUnlockBound = false;
 let visibilityPauseBound = false;
 let musicWasPlayingBeforeHide = false;
@@ -74,6 +75,33 @@ const MUSIC_VOLUME = 0.15;
 
 function clampVolume(value) {
   return Math.max(0, Math.min(1, value));
+}
+
+function loadStoredMusicTrackIndex() {
+  try {
+    const raw = localStorage.getItem(MUSIC_TRACK_STORAGE_KEY);
+    const index = Number.parseInt(raw, 10);
+    if (Number.isInteger(index) && index >= 0 && index < MUSIC_PLAYLIST.length) {
+      return index;
+    }
+  } catch (_) {}
+  return 0;
+}
+
+function saveMusicTrackIndex() {
+  try {
+    localStorage.setItem(MUSIC_TRACK_STORAGE_KEY, String(musicTrackIndex));
+  } catch (_) {}
+}
+
+function setMusicTrackIndex(index) {
+  const count = MUSIC_PLAYLIST.length;
+  musicTrackIndex = ((index % count) + count) % count;
+  saveMusicTrackIndex();
+}
+
+function getCurrentMusicTrackPath() {
+  return MUSIC_PLAYLIST[musicTrackIndex] || MUSIC_PLAYLIST[0];
 }
 
 function ensureAudioContext() {
@@ -361,10 +389,10 @@ function initializeAmbientAudio() {
 
   if (!S.musicSound) {
     const musicAudio = createAmbientAudioTrack({
-      path: MUSIC_PLAYLIST[0],
+      path: getCurrentMusicTrackPath(),
       onEnded: async () => {
-        musicTrackIndex = (musicTrackIndex + 1) % MUSIC_PLAYLIST.length;
-        await musicAudio.setSource(MUSIC_PLAYLIST[musicTrackIndex], {
+        setMusicTrackIndex(musicTrackIndex + 1);
+        await musicAudio.setSource(getCurrentMusicTrackPath(), {
           resetPlayback: true,
         });
         if (getMusicVolume(MUSIC_VOLUME) > AMBIENT_SILENT_THRESHOLD) {
@@ -418,9 +446,9 @@ async function startMenuMusic({ restartPlayback = false } = {}) {
   initializeAmbientAudio();
   if (S.musicSound) {
     if (restartPlayback) {
-      musicTrackIndex = 0;
-      if (S.musicSound.src !== MUSIC_PLAYLIST[0]) {
-        await S.musicSound.setSource(MUSIC_PLAYLIST[0], {
+      const currentTrackPath = getCurrentMusicTrackPath();
+      if (S.musicSound.src !== currentTrackPath) {
+        await S.musicSound.setSource(currentTrackPath, {
           resetPlayback: true,
         });
       }
