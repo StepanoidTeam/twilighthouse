@@ -88,7 +88,6 @@ const {
   $bootLoaderBarFill,
   $bootLoaderPercent,
   $screenGameOver,
-  $resultSplash,
   $btnResultRestart,
   $btnResultMenu,
   $btnExitConfirm,
@@ -452,14 +451,6 @@ function gameLoop(delta) {
       trySubmitScore();
     }
     S.lastSurvivalTick = 0;
-    if (S.gameWon && !S.gameOverTimeoutId) {
-      S.gameOverTimeoutId = window.setTimeout(() => {
-        S.gameOverTimeoutId = null;
-        if (S.gameWon && S.gameOver && !isMenuVisible()) {
-          exitToLeaderboard();
-        }
-      }, 8000);
-    }
     return;
   }
   if (isMenuVisible() || S.exitConfirm) {
@@ -657,13 +648,6 @@ async function init() {
   $btnResultMenu.addEventListener('pointerdown', () => {
     playClickSound();
     requestAnimationFrame(() => exitToMenu());
-  });
-  $screenGameOver.addEventListener('pointerdown', (e) => {
-    if (!S.gameWon) return;
-    if (e.target === $screenGameOver || e.target === $resultSplash) {
-      playClickSound();
-      exitToLeaderboard();
-    }
   });
   $btnExitConfirm.addEventListener('pointerdown', () => {
     playClickSound();
