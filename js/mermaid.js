@@ -4,6 +4,7 @@ import {
   BOAT_RADIUS,
   BOAT_WIDTH,
   ARRIVAL_RADIUS,
+  DARKNESS_RADIUS,
   MOB_SPAWN_RING,
   SPAWN_MARGIN,
   MERMAID_FRAMES,
@@ -54,7 +55,9 @@ export function updateMermaids(delta) {
     // Frame animation
     tickAnim(m, delta, MERMAID_FRAMES, MERMAID_FRAME_DURATION, S.textures);
 
-    const rawLit = isInBeam(m.spr.x, m.spr.y);
+    const insideDarknessRadius =
+      Math.hypot(m.spr.x - S.lhX, m.spr.y - S.lhY) < DARKNESS_RADIUS;
+    const rawLit = insideDarknessRadius && isInBeam(m.spr.x, m.spr.y);
     if (rawLit !== m.lastRawLit) {
       m.lastRawLit = rawLit;
       m.rawLitStableFor = 0;
