@@ -360,7 +360,6 @@
             <span class="menu-leaderboard-date" data-col="date"></span>
           </div>
         </template>
-
       </div>
       <p
         id="$menuHint"
@@ -532,7 +531,21 @@
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title"></h2>
         <p class="menu-screen-subtitle"></p>
-        <div class="menu-card blur-bg"></div>
+        <div class="menu-card blur-bg">
+          <div class="achievements-toolbar">
+            <div class="achievements-toolbar-left">
+              <button
+                type="button"
+                class="achievements-filter-btn"
+                data-action="toggleCompletedFilter"
+              ></button>
+            </div>
+            <div class="achievements-toolbar-right">
+              <span class="achievements-total-points"></span>
+            </div>
+          </div>
+          <div class="achievements-list"></div>
+        </div>
         <p class="menu-hint hidden-mobile">
           <span class="hotkey">esc</span>
           <span class="hotkey">Q</span>

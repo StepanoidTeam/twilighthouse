@@ -31,12 +31,87 @@
   -webkit-overflow-scrolling: touch;
 }
 
-.achievements-debug-bar {
+.achievements-toolbar {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 12px;
   margin-bottom: 14px;
+}
+
+.achievements-toolbar-left {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+}
+
+.achievements-toolbar-right {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 10px;
+  min-width: 0;
+}
+
+.achievements-total-points {
+  display: inline-flex;
+  align-items: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid rgba(255, 215, 122, 0.45);
+  border-radius: 8px;
+  background: rgba(56, 40, 10, 0.58);
+  color: #ffe2a2;
+  font-family: var(--font-menu);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  white-space: nowrap;
+}
+
+.achievements-filter-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 34px;
+  padding: 6px 12px;
+  border: 1px solid rgba(115, 156, 201, 0.42);
+  border-radius: 8px;
+  background: rgba(7, 20, 32, 0.7);
+  color: #d8e8f7;
+  font-family: var(--font-menu);
+  font-size: 0.88rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+}
+
+.achievements-filter-btn:hover {
+  border-color: rgba(168, 208, 250, 0.7);
+  background: rgba(14, 31, 52, 0.8);
+}
+
+.achievements-filter-btn.is-active {
+  border-color: rgba(255, 215, 122, 0.75);
+  color: #ffe3a3;
+  background: rgba(56, 40, 10, 0.72);
+}
+
+.achievements-empty {
+  margin: 18px 4px;
+  color: var(--color-menu-muted);
+  font-size: 0.95rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.achievements-debug-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-bottom: 0;
   padding: 10px 12px;
   border: 1px solid rgba(204, 68, 255, 0.42);
   border-radius: 8px;
@@ -201,6 +276,29 @@
 }
 
 @media (max-width: 720px) {
+  .achievements-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .achievements-toolbar-left {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .achievements-toolbar-right {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .achievements-total-points {
+    justify-content: center;
+  }
+
+  .achievements-filter-btn {
+    width: 100%;
+  }
+
   .achievement-card {
     grid-template-columns: 58px minmax(0, 1fr);
     gap: 12px;

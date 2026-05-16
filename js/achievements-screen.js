@@ -7,6 +7,43 @@ import {
 import { t } from './i18n.js';
 import S from './state.js';
 
+const FILTER_STORAGE_KEY = 'lighthouse_achievements_hide_completed_v1';
+
+function loadHideCompletedFilterState() {
+  try {
+    if (typeof localStorage === 'undefined') return false;
+    const raw = localStorage.getItem(FILTER_STORAGE_KEY);
+    return raw === '1' || raw === 'true';
+  } catch (_) {
+    return false;
+  }
+}
+
+function saveHideCompletedFilterState(value) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(FILTER_STORAGE_KEY, value ? '1' : '0');
+  } catch (_) {
+    // ignore storage failures
+  }
+}
+
+let hideCompleted = loadHideCompletedFilterState();
+
+function isAchievementDone(def, progressValue) {
+  const target = Math.max(1, Math.floor(Number(def?.target)) || 1);
+  return Math.max(0, Math.floor(Number(progressValue)) || 0) >= target;
+}
+
+function getUnlockedAchievementPoints(progress) {
+  let total = 0;
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (!isAchievementDone(def, progress[def.id] || 0)) continue;
+    total += Math.max(0, Math.floor(Number(def.points)) || 0);
+  }
+  return total;
+}
+
 function createAchievementCard(def, progress, { debug = false } = {}) {
   const target = Math.max(1, Math.floor(Number(def.target)) || 1);
   const value = Math.max(0, Math.floor(Number(progress)) || 0);
@@ -101,8 +138,26 @@ export function renderAchievementsScreen({ container, isActive }) {
   const $title = container.querySelector('.menu-screen-title');
   const $subtitle = container.querySelector('.menu-screen-subtitle');
   const $body = container.querySelector('.menu-card');
+  const $toolbar = $body?.querySelector('.achievements-toolbar');
+  const $toolbarLeft = $toolbar?.querySelector('.achievements-toolbar-left');
+  const $toolbarRight = $toolbar?.querySelector('.achievements-toolbar-right');
+  const $filterToggle = $toolbarLeft?.querySelector('.achievements-filter-btn');
+  const $totalPoints = $toolbarRight?.querySelector(
+    '.achievements-total-points',
+  );
+  const $list = $body?.querySelector('.achievements-list');
 
-  if (!$title || !$subtitle || !$body) return;
+  if (
+    !$title ||
+    !$subtitle ||
+    !$body ||
+    !$toolbar ||
+    !$toolbarRight ||
+    !$filterToggle ||
+    !$totalPoints ||
+    !$list
+  )
+    return;
 
   $title.textContent = t('achievements.title');
   $subtitle.textContent = t('achievements.subtitle');
@@ -110,7 +165,20 @@ export function renderAchievementsScreen({ container, isActive }) {
   const progress = loadAchievementProgress();
   const debug = Boolean(S.debugMode);
 
-  $body.replaceChildren();
+  const totalPoints = getUnlockedAchievementPoints(progress);
+  $totalPoints.textContent = t('achievements.total_points', {
+    points: totalPoints,
+  });
+
+  $filterToggle.classList.toggle('is-active', hideCompleted);
+  $filterToggle.textContent = hideCompleted
+    ? t('achievements.filter.show_all')
+    : t('achievements.filter.hide_completed');
+
+  const existingDebugBar = $toolbarRight.querySelector(
+    '.achievements-debug-bar',
+  );
+  if (existingDebugBar) existingDebugBar.remove();
 
   if (debug) {
     const $debugBar = document.createElement('div');
@@ -129,49 +197,63 @@ export function renderAchievementsScreen({ container, isActive }) {
 
     $debugBar.appendChild($debugLabel);
     $debugBar.appendChild($resetAll);
-    $body.appendChild($debugBar);
+    $toolbarRight.insertBefore($debugBar, $totalPoints);
   }
 
-  const $list = document.createElement('div');
-  $list.className = 'achievements-list';
+  $list.replaceChildren();
 
+  let visibleCount = 0;
   for (const def of ACHIEVEMENT_DEFS) {
-    $list.appendChild(
-      createAchievementCard(def, progress[def.id] || 0, { debug }),
-    );
+    const currentProgress = progress[def.id] || 0;
+    const done = isAchievementDone(def, currentProgress);
+    if (hideCompleted && done) continue;
+
+    $list.appendChild(createAchievementCard(def, currentProgress, { debug }));
+    visibleCount += 1;
   }
 
-  $body.appendChild($list);
+  if (visibleCount === 0) {
+    const $empty = document.createElement('p');
+    $empty.className = 'achievements-empty';
+    $empty.textContent = t('achievements.filter.empty');
+    $list.appendChild($empty);
+  }
 
-  if (debug) {
-    $body.onclick = (e) => {
-      const target = e.target;
-      if (!(target instanceof HTMLElement)) return;
-      const btn = target.closest('.achievement-debug-btn');
-      if (!btn) return;
+  $body.onclick = (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
 
-      const action = btn.dataset.action;
-      if (action === 'resetAll') {
-        resetAllAchievementProgress();
-        renderAchievementsScreen({ container, isActive });
-        return;
-      }
-
-      const achievementId = btn.dataset.achievementId;
-      if (!achievementId) return;
-      const current = loadAchievementProgress()[achievementId] || 0;
-      if (action === 'increment') {
-        setAchievementProgress(achievementId, current + 1);
-      } else if (action === 'decrement') {
-        setAchievementProgress(achievementId, Math.max(0, current - 1));
-      } else if (action === 'reset') {
-        setAchievementProgress(achievementId, 0);
-      }
+    const filterBtn = target.closest('.achievements-filter-btn');
+    if (filterBtn) {
+      hideCompleted = !hideCompleted;
+      saveHideCompletedFilterState(hideCompleted);
       renderAchievementsScreen({ container, isActive });
-    };
-  } else {
-    $body.onclick = null;
-  }
+      return;
+    }
+
+    if (!debug) return;
+    const btn = target.closest('.achievement-debug-btn');
+    if (!btn) return;
+
+    const action = btn.dataset.action;
+    if (action === 'resetAll') {
+      resetAllAchievementProgress();
+      renderAchievementsScreen({ container, isActive });
+      return;
+    }
+
+    const achievementId = btn.dataset.achievementId;
+    if (!achievementId) return;
+    const current = loadAchievementProgress()[achievementId] || 0;
+    if (action === 'increment') {
+      setAchievementProgress(achievementId, current + 1);
+    } else if (action === 'decrement') {
+      setAchievementProgress(achievementId, Math.max(0, current - 1));
+    } else if (action === 'reset') {
+      setAchievementProgress(achievementId, 0);
+    }
+    renderAchievementsScreen({ container, isActive });
+  };
 
   if (typeof isActive === 'function' && !isActive()) return;
 }
