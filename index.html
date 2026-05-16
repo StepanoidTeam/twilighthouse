@@ -335,6 +335,19 @@
               data-i18n="menu.tutorial"
             ></span>
           </button>
+
+          <!-- ===== Auth widget (top-right, main menu only) ===== -->
+          <div id="$authWidget" class="auth-widget">
+            <button
+              class="menu-btn auth-widget-btn auth-widget-btn--signin blur-bg"
+            ></button>
+            <div class="auth-widget-user blur-bg" style="display: none">
+              <span class="auth-widget-name"></span>
+              <button
+                class="menu-btn auth-widget-btn auth-widget-btn--signout blur-bg"
+              ></button>
+            </div>
+          </div>
         </div>
         <section class="menu-sub" hidden></section>
 
@@ -348,18 +361,6 @@
           </div>
         </template>
 
-        <!-- ===== Auth widget (top-right, main menu only) ===== -->
-        <div id="$authWidget" class="auth-widget">
-          <button
-            class="menu-btn auth-widget-btn auth-widget-btn--signin blur-bg"
-          ></button>
-          <div class="auth-widget-user blur-bg" style="display: none">
-            <span class="auth-widget-name"></span>
-            <button
-              class="menu-btn auth-widget-btn auth-widget-btn--signout blur-bg"
-            ></button>
-          </div>
-        </div>
       </div>
       <p
         id="$menuHint"

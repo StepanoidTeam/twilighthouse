@@ -14,7 +14,7 @@ import {
 } from './leaderboard.js';
 import { renderAchievementsScreen } from './achievements-screen.js';
 import { renderShopScreen } from './shop-screen.js';
-import { showAuthWidget, hideAuthWidget } from './auth-ui.js';
+import { initAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
 import { showIntro } from './intro.js';
@@ -311,13 +311,12 @@ export async function buildMenu(app, startGameCb) {
   onStartGame = startGameCb;
 
   initMenu();
+  initAuthWidget();
   startBgManMotion();
   initBackBtn();
   $menuOverlay.hidden = false;
   showMainMenu();
   currentScreen = 'main';
-
-  showAuthWidget();
 
   // Новых игроков сразу ведём на экран "Как играть": главное меню остаётся
   // под низом, по Back игрок попадает на пункт Tutorial с уже прокрученным
@@ -957,7 +956,6 @@ function hideMenu() {
   hideOverlayScreens();
   hideBackBtn();
   currentScreen = null;
-  hideAuthWidget();
   hideDiscordLink();
 }
 
@@ -969,7 +967,6 @@ export function showMenu() {
   showMainMenu();
   currentScreen = 'main';
   repositionMenu();
-  showAuthWidget();
 }
 
 export function isMenuVisible() {

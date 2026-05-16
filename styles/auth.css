@@ -169,14 +169,10 @@
   top: var(--size-edge-gap);
   right: var(--size-edge-gap);
   z-index: 2;
-  display: none;
+  display: flex;
   gap: 8px;
   align-items: center;
   font-size: 14px;
-}
-
-.auth-widget.is-visible {
-  display: flex;
 }
 
 .auth-widget-btn {

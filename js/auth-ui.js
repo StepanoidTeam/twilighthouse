@@ -189,11 +189,6 @@ function buildWidget() {
   return $widget;
 }
 
-export function showAuthWidget() {
-  const w = buildWidget();
-  w.classList.add('is-visible');
-}
-
-export function hideAuthWidget() {
-  if ($widget) $widget.classList.remove('is-visible');
+export function initAuthWidget() {
+  buildWidget();
 }
