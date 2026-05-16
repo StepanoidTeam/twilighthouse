@@ -347,6 +347,19 @@
             <span class="menu-leaderboard-date" data-col="date"></span>
           </div>
         </template>
+
+        <!-- ===== Auth widget (top-right, main menu only) ===== -->
+        <div id="$authWidget" class="auth-widget">
+          <button
+            class="menu-btn auth-widget-btn auth-widget-btn--signin blur-bg"
+          ></button>
+          <div class="auth-widget-user blur-bg" style="display: none">
+            <span class="auth-widget-name"></span>
+            <button
+              class="menu-btn auth-widget-btn auth-widget-btn--signout blur-bg"
+            ></button>
+          </div>
+        </div>
       </div>
       <p
         id="$menuHint"
@@ -618,18 +631,5 @@
       <span class="discord-link-icon" aria-hidden="true">💬</span>
       <span class="discord-link-label">Discord</span>
     </a>
-
-    <!-- ===== Auth widget (top-right) ===== -->
-    <div id="$authWidget" class="auth-widget">
-      <button
-        class="menu-btn auth-widget-btn auth-widget-btn--signin blur-bg"
-      ></button>
-      <div class="auth-widget-user blur-bg" style="display: none">
-        <span class="auth-widget-name"></span>
-        <button
-          class="menu-btn auth-widget-btn auth-widget-btn--signout blur-bg"
-        ></button>
-      </div>
-    </div>
   </body>
 </html>
