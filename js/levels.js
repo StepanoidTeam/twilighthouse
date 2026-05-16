@@ -36,6 +36,22 @@ const FREEPLAY_SPAWN_WEIGHTS = {
   krakens: 1,
 };
 
+const TUTORIAL_COMPLETED_KEY = 'lighthouse_tutorial_completed';
+
+function hasCompletedTutorial() {
+  try {
+    return localStorage.getItem(TUTORIAL_COMPLETED_KEY) === '1';
+  } catch (_) {
+    return false;
+  }
+}
+
+function markTutorialCompleted() {
+  try {
+    localStorage.setItem(TUTORIAL_COMPLETED_KEY, '1');
+  } catch (_) {}
+}
+
 function getLevelDef(index) {
   return SCRIPTED_LEVELS[index] || null;
 }
@@ -195,7 +211,18 @@ function showLevelIntro(index = S.levelIndex) {
   });
 }
 
-function enterFreeplay({ showBanner } = { showBanner: true }) {
+function showFreeplayIntro() {
+  if (!S.gameSessionActive || !isFreeplay()) return;
+  showLevelBanner({
+    titleKey: 'level.freeplay.title',
+    subtitleKey: 'level.freeplay.sub',
+  });
+}
+
+function enterFreeplay(
+  { showBanner, markCompleted } = { showBanner: true, markCompleted: true },
+) {
+  const fromScripted = !isFreeplay();
   S.levelIndex = SCRIPTED_LEVELS.length;
   S.levelGoal = {};
   S.levelProgress = {};
@@ -204,16 +231,32 @@ function enterFreeplay({ showBanner } = { showBanner: true }) {
   S.maxLevelReached = Math.max(S.maxLevelReached || 0, SCRIPTED_LEVELS.length);
   S.boatsSunk = 0;
   S.nextSpawnTime = performance.now() + 1500;
+  if (markCompleted && fromScripted) {
+    markTutorialCompleted();
+  }
   if (showBanner) {
-    showLevelBanner({
-      titleKey: 'level.freeplay.title',
-      subtitleKey: 'level.freeplay.sub',
-    });
+    showFreeplayIntro();
   }
   console.log('🌊 Freeplay started — spawn weights:', FREEPLAY_SPAWN_WEIGHTS);
 }
 
-function init({ showBanner = true, bannerDelayMs = 0 } = {}) {
+function init({
+  showBanner = true,
+  bannerDelayMs = 0,
+  startFromFreeplay = false,
+} = {}) {
+  if (startFromFreeplay) {
+    enterFreeplay({
+      showBanner: showBanner && bannerDelayMs <= 0,
+      markCompleted: false,
+    });
+    if (showBanner && bannerDelayMs > 0) {
+      S.nextSpawnTime += bannerDelayMs;
+      window.setTimeout(() => showFreeplayIntro(), bannerDelayMs);
+    }
+    return;
+  }
+
   applyLevel(0, { showBanner: showBanner && bannerDelayMs <= 0 });
   if (showBanner && bannerDelayMs > 0) {
     S.nextSpawnTime += bannerDelayMs;
@@ -300,6 +343,7 @@ function current() {
 
 export const levels = {
   init,
+  hasCompletedTutorial,
   tickSpawns,
   notify,
   refillGoalDeficit,

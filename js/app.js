@@ -214,7 +214,10 @@ function prepareFreshRun() {
   applyMetaToRunState(S);
   buildRocks(S.rockLayer);
   S.gameSessionActive = true;
-  levels.init({ bannerDelayMs: 500 });
+  levels.init({
+    bannerDelayMs: 500,
+    startFromFreeplay: levels.hasCompletedTutorial(),
+  });
   updateHUD();
   clearTransientVisuals();
   snapCamera();
