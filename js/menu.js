@@ -118,6 +118,13 @@ const MAIN_MENU_ACTIONS = [
 function getCreditsText() {
   return t('credits.text');
 }
+
+function cloneTemplateFirstElement(id) {
+  const template = document.getElementById(id);
+  const first = template?.content?.firstElementChild;
+  return first ? first.cloneNode(true) : null;
+}
+
 function ensureMenuAmbient() {
   if (S.wavesSound) {
     void syncLoopingAudio(S.wavesSound, getSfxVolume(WAVES_VOLUME));
@@ -263,7 +270,6 @@ function hideOverlayScreens() {
   if ($menuShop) $menuShop.hidden = true;
   if ($menuAuthors) $menuAuthors.hidden = true;
   if ($menuTutorial) $menuTutorial.hidden = true;
-  if ($menuTutorialShell) $menuTutorialShell.innerHTML = '';
 }
 
 function hideMainItems() {
@@ -461,7 +467,6 @@ let tutorialSkipBound = false;
 function hideTutorialScreen() {
   clearTutorialState();
   if ($menuTutorial) $menuTutorial.hidden = true;
-  if ($menuTutorialShell) $menuTutorialShell.innerHTML = '';
 }
 
 function showTutorial() {
@@ -481,7 +486,6 @@ function showTutorial() {
   const startIndex = Math.min(savedIndex, items.length - 1);
 
   $menuTutorial.hidden = false;
-  $menuTutorialShell.innerHTML = '';
 
   if ($menuTutorialSkipLabel) {
     $menuTutorialSkipLabel.textContent = t('howtoplay.skip');
@@ -499,82 +503,50 @@ function showTutorial() {
     }
   }
 
-  const $title = document.createElement('h2');
-  $title.className = 'menu-screen-title';
+  const $title = $menuTutorialShell.querySelector('.menu-screen-title');
+  const $stepCounter = $menuTutorialShell.querySelector(
+    '.howtoplay-step-counter',
+  );
+  const $stepTitle = $menuTutorialShell.querySelector('.howtoplay-step-title');
+  const $stepText = $menuTutorialShell.querySelector('.howtoplay-step-text');
+  const $video = $menuTutorialShell.querySelector('.howtoplay-video');
+  const $prevBtn = $menuTutorialShell.querySelector('.howtoplay-nav-btn--prev');
+  const $nextBtn = $menuTutorialShell.querySelector('.howtoplay-nav-btn--next');
+  const $dots = $menuTutorialShell.querySelector('.howtoplay-dots');
+
+  if (
+    !($title instanceof HTMLElement) ||
+    !($stepCounter instanceof HTMLElement) ||
+    !($stepTitle instanceof HTMLElement) ||
+    !($stepText instanceof HTMLElement) ||
+    !($video instanceof HTMLVideoElement) ||
+    !($prevBtn instanceof HTMLButtonElement) ||
+    !($nextBtn instanceof HTMLButtonElement) ||
+    !($dots instanceof HTMLElement)
+  ) {
+    return;
+  }
+
   $title.textContent = t('howtoplay.title');
-  $menuTutorialShell.appendChild($title);
 
-  const $card = document.createElement('div');
-  $card.className = 'menu-card menu-howtoplay blur-bg';
-
-  const $stepHeader = document.createElement('div');
-  $stepHeader.className = 'howtoplay-step-header';
-
-  const $stepCounter = document.createElement('span');
-  $stepCounter.className = 'howtoplay-step-counter';
-  $stepHeader.appendChild($stepCounter);
-
-  const $stepTitle = document.createElement('h3');
-  $stepTitle.className = 'howtoplay-step-title';
-  $stepHeader.appendChild($stepTitle);
-
-  const $stepText = document.createElement('p');
-  $stepText.className = 'howtoplay-step-text';
-  $stepHeader.appendChild($stepText);
-
-  $card.appendChild($stepHeader);
-
-  const $videoWrap = document.createElement('div');
-  $videoWrap.className = 'howtoplay-video-wrap';
-
-  const $video = document.createElement('video');
-  $video.className = 'howtoplay-video';
-  $video.muted = true;
-  $video.autoplay = true;
-  $video.loop = true;
-  $video.playsInline = true;
-  $video.setAttribute('playsinline', '');
-  $video.setAttribute('muted', '');
-  $video.preload = 'auto';
-  $videoWrap.appendChild($video);
-
-  $card.appendChild($videoWrap);
-
-  const $controls = document.createElement('div');
-  $controls.className = 'howtoplay-controls';
-
-  const $prevBtn = document.createElement('button');
-  $prevBtn.type = 'button';
-  $prevBtn.className = 'menu-btn howtoplay-nav-btn howtoplay-nav-btn--prev';
-  $prevBtn.innerHTML =
-    '<span class="howtoplay-nav-arrow">◀</span>' +
-    '<span class="howtoplay-nav-label"></span>';
-
-  const $dots = document.createElement('div');
-  $dots.className = 'howtoplay-dots';
+  $dots.replaceChildren();
   const $dotEls = items.map((_, i) => {
-    const $d = document.createElement('button');
-    $d.type = 'button';
-    $d.className = 'howtoplay-dot';
+    const $d = cloneTemplateFirstElement('$howtoplayDotTemplate');
+    if (!($d instanceof HTMLButtonElement)) {
+      const fallback = document.createElement('button');
+      fallback.type = 'button';
+      fallback.className = 'howtoplay-dot';
+      fallback.setAttribute('aria-label', String(i + 1));
+      fallback.addEventListener('click', () => goToStep(i));
+      $dots.appendChild(fallback);
+      return fallback;
+    }
+
     $d.setAttribute('aria-label', String(i + 1));
     $d.addEventListener('click', () => goToStep(i));
     $dots.appendChild($d);
     return $d;
   });
-
-  const $nextBtn = document.createElement('button');
-  $nextBtn.type = 'button';
-  $nextBtn.className = 'menu-btn howtoplay-nav-btn howtoplay-nav-btn--next';
-  $nextBtn.innerHTML =
-    '<span class="howtoplay-nav-label"></span>' +
-    '<span class="howtoplay-nav-arrow">▶</span>';
-
-  $controls.appendChild($prevBtn);
-  $controls.appendChild($dots);
-  $controls.appendChild($nextBtn);
-  $card.appendChild($controls);
-
-  $menuTutorialShell.appendChild($card);
 
   tutorialState = {
     index: startIndex,
@@ -588,18 +560,18 @@ function showTutorial() {
     $dotEls,
   };
 
-  $prevBtn.addEventListener('click', () => {
+  $prevBtn.onclick = () => {
     playMenuClick();
     goToStep(tutorialState.index - 1);
-  });
-  $nextBtn.addEventListener('click', () => {
+  };
+  $nextBtn.onclick = () => {
     playMenuClick();
     if (tutorialState.index >= tutorialState.items.length - 1) {
       finishTutorial();
     } else {
       goToStep(tutorialState.index + 1);
     }
-  });
+  };
 
   renderTutorialStep();
 }

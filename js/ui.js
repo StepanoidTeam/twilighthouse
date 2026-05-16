@@ -40,6 +40,7 @@ const {
   $resultMenuLabel,
   $resultSplash,
   $screenGameOver,
+  $achievementToastLayer,
   $exitConfirmMsg,
   $exitConfirmLabel,
   $exitResumeLabel,
@@ -310,13 +311,49 @@ function ensureAchievementToastRoot() {
   if (achievementToastRoot && achievementToastRoot.isConnected) {
     return achievementToastRoot;
   }
-  const root = document.createElement('div');
-  root.className = 'achievement-toast-layer';
-  root.setAttribute('aria-live', 'polite');
-  root.setAttribute('aria-atomic', 'true');
-  document.body.appendChild(root);
-  achievementToastRoot = root;
-  return root;
+
+  if ($achievementToastLayer) {
+    achievementToastRoot = $achievementToastLayer;
+    return achievementToastRoot;
+  }
+
+  return null;
+}
+
+function cloneTemplateFirstElement(id) {
+  const template = document.getElementById(id);
+  const first = template?.content?.firstElementChild;
+  return first ? first.cloneNode(true) : null;
+}
+
+function createAchievementToastElement(payload) {
+  const toast = cloneTemplateFirstElement('$achievementToastTemplate');
+  if (!(toast instanceof HTMLElement)) return null;
+
+  const icon = toast.querySelector('.achievement-toast-icon');
+  const eyebrow = toast.querySelector('.achievement-toast-eyebrow');
+  const title = toast.querySelector('.achievement-toast-title');
+  const desc = toast.querySelector('.achievement-toast-desc');
+  const points = toast.querySelector('.achievement-toast-points');
+
+  if (icon) icon.textContent = payload.icon || '🏅';
+  if (eyebrow) eyebrow.textContent = t('achievements.toast.unlocked');
+  if (title) title.textContent = payload.titleKey ? t(payload.titleKey) : '';
+  if (desc) desc.textContent = payload.descKey ? t(payload.descKey) : '';
+
+  if (points) {
+    if (payload.points > 0) {
+      points.hidden = false;
+      points.textContent = t('achievements.toast.points', {
+        points: payload.points,
+      });
+    } else {
+      points.hidden = true;
+      points.textContent = '';
+    }
+  }
+
+  return toast;
 }
 
 function hideActiveAchievementToast() {
@@ -339,43 +376,10 @@ function showNextAchievementToast() {
   if (!payload) return;
 
   const root = ensureAchievementToastRoot();
-  const toast = document.createElement('article');
-  toast.className = 'achievement-toast';
+  if (!(root instanceof HTMLElement)) return;
 
-  const icon = document.createElement('span');
-  icon.className = 'achievement-toast-icon';
-  icon.textContent = payload.icon || '🏅';
-
-  const body = document.createElement('div');
-  body.className = 'achievement-toast-body';
-
-  const eyebrow = document.createElement('p');
-  eyebrow.className = 'achievement-toast-eyebrow';
-  eyebrow.textContent = t('achievements.toast.unlocked');
-
-  const title = document.createElement('p');
-  title.className = 'achievement-toast-title';
-  title.textContent = payload.titleKey ? t(payload.titleKey) : '';
-
-  const desc = document.createElement('p');
-  desc.className = 'achievement-toast-desc';
-  desc.textContent = payload.descKey ? t(payload.descKey) : '';
-
-  body.appendChild(eyebrow);
-  body.appendChild(title);
-  body.appendChild(desc);
-
-  toast.appendChild(icon);
-  toast.appendChild(body);
-
-  if (payload.points > 0) {
-    const points = document.createElement('span');
-    points.className = 'achievement-toast-points';
-    points.textContent = t('achievements.toast.points', {
-      points: payload.points,
-    });
-    toast.appendChild(points);
-  }
+  const toast = createAchievementToastElement(payload);
+  if (!(toast instanceof HTMLElement)) return;
 
   root.appendChild(toast);
   activeAchievementToast = toast;
@@ -658,40 +662,45 @@ function renderResultStats(items) {
     { title: t('win.statTime'), items: timeItems },
   ].filter((section) => section.items.length > 0);
 
+  let renderedPanels = 0;
   for (const section of sections) {
-    const panel = document.createElement('section');
-    panel.className = 'screen-result-stats-panel';
-
-    const title = document.createElement('h2');
-    title.className = 'screen-result-stats-title';
-    title.textContent = section.title;
-    panel.appendChild(title);
+    const panel = createResultStatsPanel(section.title);
+    if (!(panel instanceof HTMLElement)) continue;
 
     for (const item of section.items) {
-      panel.appendChild(createResultStatRow(item));
+      const row = createResultStatRow(item);
+      if (row) panel.appendChild(row);
     }
 
     $resultStats.appendChild(panel);
+    renderedPanels += 1;
   }
-  $resultStats.hidden = sections.length === 0;
+  $resultStats.hidden = renderedPanels === 0;
 }
 
 function createResultStatRow({ icon, label, value }) {
-  const stat = document.createElement('div');
-  stat.className = 'screen-result-stat';
-  const iconEl = document.createElement('span');
-  iconEl.className = 'screen-result-stat-icon';
-  iconEl.textContent = icon;
-  const text = document.createElement('span');
-  text.className = 'screen-result-stat-label';
-  text.textContent = label;
-  const valueEl = document.createElement('span');
-  valueEl.className = 'screen-result-stat-value';
-  valueEl.textContent = value;
-  stat.appendChild(iconEl);
-  stat.appendChild(text);
-  stat.appendChild(valueEl);
+  const stat = cloneTemplateFirstElement('$resultStatsRowTemplate');
+  if (!(stat instanceof HTMLElement)) return null;
+
+  const iconEl = stat.querySelector('.screen-result-stat-icon');
+  const text = stat.querySelector('.screen-result-stat-label');
+  const valueEl = stat.querySelector('.screen-result-stat-value');
+
+  if (iconEl) iconEl.textContent = icon;
+  if (text) text.textContent = label;
+  if (valueEl) valueEl.textContent = String(value);
+
   return stat;
+}
+
+function createResultStatsPanel(titleText) {
+  const panel = cloneTemplateFirstElement('$resultStatsPanelTemplate');
+  if (!(panel instanceof HTMLElement)) return null;
+
+  const title = panel.querySelector('.screen-result-stats-title');
+  if (title) title.textContent = titleText;
+
+  return panel;
 }
 
 export async function showWin() {

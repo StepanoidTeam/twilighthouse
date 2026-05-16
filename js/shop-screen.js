@@ -1,12 +1,13 @@
 import { BOAT_CARGO_TYPES } from './config.js';
-import {
-  loadMeta,
-  tryBuy,
-  SHOP_ITEMS,
-  canAfford,
-} from './meta-progress.js';
+import { loadMeta, tryBuy, SHOP_ITEMS, canAfford } from './meta-progress.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
+
+function cloneTemplateFirstElement(id) {
+  const template = document.getElementById(id);
+  const first = template?.content?.firstElementChild;
+  return first ? first.cloneNode(true) : null;
+}
 
 function formatPriceLine(price) {
   return Object.entries(price)
@@ -18,9 +19,14 @@ function renderWallet($row, meta) {
   $row.replaceChildren();
   for (const emoji of BOAT_CARGO_TYPES) {
     const n = meta.wallet[emoji] || 0;
-    const chip = document.createElement('span');
-    chip.className = 'shop-wallet-chip';
-    chip.innerHTML = `<span class="shop-wallet-emoji">${emoji}</span><span class="shop-wallet-count">${n}</span>`;
+    const chip = cloneTemplateFirstElement('$shopWalletChipTemplate');
+    if (!(chip instanceof HTMLElement)) continue;
+
+    const emojiEl = chip.querySelector('.shop-wallet-emoji');
+    const countEl = chip.querySelector('.shop-wallet-count');
+    if (emojiEl) emojiEl.textContent = emoji;
+    if (countEl) countEl.textContent = String(n);
+
     chip.title = t(`cargo.${emoji}`);
     $row.appendChild(chip);
   }
@@ -37,24 +43,19 @@ function renderGrid($grid, meta, onBought) {
     const owned = item.once && meta.unlocks[item.unlockKey];
     const affordable = canAfford(item.price, meta);
 
-    const card = document.createElement('article');
-    card.className = 'shop-item-card blur-bg';
+    const card = cloneTemplateFirstElement('$shopItemCardTemplate');
+    if (!(card instanceof HTMLElement)) continue;
 
-    const h = document.createElement('h3');
-    h.className = 'shop-item-title';
-    h.textContent = t(`shop.items.${item.id}.name`);
+    const h = card.querySelector('.shop-item-title');
+    const desc = card.querySelector('.shop-item-desc');
+    const price = card.querySelector('.shop-item-price');
+    const btn = card.querySelector('.shop-buy-btn');
+    if (!(btn instanceof HTMLButtonElement)) continue;
 
-    const desc = document.createElement('p');
-    desc.className = 'shop-item-desc';
-    desc.textContent = t(`shop.items.${item.id}.desc`);
+    if (h) h.textContent = t(`shop.items.${item.id}.name`);
+    if (desc) desc.textContent = t(`shop.items.${item.id}.desc`);
+    if (price) price.textContent = formatPriceLine(item.price);
 
-    const price = document.createElement('p');
-    price.className = 'shop-item-price';
-    price.textContent = formatPriceLine(item.price);
-
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'menu-btn shop-buy-btn';
     btn.dataset.itemId = item.id;
 
     if (owned) {
@@ -66,13 +67,10 @@ function renderGrid($grid, meta, onBought) {
       btn.textContent = t('shop.cantAfford');
       card.classList.add('shop-item-card--locked');
     } else {
+      btn.disabled = false;
       btn.textContent = t('shop.buy');
     }
 
-    card.appendChild(h);
-    card.appendChild(desc);
-    card.appendChild(price);
-    card.appendChild(btn);
     $grid.appendChild(card);
   }
 

@@ -209,15 +209,15 @@ export function formatLeaderboardDateTime(value) {
   }).format(value);
 }
 
-function createLeaderboardHeader() {
-  const $template = document.getElementById('$menuLeaderboardHeaderTemplate');
-  const $header = $template?.content.firstElementChild?.cloneNode(true);
+function cloneTemplateFirstElement(id) {
+  const $template = document.getElementById(id);
+  const first = $template?.content?.firstElementChild;
+  return first ? first.cloneNode(true) : null;
+}
 
-  if (!$header) {
-    const $fallback = document.createElement('div');
-    $fallback.className = 'menu-leaderboard-header';
-    return $fallback;
-  }
+function createLeaderboardHeader() {
+  const $header = cloneTemplateFirstElement('$menuLeaderboardHeaderTemplate');
+  if (!($header instanceof HTMLElement)) return null;
 
   const $headerRank = $header.querySelector('[data-col="rank"]');
   const $headerName = $header.querySelector('[data-col="name"]');
@@ -248,35 +248,28 @@ function createLeaderboardRow(entry, myUid) {
     ? `${entry.displayName} ${t('leaderboard.you')}`
     : entry.displayName;
 
-  const $row = document.createElement('div');
-  $row.className = `menu-leaderboard-row${entry.rank <= 3 || isMe ? ' is-highlight' : ''}`;
+  const $row = cloneTemplateFirstElement('$menuLeaderboardRowTemplate');
+  if (!($row instanceof HTMLElement)) return { $row: null, isMe };
 
-  const $rank = document.createElement('span');
-  $rank.className = 'menu-leaderboard-rank';
-  $rank.textContent = medal;
+  $row.classList.toggle('is-highlight', entry.rank <= 3 || isMe);
 
-  const $name = document.createElement('span');
-  $name.className = 'menu-leaderboard-name';
-  $name.textContent = label;
+  const $rank = $row.querySelector('.menu-leaderboard-rank');
+  if ($rank) $rank.textContent = medal;
 
-  const $level = document.createElement('span');
-  $level.className = 'menu-leaderboard-level';
-  // Старые записи без bestLevel — показываем 0 (как и просили).
-  $level.textContent = t('hud.level.prefix', { n: entry.bestLevel || 0 });
+  const $name = $row.querySelector('.menu-leaderboard-name');
+  if ($name) $name.textContent = label;
 
-  const $time = document.createElement('span');
-  $time.className = 'menu-leaderboard-time';
-  $time.textContent = formatSurvivalTime(entry.bestTimeMs);
+  const $level = $row.querySelector('.menu-leaderboard-level');
+  if ($level) {
+    // Старые записи без bestLevel — показываем 0 (как и просили).
+    $level.textContent = t('hud.level.prefix', { n: entry.bestLevel || 0 });
+  }
 
-  const $date = document.createElement('span');
-  $date.className = 'menu-leaderboard-date';
-  $date.textContent = formatLeaderboardDateTime(entry.updatedAt);
+  const $time = $row.querySelector('.menu-leaderboard-time');
+  if ($time) $time.textContent = formatSurvivalTime(entry.bestTimeMs);
 
-  $row.appendChild($rank);
-  $row.appendChild($name);
-  $row.appendChild($level);
-  $row.appendChild($time);
-  $row.appendChild($date);
+  const $date = $row.querySelector('.menu-leaderboard-date');
+  if ($date) $date.textContent = formatLeaderboardDateTime(entry.updatedAt);
 
   return { $row, isMe };
 }
@@ -287,18 +280,39 @@ export async function renderLeaderboardScreen({ container, isActive }) {
   const $title = container.querySelector('.menu-screen-title');
   const $subtitle = container.querySelector('.menu-screen-subtitle');
   const $body = container.querySelector('.menu-card');
+  const $loading = $body?.querySelector('.menu-leaderboard-loading');
+  const $error = $body?.querySelector('.menu-leaderboard-error');
+  const $empty = $body?.querySelector('.menu-leaderboard-empty');
+  const $headerSlot = $body?.querySelector('.menu-leaderboard-header-slot');
+  const $list = $body?.querySelector('.menu-leaderboard-list');
 
-  if (!$title || !$subtitle || !$body) return;
+  if (
+    !$title ||
+    !$subtitle ||
+    !$body ||
+    !$loading ||
+    !$error ||
+    !$empty ||
+    !$headerSlot ||
+    !$list
+  ) {
+    return;
+  }
 
   $title.textContent = t('leaderboard.title');
   $subtitle.textContent = t('leaderboard.subtitle');
 
-  $body.innerHTML = '';
-
-  const $loading = document.createElement('p');
-  $loading.className = 'menu-state-label';
   $loading.textContent = t('leaderboard.loading');
-  $body.appendChild($loading);
+  $error.textContent = t('leaderboard.loadError');
+  $empty.textContent = t('leaderboard.empty');
+
+  $loading.hidden = false;
+  $error.hidden = true;
+  $empty.hidden = true;
+  $headerSlot.hidden = true;
+  $list.hidden = true;
+  $headerSlot.replaceChildren();
+  $list.replaceChildren();
 
   let leaderboardView = { rows: [], currentUid: null };
   let error = null;
@@ -312,33 +326,31 @@ export async function renderLeaderboardScreen({ container, isActive }) {
 
   if (!isActive()) return;
 
-  $body.innerHTML = '';
+  $loading.hidden = true;
 
   if (error) {
-    const $error = document.createElement('p');
-    $error.className = 'menu-state-label';
-    $error.textContent = t('leaderboard.loadError');
-    $body.appendChild($error);
+    $error.hidden = false;
     return;
   }
 
   if (leaderboardView.rows.length === 0) {
-    const $empty = document.createElement('p');
-    $empty.className = 'menu-state-label';
-    $empty.textContent = t('leaderboard.empty');
-    $body.appendChild($empty);
+    $empty.hidden = false;
     return;
   }
 
-  $body.appendChild(createLeaderboardHeader());
+  const $header = createLeaderboardHeader();
+  if (!($header instanceof HTMLElement)) return;
 
-  const $list = document.createElement('div');
-  $list.className = 'menu-leaderboard-list';
+  $headerSlot.hidden = false;
+  $headerSlot.replaceChildren($header);
+  $list.hidden = false;
+
   const myUid = currentUser ? currentUser.uid : null;
   let $currentRow = null;
 
   for (const entry of leaderboardView.rows) {
     const { $row, isMe } = createLeaderboardRow(entry, myUid);
+    if (!($row instanceof HTMLElement)) continue;
     if (isMe) {
       $row.classList.add('current-user');
       $row.dataset.currentUser = 'true';
@@ -346,8 +358,6 @@ export async function renderLeaderboardScreen({ container, isActive }) {
     }
     $list.appendChild($row);
   }
-
-  $body.appendChild($list);
 
   if ($currentRow) {
     requestAnimationFrame(() => {

@@ -171,6 +171,20 @@
       </div>
     </div>
 
+    <template id="$resultStatsPanelTemplate">
+      <section class="screen-result-stats-panel">
+        <h2 class="screen-result-stats-title"></h2>
+      </section>
+    </template>
+
+    <template id="$resultStatsRowTemplate">
+      <div class="screen-result-stat">
+        <span class="screen-result-stat-icon"></span>
+        <span class="screen-result-stat-label"></span>
+        <span class="screen-result-stat-value"></span>
+      </div>
+    </template>
+
     <!-- ===== Exit confirm screen ===== -->
     <div id="$screenExitConfirm" class="screen-exit-confirm blur-bg" hidden>
       <p class="exit-confirm-msg" id="$exitConfirmMsg"></p>
@@ -360,6 +374,92 @@
             <span class="menu-leaderboard-date" data-col="date"></span>
           </div>
         </template>
+
+        <template id="$menuLeaderboardRowTemplate">
+          <div class="menu-leaderboard-row">
+            <span class="menu-leaderboard-rank"></span>
+            <span class="menu-leaderboard-name"></span>
+            <span class="menu-leaderboard-level"></span>
+            <span class="menu-leaderboard-time"></span>
+            <span class="menu-leaderboard-date"></span>
+          </div>
+        </template>
+
+        <template id="$achievementCardTemplate">
+          <article class="achievement-card">
+            <span class="achievement-card-icon"></span>
+            <div class="achievement-card-main">
+              <div class="achievement-card-copy">
+                <h3 class="achievement-card-title"></h3>
+                <p class="achievement-card-desc"></p>
+              </div>
+              <div class="achievement-card-progress">
+                <div class="achievement-card-track">
+                  <div class="achievement-card-fill"></div>
+                </div>
+                <span class="achievement-card-progress-text"></span>
+              </div>
+              <div class="achievement-debug-controls" hidden>
+                <button
+                  type="button"
+                  class="achievement-debug-btn"
+                  data-action="decrement"
+                >
+                  −
+                </button>
+                <button
+                  type="button"
+                  class="achievement-debug-btn"
+                  data-action="increment"
+                >
+                  +
+                </button>
+                <button
+                  type="button"
+                  class="achievement-debug-btn"
+                  data-action="reset"
+                >
+                  0
+                </button>
+              </div>
+            </div>
+            <aside class="achievement-card-points">
+              <span class="achievement-card-points-value"></span>
+            </aside>
+          </article>
+        </template>
+
+        <template id="$shopWalletChipTemplate">
+          <span class="shop-wallet-chip">
+            <span class="shop-wallet-emoji"></span>
+            <span class="shop-wallet-count"></span>
+          </span>
+        </template>
+
+        <template id="$shopItemCardTemplate">
+          <article class="shop-item-card blur-bg">
+            <h3 class="shop-item-title"></h3>
+            <p class="shop-item-desc"></p>
+            <p class="shop-item-price"></p>
+            <button type="button" class="menu-btn shop-buy-btn"></button>
+          </article>
+        </template>
+
+        <template id="$howtoplayDotTemplate">
+          <button type="button" class="howtoplay-dot"></button>
+        </template>
+
+        <template id="$achievementToastTemplate">
+          <article class="achievement-toast">
+            <span class="achievement-toast-icon">🏅</span>
+            <div class="achievement-toast-body">
+              <p class="achievement-toast-eyebrow"></p>
+              <p class="achievement-toast-title"></p>
+              <p class="achievement-toast-desc"></p>
+            </div>
+            <span class="achievement-toast-points" hidden></span>
+          </article>
+        </template>
       </div>
       <p
         id="$menuHint"
@@ -374,7 +474,45 @@
       hidden
     >
       <div id="$menuTutorialShell" class="menu-screen-shell">
-        <!-- populated by js/menu.js -->
+        <h2 class="menu-screen-title"></h2>
+        <div class="menu-card menu-howtoplay blur-bg">
+          <div class="howtoplay-step-header">
+            <span class="howtoplay-step-counter"></span>
+            <h3 class="howtoplay-step-title"></h3>
+            <p class="howtoplay-step-text"></p>
+          </div>
+
+          <div class="howtoplay-video-wrap">
+            <video
+              class="howtoplay-video"
+              muted
+              autoplay
+              loop
+              playsinline
+              preload="auto"
+            ></video>
+          </div>
+
+          <div class="howtoplay-controls">
+            <button
+              type="button"
+              class="menu-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
+            >
+              <span class="howtoplay-nav-arrow">◀</span>
+              <span class="howtoplay-nav-label"></span>
+            </button>
+
+            <div class="howtoplay-dots"></div>
+
+            <button
+              type="button"
+              class="menu-btn howtoplay-nav-btn howtoplay-nav-btn--next"
+            >
+              <span class="howtoplay-nav-label"></span>
+              <span class="howtoplay-nav-arrow">▶</span>
+            </button>
+          </div>
+        </div>
       </div>
       <button
         id="$menuTutorialSkip"
@@ -511,8 +649,11 @@
         <h2 class="menu-screen-title"></h2>
         <p class="menu-screen-subtitle"></p>
         <div class="menu-card blur-bg">
-          <p class="menu-state-label"></p>
-          <div class="menu-leaderboard-list"></div>
+          <p class="menu-state-label menu-leaderboard-loading"></p>
+          <p class="menu-state-label menu-leaderboard-error" hidden></p>
+          <p class="menu-state-label menu-leaderboard-empty" hidden></p>
+          <div class="menu-leaderboard-header-slot" hidden></div>
+          <div class="menu-leaderboard-list" hidden></div>
         </div>
         <p class="menu-hint hidden-mobile">
           <span class="hotkey">esc</span>
@@ -541,10 +682,22 @@
               ></button>
             </div>
             <div class="achievements-toolbar-right">
+              <div class="achievements-debug-bar" hidden>
+                <span class="achievements-debug-label">Debug</span>
+                <button
+                  type="button"
+                  class="achievement-debug-btn achievement-debug-btn--reset-all"
+                  data-action="resetAll"
+                >
+                  Reset all
+                </button>
+              </div>
               <span class="achievements-total-points"></span>
             </div>
           </div>
-          <div class="achievements-list"></div>
+          <div class="achievements-list">
+            <p class="achievements-empty" hidden></p>
+          </div>
         </div>
         <p class="menu-hint hidden-mobile">
           <span class="hotkey">esc</span>
@@ -645,5 +798,12 @@
       <span class="discord-link-icon" aria-hidden="true">💬</span>
       <span class="discord-link-label">Discord</span>
     </a>
+
+    <div
+      id="$achievementToastLayer"
+      class="achievement-toast-layer"
+      aria-live="polite"
+      aria-atomic="true"
+    ></div>
   </body>
 </html>

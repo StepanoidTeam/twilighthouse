@@ -30,6 +30,12 @@ function saveHideCompletedFilterState(value) {
 
 let hideCompleted = loadHideCompletedFilterState();
 
+function cloneTemplateFirstElement(id) {
+  const template = document.getElementById(id);
+  const first = template?.content?.firstElementChild;
+  return first ? first.cloneNode(true) : null;
+}
+
 function isAchievementDone(def, progressValue) {
   const target = Math.max(1, Math.floor(Number(def?.target)) || 1);
   return Math.max(0, Math.floor(Number(progressValue)) || 0) >= target;
@@ -50,84 +56,38 @@ function createAchievementCard(def, progress, { debug = false } = {}) {
   const done = value >= target;
   const ratio = Math.min(1, value / target);
 
-  const $card = document.createElement('article');
-  $card.className = `achievement-card${done ? ' is-complete' : ''}`;
+  const $card = cloneTemplateFirstElement('$achievementCardTemplate');
+  if (!($card instanceof HTMLElement)) return document.createElement('article');
 
-  const $icon = document.createElement('span');
-  $icon.className = 'achievement-card-icon';
-  $icon.textContent = def.icon;
+  const $icon = $card.querySelector('.achievement-card-icon');
+  const $title = $card.querySelector('.achievement-card-title');
+  const $desc = $card.querySelector('.achievement-card-desc');
+  const $fill = $card.querySelector('.achievement-card-fill');
+  const $progressText = $card.querySelector('.achievement-card-progress-text');
+  const $pointsValue = $card.querySelector('.achievement-card-points-value');
+  const $debug = $card.querySelector('.achievement-debug-controls');
 
-  const $main = document.createElement('div');
-  $main.className = 'achievement-card-main';
-
-  const $copy = document.createElement('div');
-  $copy.className = 'achievement-card-copy';
-
-  const $title = document.createElement('h3');
-  $title.className = 'achievement-card-title';
-  $title.textContent = t(def.titleKey);
-
-  const $desc = document.createElement('p');
-  $desc.className = 'achievement-card-desc';
-  $desc.textContent = t(def.descKey);
-
-  $copy.appendChild($title);
-  $copy.appendChild($desc);
-
-  const $track = document.createElement('div');
-  $track.className = 'achievement-card-track';
-
-  const $fill = document.createElement('div');
-  $fill.className = 'achievement-card-fill';
-  $fill.style.width = `${Math.round(ratio * 100)}%`;
-
-  $track.appendChild($fill);
-
-  const $progress = document.createElement('div');
-  $progress.className = 'achievement-card-progress';
-  $progress.appendChild($track);
-
-  const $progressText = document.createElement('span');
-  $progressText.className = 'achievement-card-progress-text';
-  $progressText.textContent = t('achievements.progress', { value, target });
-  $progress.appendChild($progressText);
-
-  const $points = document.createElement('aside');
-  $points.className = 'achievement-card-points';
-
-  const $pointsValue = document.createElement('span');
-  $pointsValue.className = 'achievement-card-points-value';
-  $pointsValue.textContent = `${Math.max(0, Math.floor(Number(def.points)) || 0)} ✦`;
-
-  $points.appendChild($pointsValue);
-
-  $main.appendChild($copy);
-  $main.appendChild($progress);
-
-  if (debug) {
-    const $debug = document.createElement('div');
-    $debug.className = 'achievement-debug-controls';
-
-    for (const [label, action] of [
-      ['−', 'decrement'],
-      ['+', 'increment'],
-      ['0', 'reset'],
-    ]) {
-      const $btn = document.createElement('button');
-      $btn.type = 'button';
-      $btn.className = 'achievement-debug-btn';
-      $btn.dataset.achievementId = def.id;
-      $btn.dataset.action = action;
-      $btn.textContent = label;
-      $debug.appendChild($btn);
-    }
-
-    $main.appendChild($debug);
+  $card.classList.toggle('is-complete', done);
+  if ($icon) $icon.textContent = def.icon;
+  if ($title) $title.textContent = t(def.titleKey);
+  if ($desc) $desc.textContent = t(def.descKey);
+  if ($fill) $fill.style.width = `${Math.round(ratio * 100)}%`;
+  if ($progressText) {
+    $progressText.textContent = t('achievements.progress', { value, target });
+  }
+  if ($pointsValue) {
+    $pointsValue.textContent = `${Math.max(0, Math.floor(Number(def.points)) || 0)} ✦`;
   }
 
-  $card.appendChild($icon);
-  $card.appendChild($main);
-  $card.appendChild($points);
+  if ($debug) {
+    $debug.hidden = !debug;
+    if (debug) {
+      const $debugButtons = $debug.querySelectorAll('.achievement-debug-btn');
+      for (const $btn of $debugButtons) {
+        $btn.dataset.achievementId = def.id;
+      }
+    }
+  }
 
   return $card;
 }
@@ -145,7 +105,13 @@ export function renderAchievementsScreen({ container, isActive }) {
   const $totalPoints = $toolbarRight?.querySelector(
     '.achievements-total-points',
   );
+  const $debugBar = $toolbarRight?.querySelector('.achievements-debug-bar');
+  const $debugLabel = $debugBar?.querySelector('.achievements-debug-label');
+  const $resetAll = $debugBar?.querySelector(
+    '.achievement-debug-btn--reset-all',
+  );
   const $list = $body?.querySelector('.achievements-list');
+  const $empty = $list?.querySelector('.achievements-empty');
 
   if (
     !$title ||
@@ -155,7 +121,9 @@ export function renderAchievementsScreen({ container, isActive }) {
     !$toolbarRight ||
     !$filterToggle ||
     !$totalPoints ||
-    !$list
+    !$debugBar ||
+    !$list ||
+    !$empty
   )
     return;
 
@@ -175,32 +143,14 @@ export function renderAchievementsScreen({ container, isActive }) {
     ? t('achievements.filter.show_all')
     : t('achievements.filter.hide_completed');
 
-  const existingDebugBar = $toolbarRight.querySelector(
-    '.achievements-debug-bar',
-  );
-  if (existingDebugBar) existingDebugBar.remove();
-
-  if (debug) {
-    const $debugBar = document.createElement('div');
-    $debugBar.className = 'achievements-debug-bar';
-
-    const $debugLabel = document.createElement('span');
-    $debugLabel.className = 'achievements-debug-label';
-    $debugLabel.textContent = 'Debug';
-
-    const $resetAll = document.createElement('button');
-    $resetAll.type = 'button';
-    $resetAll.className =
-      'achievement-debug-btn achievement-debug-btn--reset-all';
-    $resetAll.dataset.action = 'resetAll';
-    $resetAll.textContent = 'Reset all';
-
-    $debugBar.appendChild($debugLabel);
-    $debugBar.appendChild($resetAll);
-    $toolbarRight.insertBefore($debugBar, $totalPoints);
-  }
+  if ($debugLabel) $debugLabel.textContent = 'Debug';
+  if ($resetAll) $resetAll.textContent = 'Reset all';
+  $debugBar.hidden = !debug;
 
   $list.replaceChildren();
+  $empty.hidden = true;
+  $empty.textContent = t('achievements.filter.empty');
+  $list.appendChild($empty);
 
   let visibleCount = 0;
   for (const def of ACHIEVEMENT_DEFS) {
@@ -208,15 +158,13 @@ export function renderAchievementsScreen({ container, isActive }) {
     const done = isAchievementDone(def, currentProgress);
     if (hideCompleted && done) continue;
 
-    $list.appendChild(createAchievementCard(def, currentProgress, { debug }));
+    const card = createAchievementCard(def, currentProgress, { debug });
+    $list.insertBefore(card, $empty);
     visibleCount += 1;
   }
 
   if (visibleCount === 0) {
-    const $empty = document.createElement('p');
-    $empty.className = 'achievements-empty';
-    $empty.textContent = t('achievements.filter.empty');
-    $list.appendChild($empty);
+    $empty.hidden = false;
   }
 
   $body.onclick = (e) => {
