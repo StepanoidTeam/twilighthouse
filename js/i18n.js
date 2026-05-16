@@ -3,7 +3,7 @@
 // Usage:
 //   import { t, getLanguage, setLanguage, onLanguageChange } from './i18n.js';
 //   t('menu.newGame')
-//   t('gameOver.boats', { n: 3 })
+//   t('gameOver.boats')
 
 import { ACHIEVEMENTS_I18N } from './i18n/achievements.js';
 
@@ -182,8 +182,8 @@ Photopea — image editor
     'exit.confirm': '⏸️ Exit to menu?',
 
     'gameOver.title': 'Game Over',
-    'gameOver.boats': '💀 {n} boats sunk!',
-    'gameOver.mermaids': '💀 {n} mermaids reached the lighthouse!',
+    'gameOver.boats': '💀 A smuggler boat sank!',
+    'gameOver.mermaids': '🧜‍♀️ Mermaids captured the lighthouse!',
     'gameOver.police': '🚔 Arrested! Police captured the lighthouse!',
     'gameOver.kraken': '🦑 The Kraken captured the lighthouse!',
     'gameOver.pattinson':
@@ -428,8 +428,8 @@ Photopea — image editor
     'exit.confirm': '⏸️ Выйти в меню?',
 
     'gameOver.title': 'Game Over',
-    'gameOver.boats': '💀 Потоплено кораблей: {n}!',
-    'gameOver.mermaids': '💀 Русалки добрались до маяка: {n}!',
+    'gameOver.boats': '💀 Лодка контрабандистов утонула!',
+    'gameOver.mermaids': '🧜‍♀️ Русалки захватили маяк!',
     'gameOver.police': '🚔 Арест! Полиция захватила маяк!',
     'gameOver.kraken': '🦑 Кракен захватил маяк!',
     'gameOver.pattinson':

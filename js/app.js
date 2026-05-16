@@ -42,6 +42,8 @@ import {
   showExitConfirm,
   hideExitConfirm,
   showWin,
+  fastForwardResultReveal,
+  resetResultRevealState,
 } from './ui.js';
 import { cleanupBoats, boatEntity } from './boat.js';
 import { cleanupMermaids, mermaidEntity } from './mermaid.js';
@@ -300,6 +302,10 @@ function bindEvents() {
 
     // Game over screen
     if (S.gameOver && !isMenuVisible()) {
+      if (fastForwardResultReveal()) {
+        return;
+      }
+
       if (isConfirmKey(e.code)) {
         playClickSound();
         if (S.gameWon) {
@@ -333,6 +339,7 @@ function bindEvents() {
 
 // ===== Clear overlay and entities =====
 function clearGame() {
+  resetResultRevealState();
   $screenGameOver.hidden = true;
   $screenExitConfirm.hidden = true;
   S.overlayLayer.visible = false;

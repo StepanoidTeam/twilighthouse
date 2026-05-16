@@ -191,11 +191,16 @@ let levelBannerTimer = null;
 
 const ACHIEVEMENT_TOAST_VISIBLE_MS = 4600;
 const ACHIEVEMENT_TOAST_TRANSITION_MS = 280;
+const RESULT_REVEAL_DELAY_MS = 3000;
 let achievementToastRoot = null;
 let achievementToastTimer = null;
 let achievementToastHideTimer = null;
 let activeAchievementToast = null;
 const achievementToastQueue = [];
+let resultRevealTimer = null;
+let resultRevealPending = false;
+let resultRevealPointerHandler = null;
+const $resultContent = $screenGameOver?.querySelector('.screen-result-content');
 
 function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
@@ -305,6 +310,74 @@ export function hideLevelBanner() {
   }
   $levelBanner.classList.remove('is-visible');
   $levelBanner.hidden = true;
+}
+
+function clearResultRevealTimer() {
+  if (!resultRevealTimer) return;
+  clearTimeout(resultRevealTimer);
+  resultRevealTimer = null;
+}
+
+function detachResultRevealPointerHandler() {
+  if (!$screenGameOver || !resultRevealPointerHandler) return;
+  $screenGameOver.removeEventListener(
+    'pointerdown',
+    resultRevealPointerHandler,
+  );
+  resultRevealPointerHandler = null;
+}
+
+function revealResultContentNow() {
+  if (!resultRevealPending) return false;
+
+  resultRevealPending = false;
+  clearResultRevealTimer();
+  detachResultRevealPointerHandler();
+
+  if ($screenGameOver) {
+    $screenGameOver.classList.remove('is-reveal-pending');
+    $screenGameOver.classList.add('is-result-visible');
+  }
+
+  return true;
+}
+
+function scheduleResultReveal() {
+  if (!$screenGameOver) return;
+
+  if (!$resultContent) {
+    $screenGameOver.classList.remove('is-reveal-pending');
+    $screenGameOver.classList.add('is-result-visible');
+    return;
+  }
+
+  resultRevealPending = true;
+  $screenGameOver.classList.add('is-reveal-pending');
+  $screenGameOver.classList.remove('is-result-visible');
+
+  resultRevealPointerHandler = () => {
+    revealResultContentNow();
+  };
+  $screenGameOver.addEventListener('pointerdown', resultRevealPointerHandler);
+
+  resultRevealTimer = window.setTimeout(() => {
+    resultRevealTimer = null;
+    revealResultContentNow();
+  }, RESULT_REVEAL_DELAY_MS);
+}
+
+export function fastForwardResultReveal() {
+  return revealResultContentNow();
+}
+
+export function resetResultRevealState() {
+  resultRevealPending = false;
+  clearResultRevealTimer();
+  detachResultRevealPointerHandler();
+  if ($screenGameOver) {
+    $screenGameOver.classList.remove('is-reveal-pending');
+    $screenGameOver.classList.remove('is-result-visible');
+  }
 }
 
 function ensureAchievementToastRoot() {
@@ -530,7 +603,7 @@ const GAME_OVER_REASONS = {
     reason: 'police',
   },
   mermaid: {
-    reasonText: () => t('gameOver.mermaids', { n: S.mermaidsArrived }),
+    reasonText: () => t('gameOver.mermaids'),
     splashKey: 'splashMermaid',
     reason: 'mermaid',
   },
@@ -540,7 +613,7 @@ const GAME_OVER_REASONS = {
     reason: 'kraken',
   },
   'boat-sink': {
-    reasonText: () => t('gameOver.boats', { n: S.boatsSunk }),
+    reasonText: () => t('gameOver.boats'),
     splashKey: 'splashIceberg',
     reason: 'boats_sunk',
   },
@@ -563,6 +636,7 @@ async function showGameOverScreen({
   statsItems = [],
 }) {
   S.gameOver = true;
+  resetResultRevealState();
   if (playFail) playFailSound();
 
   if (reason) trackGameEnd(reason, S);
@@ -585,6 +659,7 @@ async function showGameOverScreen({
     $resultSplash.style.backgroundImage = '';
   }
 
+  scheduleResultReveal();
   $screenGameOver.hidden = false;
 }
 
@@ -657,14 +732,14 @@ function renderResultStats(items) {
   const timeItems = items.filter((item) => item.section === 'time');
   const runItems = items.filter((item) => item.section !== 'time');
   const sections = [
-    { title: t('resultStats.cargoTitle'), items: cargoItems },
-    { title: t('resultStats.title'), items: runItems },
-    { title: t('win.statTime'), items: timeItems },
+    { key: 'time', title: t('win.statTime'), items: timeItems },
+    { key: 'cargo', title: t('resultStats.cargoTitle'), items: cargoItems },
+    { key: 'review', title: t('resultStats.title'), items: runItems },
   ].filter((section) => section.items.length > 0);
 
   let renderedPanels = 0;
   for (const section of sections) {
-    const panel = createResultStatsPanel(section.title);
+    const panel = createResultStatsPanel(section.title, section.key);
     if (!(panel instanceof HTMLElement)) continue;
 
     for (const item of section.items) {
@@ -693,9 +768,13 @@ function createResultStatRow({ icon, label, value }) {
   return stat;
 }
 
-function createResultStatsPanel(titleText) {
+function createResultStatsPanel(titleText, sectionKey) {
   const panel = cloneTemplateFirstElement('$resultStatsPanelTemplate');
   if (!(panel instanceof HTMLElement)) return null;
+
+  if (sectionKey) {
+    panel.classList.add(`screen-result-stats-panel--${sectionKey}`);
+  }
 
   const title = panel.querySelector('.screen-result-stats-title');
   if (title) title.textContent = titleText;
