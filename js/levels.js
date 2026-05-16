@@ -166,7 +166,7 @@ function scheduleNextSpawn(now) {
 function applyLevel(index, { showBanner } = { showBanner: true }) {
   const def = getLevelDef(index);
   if (!def) {
-    enterFreeplay({ showBanner });
+    enterFreeplay({ showBanner, markCompleted: true });
     return;
   }
   S.levelIndex = index;
@@ -219,9 +219,7 @@ function showFreeplayIntro() {
   });
 }
 
-function enterFreeplay(
-  { showBanner, markCompleted } = { showBanner: true, markCompleted: true },
-) {
+function enterFreeplay({ showBanner = true, markCompleted = true } = {}) {
   const fromScripted = !isFreeplay();
   S.levelIndex = SCRIPTED_LEVELS.length;
   S.levelGoal = {};
