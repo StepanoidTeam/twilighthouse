@@ -3,7 +3,7 @@ const PIXI = globalThis.PIXI;
 // ===== Game Rules =====
 const GAME_OVER_DELAY = 2000;
 const WIN_SCORE = 10;
-const NIGHT_DURATION_MS = 2 * 60 * 1000;
+const NIGHT_DURATION_MS = 5 * 60 * 1000;
 const SPAWN_MARGIN = 60;
 
 // ===== Boat / Mob =====
