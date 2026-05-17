@@ -90,7 +90,21 @@
 }
 
 .menu-shop .shop-buy-btn {
-  margin-top: auto;
+  /* margin-top: auto;
   align-self: flex-start;
-  min-width: 8rem;
+  min-width: 8rem; */
+
+  border: 1px solid rgba(255, 221, 68, 0.25);
+  border-radius: var(--size-pill-radius);
+  padding: 10px 16px;
+  background: rgba(15, 33, 54, 0.85);
+  color: var(--color-menu-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: auto;
+}
+.menu-shop .shop-buy-btn:hover {
+  background: rgba(30, 50, 80, 0.9);
+  border-color: #5599cc;
 }

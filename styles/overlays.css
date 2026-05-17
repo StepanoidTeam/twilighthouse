@@ -1,5 +1,6 @@
 /* ===== Game over / Win screen ===== */
 .screen-result {
+  gap: 16px;
   position: fixed;
   inset: 0;
   z-index: 3;
@@ -64,6 +65,7 @@
       'cargo review';
     align-items: start;
     width: min(1120px, calc(100vw - 32px));
+    margin-bottom: 10px;
 
     gap: 16px;
     overflow: visible;
@@ -85,8 +87,9 @@
   .screen-result-stats-panel {
     min-width: 0;
     max-height: min(40vh, 380px);
+    padding: 10px;
     overflow: auto;
-    padding: 18px 20px 20px;
+    /* padding: 18px 20px 20px; */
     background: rgba(5, 16, 22, 0.74);
     border: 1px solid rgba(218, 171, 111, 0.42);
     border-radius: 8px;
@@ -205,18 +208,32 @@
 
 @media (max-width: 760px) {
   .screen-result {
+    /* Keep result screen near bottom but allow internal scrolling instead of large bottom padding */
+    justify-content: flex-end;
+    padding-bottom: 80px;
+
+    /* Constrain and allow scrolling of the inner content so panels can fully show */
+    .screen-result-content {
+      max-height: calc(100vh - 64px);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
+      padding-bottom: 8px;
+    }
+
     .screen-result-stats {
       grid-template-columns: minmax(0, 1fr);
       grid-template-areas:
         'time'
         'cargo'
         'review';
-      max-height: min(48vh, 480px);
+      max-height: calc(100vh - 140px);
       overflow: visible;
     }
 
     .screen-result-stats-panel {
       max-height: min(34vh, 300px);
+      overflow: auto;
+      -webkit-overflow-scrolling: touch;
     }
 
     .screen-result-stats-panel--time {
@@ -224,7 +241,15 @@
     }
 
     .screen-result-stats-panel--review {
-      max-height: min(38vh, 320px);
+      max-height: min(44vh, 420px);
+      overflow: auto;
+    }
+
+    /* Prevent sticky section titles from overlapping panels on small screens */
+    .screen-result-stats-title {
+      top: 0;
+      padding-top: 12px;
+      padding-bottom: 8px;
     }
   }
 }
