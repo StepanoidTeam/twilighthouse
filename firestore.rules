@@ -48,6 +48,13 @@ service cloud.firestore {
       allow delete: if isAdmin();
     }
 
+    match /player_progress/{uid} {
+      allow read: if isOwner(uid) || isAdmin();
+      allow create, update: if isOwner(uid)
+        && request.resource.data.uid == request.auth.uid;
+      allow delete: if isOwner(uid) || isAdmin();
+    }
+
     match /{document=**} {
       allow read, write: if false;
     }

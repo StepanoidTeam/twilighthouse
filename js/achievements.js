@@ -1,4 +1,11 @@
+import { db } from '../firebase.init.js';
+import { doc, getDoc, setDoc, serverTimestamp } from '../firebase.js';
+import { currentUser, onAuthChange } from './auth.js';
+
 const STORAGE_KEY = 'lighthouse_achievements_v2';
+const STORAGE_UPDATED_AT_KEY = 'lighthouse_achievements_v2_updated_at';
+const PROGRESS_COLLECTION = 'player_progress';
+const SERVER_SYNC_DEBOUNCE_MS = 250;
 
 export const ACHIEVEMENT_DEFS = [
   {
@@ -164,6 +171,8 @@ const RUN_MAX_RULES = (() => {
 })();
 
 const unlockListeners = new Set();
+let pendingServerSyncProgress = null;
+let serverSyncTimerId = null;
 
 function toNonNegativeInt(value) {
   return Math.max(0, Math.floor(Number(value)) || 0);
@@ -217,34 +226,159 @@ function emptyAchievementProgress() {
   return Object.fromEntries(ACHIEVEMENT_DEFS.map((def) => [def.id, 0]));
 }
 
-function saveAchievementProgress(progress) {
+function getLocalAchievementsUpdatedAt() {
+  try {
+    const value = Number(localStorage.getItem(STORAGE_UPDATED_AT_KEY));
+    return Number.isFinite(value) && value > 0 ? Math.floor(value) : 0;
+  } catch (_) {
+    return 0;
+  }
+}
+
+function normalizeAchievementProgress(source) {
+  const fallback = emptyAchievementProgress();
+  const data = source && typeof source === 'object' ? source : {};
+
+  for (const def of ACHIEVEMENT_DEFS) {
+    const value = Number(data[def.id]);
+    fallback[def.id] =
+      Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+  }
+
+  return fallback;
+}
+
+function areAchievementProgressEqual(left, right) {
+  for (const def of ACHIEVEMENT_DEFS) {
+    if (
+      toNonNegativeInt(left?.[def.id]) !== toNonNegativeInt(right?.[def.id])
+    ) {
+      return false;
+    }
+  }
+  return true;
+}
+
+function saveAchievementProgressLocal(progress, updatedAtMs = Date.now()) {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(progress));
+    localStorage.setItem(
+      STORAGE_UPDATED_AT_KEY,
+      String(Math.max(0, Math.floor(Number(updatedAtMs)) || Date.now())),
+    );
   } catch (e) {
     console.warn('saveAchievementProgress failed', e);
   }
 }
 
-export function loadAchievementProgress() {
-  const fallback = emptyAchievementProgress();
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return fallback;
+async function saveAchievementProgressToServer(progress, updatedAtMs) {
+  const user = currentUser;
+  if (!user || !user.uid) return;
 
-    const data = JSON.parse(raw);
-    if (!data || typeof data !== 'object') return fallback;
+  await setDoc(
+    doc(db, PROGRESS_COLLECTION, user.uid),
+    {
+      uid: user.uid,
+      achievements: progress,
+      achievementsUpdatedAt: Math.max(
+        0,
+        Math.floor(Number(updatedAtMs)) || Date.now(),
+      ),
+      updatedAt: serverTimestamp(),
+    },
+    { merge: true },
+  );
+}
 
-    for (const def of ACHIEVEMENT_DEFS) {
-      const value = Number(data[def.id]);
-      fallback[def.id] =
-        Number.isFinite(value) && value >= 0 ? Math.floor(value) : 0;
+function queueAchievementServerSync(progress) {
+  pendingServerSyncProgress = { ...progress };
+  if (serverSyncTimerId) return;
+
+  serverSyncTimerId = window.setTimeout(async () => {
+    serverSyncTimerId = null;
+    const payload = pendingServerSyncProgress;
+    pendingServerSyncProgress = null;
+    if (!payload) return;
+
+    const updatedAtMs = getLocalAchievementsUpdatedAt() || Date.now();
+    try {
+      await saveAchievementProgressToServer(payload, updatedAtMs);
+    } catch (e) {
+      console.warn('saveAchievementProgressToServer failed', e);
     }
+  }, SERVER_SYNC_DEBOUNCE_MS);
+}
 
-    return fallback;
-  } catch (_) {
-    return fallback;
+function saveAchievementProgress(progress, { skipServerSync = false } = {}) {
+  saveAchievementProgressLocal(progress, Date.now());
+  if (!skipServerSync) {
+    queueAchievementServerSync(progress);
   }
 }
+
+export function loadAchievementProgress() {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return emptyAchievementProgress();
+
+    const data = JSON.parse(raw);
+    return normalizeAchievementProgress(data);
+  } catch (_) {
+    return emptyAchievementProgress();
+  }
+}
+
+async function syncAchievementsFromServer(user) {
+  if (!user || !user.uid) return;
+
+  const localProgress = loadAchievementProgress();
+  const localUpdatedAt = getLocalAchievementsUpdatedAt();
+
+  let serverProgress = null;
+  let serverUpdatedAt = 0;
+  try {
+    const snap = await getDoc(doc(db, PROGRESS_COLLECTION, user.uid));
+    if (snap.exists()) {
+      const data = snap.data() || {};
+      serverProgress = normalizeAchievementProgress(data.achievements);
+      const rawUpdatedAt = Number(data.achievementsUpdatedAt);
+      serverUpdatedAt =
+        Number.isFinite(rawUpdatedAt) && rawUpdatedAt > 0
+          ? Math.floor(rawUpdatedAt)
+          : 0;
+    }
+  } catch (e) {
+    console.warn('load achievements from server failed', e);
+    return;
+  }
+
+  const hasServerState = Boolean(serverProgress);
+  const serverIsNewer = hasServerState && serverUpdatedAt > localUpdatedAt;
+  const preferServerWithoutTimestamps =
+    hasServerState && localUpdatedAt <= 0 && serverUpdatedAt <= 0;
+
+  if (serverIsNewer || preferServerWithoutTimestamps) {
+    saveAchievementProgressLocal(serverProgress, serverUpdatedAt);
+    return;
+  }
+
+  if (
+    !hasServerState ||
+    !areAchievementProgressEqual(localProgress, serverProgress) ||
+    localUpdatedAt > serverUpdatedAt
+  ) {
+    try {
+      await saveAchievementProgressToServer(localProgress, Date.now());
+    } catch (e) {
+      console.warn('initial achievements sync failed', e);
+    }
+  }
+}
+
+onAuthChange((user) => {
+  if (!user || !user.uid) return;
+  void syncAchievementsFromServer(user);
+});
 
 export function setAchievementProgress(achievementId, value) {
   if (!achievementId) return;
