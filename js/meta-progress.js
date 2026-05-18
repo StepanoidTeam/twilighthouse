@@ -336,6 +336,14 @@ function subtractPrice(price, meta) {
   }
 }
 
+export function isRunXpCommittedToMeta(runStartTime) {
+  return (
+    runStartTime != null &&
+    lastCommittedRunStart != null &&
+    lastCommittedRunStart === runStartTime
+  );
+}
+
 /** @param {import('./state.js').default} S */
 export function commitRunToMeta(S) {
   if (!S.gameSessionActive) return;

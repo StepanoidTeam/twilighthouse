@@ -24,7 +24,10 @@ import {
 } from './sound.js';
 import S from './state.js';
 import { levels } from './levels.js';
-import { getCurrentPlayerLevel } from './player-level.js';
+import {
+  getCurrentPlayerLevel,
+  getResultPlayerLevel,
+} from './player-level.js';
 import { t, pluralCategory } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
@@ -760,6 +763,12 @@ function getRunStatsItems() {
       icon: '🦑',
       label: t('resultStats.krakensArrived'),
       value: stats.krakensArrived || S.krakensArrived || 0,
+    },
+    {
+      section: 'time',
+      icon: '⭐',
+      label: t('resultStats.playerLevel'),
+      value: getResultPlayerLevel(),
     },
     {
       section: 'time',

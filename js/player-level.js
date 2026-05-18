@@ -1,6 +1,6 @@
 // ===== Player level from lifetime XP (same scale as in-run perk threshold) =====
 import { RUN_XP_THRESHOLD } from './config.js';
-import { loadMeta } from './meta-progress.js';
+import { isRunXpCommittedToMeta, loadMeta } from './meta-progress.js';
 import S from './state.js';
 
 /**
@@ -26,4 +26,13 @@ export function getCurrentPlayerLevel() {
 /** Level stored on leaderboard after commitRunToMeta (meta.totalXp). */
 export function getLeaderboardPlayerLevel() {
   return getLevelFromXp(loadMeta().totalXp || 0);
+}
+
+/** Keeper level for win/loss result screen (avoids double-counting run XP after commit). */
+export function getResultPlayerLevel() {
+  const metaXp = loadMeta().totalXp || 0;
+  const pendingXp = isRunXpCommittedToMeta(S.runStartTime)
+    ? 0
+    : Math.max(0, Math.floor(S.runXpEarnedThisRun || 0));
+  return getLevelFromXp(metaXp + pendingXp);
 }

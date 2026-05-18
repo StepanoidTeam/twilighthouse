@@ -96,7 +96,7 @@ Photopea — image editor
     ...ACHIEVEMENTS_I18N.en,
 
     'shop.title': 'Harbor shop',
-    'shop.playerLevel': 'Keeper level {n}',
+    'shop.playerLevel': 'Reached level {n}',
     'shop.nightsWon': 'Nights survived (dawn reached): {n}',
     'shop.wallet': 'Supplies in the warehouse',
     'shop.buy': 'Buy',
@@ -200,6 +200,7 @@ Photopea — image editor
     'win.statTime': 'Final time',
     'resultStats.cargoTitle': 'Collected Cargo',
     'resultStats.title': 'Night Review',
+    'resultStats.playerLevel': 'Reached level',
     'resultStats.deliveredBoats': 'Smugglers saved',
     'resultStats.smugglersSunk': 'Smugglers sunk',
     'resultStats.sunkCops': 'Cops sunk',
@@ -357,7 +358,7 @@ Photopea — image editor
     ...ACHIEVEMENTS_I18N.ru,
 
     'shop.title': 'Прилавок в порту',
-    'shop.playerLevel': 'Уровень смотрителя {n}',
+    'shop.playerLevel': 'Достигнутый уровень {n}',
     'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',
     'shop.wallet': 'Запасы на складе',
     'shop.buy': 'Купить',
@@ -458,6 +459,7 @@ Photopea — image editor
     'win.statTime': 'Финальное время',
     'resultStats.cargoTitle': 'Собранные товары',
     'resultStats.title': 'Обзор ночи',
+    'resultStats.playerLevel': 'Достигнутый уровень',
     'resultStats.deliveredBoats': 'Спасено контрабандистов',
     'resultStats.smugglersSunk': 'Потоплено контрабандистов',
     'resultStats.sunkCops': 'Потоплено копов',
