@@ -7,10 +7,10 @@ import {
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
   NIGHT_DURATION_MS,
-  RUN_XP_THRESHOLD,
 } from './config.js';
 import {
   getRunXpProgress,
+  getRunPerkXpThreshold,
   getEffectiveLampBurnoutMs,
 } from './run-perks.js';
 import {
@@ -24,10 +24,7 @@ import {
 } from './sound.js';
 import S from './state.js';
 import { levels } from './levels.js';
-import {
-  getCurrentPlayerLevel,
-  getResultPlayerLevel,
-} from './player-level.js';
+import { getCurrentPlayerLevel } from './player-level.js';
 import { t, pluralCategory } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
@@ -267,11 +264,12 @@ function updateRunXpProgress() {
   }
   $hudXp.hidden = false;
 
+  const threshold = getRunPerkXpThreshold();
   const ratio = getRunXpProgress();
   const ratioValue = ratio.toFixed(4);
   const percent = Math.floor(ratio * 100);
-  const current = Math.min(S.runXp || 0, RUN_XP_THRESHOLD);
-  const valueText = `${current}/${RUN_XP_THRESHOLD}`;
+  const current = Math.min(S.runXp || 0, threshold);
+  const valueText = `${current}/${threshold}`;
   const label = t('hud.xp');
 
   if (hudCache.xpLabel !== label && $hudXpLabel) {
@@ -768,7 +766,7 @@ function getRunStatsItems() {
       section: 'time',
       icon: '⭐',
       label: t('resultStats.playerLevel'),
-      value: getResultPlayerLevel(),
+      value: getCurrentPlayerLevel(),
     },
     {
       section: 'time',

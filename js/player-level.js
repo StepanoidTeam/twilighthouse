@@ -1,15 +1,20 @@
-// ===== Player level from lifetime XP (same scale as in-run perk threshold) =====
-import { RUN_XP_THRESHOLD } from './config.js';
-import { isRunXpCommittedToMeta, loadMeta } from './meta-progress.js';
+// ===== Player level from lifetime XP (geometric curve) =====
+import { KEEPER_XP_BASE, KEEPER_XP_GROWTH } from './config.js';
+import { loadMeta } from './meta-progress.js';
+import { levelFromTotalXp, progressInLevel } from './xp-curve.js';
 import S from './state.js';
 
 /**
- * Level from total lifetime XP. Level 1 = 0–99 XP, level 2 = 100–199, …
+ * Level from total lifetime XP. Level 1 at 0 XP; each step costs more (geometric).
  * @param {number} totalXp
  */
 export function getLevelFromXp(totalXp) {
-  const xp = Math.max(0, Math.floor(Number(totalXp)) || 0);
-  return Math.max(1, Math.floor(xp / RUN_XP_THRESHOLD) + 1);
+  return levelFromTotalXp(totalXp, KEEPER_XP_BASE, KEEPER_XP_GROWTH);
+}
+
+/** @param {number} [totalXp] defaults to effective total */
+export function getKeeperXpProgress(totalXp = getEffectiveTotalXp()) {
+  return progressInLevel(totalXp, KEEPER_XP_BASE, KEEPER_XP_GROWTH);
 }
 
 /** Meta XP + XP earned this run (not yet committed to meta). */
@@ -23,16 +28,7 @@ export function getCurrentPlayerLevel() {
   return getLevelFromXp(getEffectiveTotalXp());
 }
 
-/** Level stored on leaderboard after commitRunToMeta (meta.totalXp). */
+/** Level from committed meta XP (leaderboard, after commitRunToMeta). */
 export function getLeaderboardPlayerLevel() {
   return getLevelFromXp(loadMeta().totalXp || 0);
-}
-
-/** Keeper level for win/loss result screen (avoids double-counting run XP after commit). */
-export function getResultPlayerLevel() {
-  const metaXp = loadMeta().totalXp || 0;
-  const pendingXp = isRunXpCommittedToMeta(S.runStartTime)
-    ? 0
-    : Math.max(0, Math.floor(S.runXpEarnedThisRun || 0));
-  return getLevelFromXp(metaXp + pendingXp);
 }

@@ -1,5 +1,6 @@
 import {
-  RUN_XP_THRESHOLD,
+  RUN_PERK_XP_BASE,
+  RUN_PERK_XP_GROWTH,
   RUN_XP_DELIVERED_BOATS,
   RUN_XP_REPELLED_MERMAIDS,
   RUN_XP_REPELLED_KRAKEN,
@@ -10,6 +11,7 @@ import {
   LAMP_BURNOUT_TIME,
   TOOLTIP_STYLE_OK,
 } from './config.js';
+import { xpForStep } from './xp-curve.js';
 import S from './state.js';
 import { spawnTooltip, updateHUD } from './ui.js';
 import { t } from './i18n.js';
@@ -40,9 +42,22 @@ export function getRunXp() {
   return S.runXp || 0;
 }
 
+export function getTotalPerksPicked() {
+  return PERK_IDS.reduce((n, id) => n + getPerkStack(id), 0);
+}
+
+/** XP required for the next perk pick (grows with perks already taken). */
+export function getRunPerkXpThreshold() {
+  return xpForStep(
+    getTotalPerksPicked(),
+    RUN_PERK_XP_BASE,
+    RUN_PERK_XP_GROWTH,
+  );
+}
+
 /** @returns {number} 0–1 progress toward next perk */
 export function getRunXpProgress() {
-  const threshold = RUN_XP_THRESHOLD;
+  const threshold = getRunPerkXpThreshold();
   return Math.max(0, Math.min(1, (S.runXp || 0) / threshold));
 }
 
@@ -86,7 +101,7 @@ export function resetRunPerks(state = S) {
 
 export function checkRunXpLevelUp() {
   if (S.gameOver || S.gameOverPending || S.perkPickerOpen) return;
-  if ((S.runXp || 0) >= RUN_XP_THRESHOLD) {
+  if ((S.runXp || 0) >= getRunPerkXpThreshold()) {
     perkPickerOpener?.();
   }
 }
@@ -116,9 +131,10 @@ export function grantXpForGoal(goalKey) {
  */
 export function applyPerk(perkId) {
   if (!PERK_IDS.includes(perkId)) return;
+  const threshold = getRunPerkXpThreshold();
   if (!S.runPerkStacks) S.runPerkStacks = {};
   S.runPerkStacks[perkId] = getPerkStack(perkId) + 1;
   recomputeMultipliers();
-  S.runXp = Math.max(0, (S.runXp || 0) - RUN_XP_THRESHOLD);
+  S.runXp = Math.max(0, (S.runXp || 0) - threshold);
   updateHUD();
 }

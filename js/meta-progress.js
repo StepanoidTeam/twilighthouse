@@ -336,14 +336,6 @@ function subtractPrice(price, meta) {
   }
 }
 
-export function isRunXpCommittedToMeta(runStartTime) {
-  return (
-    runStartTime != null &&
-    lastCommittedRunStart != null &&
-    lastCommittedRunStart === runStartTime
-  );
-}
-
 /** @param {import('./state.js').default} S */
 export function commitRunToMeta(S) {
   if (!S.gameSessionActive) return;
@@ -358,6 +350,7 @@ export function commitRunToMeta(S) {
   }
   const xpEarned = Math.max(0, Math.floor(S.runXpEarnedThisRun || 0));
   if (xpEarned) meta.totalXp = (meta.totalXp || 0) + xpEarned;
+  S.runXpEarnedThisRun = 0;
   recordAchievementRunMetrics({
     cargo: S.deliveredCargo,
     beam: { maxMultiLitStreakMs: S.beamMultiLitBestMs },
