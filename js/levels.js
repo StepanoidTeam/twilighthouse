@@ -6,6 +6,7 @@ import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
 import { recordAchievementEvent } from './achievements.js';
+import { grantXpForGoal } from './run-perks.js';
 
 // ===== Level Definitions =====
 // goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ
@@ -321,6 +322,7 @@ function recordRunStat(goalKey) {
 
 function notify(goalKey) {
   if (S.gameOver || S.gameOverPending) return;
+  grantXpForGoal(goalKey);
   recordAchievementEvent(`goal.${goalKey}`, 1);
   recordRunStat(goalKey);
   const def = getLevelDef(S.levelIndex);

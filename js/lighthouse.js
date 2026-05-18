@@ -12,6 +12,7 @@ import {
   scaleToWidth,
 } from './config.js';
 import S from './state.js';
+import { getEffectiveLampBurnoutMs } from './run-perks.js';
 
 export function buildLighthouse(parent) {
   S.lighthouseContainer = new PIXI.Container();
@@ -43,7 +44,7 @@ function updateBeamRotation(delta) {
 }
 
 function updateLamp(delta) {
-  const lampCap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
+  const lampCap = getEffectiveLampBurnoutMs();
   if (S.lampRestoreFramesLeft > 0) {
     S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
     const restoreTotal = Math.max(1, S.lampRestoreFramesTotal || 1);
@@ -60,8 +61,9 @@ function updateLamp(delta) {
   }
 
   const burnout = S.lampTimer / lampCap;
-  S.BEAM_HALF_ANGLE =
-    LAMP_FULL_ANGLE - (LAMP_FULL_ANGLE - LAMP_MIN_ANGLE) * burnout;
+  const beamMult = S.runBeamMult || 1;
+  const fullAngle = LAMP_FULL_ANGLE * beamMult;
+  S.BEAM_HALF_ANGLE = fullAngle - (fullAngle - LAMP_MIN_ANGLE) * burnout;
 
   if (burnout > LAMP_FLICKER_START) {
     const flickerIntensity =

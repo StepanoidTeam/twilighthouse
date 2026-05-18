@@ -70,7 +70,8 @@ export function spawnPoliceBoat() {
   S.policeBoats.push({
     spr,
     beacon,
-    speed: BOAT_SPEED * 1.1 + Math.random() * 0.3,
+    speed:
+      (BOAT_SPEED * 1.1 + Math.random() * 0.3) * (S.runPoliceSpeedMult || 1),
     sinkTimer: 0,
     sinking: false,
     arrived: false,
@@ -196,8 +197,9 @@ export function updatePoliceBoats(delta) {
       speedMult = 0.9;
     }
 
-    const moveX = moveNx * p.speed * speedMult * delta;
-    const moveY = moveNy * p.speed * speedMult * delta;
+    const policeMult = S.runPoliceSpeedMult || 1;
+    const moveX = moveNx * p.speed * speedMult * policeMult * delta;
+    const moveY = moveNy * p.speed * speedMult * policeMult * delta;
     const prevX = spr.x;
     const prevY = spr.y;
     spr.x += moveX;

@@ -63,6 +63,8 @@ import { currentUser } from './auth.js';
 import { t, onLanguageChange, applyI18nToDOM } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
 import { commitRunToMeta, applyMetaToRunState } from './meta-progress.js';
+import { resetRunPerks } from './run-perks.js';
+import { initRunPerksUi } from './run-perks-ui.js';
 import { onAchievementUnlocked } from './achievements.js';
 
 import './ip-tracker.js';
@@ -212,6 +214,7 @@ function prepareFreshRun() {
   clearGame();
   S.reset();
   applyMetaToRunState(S);
+  resetRunPerks(S);
   buildRocks(S.rockLayer);
   S.gameSessionActive = true;
   levels.init({
@@ -296,6 +299,7 @@ function bindEvents() {
       isBackKey(e.code) &&
       !S.gameOver &&
       !S.exitConfirm &&
+      !S.perkPickerOpen &&
       !isMenuVisible()
     ) {
       playClickSound();
@@ -499,7 +503,7 @@ function gameLoop(delta) {
     S.beamMultiLitStreakMs = 0;
     return;
   }
-  if (isMenuVisible() || S.exitConfirm) {
+  if (isMenuVisible() || S.exitConfirm || S.perkPickerOpen) {
     // Пауза: не накапливаем выживание и сбрасываем точку отсчёта,
     // чтобы при resume первый тик не залил большую дельту.
     S.lastSurvivalTick = 0;
@@ -657,6 +661,7 @@ async function init() {
   buildGlow();
 
   buildUI();
+  initRunPerksUi();
   onAchievementUnlocked((achievement) => {
     queueAchievementUnlockToast(achievement);
   });
@@ -665,7 +670,12 @@ async function init() {
 
   // Wire Escape button click to show exit confirmation
   $btnEsc.addEventListener('pointerdown', () => {
-    if (!S.gameOver && !S.exitConfirm && !isMenuVisible()) {
+    if (
+      !S.gameOver &&
+      !S.exitConfirm &&
+      !S.perkPickerOpen &&
+      !isMenuVisible()
+    ) {
       playClickSound();
       showExitConfirm();
     }

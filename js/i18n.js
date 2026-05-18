@@ -220,6 +220,17 @@ Photopea — image editor
     'hud.lesson.prefix': 'Lesson {n}',
     'hud.level.prefix': 'Level {n}',
     'hud.level.idle': 'survive',
+    'hud.xp': 'Experience',
+
+    'perk.xpGain': '+{n} XP',
+    'perk.pick.title': 'Choose a perk',
+    'perk.stack': 'Level {n}',
+    'perk.better_oil.title': 'Better oil',
+    'perk.better_oil.desc': 'Lamp burns slower — more time before the beam fades.',
+    'perk.brighter_beam.title': 'Brighter beam',
+    'perk.brighter_beam.desc': 'Wider light cone — easier to spot boats and threats.',
+    'perk.slow_cops.title': 'Slow cops',
+    'perk.slow_cops.desc': 'Police boats move slower — more time to sink them.',
 
     // Goal checklist (HUD): verbs + nouns with EN plural forms (one/other)
     'goal.delivered_boats.one': 'Escort {n} smuggler',
@@ -466,6 +477,17 @@ Photopea — image editor
     'hud.lesson.prefix': 'Урок {n}',
     'hud.level.prefix': 'Уровень {n}',
     'hud.level.idle': 'выжить',
+    'hud.xp': 'Опыт',
+
+    'perk.xpGain': '+{n} опыта',
+    'perk.pick.title': 'Выбери перк',
+    'perk.stack': 'Уровень {n}',
+    'perk.better_oil.title': 'Лучшее масло',
+    'perk.better_oil.desc': 'Лампа горит дольше — больше времени до угасания луча.',
+    'perk.brighter_beam.title': 'Ярче луч',
+    'perk.brighter_beam.desc': 'Шире конус света — проще находить корабли и угрозы.',
+    'perk.slow_cops.title': 'Медленные копы',
+    'perk.slow_cops.desc': 'Катера полиции плывут медленнее — больше времени их потопить.',
 
     // Чек-лист целей (HUD): глагол + существительное в нужной форме (1 / 2-4 / 5+)
     'goal.delivered_boats.one': 'Сопроводи {n} контрабандиста',

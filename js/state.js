@@ -144,6 +144,14 @@ const State = {
   heartsRemaining: 5,
   lastEnemyType: null, // 'police', 'mermaid', 'kraken', 'boat-sink'
 
+  // Run XP & perks (reset each run)
+  runXp: 0,
+  runPerkStacks: {},
+  runLampMult: 1,
+  runBeamMult: 1,
+  runPoliceSpeedMult: 1,
+  perkPickerOpen: false,
+
   // Layers
   rockLayer: null,
   boatLayer: null,
@@ -242,6 +250,12 @@ const State = {
     this.levelStartedAt = 0;
     this.levelTransitioning = false;
     this.maxLevelReached = 0;
+    this.runXp = 0;
+    this.runPerkStacks = {};
+    this.runLampMult = 1;
+    this.runBeamMult = 1;
+    this.runPoliceSpeedMult = 1;
+    this.perkPickerOpen = false;
   },
 };
 

@@ -7,7 +7,12 @@ import {
   LAMP_BURNOUT_TIME,
   GAME_OVER_DELAY,
   NIGHT_DURATION_MS,
+  RUN_XP_THRESHOLD,
 } from './config.js';
+import {
+  getRunXpProgress,
+  getEffectiveLampBurnoutMs,
+} from './run-perks.js';
 import {
   CRASH_VOLUME,
   CRASH_SOUNDS,
@@ -55,6 +60,11 @@ const {
   $levelBanner,
   $levelBannerTitle,
   $levelBannerSubtitle,
+  $hudXp,
+  $hudXpLabel,
+  $hudXpValue,
+  $hudXpFill,
+  $screenPerkPick,
 } = globalThis;
 
 // ===== Tooltips =====
@@ -109,6 +119,10 @@ export function fadeInOverlay() {
 
 export function scheduleGameOver() {
   if (S.gameOver || S.gameOverPending) return;
+  if (S.perkPickerOpen) {
+    S.perkPickerOpen = false;
+    if ($screenPerkPick) $screenPerkPick.hidden = true;
+  }
   S.gameOverPending = true;
   setTimeout(() => {
     const config = getGameOverReasonConfig(S.lastEnemyType);
@@ -215,7 +229,7 @@ function setIfChanged(key, $el, value) {
 
 function formatLampPowerHtml() {
   const slots = 5;
-  const cap = Math.max(1, S.lampBurnoutMs || LAMP_BURNOUT_TIME);
+  const cap = getEffectiveLampBurnoutMs();
   const burnout = Math.max(0, Math.min(1, S.lampTimer / cap));
   const lit = Math.max(1, Math.ceil((1 - burnout) * slots));
   const spent = slots - lit;
@@ -231,6 +245,37 @@ function formatLampPowerHtml() {
     }
   }
   return out;
+}
+
+function updateRunXpProgress() {
+  if (!$hudXp || !$hudXpFill || !$hudXpValue) return;
+  if (!S.gameSessionActive) {
+    $hudXp.hidden = true;
+    return;
+  }
+  $hudXp.hidden = false;
+
+  const ratio = getRunXpProgress();
+  const ratioValue = ratio.toFixed(4);
+  const percent = Math.floor(ratio * 100);
+  const current = Math.min(S.runXp || 0, RUN_XP_THRESHOLD);
+  const valueText = `${current}/${RUN_XP_THRESHOLD}`;
+  const label = t('hud.xp');
+
+  if (hudCache.xpLabel !== label && $hudXpLabel) {
+    hudCache.xpLabel = label;
+    $hudXpLabel.textContent = label;
+  }
+  if (hudCache.xpValue !== valueText) {
+    hudCache.xpValue = valueText;
+    $hudXpValue.textContent = valueText;
+    $hudXp.setAttribute('aria-valuenow', String(percent));
+    $hudXp.setAttribute('aria-label', `${label}: ${valueText}`);
+  }
+  if (hudCache.xpRatio !== ratioValue) {
+    hudCache.xpRatio = ratioValue;
+    $hudXpFill.style.transform = `scaleX(${ratioValue})`;
+  }
 }
 
 function updateNightProgress() {
@@ -266,6 +311,7 @@ export function updateHUD() {
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
   setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
+  updateRunXpProgress();
   updateNightProgress();
   if ($hudLevel) {
     const levelHtml = formatLevelHudHtml();

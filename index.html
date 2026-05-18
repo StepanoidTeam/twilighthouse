@@ -46,6 +46,22 @@
           </div>
         </div>
         <div id="$hudLevel" class="hud-level" hidden></div>
+        <div
+          class="hud-xp"
+          id="$hudXp"
+          role="progressbar"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow="0"
+        >
+          <div class="hud-xp-head">
+            <span id="$hudXpLabel" data-i18n="hud.xp">Experience</span>
+            <span id="$hudXpValue">0/100</span>
+          </div>
+          <div class="hud-xp-track" aria-hidden="true">
+            <div id="$hudXpFill" class="hud-xp-fill"></div>
+          </div>
+        </div>
       </div>
 
       <!-- ===== Level goal banner (mid-screen, transient) ===== -->
@@ -184,6 +200,12 @@
         <span class="screen-result-stat-value"></span>
       </div>
     </template>
+
+    <!-- ===== Perk pick (run XP milestone) ===== -->
+    <div id="$screenPerkPick" class="screen-perk-pick blur-bg" hidden>
+      <h2 class="perk-pick-title" id="$perkPickTitle"></h2>
+      <div class="perk-pick-cards" id="$perkPickCards"></div>
+    </div>
 
     <!-- ===== Exit confirm screen ===== -->
     <div id="$screenExitConfirm" class="screen-exit-confirm blur-bg" hidden>
