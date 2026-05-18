@@ -8,6 +8,8 @@ import {
 } from './auth.js';
 import { t, onLanguageChange } from './i18n.js';
 import { getAdminStatus } from './browser-tools.js';
+import { clearMetaLocalCacheOnSignOut } from './meta-progress.js';
+import { clearAchievementsLocalCacheOnSignOut } from './achievements.js';
 
 const { $authModal, $authWidget } = globalThis;
 
@@ -124,6 +126,8 @@ export function hideAuthModal() {
 }
 
 export async function doSignOut() {
+  clearMetaLocalCacheOnSignOut();
+  clearAchievementsLocalCacheOnSignOut();
   try {
     await signOut();
   } catch (e) {

@@ -76,6 +76,7 @@ function recomputeMultipliers() {
 /** @param {import('./state.js').default} state */
 export function resetRunPerks(state = S) {
   state.runXp = 0;
+  state.runXpEarnedThisRun = 0;
   state.runPerkStacks = {};
   state.runLampMult = 1;
   state.runBeamMult = 1;
@@ -99,6 +100,7 @@ export function grantXpForGoal(goalKey) {
   if (!amount) return;
 
   S.runXp = (S.runXp || 0) + amount;
+  S.runXpEarnedThisRun = (S.runXpEarnedThisRun || 0) + amount;
   spawnTooltip(
     S.lhX,
     S.lhY - 50,

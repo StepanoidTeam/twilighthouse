@@ -96,6 +96,7 @@ Photopea — image editor
     ...ACHIEVEMENTS_I18N.en,
 
     'shop.title': 'Harbor shop',
+    'shop.playerLevel': 'Keeper level {n}',
     'shop.nightsWon': 'Nights survived (dawn reached): {n}',
     'shop.wallet': 'Supplies in the warehouse',
     'shop.buy': 'Buy',
@@ -356,6 +357,7 @@ Photopea — image editor
     ...ACHIEVEMENTS_I18N.ru,
 
     'shop.title': 'Прилавок в порту',
+    'shop.playerLevel': 'Уровень смотрителя {n}',
     'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',
     'shop.wallet': 'Запасы на складе',
     'shop.buy': 'Купить',

@@ -53,7 +53,7 @@ export async function syncCurrentUserLeaderboardDisplayName(
 }
 
 /**
- * Submit a run. Stores the user's best (level, time) tuple in `leaderboard/{uid}`.
+ * Submit a run. Stores the user's best (keeper level from lifetime XP, time) in `leaderboard/{uid}`.
  * Tie-break: higher level wins; at the same level, longer survival wins.
  * Returns { written, bestLevel, bestTimeMs } or null if not signed in.
  */

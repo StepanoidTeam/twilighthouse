@@ -129,7 +129,6 @@ const State = {
   levelSpawnLeft: {},
   levelStartedAt: 0,
   levelTransitioning: false,
-  maxLevelReached: 0,
 
   // Lamp
   lampTimer: 0,
@@ -146,6 +145,7 @@ const State = {
 
   // Run XP & perks (reset each run)
   runXp: 0,
+  runXpEarnedThisRun: 0,
   runPerkStacks: {},
   runLampMult: 1,
   runBeamMult: 1,
@@ -249,8 +249,8 @@ const State = {
     this.levelSpawnLeft = {};
     this.levelStartedAt = 0;
     this.levelTransitioning = false;
-    this.maxLevelReached = 0;
     this.runXp = 0;
+    this.runXpEarnedThisRun = 0;
     this.runPerkStacks = {};
     this.runLampMult = 1;
     this.runBeamMult = 1;

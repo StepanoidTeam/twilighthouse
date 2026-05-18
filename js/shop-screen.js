@@ -1,5 +1,6 @@
 import { BOAT_CARGO_TYPES } from './config.js';
 import { loadMeta, tryBuy, SHOP_ITEMS, canAfford } from './meta-progress.js';
+import { getLevelFromXp } from './player-level.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
 
@@ -109,7 +110,7 @@ export function renderShopScreen({ container, isActive }) {
   function paint() {
     if (typeof isActive === 'function' && !isActive()) return;
     const meta = loadMeta();
-    $nights.textContent = t('shop.nightsWon', { n: meta.nightsWon });
+    $nights.textContent = `${t('shop.playerLevel', { n: getLevelFromXp(meta.totalXp || 0) })} · ${t('shop.nightsWon', { n: meta.nightsWon })}`;
     renderWallet($walletRow, meta);
     renderGrid($grid, meta, paint);
   }

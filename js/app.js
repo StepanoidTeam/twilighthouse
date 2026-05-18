@@ -63,6 +63,7 @@ import { currentUser } from './auth.js';
 import { t, onLanguageChange, applyI18nToDOM } from './i18n.js';
 import { registerBrowserTools } from './browser-tools.js';
 import { commitRunToMeta, applyMetaToRunState } from './meta-progress.js';
+import { getLeaderboardPlayerLevel } from './player-level.js';
 import { resetRunPerks } from './run-perks.js';
 import { initRunPerksUi } from './run-perks-ui.js';
 import { onAchievementUnlocked } from './achievements.js';
@@ -360,15 +361,12 @@ function clearGame() {
 
 // ===== Exit to menu =====
 function exitToMenu() {
-  // Засабмитить прогресс ДО сброса состояния — иначе достигнутый уровень
-  // и время выживания потеряются в state.reset(). trySubmitScore() читает
-  // S.runSurvivalMs / S.maxLevelReached синхронно в локальные переменные
-  // перед await, так что сброс ниже не повредит уже улетевшему запросу.
-  if (S.gameSessionActive && !S.scoreSubmitted) {
-    void trySubmitScore();
-  }
+  // Сначала коммитим мету (XP, груз), затем лидерборд — уровень считается по totalXp.
   if (S.gameSessionActive) {
     commitRunToMeta(S);
+    if (!S.scoreSubmitted) {
+      void trySubmitScore();
+    }
   }
   clearGame();
   S.reset();
@@ -415,13 +413,12 @@ function startGame() {
 }
 
 // ===== Submit Score =====
-// Теперь сабмитим КАЖДЫЙ забег (включая game-over): в endless-режиме
-// "победы" нет, оценка = (макс. достигнутый уровень, время выживания).
+// Каждый забег: (уровень смотрителя по накопленному XP, время выживания в freeplay).
 async function trySubmitScore() {
   if (S.scoreSubmitted) return;
   S.scoreSubmitted = true;
   const survivalMs = S.runSurvivalMs;
-  const maxLevel = S.maxLevelReached || 0;
+  const maxLevel = getLeaderboardPlayerLevel();
   if (!currentUser) {
     console.log(
       `🏁 Run: lvl ${maxLevel}, ${Math.round(survivalMs / 1000)}s (not signed in — score not saved)`,

@@ -8,11 +8,14 @@ import {
   recordAchievementRunMetrics,
 } from './achievements.js';
 
-const STORAGE_KEY = 'lighthouse_meta_v1';
+const STORAGE_KEY_PREFIX = 'lighthouse_meta_v1';
+/** @deprecated Global key — migrated to per-uid storage; cleared on sign-out */
+const LEGACY_STORAGE_KEY = 'lighthouse_meta_v1';
+const META_OWNER_UID_KEY = 'lighthouse_meta_owner_uid';
 const PROGRESS_COLLECTION = 'player_progress';
 const SERVER_SYNC_DEBOUNCE_MS = 250;
 
-/** @typedef {{ wallet: Record<string, number>, nightsWon: number, unlocks: Record<string, boolean> }} MetaState */
+/** @typedef {{ wallet: Record<string, number>, nightsWon: number, totalXp: number, unlocks: Record<string, boolean>, updatedAtMs: number }} MetaState */
 
 export const UNLOCK_EXTRA_HEART = 'extraHeart';
 export const UNLOCK_QUALITY_WICK = 'qualityWick';
@@ -24,6 +27,82 @@ const LAMP_BURNOUT_BONUS_MULT = 1.25;
 let lastCommittedRunStart = null;
 let pendingServerSyncMeta = null;
 let serverSyncTimerId = null;
+let activeMetaUid = null;
+
+function metaStorageKey(uid) {
+  return `${STORAGE_KEY_PREFIX}_${uid}`;
+}
+
+function resetMetaSyncState() {
+  pendingServerSyncMeta = null;
+  if (serverSyncTimerId) {
+    clearTimeout(serverSyncTimerId);
+    serverSyncTimerId = null;
+  }
+}
+
+function isMetaEmpty(meta) {
+  if (!meta) return true;
+  if (meta.nightsWon > 0 || (meta.totalXp || 0) > 0) return false;
+  if (Object.keys(meta.unlocks || {}).length > 0) return false;
+  return BOAT_CARGO_TYPES.every((k) => (meta.wallet[k] || 0) === 0);
+}
+
+function readMetaFromStorageKey(key) {
+  try {
+    const raw = localStorage.getItem(key);
+    if (!raw) return null;
+    return normalizeMeta(JSON.parse(raw));
+  } catch (_) {
+    return null;
+  }
+}
+
+/** @returns {MetaState} */
+function loadMetaForUid(uid) {
+  if (!uid) return defaultMeta();
+  const scoped = readMetaFromStorageKey(metaStorageKey(uid));
+  if (scoped) return scoped;
+  return defaultMeta();
+}
+
+function tryMigrateLegacyMeta(uid) {
+  if (!uid) return null;
+
+  const ownerUid = localStorage.getItem(META_OWNER_UID_KEY);
+  if (ownerUid && ownerUid !== uid) return null;
+
+  const legacy = readMetaFromStorageKey(LEGACY_STORAGE_KEY);
+  if (!legacy || isMetaEmpty(legacy)) {
+    try {
+      localStorage.removeItem(LEGACY_STORAGE_KEY);
+    } catch (_) {}
+    return null;
+  }
+
+  return legacy;
+}
+
+/** Clears shared legacy cache so the next session does not inherit another account's wallet. */
+export function clearMetaLocalCacheOnSignOut() {
+  const uid = currentUser?.uid;
+  if (uid) {
+    const scoped = readMetaFromStorageKey(metaStorageKey(uid));
+    const legacy = readMetaFromStorageKey(LEGACY_STORAGE_KEY);
+    if (legacy && (!scoped || isMetaEmpty(scoped))) {
+      try {
+        localStorage.setItem(metaStorageKey(uid), JSON.stringify(legacy));
+      } catch (_) {}
+    }
+  }
+
+  resetMetaSyncState();
+  activeMetaUid = null;
+  try {
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
+    localStorage.removeItem(META_OWNER_UID_KEY);
+  } catch (_) {}
+}
 
 function emptyWallet() {
   return Object.fromEntries(BOAT_CARGO_TYPES.map((k) => [k, 0]));
@@ -34,6 +113,7 @@ function defaultMeta() {
   return {
     wallet: emptyWallet(),
     nightsWon: 0,
+    totalXp: 0,
     unlocks: {},
     updatedAtMs: 0,
   };
@@ -49,6 +129,7 @@ function normalizeMeta(rawMeta) {
   }
 
   const nightsWon = Math.max(0, Math.floor(Number(data.nightsWon)) || 0);
+  const totalXp = Math.max(0, Math.floor(Number(data.totalXp)) || 0);
   const unlocks =
     data.unlocks && typeof data.unlocks === 'object' ? { ...data.unlocks } : {};
   const updatedAtMs = Math.max(0, Math.floor(Number(data.updatedAtMs)) || 0);
@@ -56,6 +137,7 @@ function normalizeMeta(rawMeta) {
   return {
     wallet,
     nightsWon,
+    totalXp,
     unlocks,
     updatedAtMs,
   };
@@ -64,6 +146,7 @@ function normalizeMeta(rawMeta) {
 function areMetaEqual(left, right) {
   if (!left || !right) return false;
   if (left.nightsWon !== right.nightsWon) return false;
+  if ((left.totalXp || 0) !== (right.totalXp || 0)) return false;
 
   for (const k of BOAT_CARGO_TYPES) {
     if ((left.wallet[k] || 0) !== (right.wallet[k] || 0)) return false;
@@ -118,14 +201,7 @@ function queueMetaServerSync(meta, updatedAtMs) {
 
 /** @returns {MetaState} */
 export function loadMeta() {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return defaultMeta();
-    const data = JSON.parse(raw);
-    return normalizeMeta(data);
-  } catch (_) {
-    return defaultMeta();
-  }
+  return loadMetaForUid(currentUser?.uid);
 }
 
 /** @param {MetaState} meta */
@@ -133,9 +209,14 @@ export function saveMeta(
   meta,
   { skipServerSync = false, updatedAtMs = Date.now() } = {},
 ) {
+  const uid = currentUser?.uid;
+  if (!uid) return;
+
   const normalized = normalizeMeta({ ...meta, updatedAtMs });
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(normalized));
+    localStorage.setItem(metaStorageKey(uid), JSON.stringify(normalized));
+    localStorage.setItem(META_OWNER_UID_KEY, uid);
+    localStorage.removeItem(LEGACY_STORAGE_KEY);
   } catch (e) {
     console.warn('saveMeta failed', e);
   }
@@ -148,7 +229,17 @@ export function saveMeta(
 async function syncMetaFromServer(user) {
   if (!user || !user.uid) return;
 
-  const localMeta = loadMeta();
+  let localMeta = loadMetaForUid(user.uid);
+  if (isMetaEmpty(localMeta)) {
+    const migrated = tryMigrateLegacyMeta(user.uid);
+    if (migrated) {
+      saveMeta(migrated, {
+        skipServerSync: true,
+        updatedAtMs: migrated.updatedAtMs || Date.now(),
+      });
+      localMeta = migrated;
+    }
+  }
 
   let remoteMeta = null;
   let remoteUpdatedAt = 0;
@@ -198,6 +289,10 @@ async function syncMetaFromServer(user) {
 
 onAuthChange((user) => {
   if (!user || !user.uid) return;
+  if (activeMetaUid !== user.uid) {
+    activeMetaUid = user.uid;
+    resetMetaSyncState();
+  }
   void syncMetaFromServer(user);
 });
 
@@ -253,6 +348,8 @@ export function commitRunToMeta(S) {
     const add = Math.max(0, Math.floor(S.deliveredCargo[type] || 0));
     if (add) meta.wallet[type] = (meta.wallet[type] || 0) + add;
   }
+  const xpEarned = Math.max(0, Math.floor(S.runXpEarnedThisRun || 0));
+  if (xpEarned) meta.totalXp = (meta.totalXp || 0) + xpEarned;
   recordAchievementRunMetrics({
     cargo: S.deliveredCargo,
     beam: { maxMultiLitStreakMs: S.beamMultiLitBestMs },

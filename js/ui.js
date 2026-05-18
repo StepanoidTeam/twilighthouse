@@ -24,6 +24,7 @@ import {
 } from './sound.js';
 import S from './state.js';
 import { levels } from './levels.js';
+import { getCurrentPlayerLevel } from './player-level.js';
 import { t, pluralCategory } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
@@ -162,9 +163,17 @@ function formatGoalLabel(key, target) {
 
 function formatLevelHudHtml() {
   if (!S.gameSessionActive) return '';
-  const idx = (S.levelIndex || 0) + 1;
   const goal = S.levelGoal || {};
-  if (Object.keys(goal).length === 0) return '';
+  if (Object.keys(goal).length === 0) {
+    if (levels.isFreeplay()) {
+      const lvl = getCurrentPlayerLevel();
+      return `<div class="hud-level-head">${escapeHtml(
+        t('hud.level.prefix', { n: lvl }),
+      )}</div>`;
+    }
+    return '';
+  }
+  const idx = (S.levelIndex || 0) + 1;
   const progress = S.levelProgress || {};
   const headKey = idx <= 3 ? 'hud.lesson.prefix' : 'hud.level.prefix';
   const head = `<div class="hud-level-head">${escapeHtml(

@@ -176,7 +176,6 @@ function applyLevel(index, { showBanner } = { showBanner: true }) {
   // Только ambient-бюджет; целевые мобы спавнятся через deficitFor().
   S.levelSpawnLeft = { ...(def.extraSpawn || {}) };
   S.levelStartedAt = performance.now();
-  S.maxLevelReached = Math.max(S.maxLevelReached || 0, index + 1);
   // Счётчик разбитых лодок — лимит проигрыша (6) считается ПО УРОВНЮ:
   // обнуляем при каждой смене, чтобы прошлые крушения не утаскивали
   // в game over посреди новой задачи.
@@ -227,7 +226,6 @@ function enterFreeplay({ showBanner = true, markCompleted = true } = {}) {
   S.levelProgress = {};
   S.levelSpawnLeft = {};
   S.levelStartedAt = performance.now();
-  S.maxLevelReached = Math.max(S.maxLevelReached || 0, SCRIPTED_LEVELS.length);
   S.boatsSunk = 0;
   S.nextSpawnTime = performance.now() + 1500;
   if (markCompleted && fromScripted) {
