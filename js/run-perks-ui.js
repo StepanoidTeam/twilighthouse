@@ -2,6 +2,7 @@ import { playClickSound } from './sound.js';
 import S from './state.js';
 import {
   PERK_ICONS,
+  PERK_MAX_STACKS,
   applyPerk,
   checkRunXpLevelUp,
   getPerkStack,
@@ -22,52 +23,75 @@ const {
 
 let perkKeyHandler = null;
 
+function renderLevelBullets(container, level, maxLevel) {
+  container.replaceChildren();
+  if (!maxLevel || maxLevel <= 1) {
+    container.hidden = true;
+    return;
+  }
+  container.hidden = false;
+  for (let i = 1; i <= maxLevel; i++) {
+    const dot = document.createElement('span');
+    dot.className = i <= level
+      ? 'perk-level-dot perk-level-dot--filled'
+      : 'perk-level-dot';
+    dot.textContent = '◆';
+    container.appendChild(dot);
+  }
+}
+
 function renderPerkCards() {
   if (!$perkPickCards) return;
   $perkPickCards.innerHTML = '';
+
+  // Toggle grid class for debug mode (more than 3 columns)
+  $perkPickCards.classList.toggle('perk-pick-cards--debug', !!S.debugMode);
 
   getPerkPickerVisibleIds().forEach((perkId, index) => {
     const stack = getPerkStack(perkId);
     const blockReason = getPerkBlockReason(perkId);
     const maxed = blockReason != null;
-    const stackLabel =
-      stack > 0 ? t('perk.stack', { n: stack + 1 }) : '';
+    const maxStacks = PERK_MAX_STACKS[perkId];
 
-    const btn = document.createElement('button');
-    btn.type = 'button';
-    btn.className = 'perk-card blur-bg';
-    btn.dataset.perkId = perkId;
-    btn.dataset.perkIndex = String(index);
+    const card = document.createElement('article');
+    card.className = 'perk-card blur-bg';
+    card.dataset.perkId = perkId;
+    card.dataset.perkIndex = String(index);
     if (maxed) {
-      btn.disabled = true;
-      btn.classList.add('perk-card--maxed');
+      card.classList.add('perk-card--maxed');
     }
 
+    // Title
+    const title = document.createElement('h3');
+    title.className = 'perk-card-title';
+    title.textContent = t(`perk.${perkId}.title`);
+
+    // Level bullets
+    const levelRow = document.createElement('div');
+    levelRow.className = 'perk-card-level-row';
+    const displayMax = maxStacks === Infinity ? 0 : maxStacks;
+    renderLevelBullets(levelRow, stack, displayMax);
+
+    // Large icon
     const icon = document.createElement('span');
     icon.className = 'perk-card-icon';
     icon.textContent = PERK_ICONS[perkId] || '✨';
 
-    const title = document.createElement('span');
-    title.className = 'perk-card-title';
-    title.textContent = t(`perk.${perkId}.title`);
-
-    const desc = document.createElement('span');
+    // Description
+    const desc = document.createElement('p');
     desc.className = 'perk-card-desc';
     desc.textContent = t(`perk.${perkId}.desc`);
 
+    // Hotkey hint
     const hotkey = document.createElement('span');
     hotkey.className = 'perk-card-hotkey hidden-mobile';
     if (index < 9) hotkey.textContent = String(index + 1);
     else if (index === 9) hotkey.textContent = '0';
     else hotkey.hidden = true;
 
-    btn.append(icon, title, desc, hotkey);
-    if (stackLabel && !maxed) {
-      const stackEl = document.createElement('span');
-      stackEl.className = 'perk-card-stack';
-      stackEl.textContent = stackLabel;
-      btn.appendChild(stackEl);
-    }
+    card.append(title, levelRow, icon, desc, hotkey);
+
+    // Stack / maxed label
     if (maxed) {
       const maxEl = document.createElement('span');
       maxEl.className = 'perk-card-stack';
@@ -75,11 +99,18 @@ function renderPerkCards() {
         blockReason === 'fullHealth'
           ? t('perk.fullHealth')
           : t('perk.maxed');
-      btn.appendChild(maxEl);
+      card.appendChild(maxEl);
+    } else if (stack > 0) {
+      const stackEl = document.createElement('span');
+      stackEl.className = 'perk-card-stack';
+      stackEl.textContent = t('perk.stack', { n: stack + 1 });
+      card.appendChild(stackEl);
     }
 
-    btn.addEventListener('pointerdown', () => selectPerk(perkId));
-    $perkPickCards.appendChild(btn);
+    if (!maxed) {
+      card.addEventListener('pointerdown', () => selectPerk(perkId));
+    }
+    $perkPickCards.appendChild(card);
   });
 }
 

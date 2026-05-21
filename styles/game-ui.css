@@ -175,12 +175,16 @@
 }
 
 .perk-pick-cards {
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 16px;
-  max-width: 960px;
+  max-width: 720px;
   width: 100%;
+}
+
+.perk-pick-cards--debug {
+  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+  max-width: 960px;
 }
 
 .perk-card {
@@ -188,10 +192,7 @@
   flex-direction: column;
   align-items: center;
   gap: 8px;
-  flex: 1 1 220px;
-  max-width: 280px;
-  min-height: 160px;
-  padding: 16px 18px;
+  padding: 18px 16px;
   background: rgba(10, 30, 50, 0.9);
   border: 1.5px solid #8866cc;
   border-radius: 10px;
@@ -213,19 +214,47 @@
   outline: none;
 }
 
-.perk-card-icon {
-  font-size: 36px;
-  line-height: 1;
+.perk-card--maxed {
+  opacity: 0.55;
+  pointer-events: none;
+  cursor: default;
 }
 
 .perk-card-title {
-  font-size: 18px;
+  margin: 0;
+  font-size: 1rem;
   font-weight: bold;
   color: #f0e8ff;
+  letter-spacing: 0.03em;
+}
+
+.perk-card-level-row {
+  display: flex;
+  gap: 4px;
+  justify-content: center;
+  min-height: 1.1em;
+}
+
+.perk-level-dot {
+  font-size: 0.8rem;
+  color: rgba(180, 200, 220, 0.35);
+  line-height: 1;
+}
+
+.perk-level-dot--filled {
+  color: #c49bff;
+}
+
+.perk-card-icon {
+  font-size: 3rem;
+  line-height: 1;
+  display: block;
+  margin: 4px 0;
 }
 
 .perk-card-desc {
-  font-size: 14px;
+  margin: 0;
+  font-size: 0.82rem;
   font-weight: normal;
   line-height: 1.35;
   color: #a8b8c8;
@@ -243,6 +272,19 @@
   font-size: 12px;
   color: #6688aa;
   margin-top: auto;
+}
+
+@media (max-width: 600px) {
+  .perk-pick-cards {
+    grid-template-columns: repeat(3, 1fr);
+    gap: 10px;
+  }
+  .perk-card {
+    padding: 12px 8px;
+  }
+  .perk-card-icon {
+    font-size: 2rem;
+  }
 }
 
 .debug-controls {
