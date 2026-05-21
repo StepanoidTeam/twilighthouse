@@ -166,7 +166,6 @@ export function renderShopScreen({ container, isActive }) {
   $resetBtn.onclick = () => {
     const meta = loadMeta();
     if (!hasShopPurchases(meta)) return;
-    if (!window.confirm(t('shop.resetConfirm'))) return;
     const res = resetShopPurchases();
     if (!res.ok) return;
     playClickSound();
