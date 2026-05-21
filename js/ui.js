@@ -13,6 +13,7 @@ import {
   getRunPerkXpThreshold,
   getEffectiveLampBurnoutMs,
 } from './run-perks.js';
+import { SUSPICION_MAX } from './config.js';
 import {
   CRASH_VOLUME,
   CRASH_SOUNDS,
@@ -146,7 +147,7 @@ const hudCache = {
   nightLabel: null,
   nightTime: null,
   nightRatio: null,
-  level: null,
+  suspicion: null,
 };
 
 // ===== Level Goal HUD =====
@@ -236,10 +237,31 @@ function setIfChanged(key, $el, value) {
   }
 }
 
+function formatSuspicionHtml() {
+  const value = Math.max(0, Math.min(SUSPICION_MAX, S.policeSuspicion || 0));
+  if (value <= 0) return '';
+  const pct = Math.round((value / SUSPICION_MAX) * 100);
+  return `<span class="hud-suspicion" title="${escapeHtml(t('hud.suspicion'))}">👁️ ${pct}%</span>`;
+}
+
+function updateSuspicionHud() {
+  if (!$hudLamps) return;
+  const suspicionHtml = formatSuspicionHtml();
+  const lampHtml = formatLampPowerHtml();
+  const combined = suspicionHtml
+    ? `${lampHtml} ${suspicionHtml}`
+    : lampHtml;
+  setIfChanged('lamps', $hudLamps, combined);
+  if (hudCache.suspicion !== suspicionHtml) {
+    hudCache.suspicion = suspicionHtml;
+  }
+}
+
 function formatLampPowerHtml() {
   const slots = 5;
   const cap = getEffectiveLampBurnoutMs();
-  const burnout = Math.max(0, Math.min(1, S.lampTimer / cap));
+  const burnout =
+    S.lampTimer < 0 ? 0 : Math.max(0, Math.min(1, S.lampTimer / cap));
   const lit = Math.max(1, Math.ceil((1 - burnout) * slots));
   const spent = slots - lit;
   const atMinimum = burnout >= 1;
@@ -320,7 +342,7 @@ function updateNightProgress() {
 export function updateHUD() {
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
-  setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
+  updateSuspicionHud();
   updateRunXpProgress();
   updateNightProgress();
   if ($hudLevel) {

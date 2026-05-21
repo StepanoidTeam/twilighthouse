@@ -1,5 +1,5 @@
 import { BOAT_CARGO_TYPES } from './config.js';
-import { loadMeta, tryBuy, SHOP_ITEMS, canAfford } from './meta-progress.js';
+import { loadMeta, tryBuy, SHOP_ITEMS, canAfford, getShopItemLevel, isShopItemMaxed } from './meta-progress.js';
 import { getLevelFromXp } from './player-level.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
@@ -41,27 +41,47 @@ function renderWallet($row, meta) {
 function renderGrid($grid, meta, onBought) {
   $grid.replaceChildren();
   for (const item of SHOP_ITEMS) {
-    const owned = item.once && meta.unlocks[item.unlockKey];
+    const level = getShopItemLevel(meta, item);
+    const maxed = isShopItemMaxed(meta, item);
     const affordable = canAfford(item.price, meta);
 
     const card = cloneTemplateFirstElement('$shopItemCardTemplate');
     if (!(card instanceof HTMLElement)) continue;
 
     const h = card.querySelector('.shop-item-title');
+    const iconEl = card.querySelector('.shop-item-icon');
     const desc = card.querySelector('.shop-item-desc');
     const price = card.querySelector('.shop-item-price');
     const btn = card.querySelector('.shop-buy-btn');
     if (!(btn instanceof HTMLButtonElement)) continue;
 
-    if (h) h.textContent = t(`shop.items.${item.id}.name`);
-    if (desc) desc.textContent = t(`shop.items.${item.id}.desc`);
+    const title = t(`shop.items.${item.id}.name`);
+    if (h) {
+      h.textContent =
+        item.maxLevel && level > 0
+          ? `${title} · ${t('shop.level', { n: level, max: item.maxLevel })}`
+          : title;
+    }
+    if (iconEl) {
+      const icon = item.icon || '';
+      iconEl.textContent = icon;
+      iconEl.hidden = !icon;
+    }
+    if (desc) {
+      desc.textContent = t(`shop.items.${item.id}.desc`, {
+        level,
+        max: item.maxLevel || 1,
+        bonus: level * 10,
+        nextBonus: Math.min((level + 1) * 10, (item.maxLevel || 1) * 10),
+      });
+    }
     if (price) price.textContent = formatPriceLine(item.price);
 
     btn.dataset.itemId = item.id;
 
-    if (owned) {
+    if (maxed) {
       btn.disabled = true;
-      btn.textContent = t('shop.owned');
+      btn.textContent = t('shop.maxLevel');
       card.classList.add('shop-item-card--owned');
     } else if (!affordable) {
       btn.disabled = true;
@@ -69,7 +89,7 @@ function renderGrid($grid, meta, onBought) {
       card.classList.add('shop-item-card--locked');
     } else {
       btn.disabled = false;
-      btn.textContent = t('shop.buy');
+      btn.textContent = level > 0 ? t('shop.upgrade') : t('shop.buy');
     }
 
     $grid.appendChild(card);

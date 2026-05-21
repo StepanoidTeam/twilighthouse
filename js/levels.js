@@ -6,7 +6,11 @@ import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 import { showLevelBanner } from './ui.js';
 import { recordAchievementEvent } from './achievements.js';
-import { grantXpForGoal } from './run-perks.js';
+import {
+  grantXpForGoal,
+  getMermaidSpawnWeightMult,
+  getKrakenSpawnWeightMult,
+} from './run-perks.js';
 
 // ===== Level Definitions =====
 // goal — пороги подцелей обучающих уровней. Уровень пройден, когда ВСЕ
@@ -154,6 +158,8 @@ function pickWeighted(weights) {
 
 function pickFreeplaySpawnKind() {
   const weights = { ...FREEPLAY_SPAWN_WEIGHTS };
+  weights.mermaids *= getMermaidSpawnWeightMult();
+  weights.krakens *= getKrakenSpawnWeightMult();
   if (LIVE_COUNTERS.krakens() > 0) weights.krakens = 0;
   return pickWeighted(weights);
 }

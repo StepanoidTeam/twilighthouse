@@ -26,6 +26,8 @@ import {
   playCrashSound,
 } from './ui.js';
 import { levels } from './levels.js';
+import { getSuspicionGainMult } from './run-perks.js';
+import { SUSPICION_MAX, SUSPICION_GAIN_PER_FRAME } from './config.js';
 import { createWakeEmitterState, tickWakeEmitter } from './wake.js';
 
 const COP_LIT_SOUNDS = [
@@ -132,6 +134,14 @@ export function updatePoliceBoats(delta) {
       playCopUnlitSound();
     }
     p.wasLit = lit;
+
+    if (lit) {
+      S.policeSuspicion = Math.min(
+        SUSPICION_MAX,
+        (S.policeSuspicion || 0) +
+          delta * SUSPICION_GAIN_PER_FRAME * getSuspicionGainMult(),
+      );
+    }
 
     if (dist < ARRIVAL_RADIUS && !p.sinking && lit) {
       p.arrived = true;

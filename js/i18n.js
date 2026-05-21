@@ -100,7 +100,10 @@ Photopea — image editor
     'shop.nightsWon': 'Nights survived (dawn reached): {n}',
     'shop.wallet': 'Supplies in the warehouse',
     'shop.buy': 'Buy',
+    'shop.upgrade': 'Upgrade',
     'shop.owned': 'Owned',
+    'shop.maxLevel': 'Max level',
+    'shop.level': 'Lv {n}/{max}',
     'shop.cantAfford': 'Not enough supplies',
     'shop.items.extra_heart.name': 'Spare lifebelt',
     'shop.items.extra_heart.desc':
@@ -108,6 +111,18 @@ Photopea — image editor
     'shop.items.quality_wick.name': 'Quality wick mix',
     'shop.items.quality_wick.desc':
       'Your lamp burns out about 25% slower — a little more time before the beam fades.',
+    'shop.items.fresnel_lens.name': 'Fresnel lens',
+    'shop.items.fresnel_lens.desc':
+      'The beam stays lit about 20% longer — more time to sweep the dark waters.',
+    'shop.items.lamp_oil_crate.name': 'Crate of lamp oil',
+    'shop.items.lamp_oil_crate.desc':
+      '+20 to lamp reserve — the beam holds out longer each night.',
+    'shop.items.spare_generator.name': 'Spare generator',
+    'shop.items.spare_generator.desc':
+      'Start each night with extra beam charge — the lamp begins fuller.',
+    'shop.items.fast_gear.name': 'Fast drive',
+    'shop.items.fast_gear.desc':
+      '+10% beam rotation speed per level (max +30%). Current: +{bonus}%. Next: +{nextBonus}%.',
 
     // Boot loader
     'boot.title': 'TWILIGHTHOUSE',
@@ -233,6 +248,30 @@ Photopea — image editor
     'perk.brighter_beam.desc': 'Wider light cone — easier to spot boats and threats.',
     'perk.slow_cops.title': 'Slow cops',
     'perk.slow_cops.desc': 'Police boats move slower — more time to sink them.',
+    'perk.beam_width.title': 'Max beam width',
+    'perk.beam_width.desc':
+      'Raises the beam width cap by 10° per level — stops endless widening.',
+    'perk.siren_eye.title': "Siren's eye",
+    'perk.siren_eye.desc':
+      'Mermaids spawn less often but swim faster when they appear.',
+    'perk.experienced_keeper.title': 'Experienced keeper',
+    'perk.experienced_keeper.desc':
+      'Earn 10% more supplies from each successful night.',
+    'perk.occult_lamp.title': 'Occult lamp',
+    'perk.occult_lamp.desc':
+      'Purple lamps on icebergs lure mermaids in — then scare them away. Kraken come much more often.',
+    'perk.old_map.title': 'Old map',
+    'perk.old_map.desc': 'Reveals all enemies on the map for 10 seconds.',
+    'perk.rum.title': 'Rum',
+    'perk.rum.desc': 'Reduces police suspicion gain by 10% per level.',
+    'perk.new_icebergs.title': 'Drifting ice',
+    'perk.new_icebergs.desc': '3 new icebergs surface at random spots in the water.',
+    'perk.maxed': 'Max level',
+    'perk.fullHealth': 'Full health',
+    'perk.repair_lighthouse.title': 'Patch the lighthouse',
+    'perk.repair_lighthouse.desc': 'Restore 1 heart — patch up the lighthouse.',
+    'perk.repair_lighthouse.healed': '+1 ❤️',
+    'hud.suspicion': 'Suspicion',
 
     // Goal checklist (HUD): verbs + nouns with EN plural forms (one/other)
     'goal.delivered_boats.one': 'Escort {n} smuggler',
@@ -362,7 +401,10 @@ Photopea — image editor
     'shop.nightsWon': 'Ночей пережито (дождались рассвета): {n}',
     'shop.wallet': 'Запасы на складе',
     'shop.buy': 'Купить',
+    'shop.upgrade': 'Улучшить',
     'shop.owned': 'Уже куплено',
+    'shop.maxLevel': 'Макс. уровень',
+    'shop.level': 'Ур. {n}/{max}',
     'shop.cantAfford': 'Не хватает товара',
     'shop.items.extra_heart.name': 'Запасной пояс',
     'shop.items.extra_heart.desc':
@@ -370,6 +412,18 @@ Photopea — image editor
     'shop.items.quality_wick.name': 'Качественная фитильная смесь',
     'shop.items.quality_wick.desc':
       'Лампа сгорает примерно на четверть дольше — чуть больше времени, пока луч не потускнеет.',
+    'shop.items.fresnel_lens.name': 'Линза Френеля',
+    'shop.items.fresnel_lens.desc':
+      'Луч горит примерно на 20% дольше — больше времени освещать тёмные воды.',
+    'shop.items.lamp_oil_crate.name': 'Ящик лампового масла',
+    'shop.items.lamp_oil_crate.desc':
+      '+20 к запасу ламп — луч дольше держится каждую ночь.',
+    'shop.items.spare_generator.name': 'Запасной генератор',
+    'shop.items.spare_generator.desc':
+      'Начинай ночь с дополнительным зарядом луча — лампа стартует полнее.',
+    'shop.items.fast_gear.name': 'Быстрый привод',
+    'shop.items.fast_gear.desc':
+      '+10% к скорости вращения луча за уровень (макс. +30%). Сейчас: +{bonus}%. Следующий: +{nextBonus}%.',
 
     'boot.title': 'Маяк',
     'boot.loading': 'Загрузка игровых ресурсов…',
@@ -492,6 +546,30 @@ Photopea — image editor
     'perk.brighter_beam.desc': 'Шире конус света — проще находить корабли и угрозы.',
     'perk.slow_cops.title': 'Медленные копы',
     'perk.slow_cops.desc': 'Катера полиции плывут медленнее — больше времени их потопить.',
+    'perk.beam_width.title': 'Макс. ширина луча',
+    'perk.beam_width.desc':
+      'Поднимает потолок ширины луча на 10° за уровень — луч не расширяется бесконечно.',
+    'perk.siren_eye.title': 'Глаз сирены',
+    'perk.siren_eye.desc':
+      'Русалки появляются реже, но плывут быстрее.',
+    'perk.experienced_keeper.title': 'Опытный смотритель',
+    'perk.experienced_keeper.desc':
+      'Получаешь на 10% больше ресурсов за ночь.',
+    'perk.occult_lamp.title': 'Оккультная лампа',
+    'perk.occult_lamp.desc':
+      'Фиолетовые лампы на айсбергах притягивают русалок — и отпугивают при подходе. Кракен приходит чаще.',
+    'perk.old_map.title': 'Старая карта',
+    'perk.old_map.desc': 'Показывает всех врагов на карте 10 секунд.',
+    'perk.rum.title': 'Ром',
+    'perk.rum.desc': 'Снижает рост подозрения полиции на 10% за уровень.',
+    'perk.new_icebergs.title': 'Поплыли льдины',
+    'perk.new_icebergs.desc': '3 новых айсберга всплывают в случайных местах.',
+    'perk.maxed': 'Макс. уровень',
+    'perk.fullHealth': 'Полное здоровье',
+    'perk.repair_lighthouse.title': 'Починить маяк',
+    'perk.repair_lighthouse.desc': 'Восстанавливает 1 ед. здоровья маяка.',
+    'perk.repair_lighthouse.healed': '+1 ❤️',
+    'hud.suspicion': 'Подозрение',
 
     // Чек-лист целей (HUD): глагол + существительное в нужной форме (1 / 2-4 / 5+)
     'goal.delivered_boats.one': 'Сопроводи {n} контрабандиста',

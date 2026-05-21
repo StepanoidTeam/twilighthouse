@@ -137,6 +137,7 @@ const State = {
   lampRestoreStartTimer: 0,
   lampFlicker: 1,
   lampBurnoutMs: LAMP_BURNOUT_TIME,
+  beamRotateMult: 1,
 
   // Hearts / Lives System
   heartsMax: 5,
@@ -151,6 +152,13 @@ const State = {
   runBeamMult: 1,
   runPoliceSpeedMult: 1,
   perkPickerOpen: false,
+  perkPickerOffer: [],
+  policeSuspicion: 0,
+  oldMapRevealUntil: 0,
+  lampOilReserve: 0,
+  spareGeneratorCharge: 0,
+  occultRockLamps: [],
+  oldMapLayer: null,
 
   // Layers
   rockLayer: null,
@@ -224,6 +232,7 @@ const State = {
     this.lampFlicker = 1;
     this.heartsMax = 5;
     this.lampBurnoutMs = LAMP_BURNOUT_TIME;
+    this.beamRotateMult = 1;
     this.heartsRemaining = this.heartsMax;
     this.lastEnemyType = null;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
@@ -256,6 +265,12 @@ const State = {
     this.runBeamMult = 1;
     this.runPoliceSpeedMult = 1;
     this.perkPickerOpen = false;
+    this.perkPickerOffer = [];
+    this.policeSuspicion = 0;
+    this.oldMapRevealUntil = 0;
+    this.lampOilReserve = 0;
+    this.spareGeneratorCharge = 0;
+    this.occultRockLamps = [];
   },
 };
 

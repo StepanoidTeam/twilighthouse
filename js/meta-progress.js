@@ -1,5 +1,5 @@
 // ===== Meta economy: wallet, nights survived, shop unlocks (localStorage) =====
-import { BOAT_CARGO_TYPES, LAMP_BURNOUT_TIME } from './config.js';
+import { BOAT_CARGO_TYPES, LAMP_BURNOUT_TIME, LAMP_OIL_RESERVE_BONUS, SPARE_GENERATOR_START_CHARGE } from './config.js';
 import { db } from '../firebase.init.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../firebase.js';
 import { currentUser, onAuthChange } from './auth.js';
@@ -7,6 +7,7 @@ import {
   recordAchievementEvent,
   recordAchievementRunMetrics,
 } from './achievements.js';
+import { getResourceBonusMult } from './run-perks.js';
 
 const STORAGE_KEY_PREFIX = 'lighthouse_meta_v1';
 /** @deprecated Global key — migrated to per-uid storage; cleared on sign-out */
@@ -15,14 +16,23 @@ const META_OWNER_UID_KEY = 'lighthouse_meta_owner_uid';
 const PROGRESS_COLLECTION = 'player_progress';
 const SERVER_SYNC_DEBOUNCE_MS = 250;
 
-/** @typedef {{ wallet: Record<string, number>, nightsWon: number, totalXp: number, unlocks: Record<string, boolean>, updatedAtMs: number }} MetaState */
+/** @typedef {{ wallet: Record<string, number>, nightsWon: number, totalXp: number, unlocks: Record<string, boolean>, upgradeLevels: Record<string, number>, updatedAtMs: number }} MetaState */
 
 export const UNLOCK_EXTRA_HEART = 'extraHeart';
 export const UNLOCK_QUALITY_WICK = 'qualityWick';
+export const UNLOCK_FRESNEL_LENS = 'fresnelLens';
+export const UNLOCK_LAMP_OIL_CRATE = 'lampOilCrate';
+export const UNLOCK_SPARE_GENERATOR = 'spareGenerator';
+/** @deprecated Migrated to upgradeLevels.fastGear */
+export const UNLOCK_FAST_GEAR = 'fastGear';
+export const UPGRADE_FAST_GEAR = 'fastGear';
 
 const BASE_HEARTS_MAX = 5;
 const HEARTS_WITH_BONUS = 6;
 const LAMP_BURNOUT_BONUS_MULT = 1.25;
+const FRESNEL_LENS_BONUS_MULT = 1.2;
+export const FAST_GEAR_MAX_LEVEL = 3;
+const BEAM_ROTATE_BONUS_PER_LEVEL = 0.1;
 
 let lastCommittedRunStart = null;
 let pendingServerSyncMeta = null;
@@ -115,8 +125,32 @@ function defaultMeta() {
     nightsWon: 0,
     totalXp: 0,
     unlocks: {},
+    upgradeLevels: {},
     updatedAtMs: 0,
   };
+}
+
+function normalizeUpgradeLevels(rawLevels) {
+  const upgradeLevels = {};
+  if (rawLevels && typeof rawLevels === 'object') {
+    for (const [key, value] of Object.entries(rawLevels)) {
+      const level = Math.max(0, Math.floor(Number(value)) || 0);
+      if (level > 0) upgradeLevels[key] = level;
+    }
+  }
+  return upgradeLevels;
+}
+
+function migrateLegacyFastGear(unlocks, upgradeLevels) {
+  if (
+    unlocks[UNLOCK_FAST_GEAR] &&
+    (upgradeLevels[UPGRADE_FAST_GEAR] || 0) < 2
+  ) {
+    upgradeLevels[UPGRADE_FAST_GEAR] = 2;
+  }
+  if (unlocks[UNLOCK_FAST_GEAR]) {
+    delete unlocks[UNLOCK_FAST_GEAR];
+  }
 }
 
 /** @returns {MetaState & { updatedAtMs: number }} */
@@ -132,6 +166,8 @@ function normalizeMeta(rawMeta) {
   const totalXp = Math.max(0, Math.floor(Number(data.totalXp)) || 0);
   const unlocks =
     data.unlocks && typeof data.unlocks === 'object' ? { ...data.unlocks } : {};
+  const upgradeLevels = normalizeUpgradeLevels(data.upgradeLevels);
+  migrateLegacyFastGear(unlocks, upgradeLevels);
   const updatedAtMs = Math.max(0, Math.floor(Number(data.updatedAtMs)) || 0);
 
   return {
@@ -139,6 +175,7 @@ function normalizeMeta(rawMeta) {
     nightsWon,
     totalXp,
     unlocks,
+    upgradeLevels,
     updatedAtMs,
   };
 }
@@ -162,7 +199,46 @@ function areMetaEqual(left, right) {
       return false;
   }
 
+  const leftUpgrades = Object.keys(left.upgradeLevels || {}).sort();
+  const rightUpgrades = Object.keys(right.upgradeLevels || {}).sort();
+  if (leftUpgrades.length !== rightUpgrades.length) return false;
+  for (let i = 0; i < leftUpgrades.length; i += 1) {
+    const key = leftUpgrades[i];
+    if (key !== rightUpgrades[i]) return false;
+    if ((left.upgradeLevels[key] || 0) !== (right.upgradeLevels[key] || 0)) {
+      return false;
+    }
+  }
+
   return true;
+}
+
+/** @param {MetaState} meta @param {string} upgradeKey */
+export function getShopUpgradeLevel(meta, upgradeKey) {
+  return Math.max(0, Math.floor(meta.upgradeLevels?.[upgradeKey] || 0));
+}
+
+export function getFastGearLevel(meta) {
+  return Math.min(FAST_GEAR_MAX_LEVEL, getShopUpgradeLevel(meta, UPGRADE_FAST_GEAR));
+}
+
+export function getBeamRotateMultFromMeta(meta) {
+  return 1 + BEAM_ROTATE_BONUS_PER_LEVEL * getFastGearLevel(meta);
+}
+
+/** @param {MetaState} meta @param {(typeof SHOP_ITEMS)[number]} item */
+export function getShopItemLevel(meta, item) {
+  if (item.upgradeKey) return getShopUpgradeLevel(meta, item.upgradeKey);
+  if (item.once && item.unlockKey && meta.unlocks[item.unlockKey]) return 1;
+  return 0;
+}
+
+/** @param {MetaState} meta @param {(typeof SHOP_ITEMS)[number]} item */
+export function isShopItemMaxed(meta, item) {
+  if (item.maxLevel) {
+    return getShopItemLevel(meta, item) >= item.maxLevel;
+  }
+  return Boolean(item.once && item.unlockKey && meta.unlocks[item.unlockKey]);
 }
 
 async function saveMetaToServer(meta, updatedAtMs) {
@@ -322,6 +398,31 @@ export const SHOP_ITEMS = [
     once: true,
     price: { '💡': 5, '🛢️': 5, '🧨': 2 },
   },
+  {
+    id: 'fresnel_lens',
+    unlockKey: UNLOCK_FRESNEL_LENS,
+    once: true,
+    price: { '💡': 4, '⚙️': 4, '🥃': 3 },
+  },
+  {
+    id: 'lamp_oil_crate',
+    unlockKey: UNLOCK_LAMP_OIL_CRATE,
+    once: true,
+    price: { '🛢️': 6, '💡': 3, '📦': 2 },
+  },
+  {
+    id: 'spare_generator',
+    unlockKey: UNLOCK_SPARE_GENERATOR,
+    once: true,
+    price: { '⚙️': 5, '🛢️': 4, '🧨': 2 },
+  },
+  {
+    id: 'fast_gear',
+    upgradeKey: UPGRADE_FAST_GEAR,
+    maxLevel: FAST_GEAR_MAX_LEVEL,
+    icon: '⚙️',
+    price: { '⚙️': 4, '💡': 3, '📦': 3 },
+  },
 ];
 
 /**
@@ -346,7 +447,11 @@ export function commitRunToMeta(S) {
   const meta = loadMeta();
   for (const type of BOAT_CARGO_TYPES) {
     const add = Math.max(0, Math.floor(S.deliveredCargo[type] || 0));
-    if (add) meta.wallet[type] = (meta.wallet[type] || 0) + add;
+    if (add) {
+      const bonusMult = getResourceBonusMult();
+      meta.wallet[type] =
+        (meta.wallet[type] || 0) + Math.max(0, Math.floor(add * bonusMult));
+    }
   }
   const xpEarned = Math.max(0, Math.floor(S.runXpEarnedThisRun || 0));
   if (xpEarned) meta.totalXp = (meta.totalXp || 0) + xpEarned;
@@ -374,7 +479,7 @@ export function tryBuy(itemId) {
   if (!def) return { ok: false, reason: 'unknown' };
 
   const meta = loadMeta();
-  if (def.once && meta.unlocks[def.unlockKey]) {
+  if (isShopItemMaxed(meta, def)) {
     return { ok: false, reason: 'owned' };
   }
   if (!canAfford(def.price, meta)) {
@@ -382,7 +487,12 @@ export function tryBuy(itemId) {
   }
 
   subtractPrice(def.price, meta);
-  meta.unlocks[def.unlockKey] = true;
+  if (def.upgradeKey) {
+    if (!meta.upgradeLevels) meta.upgradeLevels = {};
+    meta.upgradeLevels[def.upgradeKey] = getShopUpgradeLevel(meta, def.upgradeKey) + 1;
+  } else if (def.unlockKey) {
+    meta.unlocks[def.unlockKey] = true;
+  }
   saveMeta(meta);
   return { ok: true };
 }
@@ -395,8 +505,21 @@ export function applyMetaToRunState(S) {
   S.heartsMax = meta.unlocks[UNLOCK_EXTRA_HEART]
     ? HEARTS_WITH_BONUS
     : BASE_HEARTS_MAX;
-  S.lampBurnoutMs = meta.unlocks[UNLOCK_QUALITY_WICK]
-    ? Math.round(LAMP_BURNOUT_TIME * LAMP_BURNOUT_BONUS_MULT)
-    : LAMP_BURNOUT_TIME;
+  let lampMult = 1;
+  if (meta.unlocks[UNLOCK_QUALITY_WICK]) lampMult *= LAMP_BURNOUT_BONUS_MULT;
+  if (meta.unlocks[UNLOCK_FRESNEL_LENS]) lampMult *= FRESNEL_LENS_BONUS_MULT;
+  S.lampBurnoutMs = Math.round(LAMP_BURNOUT_TIME * lampMult);
+  S.lampOilReserve = meta.unlocks[UNLOCK_LAMP_OIL_CRATE]
+    ? LAMP_OIL_RESERVE_BONUS
+    : 0;
+  S.spareGeneratorCharge = meta.unlocks[UNLOCK_SPARE_GENERATOR]
+    ? SPARE_GENERATOR_START_CHARGE
+    : 0;
+  S.beamRotateMult = getBeamRotateMultFromMeta(meta);
   S.heartsRemaining = S.heartsMax;
+  if (S.spareGeneratorCharge > 0) {
+    S.lampTimer = -Math.round(S.lampBurnoutMs * S.spareGeneratorCharge);
+  } else {
+    S.lampTimer = 0;
+  }
 }

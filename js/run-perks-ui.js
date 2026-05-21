@@ -1,11 +1,14 @@
 import { playClickSound } from './sound.js';
 import S from './state.js';
 import {
-  PERK_IDS,
   PERK_ICONS,
   applyPerk,
   checkRunXpLevelUp,
   getPerkStack,
+  canSelectPerkInPicker,
+  getPerkBlockReason,
+  getPerkPickerVisibleIds,
+  rollPerkPickerOffer,
   setPerkPickerOpener,
 } from './run-perks.js';
 import { updateHUD } from './ui.js';
@@ -23,8 +26,10 @@ function renderPerkCards() {
   if (!$perkPickCards) return;
   $perkPickCards.innerHTML = '';
 
-  PERK_IDS.forEach((perkId, index) => {
+  getPerkPickerVisibleIds().forEach((perkId, index) => {
     const stack = getPerkStack(perkId);
+    const blockReason = getPerkBlockReason(perkId);
+    const maxed = blockReason != null;
     const stackLabel =
       stack > 0 ? t('perk.stack', { n: stack + 1 }) : '';
 
@@ -33,6 +38,10 @@ function renderPerkCards() {
     btn.className = 'perk-card blur-bg';
     btn.dataset.perkId = perkId;
     btn.dataset.perkIndex = String(index);
+    if (maxed) {
+      btn.disabled = true;
+      btn.classList.add('perk-card--maxed');
+    }
 
     const icon = document.createElement('span');
     icon.className = 'perk-card-icon';
@@ -48,14 +57,25 @@ function renderPerkCards() {
 
     const hotkey = document.createElement('span');
     hotkey.className = 'perk-card-hotkey hidden-mobile';
-    hotkey.textContent = String(index + 1);
+    if (index < 9) hotkey.textContent = String(index + 1);
+    else if (index === 9) hotkey.textContent = '0';
+    else hotkey.hidden = true;
 
     btn.append(icon, title, desc, hotkey);
-    if (stackLabel) {
+    if (stackLabel && !maxed) {
       const stackEl = document.createElement('span');
       stackEl.className = 'perk-card-stack';
       stackEl.textContent = stackLabel;
       btn.appendChild(stackEl);
+    }
+    if (maxed) {
+      const maxEl = document.createElement('span');
+      maxEl.className = 'perk-card-stack';
+      maxEl.textContent =
+        blockReason === 'fullHealth'
+          ? t('perk.fullHealth')
+          : t('perk.maxed');
+      btn.appendChild(maxEl);
     }
 
     btn.addEventListener('pointerdown', () => selectPerk(perkId));
@@ -64,7 +84,7 @@ function renderPerkCards() {
 }
 
 function selectPerk(perkId) {
-  if (!S.perkPickerOpen) return;
+  if (!S.perkPickerOpen || !canSelectPerkInPicker(perkId)) return;
   playClickSound();
   applyPerk(perkId);
   closePerkPicker();
@@ -73,24 +93,39 @@ function selectPerk(perkId) {
 
 function onPerkKeyDown(e) {
   if (!S.perkPickerOpen) return;
+  const visible = getPerkPickerVisibleIds();
   const key = e.key;
-  if (key >= '1' && key <= '3') {
+  if (key >= '1' && key <= '9') {
     const idx = Number(key) - 1;
-    const perkId = PERK_IDS[idx];
-    if (perkId) {
+    const perkId = visible[idx];
+    if (perkId && canSelectPerkInPicker(perkId)) {
       e.preventDefault();
       selectPerk(perkId);
     }
     return;
   }
+  if (key === '0') {
+    const perkId = visible[9];
+    if (perkId && canSelectPerkInPicker(perkId)) {
+      e.preventDefault();
+      selectPerk(perkId);
+    }
+  }
   if (key === 'Enter') {
-    e.preventDefault();
-    selectPerk(PERK_IDS[0]);
+    const firstAvailable = visible.find((id) => canSelectPerkInPicker(id));
+    if (firstAvailable) {
+      e.preventDefault();
+      selectPerk(firstAvailable);
+    }
   }
 }
 
 export function openPerkPicker() {
   if (S.perkPickerOpen || S.gameOver) return;
+  if (!S.debugMode) {
+    rollPerkPickerOffer();
+    if (!S.perkPickerOffer.length) return;
+  }
   S.perkPickerOpen = true;
   if ($perkPickTitle) $perkPickTitle.textContent = t('perk.pick.title');
   renderPerkCards();
@@ -104,7 +139,23 @@ export function openPerkPicker() {
 
 export function closePerkPicker() {
   S.perkPickerOpen = false;
+  S.perkPickerOffer = [];
   if ($screenPerkPick) $screenPerkPick.hidden = true;
+  updateHUD();
+}
+
+/** Re-roll offer and re-render when debug is toggled while the picker is open. */
+export function refreshPerkPickerOnDebugChange() {
+  if (!S.perkPickerOpen) return;
+  if (!S.debugMode) {
+    rollPerkPickerOffer();
+    if (!S.perkPickerOffer.length) {
+      closePerkPicker();
+      checkRunXpLevelUp();
+      return;
+    }
+  }
+  renderPerkCards();
   updateHUD();
 }
 

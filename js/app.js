@@ -65,7 +65,8 @@ import { registerBrowserTools } from './browser-tools.js';
 import { commitRunToMeta, applyMetaToRunState } from './meta-progress.js';
 import { getLeaderboardPlayerLevel } from './player-level.js';
 import { resetRunPerks } from './run-perks.js';
-import { initRunPerksUi } from './run-perks-ui.js';
+import { initRunPerksUi, refreshPerkPickerOnDebugChange } from './run-perks-ui.js';
+import { updateOldMapReveal, cleanupOldMap } from './old-map.js';
 import { onAchievementUnlocked } from './achievements.js';
 
 import './ip-tracker.js';
@@ -272,6 +273,7 @@ function bindEvents() {
       S.debugText.visible = S.debugMode;
       setDebugControlsVisible(S.debugMode);
       S.darknessGfx.visible = !S.debugMode;
+      refreshPerkPickerOnDebugChange();
       console.log(`🔧 Debug mode: ${S.debugMode}`);
     }
 
@@ -357,6 +359,7 @@ function clearGame() {
   cleanupKrakens();
   cleanupMermaids();
   cleanupRocks();
+  cleanupOldMap();
 }
 
 // ===== Exit to menu =====
@@ -557,6 +560,7 @@ function gameLoop(delta) {
   updateBeamMultiLitTracker(now);
   updateDarkness();
   updateTooltips(delta);
+  updateOldMapReveal();
   if (S.debugMode) updateDebug();
 
   const drawCtx = { debug: S.debugMode, gfx: S.debugGfx };

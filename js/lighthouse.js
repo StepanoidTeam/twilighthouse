@@ -12,7 +12,7 @@ import {
   scaleToWidth,
 } from './config.js';
 import S from './state.js';
-import { getEffectiveLampBurnoutMs } from './run-perks.js';
+import { getEffectiveLampBurnoutMs, getMaxBeamHalfAngle } from './run-perks.js';
 
 export function buildLighthouse(parent) {
   S.lighthouseContainer = new PIXI.Container();
@@ -35,11 +35,12 @@ export function buildGlow() {
 }
 
 function updateBeamRotation(delta) {
+  const rotateSpeed = BEAM_ROTATE_SPEED * (S.beamRotateMult || 1);
   if (S.keys['KeyA'] || S.keys['ArrowLeft']) {
-    S.beamAngle -= BEAM_ROTATE_SPEED * delta;
+    S.beamAngle -= rotateSpeed * delta;
   }
   if (S.keys['KeyD'] || S.keys['ArrowRight']) {
-    S.beamAngle += BEAM_ROTATE_SPEED * delta;
+    S.beamAngle += rotateSpeed * delta;
   }
 }
 
@@ -56,14 +57,19 @@ function updateLamp(delta) {
       S.lampRestoreFramesTotal = 0;
       S.lampRestoreStartTimer = 0;
     }
+  } else if (S.lampTimer < 0) {
+    S.lampTimer = Math.min(S.lampTimer + delta, 0);
   } else {
     S.lampTimer = Math.min(S.lampTimer + delta, lampCap);
   }
 
-  const burnout = S.lampTimer / lampCap;
+  const burnout =
+    S.lampTimer < 0 ? 0 : S.lampTimer / lampCap;
   const beamMult = S.runBeamMult || 1;
   const fullAngle = LAMP_FULL_ANGLE * beamMult;
-  S.BEAM_HALF_ANGLE = fullAngle - (fullAngle - LAMP_MIN_ANGLE) * burnout;
+  let halfAngle = fullAngle - (fullAngle - LAMP_MIN_ANGLE) * burnout;
+  halfAngle = Math.min(halfAngle, getMaxBeamHalfAngle());
+  S.BEAM_HALF_ANGLE = halfAngle;
 
   if (burnout > LAMP_FLICKER_START) {
     const flickerIntensity =
@@ -98,6 +104,7 @@ export function isInBeam(x, y) {
 
 export function checkRockCollision(x, y) {
   for (const rock of S.rockColliders) {
+    if (rock.radius <= 0) continue;
     const dist = Math.hypot(x - rock.x, y - rock.y);
     if (dist < rock.radius + BOAT_RADIUS) return true;
   }
