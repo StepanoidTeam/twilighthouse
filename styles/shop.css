@@ -24,6 +24,11 @@
   align-items: center;
 }
 
+.menu-shop .shop-reset-btn {
+  align-self: flex-start;
+  padding-inline: 18px;
+}
+
 .menu-shop .shop-wallet-chip {
   display: inline-flex;
   align-items: center;

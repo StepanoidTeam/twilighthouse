@@ -1,5 +1,14 @@
 import { BOAT_CARGO_TYPES } from './config.js';
-import { loadMeta, tryBuy, SHOP_ITEMS, canAfford, getShopItemLevel, isShopItemMaxed } from './meta-progress.js';
+import {
+  loadMeta,
+  tryBuy,
+  SHOP_ITEMS,
+  canAfford,
+  getShopItemLevel,
+  isShopItemMaxed,
+  hasShopPurchases,
+  resetShopPurchases,
+} from './meta-progress.js';
 import { getLevelFromXp } from './player-level.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
@@ -120,9 +129,10 @@ export function renderShopScreen({ container, isActive }) {
   const $nights = container.querySelector('.shop-nights-line');
   const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
+  const $resetBtn = container.querySelector('.shop-reset-btn');
   const $grid = container.querySelector('.shop-grid');
 
-  if (!$title || !$nights || !$walletRow || !$grid) return;
+  if (!$title || !$nights || !$walletRow || !$grid || !$resetBtn) return;
 
   $title.textContent = t('shop.title');
   if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
@@ -131,9 +141,21 @@ export function renderShopScreen({ container, isActive }) {
     if (typeof isActive === 'function' && !isActive()) return;
     const meta = loadMeta();
     $nights.textContent = `${t('shop.playerLevel', { n: getLevelFromXp(meta.totalXp || 0) })} · ${t('shop.nightsWon', { n: meta.nightsWon })}`;
+    $resetBtn.textContent = t('shop.reset');
+    $resetBtn.disabled = !hasShopPurchases(meta);
     renderWallet($walletRow, meta);
     renderGrid($grid, meta, paint);
   }
+
+  $resetBtn.onclick = () => {
+    const meta = loadMeta();
+    if (!hasShopPurchases(meta)) return;
+    if (!window.confirm(t('shop.resetConfirm'))) return;
+    const res = resetShopPurchases();
+    if (!res.ok) return;
+    playClickSound();
+    paint();
+  };
 
   paint();
 }

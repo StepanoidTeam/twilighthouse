@@ -105,6 +105,8 @@ Photopea — image editor
     'shop.maxLevel': 'Max level',
     'shop.level': 'Lv {n}/{max}',
     'shop.cantAfford': 'Not enough supplies',
+    'shop.reset': 'Reset purchases',
+    'shop.resetConfirm': 'Reset all shop purchases and refund all spent supplies?',
     'shop.items.extra_heart.name': 'Spare lifebelt',
     'shop.items.extra_heart.desc':
       'Start each run with one extra heart — more room for mistakes at the lighthouse.',
@@ -406,6 +408,8 @@ Photopea — image editor
     'shop.maxLevel': 'Макс. уровень',
     'shop.level': 'Ур. {n}/{max}',
     'shop.cantAfford': 'Не хватает товара',
+    'shop.reset': 'Сбросить покупки',
+    'shop.resetConfirm': 'Сбросить все покупки в магазине и вернуть все потраченные ресурсы?',
     'shop.items.extra_heart.name': 'Запасной пояс',
     'shop.items.extra_heart.desc':
       'Каждый забег начинается с одной дополнительной жизни — больше шансов удержать маяк.',

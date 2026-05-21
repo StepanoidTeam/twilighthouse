@@ -241,6 +241,11 @@ export function isShopItemMaxed(meta, item) {
   return Boolean(item.once && item.unlockKey && meta.unlocks[item.unlockKey]);
 }
 
+/** @param {MetaState} meta */
+export function hasShopPurchases(meta) {
+  return SHOP_ITEMS.some((item) => getShopItemLevel(meta, item) > 0);
+}
+
 async function saveMetaToServer(meta, updatedAtMs) {
   const user = currentUser;
   if (!user || !user.uid) return;
@@ -437,6 +442,21 @@ function subtractPrice(price, meta) {
   }
 }
 
+/**
+ * @param {Record<string, number>} price
+ * @param {MetaState} meta
+ * @param {number} multiplier
+ */
+function addPrice(price, meta, multiplier = 1) {
+  const times = Math.max(0, Math.floor(Number(multiplier)) || 0);
+  if (times <= 0) return;
+  for (const [emoji, need] of Object.entries(price)) {
+    const n = Math.max(0, Math.floor(Number(need)) || 0);
+    if (n <= 0) continue;
+    meta.wallet[emoji] = (meta.wallet[emoji] || 0) + n * times;
+  }
+}
+
 /** @param {import('./state.js').default} S */
 export function commitRunToMeta(S) {
   if (!S.gameSessionActive) return;
@@ -493,6 +513,31 @@ export function tryBuy(itemId) {
   } else if (def.unlockKey) {
     meta.unlocks[def.unlockKey] = true;
   }
+  saveMeta(meta);
+  return { ok: true };
+}
+
+/**
+ * @returns {{ ok: true } | { ok: false, reason: 'empty' }}
+ */
+export function resetShopPurchases() {
+  const meta = loadMeta();
+  if (!hasShopPurchases(meta)) {
+    return { ok: false, reason: 'empty' };
+  }
+
+  for (const item of SHOP_ITEMS) {
+    const level = getShopItemLevel(meta, item);
+    if (level <= 0) continue;
+
+    addPrice(item.price, meta, level);
+    if (item.upgradeKey) {
+      delete meta.upgradeLevels[item.upgradeKey];
+    } else if (item.unlockKey) {
+      delete meta.unlocks[item.unlockKey];
+    }
+  }
+
   saveMeta(meta);
   return { ok: true };
 }
