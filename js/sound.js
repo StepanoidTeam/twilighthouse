@@ -342,7 +342,11 @@ function createAmbientAudioTrack(options) {
   return new AmbientAudioTrack(options);
 }
 
+const preloadedAudioPaths = new Set();
+
 function preloadAudioAsset(path) {
+  if (preloadedAudioPaths.has(path)) return Promise.resolve();
+
   return new Promise((resolve) => {
     const audio = new Audio();
     let settled = false;
@@ -359,6 +363,7 @@ function preloadAudioAsset(path) {
       if (settled) return;
       settled = true;
       cleanup();
+      preloadedAudioPaths.add(path);
       resolve();
     }
 
