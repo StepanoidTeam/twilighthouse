@@ -19,6 +19,21 @@ function cloneTemplateFirstElement(id) {
   return first ? first.cloneNode(true) : null;
 }
 
+function renderLevelIndicator($row, level, maxLevel) {
+  $row.replaceChildren();
+  if (!maxLevel || maxLevel <= 1) {
+    $row.hidden = true;
+    return;
+  }
+  $row.hidden = false;
+  for (let i = 1; i <= maxLevel; i++) {
+    const diamond = document.createElement('span');
+    diamond.className = i <= level ? 'shop-level-diamond shop-level-diamond--filled' : 'shop-level-diamond';
+    diamond.textContent = '◆';
+    $row.appendChild(diamond);
+  }
+}
+
 function formatPriceLine(price) {
   return Object.entries(price)
     .map(([emoji, n]) => `${emoji}×${n}`)
@@ -58,6 +73,7 @@ function renderGrid($grid, meta, onBought) {
     if (!(card instanceof HTMLElement)) continue;
 
     const h = card.querySelector('.shop-item-title');
+    const levelRow = card.querySelector('.shop-item-level-row');
     const iconEl = card.querySelector('.shop-item-icon');
     const desc = card.querySelector('.shop-item-desc');
     const price = card.querySelector('.shop-item-price');
@@ -65,17 +81,17 @@ function renderGrid($grid, meta, onBought) {
     if (!(btn instanceof HTMLButtonElement)) continue;
 
     const title = t(`shop.items.${item.id}.name`);
-    if (h) {
-      h.textContent =
-        item.maxLevel && level > 0
-          ? `${title} · ${t('shop.level', { n: level, max: item.maxLevel })}`
-          : title;
-    }
+    if (h) h.textContent = title;
+
+    // Level indicator (diamonds)
+    const maxLevel = item.maxLevel || (item.once ? 1 : 0);
+    if (levelRow) renderLevelIndicator(levelRow, level, maxLevel);
+
+    // Large icon
     if (iconEl) {
-      const icon = item.icon || '';
-      iconEl.textContent = icon;
-      iconEl.hidden = !icon;
+      iconEl.textContent = item.icon || '';
     }
+
     if (desc) {
       desc.textContent = t(`shop.items.${item.id}.desc`, {
         level,
