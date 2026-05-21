@@ -103,6 +103,12 @@ const BOOT_TEXTURE_ASSETS = [
   'sprites/icons/wheel.png',
   'sprites/icons/chest.png',
   'sprites/icons/map.png',
+  // Game-over / win splash backgrounds
+  'sprites/wasted/iceberg.png',
+  'sprites/wasted/mermaid.png',
+  'sprites/wasted/kraken.png',
+  'sprites/wasted/police.png',
+  'sprites/wasted/peremoha.png',
 ];
 let bootLoaderState = {
   loaded: 0,
@@ -712,9 +718,6 @@ async function init() {
   snapCamera();
   S.app.ticker.add(gameLoop);
 
-  // Build menu (on top of everything) and show it
-  await buildMenu(S.app, startGame);
-
   applyI18nToDOM();
 
   await primeBootAmbientAudio();
@@ -722,6 +725,9 @@ async function init() {
   S.gameSessionActive = false;
   resourcesReady = true;
   hideBootLoader();
+
+  // Build menu (on top of everything) and show it only after all resources are ready
+  await buildMenu(S.app, startGame);
 
   initializeAmbientAudio();
   startWavesSound({ restartPlayback: true });
