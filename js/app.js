@@ -57,6 +57,7 @@ import {
   openLeaderboard,
   isMenuVisible,
   repositionMenu,
+  showSettingsFromGame,
 } from './menu.js';
 import { submitScore } from './leaderboard.js';
 import { currentUser } from './auth.js';
@@ -92,6 +93,7 @@ const {
   $btnResultRestart,
   $btnResultMenu,
   $btnExitConfirm,
+  $btnExitSettings,
   $btnExitResume,
   $btnEsc,
   $volControls,
@@ -799,6 +801,11 @@ async function init() {
   $btnExitResume.addEventListener('pointerdown', () => {
     playClickSound();
     hideExitConfirm();
+  });
+  $btnExitSettings.addEventListener('pointerdown', () => {
+    playClickSound();
+    hideExitConfirm();
+    showSettingsFromGame();
   });
 
   bindEvents();
