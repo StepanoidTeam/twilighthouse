@@ -84,6 +84,7 @@ const {
   $bootLoader,
   $bootLoaderTitle,
   $bootLoaderText,
+  $bootLoaderTip,
   $bootLoaderAsset,
   $bootLoaderBarFill,
   $bootLoaderPercent,
@@ -121,6 +122,97 @@ let bootLoaderState = {
   currentAsset: null,
 };
 let resourcesReady = false;
+const BOOT_TIP_MIN_MS = 3000;
+const BOOT_TIP_MAX_MS = 5000;
+const BOOT_TIP_FADE_MS = 180;
+let bootTipIndex = -1;
+let bootTipSwitchTimeoutId = 0;
+let bootTipFadeTimeoutId = 0;
+
+function clearBootTipTimers() {
+  window.clearTimeout(bootTipSwitchTimeoutId);
+  window.clearTimeout(bootTipFadeTimeoutId);
+  bootTipSwitchTimeoutId = 0;
+  bootTipFadeTimeoutId = 0;
+}
+
+function getBootTips() {
+  const tips = t('boot.tips');
+  if (!Array.isArray(tips)) return [];
+  return tips.filter((tip) => typeof tip === 'string' && tip.trim().length > 0);
+}
+
+function getNextBootTipIndex(tips) {
+  if (tips.length <= 1) return tips.length === 1 ? 0 : -1;
+  let nextIndex = Math.floor(Math.random() * tips.length);
+  while (nextIndex === bootTipIndex) {
+    nextIndex = Math.floor(Math.random() * tips.length);
+  }
+  return nextIndex;
+}
+
+function renderBootTip({ animate = true, forceIndex = null } = {}) {
+  if (!$bootLoaderTip) return;
+  const tips = getBootTips();
+  if (!tips.length) {
+    $bootLoaderTip.hidden = true;
+    $bootLoaderTip.classList.remove('is-visible');
+    bootTipIndex = -1;
+    return;
+  }
+
+  const nextIndex =
+    typeof forceIndex === 'number'
+      ? Math.max(0, Math.min(forceIndex, tips.length - 1))
+      : getNextBootTipIndex(tips);
+
+  if (nextIndex < 0) return;
+  bootTipIndex = nextIndex;
+  const nextTip = tips[nextIndex];
+
+  if (!animate) {
+    $bootLoaderTip.textContent = nextTip;
+    $bootLoaderTip.hidden = false;
+    $bootLoaderTip.classList.add('is-visible');
+    return;
+  }
+
+  $bootLoaderTip.classList.remove('is-visible');
+  window.clearTimeout(bootTipFadeTimeoutId);
+  bootTipFadeTimeoutId = window.setTimeout(() => {
+    $bootLoaderTip.textContent = nextTip;
+    $bootLoaderTip.hidden = false;
+    requestAnimationFrame(() => {
+      $bootLoaderTip.classList.add('is-visible');
+    });
+  }, BOOT_TIP_FADE_MS);
+}
+
+function scheduleNextBootTip() {
+  window.clearTimeout(bootTipSwitchTimeoutId);
+  if (bootLoaderState.status !== 'loading') return;
+  const delay =
+    BOOT_TIP_MIN_MS +
+    Math.floor(Math.random() * (BOOT_TIP_MAX_MS - BOOT_TIP_MIN_MS + 1));
+  bootTipSwitchTimeoutId = window.setTimeout(() => {
+    if (bootLoaderState.status !== 'loading') return;
+    renderBootTip();
+    scheduleNextBootTip();
+  }, delay);
+}
+
+function startBootTipsRotation() {
+  if (!$bootLoaderTip) return;
+  clearBootTipTimers();
+  renderBootTip({ animate: false });
+  scheduleNextBootTip();
+}
+
+function stopBootTipsRotation() {
+  clearBootTipTimers();
+  if (!$bootLoaderTip) return;
+  $bootLoaderTip.classList.remove('is-visible');
+}
 
 function getBootAssetLabel(asset) {
   if (!asset) {
@@ -179,6 +271,7 @@ function setBootLoaderProgress(loaded, total, currentAsset = null) {
 
 function hideBootLoader() {
   if (!$bootLoader) return;
+  stopBootTipsRotation();
 
   bootLoaderState = {
     ...bootLoaderState,
@@ -201,6 +294,7 @@ function hideBootLoader() {
 
 function showBootLoaderError() {
   if (!$bootLoader) return;
+  stopBootTipsRotation();
 
   bootLoaderState = {
     ...bootLoaderState,
@@ -611,6 +705,7 @@ async function loadTextures() {
 // ===== Init =====
 async function init() {
   renderBootLoaderText();
+  startBootTipsRotation();
   bindAmbientAudioUnlock();
   bindAmbientAudioVisibilityPause();
 
@@ -743,6 +838,11 @@ async function init() {
 
 renderBootLoaderText();
 onLanguageChange(renderBootLoaderText);
+onLanguageChange(() => {
+  if (bootLoaderState.status !== 'loading' || !$bootLoaderTip) return;
+  if (bootTipIndex >= 0) renderBootTip({ animate: false, forceIndex: bootTipIndex });
+  else renderBootTip({ animate: false });
+});
 onLanguageChange(applyI18nToDOM);
 onLanguageChange(updateHUD);
 registerBrowserTools();

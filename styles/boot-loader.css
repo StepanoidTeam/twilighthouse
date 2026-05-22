@@ -54,6 +54,25 @@
   padding-left: 10px;
 }
 
+.boot-loader-tip {
+  margin: 0;
+  min-height: 42px;
+  color: #9dd5ff;
+  font-size: 14px;
+  line-height: 1.45;
+  padding-left: 10px;
+  opacity: 0;
+  transform: translateY(6px);
+  transition:
+    opacity 220ms ease,
+    transform 220ms ease;
+}
+
+.boot-loader-tip.is-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
 .boot-loader-asset {
   min-height: 19px;
   color: #8aa0bd;
