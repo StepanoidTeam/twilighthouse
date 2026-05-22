@@ -25,12 +25,9 @@ let perkKeyHandler = null;
 
 function renderLevelBullets(container, level, maxLevel) {
   container.replaceChildren();
-  if (!maxLevel || maxLevel <= 1) {
-    container.hidden = true;
-    return;
-  }
+  const displayMax = Math.max(1, Math.floor(Number(maxLevel)) || 0);
   container.hidden = false;
-  for (let i = 1; i <= maxLevel; i++) {
+  for (let i = 1; i <= displayMax; i++) {
     const dot = document.createElement('span');
     dot.className = i <= level
       ? 'perk-level-dot perk-level-dot--filled'
@@ -69,7 +66,9 @@ function renderPerkCards() {
     // Level bullets
     const levelRow = document.createElement('div');
     levelRow.className = 'perk-card-level-row';
-    const displayMax = maxStacks === Infinity ? 0 : maxStacks;
+    const displayMax = maxStacks === Infinity
+      ? 1
+      : Math.max(1, Math.floor(Number(maxStacks)) || 0);
     renderLevelBullets(levelRow, stack, displayMax);
 
     // Large icon

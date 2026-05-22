@@ -21,12 +21,9 @@ function cloneTemplateFirstElement(id) {
 
 function renderLevelIndicator($row, level, maxLevel) {
   $row.replaceChildren();
-  if (!maxLevel || maxLevel <= 1) {
-    $row.hidden = true;
-    return;
-  }
+  const displayMax = Math.max(1, Math.floor(Number(maxLevel)) || 0);
   $row.hidden = false;
-  for (let i = 1; i <= maxLevel; i++) {
+  for (let i = 1; i <= displayMax; i++) {
     const diamond = document.createElement('span');
     diamond.className = i <= level ? 'shop-level-diamond shop-level-diamond--filled' : 'shop-level-diamond';
     diamond.textContent = '◆';
@@ -146,6 +143,10 @@ export function renderShopScreen({ container, isActive }) {
   const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
   const $resetBtn = container.querySelector('.shop-reset-btn');
+  const $resetConfirm = container.querySelector('.shop-reset-confirm');
+  const $resetConfirmText = container.querySelector('.shop-reset-confirm-text');
+  const $resetConfirmCancel = container.querySelector('.shop-reset-confirm-cancel');
+  const $resetConfirmApply = container.querySelector('.shop-reset-confirm-apply');
   const $grid = container.querySelector('.shop-grid');
 
   if (!$title || !$nights || !$walletRow || !$grid || !$resetBtn) return;
@@ -159,18 +160,52 @@ export function renderShopScreen({ container, isActive }) {
     $nights.textContent = `${t('shop.playerLevel', { n: getLevelFromXp(meta.totalXp || 0) })} · ${t('shop.nightsWon', { n: meta.nightsWon })}`;
     $resetBtn.textContent = t('shop.reset');
     $resetBtn.disabled = !hasShopPurchases(meta);
+    if ($resetConfirmText) $resetConfirmText.textContent = t('shop.resetConfirm');
+    if ($resetConfirmCancel) $resetConfirmCancel.textContent = t('shop.resetCancel');
+    if ($resetConfirmApply) $resetConfirmApply.textContent = t('shop.resetApply');
     renderWallet($walletRow, meta);
     renderGrid($grid, meta, paint);
+  }
+
+  function closeResetConfirm() {
+    if ($resetConfirm instanceof HTMLElement) {
+      $resetConfirm.hidden = true;
+    }
+  }
+
+  function tryResetPurchases() {
+    const res = resetShopPurchases();
+    if (!res.ok) return;
+    playClickSound();
+    closeResetConfirm();
+    paint();
   }
 
   $resetBtn.onclick = () => {
     const meta = loadMeta();
     if (!hasShopPurchases(meta)) return;
-    const res = resetShopPurchases();
-    if (!res.ok) return;
-    playClickSound();
-    paint();
+    if ($resetConfirm instanceof HTMLElement) {
+      $resetConfirm.hidden = false;
+      return;
+    }
+    tryResetPurchases();
   };
+
+  if ($resetConfirmCancel instanceof HTMLButtonElement) {
+    $resetConfirmCancel.onclick = closeResetConfirm;
+  }
+  if ($resetConfirmApply instanceof HTMLButtonElement) {
+    $resetConfirmApply.onclick = tryResetPurchases;
+  }
+  if ($resetConfirm instanceof HTMLElement) {
+    $resetConfirm.onclick = (e) => {
+      const target = e.target;
+      if (!(target instanceof HTMLElement)) return;
+      if (target === $resetConfirm || target.classList.contains('shop-reset-confirm-backdrop')) {
+        closeResetConfirm();
+      }
+    };
+  }
 
   paint();
 }
