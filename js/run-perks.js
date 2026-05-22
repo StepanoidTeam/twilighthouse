@@ -16,6 +16,7 @@ import {
   PERK_EXPERIENCED_KEEPER_BONUS,
   PERK_OCCULT_MERMAID_WEIGHT,
   PERK_OCCULT_KRAKEN_WEIGHT,
+  PERK_ELASTIC_BEAM_DEG_PER_STACK,
   OLD_MAP_REVEAL_MS,
   LAMP_BURNOUT_TIME,
   LAMP_FULL_ANGLE,
@@ -40,6 +41,7 @@ export const PERK_IDS = [
   'brighter_beam',
   'slow_cops',
   'beam_width',
+  'elastic_beam',
   'siren_eye',
   'experienced_keeper',
   'occult_lamp',
@@ -53,6 +55,7 @@ export const PERK_ICONS = {
   brighter_beam: '🔦',
   slow_cops: '🚔',
   beam_width: '📐',
+  elastic_beam: '🌀',
   siren_eye: '👁️',
   experienced_keeper: '🧭',
   occult_lamp: '🔮',
@@ -66,6 +69,7 @@ export const PERK_MAX_STACKS = {
   brighter_beam: Infinity,
   slow_cops: Infinity,
   beam_width: PERK_BEAM_WIDTH_MAX_STACKS,
+  elastic_beam: Infinity,
   siren_eye: Infinity,
   experienced_keeper: Infinity,
   occult_lamp: 1,
@@ -192,6 +196,12 @@ export function getMaxBeamHalfAngle() {
   return LAMP_FULL_ANGLE + extraHalfRad;
 }
 
+export function getElasticBeamHalfAngleBonus() {
+  const stacks = getPerkStack('elastic_beam');
+  if (stacks <= 0) return 0;
+  return ((stacks * PERK_ELASTIC_BEAM_DEG_PER_STACK) / 2) * (Math.PI / 180);
+}
+
 export function getMermaidSpawnWeightMult() {
   let mult = 1;
   const sirenStacks = getPerkStack('siren_eye');
@@ -272,6 +282,7 @@ export function resetRunPerks(state = S) {
   state.perkPickerOpen = false;
   state.perkPickerOffer = [];
   state.oldMapRevealUntil = 0;
+  state.beamMotionBonusHalfAngle = 0;
 }
 
 export function checkRunXpLevelUp() {

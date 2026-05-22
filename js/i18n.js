@@ -287,6 +287,9 @@ Photopea — image editor
     'perk.beam_width.title': 'Max beam width',
     'perk.beam_width.desc':
       'Raises the beam width cap by 10° per level.',
+    'perk.elastic_beam.title': 'Elastic beam',
+    'perk.elastic_beam.desc':
+      'While rotating, the beam briefly widens; when idle it smoothly returns to normal width.',
     'perk.siren_eye.title': "Siren's eye",
     'perk.siren_eye.desc':
       'Mermaids spawn less often, but move faster.',
@@ -619,6 +622,9 @@ Photopea — image editor
     'perk.beam_width.title': 'Макс. ширина луча',
     'perk.beam_width.desc':
       'Повышает максимум ширины луча на 10° за уровень.',
+    'perk.elastic_beam.title': 'Упругий луч',
+    'perk.elastic_beam.desc':
+      'Во время поворота луч немного расширяется, а при остановке плавно сужается до обычной ширины.',
     'perk.siren_eye.title': 'Глаз сирены',
     'perk.siren_eye.desc':
       'Русалки появляются реже, но двигаются быстрее.',
