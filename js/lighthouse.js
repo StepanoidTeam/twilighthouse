@@ -7,12 +7,18 @@ import {
   LAMP_MIN_ANGLE,
   LAMP_BURNOUT_TIME,
   LAMP_FLICKER_START,
+  PERK_ELASTIC_BEAM_EXPAND_SPEED,
+  PERK_ELASTIC_BEAM_SHRINK_SPEED,
   MOB_SPAWN_RING,
   LIGHTHOUSE_WIDTH,
   scaleToWidth,
 } from './config.js';
 import S from './state.js';
-import { getEffectiveLampBurnoutMs, getMaxBeamHalfAngle } from './run-perks.js';
+import {
+  getEffectiveLampBurnoutMs,
+  getElasticBeamHalfAngleBonus,
+  getMaxBeamHalfAngle,
+} from './run-perks.js';
 
 export function buildLighthouse(parent) {
   S.lighthouseContainer = new PIXI.Container();
@@ -36,15 +42,19 @@ export function buildGlow() {
 
 function updateBeamRotation(delta) {
   const rotateSpeed = BEAM_ROTATE_SPEED * (S.beamRotateMult || 1);
+  let moving = false;
   if (S.keys['KeyA'] || S.keys['ArrowLeft']) {
     S.beamAngle -= rotateSpeed * delta;
+    moving = true;
   }
   if (S.keys['KeyD'] || S.keys['ArrowRight']) {
     S.beamAngle += rotateSpeed * delta;
+    moving = true;
   }
+  return moving;
 }
 
-function updateLamp(delta) {
+function updateLamp(delta, isBeamMoving) {
   const lampCap = getEffectiveLampBurnoutMs();
   if (S.lampRestoreFramesLeft > 0) {
     S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
@@ -69,6 +79,15 @@ function updateLamp(delta) {
   const fullAngle = LAMP_FULL_ANGLE * beamMult;
   let halfAngle = fullAngle - (fullAngle - LAMP_MIN_ANGLE) * burnout;
   halfAngle = Math.min(halfAngle, getMaxBeamHalfAngle());
+  const motionTarget = isBeamMoving ? getElasticBeamHalfAngleBonus() : 0;
+  const stretchSpeed = isBeamMoving
+    ? PERK_ELASTIC_BEAM_EXPAND_SPEED
+    : PERK_ELASTIC_BEAM_SHRINK_SPEED;
+  const stretchStep = Math.min(1, Math.max(0, stretchSpeed * delta));
+  const motionBonus = S.beamMotionBonusHalfAngle || 0;
+  S.beamMotionBonusHalfAngle =
+    motionBonus + (motionTarget - motionBonus) * stretchStep;
+  halfAngle += S.beamMotionBonusHalfAngle;
   S.BEAM_HALF_ANGLE = halfAngle;
 
   if (burnout > LAMP_FLICKER_START) {
@@ -87,8 +106,8 @@ function updateLamp(delta) {
 }
 
 export function updateLighthouse(delta) {
-  updateBeamRotation(delta);
-  updateLamp(delta);
+  const isBeamMoving = updateBeamRotation(delta);
+  updateLamp(delta, isBeamMoving);
 }
 
 export function isInBeam(x, y) {

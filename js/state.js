@@ -138,6 +138,7 @@ const State = {
   lampFlicker: 1,
   lampBurnoutMs: LAMP_BURNOUT_TIME,
   beamRotateMult: 1,
+  beamMotionBonusHalfAngle: 0,
 
   // Hearts / Lives System
   heartsMax: 5,
@@ -241,6 +242,7 @@ const State = {
     this.heartsMax = 5;
     this.lampBurnoutMs = LAMP_BURNOUT_TIME;
     this.beamRotateMult = 1;
+    this.beamMotionBonusHalfAngle = 0;
     this.heartsRemaining = this.heartsMax;
     this.lastEnemyType = null;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
