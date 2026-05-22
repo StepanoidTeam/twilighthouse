@@ -9,6 +9,7 @@ import {
   canSelectPerkInPicker,
   getPerkBlockReason,
   getPerkPickerVisibleIds,
+  getRunLevel,
   rollPerkPickerOffer,
   setPerkPickerOpener,
 } from './run-perks.js';
@@ -18,6 +19,7 @@ import { t, onLanguageChange } from './i18n.js';
 const {
   $screenPerkPick,
   $perkPickTitle,
+  $perkPickLevel,
   $perkPickCards,
 } = globalThis;
 
@@ -158,6 +160,9 @@ export function openPerkPicker() {
   }
   S.perkPickerOpen = true;
   if ($perkPickTitle) $perkPickTitle.textContent = t('perk.pick.title');
+  if ($perkPickLevel) {
+    $perkPickLevel.textContent = t('perk.pick.level', { n: getRunLevel() });
+  }
   renderPerkCards();
   if ($screenPerkPick) $screenPerkPick.hidden = false;
   if (!perkKeyHandler) {
@@ -194,6 +199,9 @@ export function initRunPerksUi() {
   onLanguageChange(() => {
     if (S.perkPickerOpen) {
       if ($perkPickTitle) $perkPickTitle.textContent = t('perk.pick.title');
+      if ($perkPickLevel) {
+        $perkPickLevel.textContent = t('perk.pick.level', { n: getRunLevel() });
+      }
       renderPerkCards();
     }
   });

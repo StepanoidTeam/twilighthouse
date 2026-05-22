@@ -12,6 +12,7 @@ import {
   getRunXpProgress,
   getRunPerkXpThreshold,
   getEffectiveLampBurnoutMs,
+  getRunLevel,
 } from './run-perks.js';
 import {
   CRASH_VOLUME,
@@ -213,9 +214,7 @@ function updateRunXpProgress() {
   const percent = Math.floor(ratio * 100);
   const current = Math.min(S.runXp || 0, threshold);
   const valueText = `${current}/${threshold}`;
-  const currentRunLevel = levels.isFreeplay()
-    ? 1
-    : Math.max(1, Math.floor(S.levelIndex || 0) + 1);
+  const currentRunLevel = getRunLevel();
   const label = t('hud.level.prefix', { n: currentRunLevel });
 
   if (hudCache.xpLabel !== label && $hudXpLabel) {
