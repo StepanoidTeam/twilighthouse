@@ -15,7 +15,6 @@ import { spawnMermaid } from './mermaid.js';
 import { spawnKraken } from './kraken.js';
 
 const {
-  $debugControls,
   $debugSpawnBoat,
   $debugSpawnPolice,
   $debugSpawnMermaid,
@@ -28,6 +27,8 @@ const DEBUG_SPAWNERS = [
   { button: $debugSpawnMermaid, spawn: spawnMermaid },
   { button: $debugSpawnKraken, spawn: spawnKraken },
 ];
+const ROOT_DEBUG_CLASS = 'debug';
+const GLOBAL_DEBUG_FLAG = 'DEBUG_MODE';
 
 function canUseDebugSpawner() {
   return S.debugMode && S.gameSessionActive && !S.gameOver;
@@ -63,7 +64,11 @@ export function buildDebug() {
 }
 
 export function setDebugControlsVisible(visible) {
-  if ($debugControls) $debugControls.hidden = !visible;
+  const nextValue = Boolean(visible);
+  globalThis[GLOBAL_DEBUG_FLAG] = nextValue;
+  if (document?.documentElement) {
+    document.documentElement.classList.toggle(ROOT_DEBUG_CLASS, nextValue);
+  }
 }
 
 export function updateDebug() {

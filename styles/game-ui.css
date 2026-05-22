@@ -299,6 +299,14 @@
   font-family: var(--font-ui);
 }
 
+.debug-only {
+  display: none !important;
+}
+
+.debug .debug-controls.debug-only {
+  display: flex !important;
+}
+
 .debug-btn {
   min-height: 30px;
   padding: 6px 10px;

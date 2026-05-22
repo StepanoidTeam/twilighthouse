@@ -359,14 +359,6 @@ function handleMenuKey(e) {
     return;
   }
 
-  if (e.code === 'Backquote' && currentScreen === 'achievements') {
-    e.preventDefault();
-    requestAnimationFrame(() => {
-      if (currentScreen === 'achievements') showAchievements();
-    });
-    return;
-  }
-
   if (currentScreen === 'main') {
     const n = MAIN_MENU_ACTIONS.length;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
