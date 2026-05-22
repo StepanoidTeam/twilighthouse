@@ -124,7 +124,7 @@ let bootLoaderState = {
   currentAsset: null,
 };
 let resourcesReady = false;
-const BOOT_TIP_INTERVAL_MS = 5000;
+const BOOT_TIP_INTERVAL_MS = 10000;
 const BOOT_TIP_FADE_MS = 180;
 let bootTipIndex = -1;
 let bootTipSwitchTimeoutId = 0;
