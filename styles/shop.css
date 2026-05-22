@@ -6,6 +6,7 @@
   gap: 14px;
   max-height: min(70vh, 640px);
   overflow: hidden;
+  position: relative;
 }
 
 .menu-shop .shop-wallet-label {
@@ -27,6 +28,54 @@
 .menu-shop .shop-reset-btn {
   align-self: flex-start;
   padding-inline: 18px;
+}
+
+.menu-shop .shop-reset-confirm {
+  position: absolute;
+  inset: 0;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+}
+
+.menu-shop .shop-reset-confirm[hidden] {
+  display: none;
+}
+
+.menu-shop .shop-reset-confirm-backdrop {
+  position: absolute;
+  inset: 0;
+  background: rgba(5, 12, 20, 0.72);
+}
+
+.menu-shop .shop-reset-confirm-dialog {
+  position: relative;
+  z-index: 1;
+  width: min(100%, 380px);
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  padding: 20px;
+  border-radius: var(--size-panel-radius);
+  border: 1px solid rgba(200, 220, 255, 0.24);
+}
+
+.menu-shop .shop-reset-confirm-text {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.4;
+}
+
+.menu-shop .shop-reset-confirm-actions {
+  display: flex;
+  gap: 10px;
+  justify-content: flex-end;
+  flex-wrap: wrap;
+}
+
+.menu-shop .shop-reset-confirm-apply {
+  border-color: rgba(255, 120, 120, 0.5);
+  color: #ffd4d4;
 }
 
 .menu-shop .shop-wallet-chip {
