@@ -127,6 +127,7 @@ let resourcesReady = false;
 const BOOT_TIP_INTERVAL_MS = 10000;
 const BOOT_TIP_FADE_MS = 180;
 let bootTipIndex = -1;
+let bootTipsShuffled = [];
 let bootTipSwitchTimeoutId = 0;
 let bootTipFadeTimeoutId = 0;
 
@@ -143,19 +144,18 @@ function getBootTips() {
   return tips.filter((tip) => typeof tip === 'string' && tip.trim().length > 0);
 }
 
-function getNextBootTipIndex(tips) {
-  if (tips.length <= 1) return tips.length === 1 ? 0 : -1;
-  let nextIndex = Math.floor(Math.random() * tips.length);
-  while (nextIndex === bootTipIndex) {
-    nextIndex = Math.floor(Math.random() * tips.length);
+function shuffleArray(arr) {
+  const result = arr.slice();
+  for (let i = result.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [result[i], result[j]] = [result[j], result[i]];
   }
-  return nextIndex;
+  return result;
 }
 
 function renderBootTip({ animate = true, forceIndex = null } = {}) {
   if (!$bootLoaderTip) return;
-  const tips = getBootTips();
-  if (!tips.length) {
+  if (!bootTipsShuffled.length) {
     $bootLoaderTip.hidden = true;
     $bootLoaderTip.classList.remove('is-visible');
     bootTipIndex = -1;
@@ -164,12 +164,11 @@ function renderBootTip({ animate = true, forceIndex = null } = {}) {
 
   const nextIndex =
     typeof forceIndex === 'number'
-      ? Math.max(0, Math.min(forceIndex, tips.length - 1))
-      : getNextBootTipIndex(tips);
+      ? Math.max(0, Math.min(forceIndex, bootTipsShuffled.length - 1))
+      : (bootTipIndex + 1) % bootTipsShuffled.length;
 
-  if (nextIndex < 0) return;
   bootTipIndex = nextIndex;
-  const nextTip = tips[nextIndex];
+  const nextTip = bootTipsShuffled[nextIndex];
 
   if (!animate) {
     $bootLoaderTip.textContent = nextTip;
@@ -202,6 +201,8 @@ function scheduleNextBootTip() {
 function startBootTipsRotation() {
   if (!$bootLoaderTip) return;
   clearBootTipTimers();
+  bootTipsShuffled = shuffleArray(getBootTips());
+  bootTipIndex = -1;
   renderBootTip({ animate: false });
   scheduleNextBootTip();
 }
