@@ -763,9 +763,7 @@ function getRunStatsItems() {
       section: 'time',
       icon: '⭐',
       label: t('resultStats.playerLevel'),
-      value: levels.isFreeplay()
-        ? 1
-        : Math.max(1, Math.floor(S.levelIndex || 0) + 1),
+      value: getRunLevel(),
     },
     {
       section: 'time',
