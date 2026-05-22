@@ -83,10 +83,12 @@ let i18nBound = false;
 let bgManMotion = null;
 let bgManMotionKeyframes = null;
 let openedFromGame = false; // true when settings opened mid-game via exit-confirm popup
+let menuLayoutSyncFrame = 0;
 
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
 const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.png';
+const NARROW_MENU_BREAKPOINT = 720;
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -259,6 +261,7 @@ function hideOverlayScreens() {
 function hideMainItems() {
   if ($menuMain) $menuMain.hidden = true;
   if ($menuHint) $menuHint.hidden = true;
+  if ($menuOverlay) $menuOverlay.classList.remove('menu-overlay--show-keeper');
   hideDiscordLink();
 }
 
@@ -274,6 +277,7 @@ function showMainMenu() {
   hideBackBtn();
   currentScreen = 'main';
   updateSelection();
+  scheduleMenuLayoutSync();
 }
 
 // ===== HTML Back Button =====
@@ -939,4 +943,31 @@ export function repositionMenu() {
 
   $menuOverlay.style.setProperty('--menu-vw', `${S.gameW}px`);
   $menuOverlay.style.setProperty('--menu-vh', `${S.gameH}px`);
+  scheduleMenuLayoutSync();
+}
+
+function scheduleMenuLayoutSync() {
+  if (menuLayoutSyncFrame) {
+    cancelAnimationFrame(menuLayoutSyncFrame);
+  }
+
+  menuLayoutSyncFrame = requestAnimationFrame(() => {
+    menuLayoutSyncFrame = 0;
+    syncMainMenuLayout();
+  });
+}
+
+function syncMainMenuLayout() {
+  if (!$menuOverlay || !$menuMain) return;
+
+  const viewportWidth = S.gameW || window.innerWidth || document.documentElement.clientWidth;
+  const isNarrowScreen = viewportWidth <= NARROW_MENU_BREAKPOINT;
+  const canShowKeeper =
+    currentScreen === 'main' &&
+    isNarrowScreen &&
+    !$menuMain.hidden &&
+    $menuMain.getBoundingClientRect().width > 0 &&
+    $menuMain.getBoundingClientRect().width <= viewportWidth / 2;
+
+  $menuOverlay.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
 }

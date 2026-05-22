@@ -68,6 +68,7 @@
   position: absolute;
   inset: 0;
   padding: 34px 28px;
+  overflow-x: clip;
 }
 
 .menu-title {
@@ -753,10 +754,18 @@
   }
 
   .menu-main {
-    left: 16px;
+    left: 50%;
     right: auto;
-    bottom: 80px;
-    width: min(50vw, 340px);
+    bottom: 16px;
+    width: fit-content;
+    max-width: calc(100vw - 32px);
+    max-height: calc((100vh * 2) / 3);
+    max-height: calc((100dvh * 2) / 3);
+    transform: translateX(-50%);
+    overflow-x: hidden;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
   }
 
   .menu-main-btn {
@@ -769,6 +778,27 @@
     width: 34px;
     height: 34px;
     flex-basis: 34px;
+  }
+
+  .menu-main-btn-label {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .menu-overlay--show-keeper .menu-overlay-bg-man {
+    display: block;
+    width: auto;
+    max-width: calc(50vw - 8px);
+    height: 100vh;
+    height: 100dvh;
+    object-fit: contain;
+    object-position: right bottom;
+  }
+
+  .menu-overlay--show-keeper .menu-main {
+    left: 16px;
+    transform: none;
   }
 
   .menu-screen {
@@ -797,17 +827,10 @@
 
 @media (max-width: 720px) and (orientation: portrait) {
   .menu-main {
-    left: 16px;
-    right: 16px;
-    bottom: 0;
-    height: 50vh;
-    height: 50dvh;
-    width: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
     gap: 8px;
-    overflow-y: auto;
     box-sizing: border-box;
     padding-block: 12px;
   }
@@ -827,32 +850,14 @@
 
   .menu-main-btn-label {
     font-size: clamp(13px, 3.2vw, 18px);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
   }
 }
 
 @media (max-width: 720px) and (orientation: landscape) {
-  .menu-overlay-bg-man {
-    display: block;
-    width: auto;
-    max-width: 45vw;
-    height: 100vh;
-    height: 100dvh;
-    object-fit: contain;
-    object-position: right bottom;
-  }
-
   .menu-main {
     top: 8px;
     bottom: 8px;
-    left: 16px;
-    width: 50vw;
-    height: calc(100vh - 16px);
-    height: calc(100dvh - 16px);
     box-sizing: border-box;
-    overflow-y: auto;
     display: flex;
     flex-direction: column;
     justify-content: center;
