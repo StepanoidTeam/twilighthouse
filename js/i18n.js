@@ -276,6 +276,7 @@ Photopea — image editor
 
     'perk.xpGain': '+{n} XP',
     'perk.pick.title': 'Choose a perk',
+    'perk.pick.level': 'Level {n}',
     'perk.stack': 'Level {n}',
     'perk.better_oil.title': 'Better oil',
     'perk.better_oil.desc': 'The lamp burns longer.',
@@ -607,6 +608,7 @@ Photopea — image editor
 
     'perk.xpGain': '+{n} опыта',
     'perk.pick.title': 'Выбери перк',
+    'perk.pick.level': 'Уровень {n}',
     'perk.stack': 'Уровень {n}',
     'perk.better_oil.title': 'Лучшее масло',
     'perk.better_oil.desc': 'Лампа горит дольше.',

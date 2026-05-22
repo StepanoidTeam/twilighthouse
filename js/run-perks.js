@@ -89,6 +89,30 @@ export function getTotalPerksPicked() {
   return PERK_IDS.reduce((n, id) => n + getPerkStack(id), 0);
 }
 
+function getPendingRunLevelUps() {
+  let pending = 0;
+  let remainingXp = Math.max(0, S.runXp || 0);
+  let totalPerks = getTotalPerksPicked();
+
+  while (
+    remainingXp >=
+    xpForStep(totalPerks + pending, RUN_PERK_XP_BASE, RUN_PERK_XP_GROWTH)
+  ) {
+    remainingXp -= xpForStep(
+      totalPerks + pending,
+      RUN_PERK_XP_BASE,
+      RUN_PERK_XP_GROWTH,
+    );
+    pending++;
+  }
+
+  return pending;
+}
+
+export function getRunLevel() {
+  return 1 + getTotalPerksPicked() + getPendingRunLevelUps();
+}
+
 /** XP required for the next perk pick (grows with perks already taken). */
 export function getRunPerkXpThreshold() {
   return xpForStep(
