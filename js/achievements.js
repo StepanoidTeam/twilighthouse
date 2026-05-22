@@ -77,15 +77,6 @@ export const ACHIEVEMENT_DEFS = [
     rules: [{ type: 'run_max', metric: 'cargo.📦' }],
   },
   {
-    id: 'for_courage',
-    icon: '🥃',
-    titleKey: 'achievements.items.for_courage.title',
-    descKey: 'achievements.items.for_courage.desc',
-    target: 10,
-    points: 20,
-    rules: [{ type: 'run_max', metric: 'cargo.🥃' }],
-  },
-  {
     id: 'wave_of_law',
     icon: '🚨',
     titleKey: 'achievements.items.wave_of_law.title',
