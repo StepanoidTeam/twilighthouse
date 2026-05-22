@@ -232,7 +232,7 @@
   position: fixed;
   top: var(--size-edge-gap);
   left: var(--size-edge-gap);
-  z-index: 2;
+  z-index: 3;
   display: none;
   align-items: center;
   gap: 6px;
