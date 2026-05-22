@@ -278,7 +278,8 @@ Photopea — image editor
     'perk.occult_lamp.desc':
       'Purple lamps on icebergs lure mermaids in and scare them away on contact. Kraken appear more often.',
     'perk.old_map.title': 'Old map',
-    'perk.old_map.desc': 'Reveals all enemies on the map for 10 seconds.',
+    'perk.old_map.desc':
+      'Shows icons for all hidden enemies and smugglers not in the beam for 20 seconds.',
     'perk.rum.title': 'Rum',
     'perk.rum.desc': 'Reduces police suspicion gain by 10% per level.',
     'perk.new_icebergs.title': 'New icebergs',
@@ -593,7 +594,8 @@ Photopea — image editor
     'perk.occult_lamp.desc':
       'Фиолетовые лампы на айсбергах приманивают русалок и отпугивают их при приближении. Кракен появляется чаще.',
     'perk.old_map.title': 'Старая карта',
-    'perk.old_map.desc': 'На 10 секунд показывает всех врагов на карте.',
+    'perk.old_map.desc':
+      'На 20 секунд показывает иконки всех скрытых врагов и контрабандистов, не попавших в луч.',
     'perk.rum.title': 'Ром',
     'perk.rum.desc': 'Снижает рост подозрения полиции на 10% за уровень.',
     'perk.new_icebergs.title': 'Новые айсберги',
