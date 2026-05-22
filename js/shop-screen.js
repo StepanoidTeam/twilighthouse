@@ -9,7 +9,6 @@ import {
   hasShopPurchases,
   resetShopPurchases,
 } from './meta-progress.js';
-import { getLevelFromXp } from './player-level.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
 
@@ -139,7 +138,6 @@ export function renderShopScreen({ container, isActive }) {
   if (!container) return;
 
   const $title = container.querySelector('.menu-screen-title');
-  const $nights = container.querySelector('.shop-nights-line');
   const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
   const $resetBtn = container.querySelector('.shop-reset-btn');
@@ -149,7 +147,7 @@ export function renderShopScreen({ container, isActive }) {
   const $resetConfirmApply = container.querySelector('.shop-reset-confirm-apply');
   const $grid = container.querySelector('.shop-grid');
 
-  if (!$title || !$nights || !$walletRow || !$grid || !$resetBtn) return;
+  if (!$title || !$walletRow || !$grid || !$resetBtn) return;
 
   $title.textContent = t('shop.title');
   if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
@@ -157,7 +155,6 @@ export function renderShopScreen({ container, isActive }) {
   function paint() {
     if (typeof isActive === 'function' && !isActive()) return;
     const meta = loadMeta();
-    $nights.textContent = `${t('shop.playerLevel', { n: getLevelFromXp(meta.totalXp || 0) })} · ${t('shop.nightsWon', { n: meta.nightsWon })}`;
     $resetBtn.textContent = t('shop.reset');
     $resetBtn.disabled = !hasShopPurchases(meta);
     if ($resetConfirmText) $resetConfirmText.textContent = t('shop.resetConfirm');
