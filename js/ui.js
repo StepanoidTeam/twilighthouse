@@ -656,6 +656,9 @@ function positionSplashSprite() {}
 
 export function repositionUI() {
   // HUD positioning is handled by CSS (fixed top-right).
+  if (!$screenGameOver?.hidden) {
+    void updateResultSplashPan(currentResultSplashImage);
+  }
 }
 
 export function buildUI() {
@@ -673,6 +676,10 @@ const SPLASH_IMAGES = {
   splashPolice: 'sprites/wasted/police.png',
   splashPeremoha: 'sprites/wasted/peremoha.png',
 };
+const RESULT_BG_PAN_CLASS = 'is-panning';
+const resultSplashImageMetrics = new Map();
+let activeSplashPanRequest = 0;
+let currentResultSplashImage = '';
 
 const GAME_OVER_REASONS = {
   police: {
@@ -705,6 +712,55 @@ function getGameOverReasonConfig(enemyType) {
   return GAME_OVER_REASONS[enemyType] || GAME_OVER_REASONS.unknown;
 }
 
+function getImageMetrics(src) {
+  if (!src) return Promise.resolve(null);
+  if (resultSplashImageMetrics.has(src)) {
+    return Promise.resolve(resultSplashImageMetrics.get(src));
+  }
+
+  return new Promise((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      const metrics = {
+        width: image.naturalWidth || image.width || 0,
+        height: image.naturalHeight || image.height || 0,
+      };
+      resultSplashImageMetrics.set(src, metrics);
+      resolve(metrics);
+    };
+    image.onerror = () => resolve(null);
+    image.src = src;
+  });
+}
+
+function shouldPanResultSplash(metrics) {
+  if (!metrics?.width || !metrics?.height) return false;
+  const viewportWidth = window.innerWidth || 0;
+  const viewportHeight = window.innerHeight || 0;
+  if (!viewportWidth || !viewportHeight) return false;
+
+  return metrics.width / metrics.height > viewportWidth / viewportHeight;
+}
+
+async function updateResultSplashPan(src) {
+  if (!$resultSplash) return;
+
+  const requestId = ++activeSplashPanRequest;
+  $resultSplash.classList.remove(RESULT_BG_PAN_CLASS);
+  $resultSplash.style.backgroundPosition = 'center center';
+
+  if (!src) return;
+
+  const metrics = await getImageMetrics(src);
+  if (requestId !== activeSplashPanRequest) return;
+  if (!shouldPanResultSplash(metrics)) return;
+
+  $resultSplash.style.backgroundPosition = 'right center';
+  void $resultSplash.offsetWidth;
+  if (requestId !== activeSplashPanRequest) return;
+  $resultSplash.classList.add(RESULT_BG_PAN_CLASS);
+}
+
 async function showGameOverScreen({
   title,
   reasonText = '',
@@ -732,9 +788,13 @@ async function showGameOverScreen({
   renderResultStats(statsItems);
 
   if (splashKey && SPLASH_IMAGES[splashKey]) {
-    $resultSplash.style.backgroundImage = `url("${SPLASH_IMAGES[splashKey]}")`;
+    currentResultSplashImage = SPLASH_IMAGES[splashKey];
+    $resultSplash.style.backgroundImage = `url("${currentResultSplashImage}")`;
+    void updateResultSplashPan(currentResultSplashImage);
   } else {
+    currentResultSplashImage = '';
     $resultSplash.style.backgroundImage = '';
+    void updateResultSplashPan('');
   }
 
   scheduleResultReveal();
