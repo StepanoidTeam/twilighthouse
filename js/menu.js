@@ -82,6 +82,7 @@ let keyHandlerBound = false;
 let i18nBound = false;
 let bgManMotion = null;
 let bgManMotionKeyframes = null;
+let openedFromGame = false; // true when settings opened mid-game via exit-confirm popup
 
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
@@ -282,7 +283,12 @@ function initBackBtn() {
     e.preventDefault();
     e.stopPropagation();
     playMenuClick();
-    showMainMenu();
+    if (openedFromGame) {
+      openedFromGame = false;
+      hideMenu();
+    } else {
+      showMainMenu();
+    }
   });
 }
 
@@ -389,7 +395,12 @@ function handleMenuKey(e) {
     }
   } else if (isBackKey(e.code)) {
     playMenuClick();
-    showMainMenu();
+    if (openedFromGame) {
+      openedFromGame = false;
+      hideMenu();
+    } else {
+      showMainMenu();
+    }
   }
 }
 
@@ -896,6 +907,7 @@ function hideMenu() {
   hideOverlayScreens();
   hideBackBtn();
   currentScreen = null;
+  openedFromGame = false;
   hideDiscordLink();
 }
 
@@ -907,6 +919,15 @@ export function showMenu() {
   showMainMenu();
   currentScreen = 'main';
   repositionMenu();
+}
+
+export function showSettingsFromGame() {
+  if (!$menuOverlay) return;
+  openedFromGame = true;
+  $menuOverlay.hidden = false;
+  startBgManMotion();
+  repositionMenu();
+  showSettings();
 }
 
 export function isMenuVisible() {

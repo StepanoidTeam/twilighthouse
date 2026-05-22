@@ -212,6 +212,7 @@ Photopea — image editor
     'overlay.continue': 'Continue',
     'overlay.pressToPlayAgain': 'Press to play again',
     'exit.confirm': '⏸️ Exit to menu?',
+    'exit.settings': '⚙️ Settings',
 
     'gameOver.title': 'Game Over',
     'gameOver.boats': '💀 A smuggler boat sank!',
@@ -526,6 +527,7 @@ Photopea — image editor
     'overlay.continue': 'Продолжить',
     'overlay.pressToPlayAgain': 'Нажмите, чтобы сыграть снова',
     'exit.confirm': '⏸️ Выйти в меню?',
+    'exit.settings': '⚙️ Настройки',
 
     'gameOver.title': 'Game Over',
     'gameOver.boats': '💀 Лодка контрабандистов утонула!',

@@ -49,6 +49,7 @@ const {
   $achievementToastLayer,
   $exitConfirmMsg,
   $exitConfirmLabel,
+  $exitSettingsLabel,
   $exitResumeLabel,
   $screenExitConfirm,
   $hudLamp,
@@ -885,6 +886,7 @@ export function showExitConfirm() {
   S.exitConfirm = true;
   $exitConfirmMsg.textContent = t('exit.confirm');
   $exitConfirmLabel.textContent = t('overlay.exit');
+  $exitSettingsLabel.textContent = t('exit.settings');
   $exitResumeLabel.textContent = t('overlay.resume');
   $screenExitConfirm.hidden = false;
 }
