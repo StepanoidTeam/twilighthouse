@@ -569,6 +569,17 @@
   left: calc(50% + 40px);
 }
 
+@media (pointer: coarse) {
+  .turn-btn--left {
+    left: 12px;
+  }
+
+  .turn-btn--right {
+    left: auto;
+    right: 12px;
+  }
+}
+
 .turn-btn-arrow {
   font-size: 28px;
   font-weight: bold;
