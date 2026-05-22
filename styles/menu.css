@@ -748,9 +748,9 @@
 
   .menu-main {
     left: 16px;
-    right: 16px;
+    right: auto;
     bottom: 80px;
-    width: auto;
+    width: min(50vw, 340px);
   }
 
   .menu-main-btn {
@@ -790,6 +790,18 @@
 }
 
 @media (max-width: 720px) and (orientation: landscape) {
+  .menu-overlay-bg-man {
+    display: block;
+    width: min(44vw, 460px);
+  }
+
+  .menu-main {
+    top: 16px;
+    bottom: 16px;
+    width: min(46vw, 360px);
+    overflow-y: auto;
+  }
+
   .menu-screen {
     padding: 56px 16px 24px;
   }
