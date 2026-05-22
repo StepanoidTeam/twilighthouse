@@ -138,6 +138,18 @@ Photopea — image editor
     'boot.audio': 'Sound',
     'boot.video': 'Video',
     'boot.finalizing': 'Finalizing startup…',
+    'boot.tips': [
+      '🔦 Don’t keep the beam in one place for too long — threats come from every side.',
+      '🧜 If a mermaid disappears into darkness, it doesn’t mean she has swum away.',
+      '🚨 Even one lit police boat is already a problem.',
+      '🪔 Save the lamp at the start of the night. By the end, every centimeter of beam is priceless.',
+      '⚓ Sometimes it is better to let one boat pass than lose the lighthouse.',
+      '🌊 Watch the screen edges — danger rarely comes through the center.',
+      '📦 Losing smugglers is easier than it seems, especially in panic.',
+      '🐙 The kraken likes to attack when you are distracted by something else.',
+      '🌫 In fog, orient by boat lights, not silhouettes.',
+      '🔥 Flickering lamp is a bad sign. Usually everything gets worse after that.',
+    ],
 
     // Settings
     'settings.title': '⚙️ Settings',
@@ -442,6 +454,18 @@ Photopea — image editor
     'boot.audio': 'Звук',
     'boot.video': 'Видео',
     'boot.finalizing': 'Завершаем запуск…',
+    'boot.tips': [
+      '🔦 Не держи луч на одном месте слишком долго — угрозы приходят с разных сторон.',
+      '🧜 Если русалка исчезла во тьме — это не значит, что она уплыла.',
+      '🚨 Один освещённый полицейский катер — уже проблема.',
+      '🪔 Береги лампу в начале ночи. Под конец каждый сантиметр луча на вес золота.',
+      '⚓ Иногда лучше пропустить одну лодку, чем потерять маяк.',
+      '🌊 Следи за краями экрана — опасность редко идёт по центру.',
+      '📦 Потерять контрабандистов легче, чем кажется. Особенно в панике.',
+      '🐙 Кракен любит атаковать в моменты, когда ты отвлёкся на что-то другое.',
+      '🌫 В тумане ориентируйся по огням лодок, а не по силуэтам.',
+      '🔥 Мигание лампы — плохой знак. Обычно после него всё становится хуже.',
+    ],
 
     'settings.title': '⚙️ Настройки',
     'settings.language': '🌐 Язык',
