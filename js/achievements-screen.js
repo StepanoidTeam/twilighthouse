@@ -50,7 +50,7 @@ function getUnlockedAchievementPoints(progress) {
   return total;
 }
 
-function createAchievementCard(def, progress, { debug = false } = {}) {
+function createAchievementCard(def, progress) {
   const target = Math.max(1, Math.floor(Number(def.target)) || 1);
   const value = Math.max(0, Math.floor(Number(progress)) || 0);
   const done = value >= target;
@@ -80,12 +80,9 @@ function createAchievementCard(def, progress, { debug = false } = {}) {
   }
 
   if ($debug) {
-    $debug.hidden = !debug;
-    if (debug) {
-      const $debugButtons = $debug.querySelectorAll('.achievement-debug-btn');
-      for (const $btn of $debugButtons) {
-        $btn.dataset.achievementId = def.id;
-      }
+    const $debugButtons = $debug.querySelectorAll('.achievement-debug-btn');
+    for (const $btn of $debugButtons) {
+      $btn.dataset.achievementId = def.id;
     }
   }
 
@@ -131,8 +128,6 @@ export function renderAchievementsScreen({ container, isActive }) {
   $subtitle.textContent = t('achievements.subtitle');
 
   const progress = loadAchievementProgress();
-  const debug = Boolean(S.debugMode);
-
   const totalPoints = getUnlockedAchievementPoints(progress);
   $totalPoints.textContent = t('achievements.total_points', {
     points: totalPoints,
@@ -145,8 +140,6 @@ export function renderAchievementsScreen({ container, isActive }) {
 
   if ($debugLabel) $debugLabel.textContent = 'Debug';
   if ($resetAll) $resetAll.textContent = 'Reset all';
-  $debugBar.hidden = !debug;
-
   $list.replaceChildren();
   $empty.hidden = true;
   $empty.textContent = t('achievements.filter.empty');
@@ -158,7 +151,7 @@ export function renderAchievementsScreen({ container, isActive }) {
     const done = isAchievementDone(def, currentProgress);
     if (hideCompleted && done) continue;
 
-    const card = createAchievementCard(def, currentProgress, { debug });
+    const card = createAchievementCard(def, currentProgress);
     $list.insertBefore(card, $empty);
     visibleCount += 1;
   }
@@ -179,7 +172,7 @@ export function renderAchievementsScreen({ container, isActive }) {
       return;
     }
 
-    if (!debug) return;
+    if (!S.debugMode) return;
     const btn = target.closest('.achievement-debug-btn');
     if (!btn) return;
 

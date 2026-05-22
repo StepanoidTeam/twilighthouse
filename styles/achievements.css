@@ -275,6 +275,11 @@
   min-width: 96px;
 }
 
+.debug .achievement-debug-controls.debug-only,
+.debug .achievements-debug-bar.debug-only {
+  display: flex !important;
+}
+
 @media (max-width: 720px) {
   .achievements-toolbar {
     flex-direction: column;
