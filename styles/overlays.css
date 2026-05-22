@@ -19,6 +19,10 @@
     background-repeat: no-repeat;
   }
 
+  .screen-result-splash.is-panning {
+    animation: result-bg-pan 18s linear forwards;
+  }
+
   .screen-result-content {
     position: relative;
     display: flex;
@@ -203,6 +207,16 @@
       transform: translateY(0);
       transition-delay: 200ms;
     }
+  }
+}
+
+@keyframes result-bg-pan {
+  from {
+    background-position: right center;
+  }
+
+  to {
+    background-position: left center;
   }
 }
 
