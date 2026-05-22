@@ -789,16 +789,34 @@
   }
 }
 
+@media (max-width: 720px) and (orientation: portrait) {
+  .menu-main {
+    left: 16px;
+    bottom: 0;
+    height: 50vh;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    overflow-y: auto;
+  }
+}
+
 @media (max-width: 720px) and (orientation: landscape) {
   .menu-overlay-bg-man {
     display: block;
-    width: min(44vw, 460px);
+    width: min(50vw, 460px);
+    max-height: 100vh;
+    object-fit: contain;
   }
 
   .menu-main {
     top: 16px;
     bottom: 16px;
-    width: min(46vw, 360px);
+    left: 16px;
+    width: 50vw;
+    height: 100vh;
+    height: 100dvh;
+    box-sizing: border-box;
     overflow-y: auto;
   }
 
