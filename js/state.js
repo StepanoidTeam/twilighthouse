@@ -153,7 +153,6 @@ const State = {
   runPoliceSpeedMult: 1,
   perkPickerOpen: false,
   perkPickerOffer: [],
-  policeSuspicion: 0,
   oldMapRevealUntil: 0,
   lampOilReserve: 0,
   spareGeneratorCharge: 0,
@@ -266,7 +265,6 @@ const State = {
     this.runPoliceSpeedMult = 1;
     this.perkPickerOpen = false;
     this.perkPickerOffer = [];
-    this.policeSuspicion = 0;
     this.oldMapRevealUntil = 0;
     this.lampOilReserve = 0;
     this.spareGeneratorCharge = 0;

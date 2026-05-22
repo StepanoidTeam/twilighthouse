@@ -280,8 +280,6 @@ Photopea — image editor
     'perk.old_map.title': 'Old map',
     'perk.old_map.desc':
       'Shows icons for all hidden enemies and smugglers not in the beam for 20 seconds.',
-    'perk.rum.title': 'Rum',
-    'perk.rum.desc': 'Reduces police suspicion gain by 10% per level.',
     'perk.new_icebergs.title': 'New icebergs',
     'perk.new_icebergs.desc': '3 new icebergs appear in random spots.',
     'perk.maxed': 'Max level',
@@ -289,7 +287,6 @@ Photopea — image editor
     'perk.repair_lighthouse.title': 'Repair the lighthouse',
     'perk.repair_lighthouse.desc': 'Restore 1 heart.',
     'perk.repair_lighthouse.healed': '+1 ❤️',
-    'hud.suspicion': 'Suspicion',
 
     // Goal checklist (HUD): verbs + nouns with EN plural forms (one/other)
     'goal.delivered_boats.one': 'Escort {n} smuggler',
@@ -596,8 +593,6 @@ Photopea — image editor
     'perk.old_map.title': 'Старая карта',
     'perk.old_map.desc':
       'На 20 секунд показывает иконки всех скрытых врагов и контрабандистов, не попавших в луч.',
-    'perk.rum.title': 'Ром',
-    'perk.rum.desc': 'Снижает рост подозрения полиции на 10% за уровень.',
     'perk.new_icebergs.title': 'Новые айсберги',
     'perk.new_icebergs.desc': 'В воде появляются 3 новых айсберга.',
     'perk.maxed': 'Макс. уровень',
@@ -605,7 +600,6 @@ Photopea — image editor
     'perk.repair_lighthouse.title': 'Починить маяк',
     'perk.repair_lighthouse.desc': 'Восстанавливает 1 сердце маяка.',
     'perk.repair_lighthouse.healed': '+1 ❤️',
-    'hud.suspicion': 'Подозрение',
 
     // Чек-лист целей (HUD): глагол + существительное в нужной форме (1 / 2-4 / 5+)
     'goal.delivered_boats.one': 'Сопроводи {n} контрабандиста',

@@ -16,7 +16,6 @@ import {
   PERK_EXPERIENCED_KEEPER_BONUS,
   PERK_OCCULT_MERMAID_WEIGHT,
   PERK_OCCULT_KRAKEN_WEIGHT,
-  PERK_RUM_SUSPICION_RED,
   OLD_MAP_REVEAL_MS,
   LAMP_BURNOUT_TIME,
   LAMP_FULL_ANGLE,
@@ -45,7 +44,6 @@ export const PERK_IDS = [
   'experienced_keeper',
   'occult_lamp',
   'old_map',
-  'rum',
   'new_icebergs',
   'repair_lighthouse',
 ];
@@ -59,7 +57,6 @@ export const PERK_ICONS = {
   experienced_keeper: '🧭',
   occult_lamp: '🔮',
   old_map: '🗺️',
-  rum: '🥃',
   new_icebergs: '🧊',
   repair_lighthouse: '🔧',
 };
@@ -73,7 +70,6 @@ export const PERK_MAX_STACKS = {
   experienced_keeper: Infinity,
   occult_lamp: 1,
   old_map: Infinity,
-  rum: Infinity,
   new_icebergs: Infinity,
   repair_lighthouse: Infinity,
 };
@@ -205,12 +201,6 @@ export function getResourceBonusMult() {
   return 1 + PERK_EXPERIENCED_KEEPER_BONUS * stacks;
 }
 
-export function getSuspicionGainMult() {
-  const stacks = getPerkStack('rum');
-  if (stacks <= 0) return 1;
-  return Math.max(0, 1 - PERK_RUM_SUSPICION_RED * stacks);
-}
-
 export function isOldMapActive() {
   return (S.oldMapRevealUntil || 0) > performance.now();
 }
@@ -257,7 +247,6 @@ export function resetRunPerks(state = S) {
   state.runPoliceSpeedMult = 1;
   state.perkPickerOpen = false;
   state.perkPickerOffer = [];
-  state.policeSuspicion = 0;
   state.oldMapRevealUntil = 0;
 }
 

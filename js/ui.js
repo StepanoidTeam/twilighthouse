@@ -13,7 +13,6 @@ import {
   getRunPerkXpThreshold,
   getEffectiveLampBurnoutMs,
 } from './run-perks.js';
-import { SUSPICION_MAX } from './config.js';
 import {
   CRASH_VOLUME,
   CRASH_SOUNDS,
@@ -146,15 +145,7 @@ const hudCache = {
   nightLabel: null,
   nightTime: null,
   nightRatio: null,
-  suspicion: null,
 };
-
-function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
-}
 
 let levelBannerTimer = null;
 
@@ -182,24 +173,9 @@ function setIfChanged(key, $el, value) {
   }
 }
 
-function formatSuspicionHtml() {
-  const value = Math.max(0, Math.min(SUSPICION_MAX, S.policeSuspicion || 0));
-  if (value <= 0) return '';
-  const pct = Math.round((value / SUSPICION_MAX) * 100);
-  return `<span class="hud-suspicion" title="${escapeHtml(t('hud.suspicion'))}">👁️ ${pct}%</span>`;
-}
-
-function updateSuspicionHud() {
+function updateLampHud() {
   if (!$hudLamps) return;
-  const suspicionHtml = formatSuspicionHtml();
-  const lampHtml = formatLampPowerHtml();
-  const combined = suspicionHtml
-    ? `${lampHtml} ${suspicionHtml}`
-    : lampHtml;
-  setIfChanged('lamps', $hudLamps, combined);
-  if (hudCache.suspicion !== suspicionHtml) {
-    hudCache.suspicion = suspicionHtml;
-  }
+  setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
 }
 
 function formatLampPowerHtml() {
@@ -290,7 +266,7 @@ function updateNightProgress() {
 export function updateHUD() {
   // Display hearts instead of lamp burnout timer
   setIfChanged('lamp', $hudLamp, S.getHeartDisplay());
-  updateSuspicionHud();
+  updateLampHud();
   updateRunXpProgress();
   updateNightProgress();
 }

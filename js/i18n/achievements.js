@@ -29,8 +29,6 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.items.cargo_delivered.title': 'Cargo Delivered',
     'achievements.items.cargo_delivered.desc':
       'Collect 15 contraband crates in a single run.',
-    'achievements.items.for_courage.title': 'For Courage',
-    'achievements.items.for_courage.desc': 'Collect 10 rum in a single run.',
     'achievements.items.wave_of_law.title': 'Wave of Law',
     'achievements.items.wave_of_law.desc': 'Repel 25 police boats.',
     'achievements.items.siren_whisper.title': 'Siren Whisper',
@@ -76,8 +74,6 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.items.cargo_delivered.title': 'Груз доставлен',
     'achievements.items.cargo_delivered.desc':
       'Собери 15 ящиков контрабанды за один забег.',
-    'achievements.items.for_courage.title': 'Для храбрости',
-    'achievements.items.for_courage.desc': 'Собери 10 рома за один забег.',
     'achievements.items.wave_of_law.title': 'Волна закона',
     'achievements.items.wave_of_law.desc': 'Отпугни 25 полицейских катеров.',
     'achievements.items.siren_whisper.title': 'Шёпот сирен',
