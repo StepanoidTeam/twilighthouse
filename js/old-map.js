@@ -1,4 +1,5 @@
 import { PIXI } from './config.js';
+import { isInBeam } from './lighthouse.js';
 import S from './state.js';
 
 const INDICATOR_MARGIN = 34;
@@ -106,18 +107,27 @@ export function updateOldMapReveal() {
 
   for (const p of S.policeBoats) {
     if (p.arrived || p.sinking) continue;
+    if (isInBeam(p.spr.x, p.spr.y)) continue;
     const c = makeIndicator('🚔');
     if (c) placeIndicator(c, p.spr.x, p.spr.y);
   }
   for (const m of S.mermaids) {
     if (m.gone) continue;
+    if (isInBeam(m.spr.x, m.spr.y)) continue;
     const c = makeIndicator('🧜‍♀️');
     if (c) placeIndicator(c, m.spr.x, m.spr.y);
   }
   for (const k of S.krakens) {
     if (k.gone) continue;
+    if (isInBeam(k.spr.x, k.spr.y)) continue;
     const c = makeIndicator('🦑');
     if (c) placeIndicator(c, k.spr.x, k.spr.y);
+  }
+  for (const b of S.boats) {
+    if (b.arrived || b.sinking) continue;
+    if (b.lit) continue;
+    const c = makeIndicator('📦');
+    if (c) placeIndicator(c, b.spr.x, b.spr.y);
   }
 }
 
