@@ -122,8 +122,7 @@ let bootLoaderState = {
   currentAsset: null,
 };
 let resourcesReady = false;
-const BOOT_TIP_MIN_MS = 3000;
-const BOOT_TIP_MAX_MS = 5000;
+const BOOT_TIP_INTERVAL_MS = 5000;
 const BOOT_TIP_FADE_MS = 180;
 let bootTipIndex = -1;
 let bootTipSwitchTimeoutId = 0;
@@ -191,14 +190,11 @@ function renderBootTip({ animate = true, forceIndex = null } = {}) {
 function scheduleNextBootTip() {
   window.clearTimeout(bootTipSwitchTimeoutId);
   if (bootLoaderState.status !== 'loading') return;
-  const delay =
-    BOOT_TIP_MIN_MS +
-    Math.floor(Math.random() * (BOOT_TIP_MAX_MS - BOOT_TIP_MIN_MS + 1));
   bootTipSwitchTimeoutId = window.setTimeout(() => {
     if (bootLoaderState.status !== 'loading') return;
     renderBootTip();
     scheduleNextBootTip();
-  }, delay);
+  }, BOOT_TIP_INTERVAL_MS);
 }
 
 function startBootTipsRotation() {
