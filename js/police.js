@@ -29,6 +29,7 @@ import { levels } from './levels.js';
 import { getSuspicionGainMult } from './run-perks.js';
 import { SUSPICION_MAX, SUSPICION_GAIN_PER_FRAME } from './config.js';
 import { createWakeEmitterState, tickWakeEmitter } from './wake.js';
+import { addEnemyGlowTrace } from './darkness.js';
 
 const COP_LIT_SOUNDS = [
   'audio/cop/police-intro-siren.mp3',
@@ -89,6 +90,7 @@ export function spawnPoliceBoat() {
     // Prevents tooltip/sound spam when beam edge grazes the boat.
     lastRawLit: false,
     rawLitStableFor: 0,
+    phosphorTrailTime: 0,
   });
 }
 
@@ -132,6 +134,7 @@ export function updatePoliceBoats(delta) {
     } else if (!lit && p.wasLit) {
       spawnTooltip(spr.x, spr.y - 30, '❔', TOOLTIP_STYLE_OK);
       playCopUnlitSound();
+      p.phosphorTrailTime = 140;
     }
     p.wasLit = lit;
 
@@ -221,6 +224,10 @@ export function updatePoliceBoats(delta) {
     while (rDiff > Math.PI) rDiff -= Math.PI * 2;
     while (rDiff < -Math.PI) rDiff += Math.PI * 2;
     spr.rotation += rDiff * 0.08 * delta;
+    if ((p.phosphorTrailTime || 0) > 0) {
+      addEnemyGlowTrace(spr.x, spr.y);
+      p.phosphorTrailTime = Math.max(0, p.phosphorTrailTime - delta);
+    }
 
     // Rock collision — sink when not lit (no penalty), push away when lit
     if (checkRockCollision(spr.x, spr.y)) {

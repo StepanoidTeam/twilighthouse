@@ -159,6 +159,15 @@ const State = {
   spareGeneratorCharge: 0,
   occultRockLamps: [],
   oldMapLayer: null,
+  moonlightRevealRadius: 0,
+  moonlightRevealAlpha: 0,
+  guidingSignalUnlitSpeedMult: 1,
+  contrabandRouteEnabled: false,
+  alarmBellEnabled: false,
+  phosphorWaterEnabled: false,
+  smugglerRescueStreak: 0,
+  alarmBellUsed: false,
+  enemyGlowTraces: [],
 
   // Layers
   rockLayer: null,
@@ -271,6 +280,15 @@ const State = {
     this.lampOilReserve = 0;
     this.spareGeneratorCharge = 0;
     this.occultRockLamps = [];
+    this.moonlightRevealRadius = 0;
+    this.moonlightRevealAlpha = 0;
+    this.guidingSignalUnlitSpeedMult = 1;
+    this.contrabandRouteEnabled = false;
+    this.alarmBellEnabled = false;
+    this.phosphorWaterEnabled = false;
+    this.smugglerRescueStreak = 0;
+    this.alarmBellUsed = false;
+    this.enemyGlowTraces = [];
   },
 };
 

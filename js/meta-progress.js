@@ -23,6 +23,12 @@ export const UNLOCK_QUALITY_WICK = 'qualityWick';
 export const UNLOCK_FRESNEL_LENS = 'fresnelLens';
 export const UNLOCK_LAMP_OIL_CRATE = 'lampOilCrate';
 export const UNLOCK_SPARE_GENERATOR = 'spareGenerator';
+export const UNLOCK_COLD_LAMP = 'coldLamp';
+export const UNLOCK_MOONLIGHT = 'moonlight';
+export const UNLOCK_GUIDING_SIGNAL = 'guidingSignal';
+export const UNLOCK_CONTRABAND_ROUTE = 'contrabandRoute';
+export const UNLOCK_ALARM_BELL = 'alarmBell';
+export const UNLOCK_PHOSPHOR_WATER = 'phosphorWater';
 /** @deprecated Migrated to upgradeLevels.fastGear */
 export const UNLOCK_FAST_GEAR = 'fastGear';
 export const UPGRADE_FAST_GEAR = 'fastGear';
@@ -33,6 +39,10 @@ const LAMP_BURNOUT_BONUS_MULT = 1.25;
 const FRESNEL_LENS_BONUS_MULT = 1.2;
 export const FAST_GEAR_MAX_LEVEL = 3;
 const BEAM_ROTATE_BONUS_PER_LEVEL = 0.1;
+const COLD_LAMP_BONUS_MULT = 1.12;
+const MOONLIGHT_REVEAL_RADIUS = 120;
+const MOONLIGHT_REVEAL_ALPHA = 0.2;
+const GUIDING_SIGNAL_UNLIT_SPEED_MULT = 1.2;
 
 let lastCommittedRunStart = null;
 let pendingServerSyncMeta = null;
@@ -433,6 +443,48 @@ export const SHOP_ITEMS = [
     icon: '⚙️',
     price: { '⚙️': 4, '💡': 3, '📦': 3 },
   },
+  {
+    id: 'cold_lamp',
+    unlockKey: UNLOCK_COLD_LAMP,
+    once: true,
+    icon: '🔋',
+    price: { '🛢️': 5, '💡': 4, '⚙️': 2 },
+  },
+  {
+    id: 'moonlight',
+    unlockKey: UNLOCK_MOONLIGHT,
+    once: true,
+    icon: '🌘',
+    price: { '💡': 4, '📦': 3, '🥃': 2 },
+  },
+  {
+    id: 'guiding_signal',
+    unlockKey: UNLOCK_GUIDING_SIGNAL,
+    once: true,
+    icon: '🧲',
+    price: { '⚙️': 4, '📦': 4, '🛢️': 2 },
+  },
+  {
+    id: 'contraband_route',
+    unlockKey: UNLOCK_CONTRABAND_ROUTE,
+    once: true,
+    icon: '🚢',
+    price: { '📦': 5, '🥃': 3, '🧨': 2 },
+  },
+  {
+    id: 'alarm_bell',
+    unlockKey: UNLOCK_ALARM_BELL,
+    once: true,
+    icon: '🔔',
+    price: { '⚙️': 4, '💡': 3, '🧨': 2 },
+  },
+  {
+    id: 'phosphor_water',
+    unlockKey: UNLOCK_PHOSPHOR_WATER,
+    once: true,
+    icon: '🐟',
+    price: { '🛢️': 4, '🥃': 3, '💡': 3 },
+  },
 ];
 
 /**
@@ -558,6 +610,7 @@ export function applyMetaToRunState(S) {
   let lampMult = 1;
   if (meta.unlocks[UNLOCK_QUALITY_WICK]) lampMult *= LAMP_BURNOUT_BONUS_MULT;
   if (meta.unlocks[UNLOCK_FRESNEL_LENS]) lampMult *= FRESNEL_LENS_BONUS_MULT;
+  if (meta.unlocks[UNLOCK_COLD_LAMP]) lampMult *= COLD_LAMP_BONUS_MULT;
   S.lampBurnoutMs = Math.round(LAMP_BURNOUT_TIME * lampMult);
   S.lampOilReserve = meta.unlocks[UNLOCK_LAMP_OIL_CRATE]
     ? LAMP_OIL_RESERVE_BONUS
@@ -566,6 +619,21 @@ export function applyMetaToRunState(S) {
     ? SPARE_GENERATOR_START_CHARGE
     : 0;
   S.beamRotateMult = getBeamRotateMultFromMeta(meta);
+  S.moonlightRevealRadius = meta.unlocks[UNLOCK_MOONLIGHT]
+    ? MOONLIGHT_REVEAL_RADIUS
+    : 0;
+  S.moonlightRevealAlpha = meta.unlocks[UNLOCK_MOONLIGHT]
+    ? MOONLIGHT_REVEAL_ALPHA
+    : 0;
+  S.guidingSignalUnlitSpeedMult = meta.unlocks[UNLOCK_GUIDING_SIGNAL]
+    ? GUIDING_SIGNAL_UNLIT_SPEED_MULT
+    : 1;
+  S.contrabandRouteEnabled = Boolean(meta.unlocks[UNLOCK_CONTRABAND_ROUTE]);
+  S.alarmBellEnabled = Boolean(meta.unlocks[UNLOCK_ALARM_BELL]);
+  S.phosphorWaterEnabled = Boolean(meta.unlocks[UNLOCK_PHOSPHOR_WATER]);
+  S.smugglerRescueStreak = 0;
+  S.alarmBellUsed = false;
+  S.enemyGlowTraces = [];
   S.heartsRemaining = S.heartsMax;
   if (S.spareGeneratorCharge > 0) {
     S.lampTimer = -Math.round(S.lampBurnoutMs * S.spareGeneratorCharge);

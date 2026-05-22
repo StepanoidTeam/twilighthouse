@@ -46,6 +46,7 @@ import { levels } from './levels.js';
 import { recordAchievementEvent } from './achievements.js';
 
 const LAMP_RESTORE_FRAMES = 14;
+const CONTRABAND_ROUTE_RARE_TYPES = ['🧨', '🥃', '🛢️'];
 
 // ===== Cargo Helpers =====
 function parseCargo(cargoStr) {
@@ -186,9 +187,25 @@ export function updateBoats(delta) {
         b.cargoLabel = null;
       }
       S.score++;
+      S.smugglerRescueStreak = (S.smugglerRescueStreak || 0) + 1;
       addCargo(b.cargo);
+      let cargoTooltipText = b.cargo;
+      if (S.contrabandRouteEnabled && S.smugglerRescueStreak >= 3) {
+        const bonusChance = Math.min(
+          0.45,
+          0.15 + (S.smugglerRescueStreak - 3) * 0.05,
+        );
+        if (Math.random() < bonusChance) {
+          const rareType =
+            CONTRABAND_ROUTE_RARE_TYPES[
+              Math.floor(Math.random() * CONTRABAND_ROUTE_RARE_TYPES.length)
+            ];
+          S.deliveredCargo[rareType] = (S.deliveredCargo[rareType] || 0) + 1;
+          cargoTooltipText += ` +${rareType}1`;
+        }
+      }
       updateHUD();
-      spawnTooltip(spr.x, spr.y - 20, b.cargo, TOOLTIP_STYLE_OK);
+      spawnTooltip(spr.x, spr.y - 20, cargoTooltipText, TOOLTIP_STYLE_OK);
       // Restore lamp on boat arrival
       S.lampRestoreStartTimer = S.lampTimer;
       S.lampRestoreFramesTotal = LAMP_RESTORE_FRAMES;
@@ -228,7 +245,9 @@ export function updateBoats(delta) {
     }
 
     // Movement — boats move slowly, faster when lit
-    const speedMult = b.lit ? 1.5 : 0.6;
+    const speedMult = b.lit
+      ? 1.5
+      : 0.6 * (S.guidingSignalUnlitSpeedMult || 1);
     const nx = toX / dist;
     const ny = toY / dist;
 
@@ -261,6 +280,7 @@ export function updateBoats(delta) {
       if (!hasRockImmunity) {
         b.sinking = true;
         b.sinkTimer = 0;
+        S.smugglerRescueStreak = 0;
         S.boatsSunk++;
         if (S.runStats) S.runStats.smugglersSunk++;
         const gameOver = S.takeDamage('boat-sink', 1);
