@@ -25,8 +25,7 @@ import {
 } from './sound.js';
 import S from './state.js';
 import { levels } from './levels.js';
-import { getCurrentPlayerLevel } from './player-level.js';
-import { t, pluralCategory } from './i18n.js';
+import { t } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
 
@@ -58,7 +57,6 @@ const {
   $hudNightFill,
   $hudNightLabel,
   $hudNightTime,
-  $hudLevel,
   $levelBanner,
   $levelBannerTitle,
   $levelBannerSubtitle,
@@ -150,60 +148,6 @@ const hudCache = {
   suspicion: null,
 };
 
-// ===== Level Goal HUD =====
-// Чек-лист подцелей: одна строка на подцель, выполненная — с галочкой
-// и зачёркнутая, текущая — с пустым чекбоксом и конкретным заданием
-// ("Сопроводи 3 контрабандиста" и т.п. — глагол + существительное в нужной форме).
-function formatGoalLabel(key, target) {
-  const cat = pluralCategory(target);
-  const label = t(`goal.${key}.${cat}`, { n: target });
-  if (label && label !== `goal.${key}.${cat}`) return label;
-  // Fallback: ключ без перевода — покажем хотя бы счётчик.
-  return `${target}`;
-}
-
-function formatLevelHudHtml() {
-  if (!S.gameSessionActive) return '';
-  const goal = S.levelGoal || {};
-  if (Object.keys(goal).length === 0) {
-    if (levels.isFreeplay()) {
-      const lvl = getCurrentPlayerLevel();
-      return `<div class="hud-level-head">${escapeHtml(
-        t('hud.level.prefix', { n: lvl }),
-      )}</div>`;
-    }
-    return '';
-  }
-  const idx = (S.levelIndex || 0) + 1;
-  const progress = S.levelProgress || {};
-  const headKey = idx <= 3 ? 'hud.lesson.prefix' : 'hud.level.prefix';
-  const head = `<div class="hud-level-head">${escapeHtml(
-    t(headKey, { n: idx }),
-  )}</div>`;
-  const rows = [];
-  for (const [key, target] of Object.entries(goal)) {
-    if (!target) continue;
-    const cur = Math.min(progress[key] || 0, target);
-    const done = cur >= target;
-    const box = done ? '✅' : '☐';
-    const label = escapeHtml(formatGoalLabel(key, target));
-    rows.push(
-      `<div class="hud-level-row${done ? ' is-done' : ''}">` +
-        `<span class="hud-level-box">${box}</span>` +
-        `<span class="hud-level-label">${label}</span>` +
-        `<span class="hud-level-count">${cur}/${target}</span>` +
-        `</div>`,
-    );
-  }
-  if (rows.length === 0) {
-    rows.push(
-      `<div class="hud-level-row"><span class="hud-level-box">☐</span>` +
-        `<span class="hud-level-label">${escapeHtml(t('hud.level.idle'))}</span></div>`,
-    );
-  }
-  return head + rows.join('');
-}
-
 function escapeHtml(s) {
   return String(s)
     .replace(/&/g, '&amp;')
@@ -292,7 +236,10 @@ function updateRunXpProgress() {
   const percent = Math.floor(ratio * 100);
   const current = Math.min(S.runXp || 0, threshold);
   const valueText = `${current}/${threshold}`;
-  const label = t('hud.xp');
+  const currentRunLevel = levels.isFreeplay()
+    ? 1
+    : Math.max(1, Math.floor(S.levelIndex || 0) + 1);
+  const label = t('hud.level.prefix', { n: currentRunLevel });
 
   if (hudCache.xpLabel !== label && $hudXpLabel) {
     hudCache.xpLabel = label;
@@ -345,14 +292,6 @@ export function updateHUD() {
   updateSuspicionHud();
   updateRunXpProgress();
   updateNightProgress();
-  if ($hudLevel) {
-    const levelHtml = formatLevelHudHtml();
-    if (hudCache.level !== levelHtml) {
-      hudCache.level = levelHtml;
-      $hudLevel.innerHTML = levelHtml;
-      $hudLevel.hidden = !levelHtml;
-    }
-  }
 }
 
 // ===== Level Banner =====
@@ -848,7 +787,9 @@ function getRunStatsItems() {
       section: 'time',
       icon: '⭐',
       label: t('resultStats.playerLevel'),
-      value: getCurrentPlayerLevel(),
+      value: levels.isFreeplay()
+        ? 1
+        : Math.max(1, Math.floor(S.levelIndex || 0) + 1),
     },
     {
       section: 'time',
