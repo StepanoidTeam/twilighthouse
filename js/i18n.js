@@ -127,6 +127,24 @@ Photopea — image editor
     'shop.items.fast_gear.name': 'Fast drive',
     'shop.items.fast_gear.desc':
       '+10% beam rotation speed per level (max +30%). Current: +{bonus}%. Next: +{nextBonus}%.',
+    'shop.items.cold_lamp.name': 'Cold lamp',
+    'shop.items.cold_lamp.desc':
+      'The lamp burns about 12% slower.',
+    'shop.items.moonlight.name': 'Moonlight',
+    'shop.items.moonlight.desc':
+      'A small area around the lighthouse stays slightly visible even outside the beam.',
+    'shop.items.guiding_signal.name': 'Guiding signal',
+    'shop.items.guiding_signal.desc':
+      'Smuggler boats keep direction better in darkness.',
+    'shop.items.contraband_route.name': 'Contraband route',
+    'shop.items.contraband_route.desc':
+      'After several saved boats in a row, there is a chance to gain an extra rare resource.',
+    'shop.items.alarm_bell.name': 'Alarm bell',
+    'shop.items.alarm_bell.desc':
+      'The first mermaid each night is auto-marked for a brief moment.',
+    'shop.items.phosphor_water.name': 'Phosphorescent water',
+    'shop.items.phosphor_water.desc':
+      'Enemies leave a glowing trace for a short time after leaving the beam.',
 
     // Boot loader
     'boot.title': 'TWILIGHTHOUSE',
@@ -443,6 +461,24 @@ Photopea — image editor
     'shop.items.fast_gear.name': 'Быстрый привод',
     'shop.items.fast_gear.desc':
       '+10% к скорости вращения луча за уровень (макс. +30%). Сейчас: +{bonus}%. Следующий: +{nextBonus}%.',
+    'shop.items.cold_lamp.name': 'Холодная лампа',
+    'shop.items.cold_lamp.desc':
+      'Лампа расходуется примерно на 12% медленнее.',
+    'shop.items.moonlight.name': 'Лунный свет',
+    'shop.items.moonlight.desc':
+      'Небольшая зона вокруг маяка остаётся слегка видимой даже вне луча.',
+    'shop.items.guiding_signal.name': 'Наводящий сигнал',
+    'shop.items.guiding_signal.desc':
+      'Контрабандисты увереннее держат курс в темноте.',
+    'shop.items.contraband_route.name': 'Контрабандный маршрут',
+    'shop.items.contraband_route.desc':
+      'После серии спасённых лодок появляется шанс получить дополнительный редкий ресурс.',
+    'shop.items.alarm_bell.name': 'Колокол тревоги',
+    'shop.items.alarm_bell.desc':
+      'Первая русалка за ночь автоматически кратко отмечается.',
+    'shop.items.phosphor_water.name': 'Фосфоресцирующая вода',
+    'shop.items.phosphor_water.desc':
+      'Враги ненадолго оставляют светящийся след после выхода из луча.',
 
     'boot.title': 'Маяк',
     'boot.loading': 'Загрузка игровых ресурсов…',

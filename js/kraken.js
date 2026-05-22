@@ -28,6 +28,7 @@ import {
 } from './ui.js';
 import { levels } from './levels.js';
 import { recordAchievementEvent } from './achievements.js';
+import { addEnemyGlowTrace } from './darkness.js';
 
 const KRAKEN_INDICATOR_MARGIN = 34;
 const KRAKEN_INDICATOR_STYLE = new PIXI.TextStyle({
@@ -135,6 +136,7 @@ export function spawnKraken() {
     baseScaleX: spr.scale.x,
     indicator: createKrakenIndicator(),
     fadeOut: null,
+    phosphorTrailTime: 0,
   });
 }
 
@@ -158,6 +160,8 @@ export function updateKrakens(delta) {
         if (rawLit) {
           spawnTooltip(k.spr.x, k.spr.y - 30, '🙈', TOOLTIP_STYLE_OK);
           spawnMermaid();
+        } else {
+          k.phosphorTrailTime = 140;
         }
       }
     } else {
@@ -236,6 +240,10 @@ export function updateKrakens(delta) {
 
     k.spr.x += nx * k.speed * speedMult * delta + kWaveOffset * 0.04 * delta;
     k.spr.y += ny * k.speed * speedMult * delta;
+    if ((k.phosphorTrailTime || 0) > 0) {
+      addEnemyGlowTrace(k.spr.x, k.spr.y);
+      k.phosphorTrailTime = Math.max(0, k.phosphorTrailTime - delta);
+    }
 
     // Смещённый центр коллайдера кракена (вниз на 1 радиус)
     const kcx = k.spr.x;

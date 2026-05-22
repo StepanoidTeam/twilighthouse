@@ -18,6 +18,8 @@ import S from './state.js';
 import { isInBeam, spawnOnRing } from './lighthouse.js';
 import { getMermaidSpeedMult, isOccultLampActive } from './run-perks.js';
 import { getOccultLampTargets } from './rocks.js';
+import { addEnemyGlowTrace } from './darkness.js';
+import { triggerOldMapReveal } from './old-map.js';
 import {
   spawnTooltip,
   updateHUD,
@@ -71,7 +73,14 @@ export function spawnMermaid() {
     wavePhase: Math.random() * Math.PI * 2,
     frameIndex: 0,
     frameTick: Math.random() * MERMAID_FRAME_DURATION,
+    phosphorTrailTime: 0,
   });
+  const spawned = S.mermaids[S.mermaids.length - 1];
+  if (S.alarmBellEnabled && !S.alarmBellUsed) {
+    S.alarmBellUsed = true;
+    triggerOldMapReveal(2500);
+    spawnTooltip(spawned.spr.x, spawned.spr.y - 30, '🔔🧜', TOOLTIP_STYLE_OK);
+  }
 }
 
 export function updateMermaids(delta) {
@@ -87,6 +96,9 @@ export function updateMermaids(delta) {
     const insideDarknessRadius =
       Math.hypot(m.spr.x - S.lhX, m.spr.y - S.lhY) < DARKNESS_RADIUS;
     const rawLit = insideDarknessRadius && isInBeam(m.spr.x, m.spr.y);
+    if (!rawLit && m.lastRawLit) {
+      m.phosphorTrailTime = 140;
+    }
     if (rawLit !== m.lastRawLit) {
       m.lastRawLit = rawLit;
       m.rawLitStableFor = 0;
@@ -162,6 +174,10 @@ export function updateMermaids(delta) {
     if (speedMult > 0) {
       m.spr.x += nx * m.speed * speedMult * delta + waveOffset * 0.04 * delta;
       m.spr.y += ny * m.speed * speedMult * delta;
+    }
+    if ((m.phosphorTrailTime || 0) > 0) {
+      addEnemyGlowTrace(m.spr.x, m.spr.y);
+      m.phosphorTrailTime = Math.max(0, m.phosphorTrailTime - delta);
     }
 
     // Удалить если уплыла за пределы зоны

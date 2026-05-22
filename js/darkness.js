@@ -8,6 +8,10 @@ import {
 import S from './state.js';
 import { getBeamConvergencePoint } from './lighthouse.js';
 
+const PHOSPHOR_TRAIL_MAX_AGE = 180;
+const PHOSPHOR_TRAIL_BASE_RADIUS = 18;
+const PHOSPHOR_TRAIL_BASE_ALPHA = 0.32;
+
 // Логические размеры RT затемнения: покрываем видимую область мира вокруг
 // маяка (gameW / worldScale) + padding с каждой стороны. Маяк лежит по центру
 // RT, что освобождает расчёты от привязки к lhX/lhY и viewport-центру.
@@ -89,6 +93,35 @@ export function updateDarkness() {
   S.beamErase.drawCircle(cxCircle, cyCircle, S.LH_GLOW_RADIUS);
   S.beamErase.endFill();
 
+  const moonlightRadius = Math.max(0, Number(S.moonlightRevealRadius) || 0);
+  const moonlightAlpha = Math.max(0, Number(S.moonlightRevealAlpha) || 0);
+  if (moonlightRadius > 0 && moonlightAlpha > 0) {
+    S.beamErase.beginFill(0xffffff, moonlightAlpha * S.lampFlicker);
+    S.beamErase.drawCircle(cxLH, cyLH, moonlightRadius);
+    S.beamErase.endFill();
+  }
+
+  if (Array.isArray(S.enemyGlowTraces) && S.enemyGlowTraces.length > 0) {
+    const next = [];
+    for (const trace of S.enemyGlowTraces) {
+      const age = (trace.age || 0) + 1;
+      if (age >= PHOSPHOR_TRAIL_MAX_AGE) continue;
+      trace.age = age;
+      next.push(trace);
+      const progress = age / PHOSPHOR_TRAIL_MAX_AGE;
+      const alpha = Math.max(0, (trace.alpha || PHOSPHOR_TRAIL_BASE_ALPHA) * (1 - progress));
+      const radius = Math.max(
+        2,
+        (trace.radius || PHOSPHOR_TRAIL_BASE_RADIUS) * (0.7 + progress * 0.5),
+      );
+      if (alpha <= 0) continue;
+      S.beamErase.beginFill(0xffffff, alpha);
+      S.beamErase.drawCircle(trace.x - S.lhX + cxLH, trace.y - S.lhY + cyLH, radius);
+      S.beamErase.endFill();
+    }
+    S.enemyGlowTraces = next;
+  }
+
   S.app.renderer.render(S.beamErase, { renderTexture: S.darkRT, clear: false });
 
   // Снова заливаем чёрным вне радиуса спавна: луч туда не дотянется
@@ -100,4 +133,22 @@ export function updateDarkness() {
   S.outerDark.endHole();
   S.outerDark.endFill();
   S.app.renderer.render(S.outerDark, { renderTexture: S.darkRT, clear: false });
+}
+
+export function addEnemyGlowTrace(x, y) {
+  if (!S.phosphorWaterEnabled) return;
+  if (!Number.isFinite(x) || !Number.isFinite(y)) return;
+  if (!Array.isArray(S.enemyGlowTraces)) {
+    S.enemyGlowTraces = [];
+  }
+  S.enemyGlowTraces.push({
+    x,
+    y,
+    age: 0,
+    radius: PHOSPHOR_TRAIL_BASE_RADIUS + Math.random() * 6,
+    alpha: PHOSPHOR_TRAIL_BASE_ALPHA + Math.random() * 0.08,
+  });
+  if (S.enemyGlowTraces.length > 260) {
+    S.enemyGlowTraces.splice(0, S.enemyGlowTraces.length - 260);
+  }
 }
