@@ -12,6 +12,7 @@ import {
   BOAT_FRAMES,
   BOAT_FRAME_DURATION,
   LIT_DEBOUNCE,
+  BOAT_ROCK_IMMUNITY_COOLDOWN_MS,
   BOAT_CARGO_TYPES,
   TOOLTIP_STYLE_OK,
   TOOLTIP_STYLE_FAIL,
@@ -114,6 +115,7 @@ export function spawnBoat() {
     wasLit: false,
     litPending: null,
     litPendingAt: 0,
+    rockImmunityUntil: 0,
     sinkTimer: 0,
     sinking: false,
     arrived: false,
@@ -148,6 +150,9 @@ export function updateBoats(delta) {
       } else if (now - b.litPendingAt >= LIT_DEBOUNCE) {
         b.wasLit = b.lit;
         b.lit = rawLit;
+        if (!b.lit && b.wasLit) {
+          b.rockImmunityUntil = now + BOAT_ROCK_IMMUNITY_COOLDOWN_MS;
+        }
         b.litPending = null;
         // Play sonar sound on beam entry
         if (b.lit && !b.wasLit && !b.sinking) {
@@ -252,7 +257,8 @@ export function updateBoats(delta) {
 
     // Rock collision — sink if not lit
     if (checkRockCollision(spr.x, spr.y)) {
-      if (!b.lit) {
+      const hasRockImmunity = b.lit || now < b.rockImmunityUntil;
+      if (!hasRockImmunity) {
         b.sinking = true;
         b.sinkTimer = 0;
         S.boatsSunk++;
