@@ -71,7 +71,7 @@ export const PERK_MAX_STACKS = {
   occult_lamp: 1,
   old_map: Infinity,
   new_icebergs: Infinity,
-  repair_lighthouse: Infinity,
+  repair_lighthouse: 3,
 };
 
 let perkPickerOpener = null;
@@ -175,8 +175,8 @@ export function rollPerkPickerOffer() {
 
 /** Perk ids rendered in the picker (all in debug, offer otherwise). */
 export function getPerkPickerVisibleIds() {
-  if (S.debugMode) return PERK_IDS;
-  return S.perkPickerOffer || [];
+  const visibleIds = S.debugMode ? PERK_IDS : (S.perkPickerOffer || []);
+  return visibleIds.filter((id) => canPickPerk(id));
 }
 
 export function canSelectPerkInPicker(perkId) {
