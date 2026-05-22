@@ -153,6 +153,7 @@ const KRAKEN_FRAME_DURATION = 15;
 
 // ===== Boat Lit Debounce =====
 const LIT_DEBOUNCE = 100; // ms — минимальное время стабильного состояния перед сменой
+const BOAT_ROCK_IMMUNITY_COOLDOWN_MS = 1000;
 
 // ===== Tooltips =====
 const TOOLTIP_RISE_SPEED = 0.5;
@@ -327,6 +328,7 @@ export {
   KRAKEN_RETREAT_FRAMES,
   KRAKEN_FRAME_DURATION,
   LIT_DEBOUNCE,
+  BOAT_ROCK_IMMUNITY_COOLDOWN_MS,
   TOOLTIP_RISE_SPEED,
   TOOLTIP_DURATION,
   C,
