@@ -27,7 +27,41 @@
 
 .menu-shop .shop-reset-btn {
   align-self: flex-start;
-  padding-inline: 18px;
+}
+
+.menu-shop .shop-reset-btn,
+.menu-shop .shop-reset-confirm-cancel,
+.menu-shop .shop-reset-confirm-apply {
+  border: 1px solid rgba(255, 221, 68, 0.25);
+  border-radius: var(--size-pill-radius);
+  padding: 10px 16px;
+  background: rgba(15, 33, 54, 0.85);
+  color: var(--color-menu-accent);
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition:
+    background var(--duration-ui),
+    border-color var(--duration-ui),
+    transform var(--duration-press);
+}
+
+.menu-shop .shop-reset-btn:hover:not(:disabled),
+.menu-shop .shop-reset-confirm-cancel:hover,
+.menu-shop .shop-reset-confirm-apply:hover {
+  background: rgba(30, 50, 80, 0.9);
+  border-color: #5599cc;
+}
+
+.menu-shop .shop-reset-btn:active:not(:disabled),
+.menu-shop .shop-reset-confirm-cancel:active,
+.menu-shop .shop-reset-confirm-apply:active {
+  transform: translateY(1px);
+}
+
+.menu-shop .shop-reset-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
 }
 
 .menu-shop .shop-reset-confirm {
@@ -71,11 +105,6 @@
   gap: 10px;
   justify-content: flex-end;
   flex-wrap: wrap;
-}
-
-.menu-shop .shop-reset-confirm-apply {
-  border-color: rgba(255, 120, 120, 0.5);
-  color: #ffd4d4;
 }
 
 .menu-shop .shop-wallet-chip {
