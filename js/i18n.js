@@ -9,7 +9,7 @@ import { ACHIEVEMENTS_I18N } from './i18n/achievements.js';
 
 const STORAGE_KEY = 'lighthouse_lang';
 const DEFAULT_LANG = 'en';
-const SUPPORTED = ['en', 'ru'];
+const SUPPORTED = ['en', 'ru', 'zh'];
 
 const DICT = {
   en: {
@@ -106,21 +106,18 @@ Photopea — image editor
     'shop.level': 'Lv {n}/{max}',
     'shop.cantAfford': 'Not enough supplies',
     'shop.reset': 'Reset purchases',
-    'shop.resetConfirm': 'Reset all shop purchases and refund all spent supplies?',
+    'shop.resetConfirm':
+      'Reset all shop purchases and refund all spent supplies?',
     'shop.resetCancel': 'Cancel',
     'shop.resetApply': 'Reset purchases',
     'shop.items.extra_heart.name': 'Life ring',
-    'shop.items.extra_heart.desc':
-      'Start each run with 1 extra heart.',
+    'shop.items.extra_heart.desc': 'Start each run with 1 extra heart.',
     'shop.items.quality_wick.name': 'Sturdy wick',
-    'shop.items.quality_wick.desc':
-      'Your lamp burns about 25% longer.',
+    'shop.items.quality_wick.desc': 'Your lamp burns about 25% longer.',
     'shop.items.fresnel_lens.name': 'Fresnel lens',
-    'shop.items.fresnel_lens.desc':
-      'The beam lasts about 20% longer.',
+    'shop.items.fresnel_lens.desc': 'The beam lasts about 20% longer.',
     'shop.items.lamp_oil_crate.name': 'Crate of lamp oil',
-    'shop.items.lamp_oil_crate.desc':
-      '+20 lamp oil reserve.',
+    'shop.items.lamp_oil_crate.desc': '+20 lamp oil reserve.',
     'shop.items.spare_generator.name': 'Spare generator',
     'shop.items.spare_generator.desc':
       'Start each night with extra lamp charge.',
@@ -128,8 +125,7 @@ Photopea — image editor
     'shop.items.fast_gear.desc':
       '+10% beam rotation speed per level (max +30%). Current: +{bonus}%. Next: +{nextBonus}%.',
     'shop.items.cold_lamp.name': 'Cold lamp',
-    'shop.items.cold_lamp.desc':
-      'The lamp burns about 12% slower.',
+    'shop.items.cold_lamp.desc': 'The lamp burns about 12% slower.',
     'shop.items.moonlight.name': 'Moonlight',
     'shop.items.moonlight.desc':
       'A small area around the lighthouse stays slightly visible even outside the beam.',
@@ -189,8 +185,11 @@ Photopea — image editor
     'settings.displayNameTooLong': 'Name must be 30 characters or fewer',
     'settings.displayNameSaving': 'Saving…',
     'settings.displayNameEmpty': 'Enter a name to save',
+    'settings.languageHelp': "Don't see your language?",
+    'settings.contactUs': 'Contact us',
     'lang.russian': 'Русский',
     'lang.english': 'English',
+    'lang.chinese': '中文',
     'profile.guest': 'Guest',
 
     // How to play
@@ -285,17 +284,14 @@ Photopea — image editor
     'perk.slow_cops.title': 'Slower cops',
     'perk.slow_cops.desc': 'Police boats move slower.',
     'perk.beam_width.title': 'Max beam width',
-    'perk.beam_width.desc':
-      'Raises the beam width cap by 10° per level.',
+    'perk.beam_width.desc': 'Raises the beam width cap by 10° per level.',
     'perk.elastic_beam.title': 'Elastic beam',
     'perk.elastic_beam.desc':
       'While rotating, the beam briefly widens; when idle it smoothly returns to normal width.',
     'perk.siren_eye.title': "Siren's eye",
-    'perk.siren_eye.desc':
-      'Mermaids spawn less often, but move faster.',
+    'perk.siren_eye.desc': 'Mermaids spawn less often, but move faster.',
     'perk.experienced_keeper.title': 'Experienced keeper',
-    'perk.experienced_keeper.desc':
-      'Earn 10% more supplies each night.',
+    'perk.experienced_keeper.desc': 'Earn 10% more supplies each night.',
     'perk.occult_lamp.title': 'Occult lamp',
     'perk.occult_lamp.desc':
       'Purple lamps on icebergs lure mermaids in and scare them away on contact. Kraken appear more often.',
@@ -352,6 +348,323 @@ Photopea — image editor
     'err.tooManyRequests': 'Too many attempts, try again later',
     'err.network': 'Network problem',
     'err.unknown': 'Unknown error',
+  },
+
+  zh: {
+    'menu.newGame': '新游戏',
+    'menu.shop': '港口商店',
+    'menu.leaderboard': '排行榜',
+    'menu.achievements': '成就',
+    'menu.settings': '设置',
+    'menu.authors': '制作人员',
+    'menu.tutorial': '玩法说明',
+    'credits.text': `
+🎨 概念美术
+
+@adriaaaaana
+@r1m
+@lina
+
+
+💻 程序员
+
+@bobanko
+@nuclme
+
+
+🎲 游戏设计
+
+@nuclme
+@stepastepa
+@adriaaaaana
+@bobanko
+
+
+🤖 AI 工具
+
+GitHub Copilot
+
+
+🎵 音乐
+
+suno.com
+
+
+🔊 音效
+
+pixabay.com
+libsounds.com
+
+
+⚙️ 技术
+
+PixiJS — 2D 渲染引擎
+VS Code — 代码编辑器
+Firebase — 分析与后端
+Photopea — 图像编辑器
+
+
+🌊 感谢游玩！🌊
+`,
+
+    'hint.main': '↑↓ / W S — 导航  •  Enter / E — 选择  •  Q — 返回',
+    'hint.back': '返回',
+    'hint.intro': '◀ ▶ — 翻页  •  Esc — 跳过',
+    'btn.back': '返回',
+
+    'intro.start': '开始',
+    'intro.skip': '跳过',
+
+    'leaderboard.title': '🏆 排行榜',
+    'leaderboard.subtitle': '灯塔守卫者排行榜 - 看谁坚持得最久',
+    'leaderboard.loading': '加载中…',
+    'leaderboard.loadError': '排行榜加载失败',
+    'leaderboard.empty': '还没有人上榜 - 你来当第一名吧！',
+    'leaderboard.you': '（你）',
+    'leaderboard.col.rank': '#',
+    'leaderboard.col.name': '名字',
+    'leaderboard.col.level': '等级',
+    'leaderboard.col.time': '最佳时间',
+    'leaderboard.col.date': '日期',
+
+    ...ACHIEVEMENTS_I18N.zh,
+
+    'shop.title': '港口商店',
+    'shop.playerLevel': '已达到等级 {n}',
+    'shop.nightsWon': '幸存夜晚数（撑到黎明）：{n}',
+    'shop.wallet': '仓库储备',
+    'shop.buy': '购买',
+    'shop.upgrade': '升级',
+    'shop.owned': '已拥有',
+    'shop.maxLevel': '最高等级',
+    'shop.level': 'Lv {n}/{max}',
+    'shop.cantAfford': '资源不足',
+    'shop.reset': '重置购买',
+    'shop.resetConfirm': '重置所有商店购买并返还全部已花费资源？',
+    'shop.resetCancel': '取消',
+    'shop.resetApply': '重置购买',
+    'shop.items.extra_heart.name': '救生圈',
+    'shop.items.extra_heart.desc': '每次开局额外获得 1 点生命。',
+    'shop.items.quality_wick.name': '结实灯芯',
+    'shop.items.quality_wick.desc': '灯能多燃烧约 25%。',
+    'shop.items.fresnel_lens.name': '菲涅尔透镜',
+    'shop.items.fresnel_lens.desc': '光束持续时间增加约 20%。',
+    'shop.items.lamp_oil_crate.name': '灯油箱',
+    'shop.items.lamp_oil_crate.desc': '灯油储备 +20。',
+    'shop.items.spare_generator.name': '备用发电机',
+    'shop.items.spare_generator.desc': '每晚开始时额外获得灯塔充能。',
+    'shop.items.fast_gear.name': '快速齿轮',
+    'shop.items.fast_gear.desc':
+      '每级提升 10% 光束转速（最高 +30%）。当前：+{bonus}%。下一级：+{nextBonus}%。',
+    'shop.items.cold_lamp.name': '冷灯',
+    'shop.items.cold_lamp.desc': '灯的消耗速度约慢 12%。',
+    'shop.items.moonlight.name': '月光',
+    'shop.items.moonlight.desc': '灯塔周围一小片区域在光束外也会微微可见。',
+    'shop.items.guiding_signal.name': '引导信号',
+    'shop.items.guiding_signal.desc': '走私船在黑暗中更能保持航向。',
+    'shop.items.contraband_route.name': '走私航线',
+    'shop.items.contraband_route.desc':
+      '连续救起几艘船后，有机会获得额外稀有资源。',
+    'shop.items.alarm_bell.name': '警报钟',
+    'shop.items.alarm_bell.desc': '每晚第一位美人鱼会被短暂自动标记。',
+    'shop.items.phosphor_water.name': '磷光水',
+    'shop.items.phosphor_water.desc': '敌人离开光束后会短暂留下发光痕迹。',
+
+    'boot.title': 'TWILIGHTHOUSE',
+    'boot.loading': '正在加载 twilighthouse 资源…',
+    'boot.progress': '正在加载资源 {loaded}/{total}',
+    'boot.ready': '就绪',
+    'boot.failed': '游戏资源加载失败',
+    'boot.texture': '贴图',
+    'boot.audio': '音效',
+    'boot.video': '视频',
+    'boot.finalizing': '正在完成启动…',
+    'boot.tips': [
+      '🔦 不要把光束长时间停在一个地方 - 威胁会从四面八方出现。',
+      '🧜 如果美人鱼消失在黑暗中，这不代表她已经游走了。',
+      '🚨 只要有一艘警船被照亮，问题就已经来了。',
+      '🪔 夜晚一开始要节省灯油。到后面，每一厘米光束都很珍贵。',
+      '⚓ 有时候放过一艘船，比失去灯塔更划算。',
+      '🌊 注意屏幕边缘 - 危险很少从正中央出现。',
+      '📦 失去走私船比想象中更容易，尤其是在慌乱时。',
+      '🐙 当你被别的事分心时，克拉肯最喜欢出手。',
+      '🌫 大雾里要看船灯，不要只看剪影。',
+      '🔥 灯开始闪烁通常不是好兆头，后面往往会更糟。',
+    ],
+
+    'settings.title': '⚙️ 设置',
+    'settings.language': '🌐 语言',
+    'settings.languageHelp': '没有找到您的语言？',
+    'settings.contactUs': '联系我们',
+    'settings.music': '🎵 音乐',
+    'settings.sfx': '🔊 音效',
+    'settings.mute': '静音',
+    'settings.unmute': '取消静音',
+    'settings.displayName': '👤 显示名称',
+    'settings.displayNamePlaceholder': '输入你的名字…',
+    'settings.displayNameSave': '保存',
+    'settings.displayNameSaved': '已保存！',
+    'settings.displayNameError': '无法保存名称',
+    'settings.displayNameGuestNote': '登录后可设置显示名称',
+    'settings.displayNameAnon':
+      '你当前以游客身份游玩。你的名字会显示在排行榜中。',
+    'settings.displayNameEmail': '你的名字会显示在排行榜中。',
+    'settings.displayNameTooShort': '名称至少需要 1 个字符',
+    'settings.displayNameTooLong': '名称不能超过 30 个字符',
+    'settings.displayNameSaving': '保存中…',
+    'settings.displayNameEmpty': '请输入要保存的名称',
+    'lang.russian': 'Русский',
+    'lang.english': 'English',
+    'lang.chinese': '中文',
+    'profile.guest': '游客',
+
+    'howtoplay.title': '玩法说明',
+    'howtoplay.prev': '上一页',
+    'howtoplay.next': '下一页',
+    'howtoplay.finish': '开始游戏',
+    'howtoplay.skip': '跳过',
+    'howtoplay.items': [
+      {
+        video: 'tutorial-vids/smugglers.mp4',
+        title: '走私者',
+        text: '被照亮的船会被港口接纳。帮帮走私者。',
+      },
+      {
+        video: 'tutorial-vids/cops.mp4',
+        title: '警察',
+        text: '不要照亮警船。在它们到达灯塔前击沉它们。',
+      },
+      {
+        video: 'tutorial-vids/mermaid.mp4',
+        title: '美人鱼',
+        text: '把美人鱼吓跑！',
+      },
+      {
+        video: 'tutorial-vids/kraken.mp4',
+        title: '克拉肯',
+        text: '用你的光束击退克拉肯。',
+      },
+    ],
+
+    'overlay.restart': '重新开始',
+    'overlay.toMenu': '返回菜单',
+    'overlay.exit': '退出',
+    'overlay.resume': '继续',
+    'overlay.continue': '继续',
+    'overlay.pressToPlayAgain': '点击重新游玩',
+    'exit.confirm': '⏸️ 退出到菜单？',
+    'exit.settings': '⚙️ 设置',
+
+    'gameOver.title': '游戏结束',
+    'gameOver.boats': '💀 一艘走私船沉没了！',
+    'gameOver.mermaids': '🧜‍♀️ 美人鱼占领了灯塔！',
+    'gameOver.police': '🚔 被逮捕了！警察占领了灯塔！',
+    'gameOver.kraken': '🦑 克拉肯占领了灯塔！',
+    'gameOver.pattinson': '📦 火药用光了！灯塔守卫把实习生扔下了悬崖！',
+    'gameOver.score': '💀 已救下 {score}/{total} 艘船',
+    'win.message': '🎉 你赢了！全部 {total} 艘船都被救下！',
+    'win.messageTime': '🎉 你赢了！全部 {total} 艘船都被救下！最终时间：{time}',
+    'win.title': '🎉 胜利！',
+    'win.nightSubtitle': '夜晚结束了！',
+    'win.statLamps': '送达的灯',
+    'win.statCrates': '送达的箱子',
+    'win.statTime': '最终时间',
+    'resultStats.cargoTitle': '收集的货物',
+    'resultStats.title': '夜间回顾',
+    'resultStats.playerLevel': '达到等级',
+    'resultStats.deliveredBoats': '已救下的走私船',
+    'resultStats.smugglersSunk': '已击沉的走私船',
+    'resultStats.sunkCops': '已击沉的警船',
+    'resultStats.repelledMermaids': '已击退的美人鱼',
+    'resultStats.repelledKraken': '已击退的克拉肯',
+    'resultStats.copsArrived': '警船到达灯塔',
+    'resultStats.mermaidsArrived': '美人鱼到达灯塔',
+    'resultStats.krakensArrived': '克拉肯到达灯塔',
+
+    'cargo.💡': '灯',
+    'cargo.📦': '箱子',
+    'cargo.⚙️': '零件',
+    'cargo.🧨': '炸药',
+    'cargo.🥃': '朗姆酒',
+    'cargo.🛢️': '燃料',
+
+    'hud.night': '夜晚',
+    'hud.lesson.prefix': '教学 {n}',
+    'hud.level.prefix': '等级 {n}',
+    'hud.level.idle': '生存',
+    'hud.xp': '经验',
+
+    'perk.xpGain': '+{n} 经验',
+    'perk.pick.title': '选择一个加成',
+    'perk.pick.level': '等级 {n}',
+    'perk.stack': '等级 {n}',
+    'perk.better_oil.title': '更好的灯油',
+    'perk.better_oil.desc': '灯能燃烧更久。',
+    'perk.brighter_beam.title': '更宽的光束',
+    'perk.brighter_beam.desc': '光锥变得更宽。',
+    'perk.slow_cops.title': '更慢的警船',
+    'perk.slow_cops.desc': '警船移动得更慢。',
+    'perk.beam_width.title': '最大光束宽度',
+    'perk.beam_width.desc': '每级将光束宽度上限提高 10°。',
+    'perk.elastic_beam.title': '弹性光束',
+    'perk.elastic_beam.desc':
+      '旋转时光束会短暂变宽；静止时会平滑回到正常宽度。',
+    'perk.siren_eye.title': '海妖之眼',
+    'perk.siren_eye.desc': '美人鱼刷新更少，但移动更快。',
+    'perk.experienced_keeper.title': '经验丰富的守卫',
+    'perk.experienced_keeper.desc': '每晚获得 10% 更多资源。',
+    'perk.occult_lamp.title': '秘术之灯',
+    'perk.occult_lamp.desc':
+      '冰山上的紫色灯会吸引美人鱼并在接触时吓跑她们。克拉肯出现得更频繁。',
+    'perk.old_map.title': '旧地图',
+    'perk.old_map.desc': '持续 20 秒显示所有隐藏敌人和未在光束中的走私者图标。',
+    'perk.new_icebergs.title': '新冰山',
+    'perk.new_icebergs.desc': '随机位置会出现 3 座新冰山。',
+    'perk.maxed': '最高等级',
+    'perk.fullHealth': '满血',
+    'perk.repair_lighthouse.title': '修复灯塔',
+    'perk.repair_lighthouse.desc': '恢复 1 颗心。',
+    'perk.repair_lighthouse.healed': '+1 ❤️',
+
+    'goal.delivered_boats.one': '护送 {n} 艘走私船',
+    'goal.delivered_boats.other': '护送 {n} 艘走私船',
+    'goal.sunk_cops.one': '击沉 {n} 艘警船',
+    'goal.sunk_cops.other': '击沉 {n} 艘警船',
+    'goal.repelled_kraken.one': '击退 {n} 只克拉肯',
+    'goal.repelled_kraken.other': '击退 {n} 只克拉肯',
+    'goal.repelled_mermaids.one': '击退 {n} 位美人鱼',
+    'goal.repelled_mermaids.other': '击退 {n} 位美人鱼',
+
+    'level.l1.title': '教学 1',
+    'level.l1.sub': '安全地把走私船引进港口',
+    'level.l2.title': '教学 2',
+    'level.l2.sub': '在警船到达灯塔前击沉它们',
+    'level.l3.title': '教学 3',
+    'level.l3.sub': '在美人鱼到达灯塔前把她们赶走',
+    'level.freeplay.title': '守夜',
+    'level.freeplay.sub': '坚持到黎明',
+
+    'auth.signIn': '登录',
+    'auth.signUp': '注册',
+    'auth.tabSignIn': '登录',
+    'auth.tabSignUp': '注册',
+    'auth.fieldName': '昵称',
+    'auth.fieldEmail': '邮箱',
+    'auth.fieldPassword': '密码',
+    'auth.submitSignIn': '登录',
+    'auth.submitSignUp': '创建账号',
+    'auth.close': '关闭',
+
+    'widget.signIn': '👤 登录',
+    'widget.signOut': '🚪 退出登录',
+
+    'err.invalidEmail': '邮箱无效',
+    'err.emailInUse': '该邮箱已被注册',
+    'err.weakPassword': '密码太弱（至少 6 个字符）',
+    'err.wrongCreds': '邮箱或密码错误',
+    'err.tooManyRequests': '尝试次数过多，请稍后再试',
+    'err.network': '网络问题',
+    'err.unknown': '未知错误',
   },
 
   ru: {
@@ -444,21 +757,19 @@ Photopea — image editor
     'shop.level': 'Ур. {n}/{max}',
     'shop.cantAfford': 'Не хватает товара',
     'shop.reset': 'Сбросить покупки',
-    'shop.resetConfirm': 'Сбросить все покупки в магазине и вернуть все потраченные ресурсы?',
+    'shop.resetConfirm':
+      'Сбросить все покупки в магазине и вернуть все потраченные ресурсы?',
     'shop.resetCancel': 'Отмена',
     'shop.resetApply': 'Сбросить покупки',
     'shop.items.extra_heart.name': 'Спасательный круг',
     'shop.items.extra_heart.desc':
       'Каждый забег начинается с 1 дополнительной жизни.',
     'shop.items.quality_wick.name': 'Надёжный фитиль',
-    'shop.items.quality_wick.desc':
-      'Лампа горит примерно на 25% дольше.',
+    'shop.items.quality_wick.desc': 'Лампа горит примерно на 25% дольше.',
     'shop.items.fresnel_lens.name': 'Линза Френеля',
-    'shop.items.fresnel_lens.desc':
-      'Луч держится примерно на 20% дольше.',
+    'shop.items.fresnel_lens.desc': 'Луч держится примерно на 20% дольше.',
     'shop.items.lamp_oil_crate.name': 'Ящик лампового масла',
-    'shop.items.lamp_oil_crate.desc':
-      '+20 к запасу масла для лампы.',
+    'shop.items.lamp_oil_crate.desc': '+20 к запасу масла для лампы.',
     'shop.items.spare_generator.name': 'Запасной генератор',
     'shop.items.spare_generator.desc':
       'Начинай ночь с дополнительным зарядом лампы.',
@@ -466,8 +777,7 @@ Photopea — image editor
     'shop.items.fast_gear.desc':
       '+10% к скорости вращения луча за уровень (макс. +30%). Сейчас: +{bonus}%. Следующий: +{nextBonus}%.',
     'shop.items.cold_lamp.name': 'Холодная лампа',
-    'shop.items.cold_lamp.desc':
-      'Лампа расходуется примерно на 12% медленнее.',
+    'shop.items.cold_lamp.desc': 'Лампа расходуется примерно на 12% медленнее.',
     'shop.items.moonlight.name': 'Лунный свет',
     'shop.items.moonlight.desc':
       'Небольшая зона вокруг маяка остаётся слегка видимой даже вне луча.',
@@ -525,6 +835,8 @@ Photopea — image editor
     'settings.displayNameTooLong': 'Имя не должно превышать 30 символов',
     'settings.displayNameSaving': 'Сохранение…',
     'settings.displayNameEmpty': 'Введите имя для сохранения',
+    'settings.languageHelp': 'Не нашли свой язык?',
+    'settings.contactUs': 'Свяжитесь с нами',
     'profile.guest': 'Гость',
     'lang.russian': 'Русский',
 
@@ -557,6 +869,7 @@ Photopea — image editor
       },
     ],
     'lang.english': 'English',
+    'lang.chinese': '中文',
 
     'overlay.restart': 'Заново',
     'overlay.toMenu': 'В меню',
@@ -620,17 +933,14 @@ Photopea — image editor
     'perk.slow_cops.title': 'Медленные копы',
     'perk.slow_cops.desc': 'Полицейские катера двигаются медленнее.',
     'perk.beam_width.title': 'Макс. ширина луча',
-    'perk.beam_width.desc':
-      'Повышает максимум ширины луча на 10° за уровень.',
+    'perk.beam_width.desc': 'Повышает максимум ширины луча на 10° за уровень.',
     'perk.elastic_beam.title': 'Упругий луч',
     'perk.elastic_beam.desc':
       'Во время поворота луч немного расширяется, а при остановке плавно сужается до обычной ширины.',
     'perk.siren_eye.title': 'Глаз сирены',
-    'perk.siren_eye.desc':
-      'Русалки появляются реже, но двигаются быстрее.',
+    'perk.siren_eye.desc': 'Русалки появляются реже, но двигаются быстрее.',
     'perk.experienced_keeper.title': 'Опытный смотритель',
-    'perk.experienced_keeper.desc':
-      'Даёт на 10% больше ресурсов за ночь.',
+    'perk.experienced_keeper.desc': 'Даёт на 10% больше ресурсов за ночь.',
     'perk.occult_lamp.title': 'Оккультная лампа',
     'perk.occult_lamp.desc':
       'Фиолетовые лампы на айсбергах приманивают русалок и отпугивают их при приближении. Кракен появляется чаще.',
@@ -707,6 +1017,9 @@ function detectSystemLanguage() {
     ...(Array.isArray(navigator?.languages) ? navigator.languages : []),
     navigator?.language,
   ].filter(Boolean);
+  for (const tag of candidates) {
+    if (String(tag).toLowerCase().startsWith('zh')) return 'zh';
+  }
   for (const tag of candidates) {
     if (String(tag).toLowerCase().startsWith('ru')) return 'ru';
   }

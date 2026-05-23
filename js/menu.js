@@ -53,6 +53,7 @@ const {
   $menuTutorialSkipLabel,
   $menuSettingsLangLabel,
   $menuSettingsLangBtn,
+  $menuSettingsContactBtn,
   $menuSettingsMusicLabel,
   $menuSettingsMusicInput,
   $menuSettingsMusicValue,
@@ -680,6 +681,7 @@ function showSettings() {
   const langs = [
     { code: 'en', label: t('lang.english') },
     { code: 'ru', label: t('lang.russian') },
+    { code: 'zh', label: t('lang.chinese') },
   ];
   let langIdx = Math.max(
     0,
@@ -693,6 +695,14 @@ function showSettings() {
     langIdx = (langIdx + 1) % langs.length;
     setLanguage(langs[langIdx].code);
   };
+
+  if ($menuSettingsContactBtn) {
+    $menuSettingsContactBtn.onclick = () => {
+      playMenuClick();
+      const contactUrl = $discordLink?.href || 'https://discord.gg/dZerNr27B';
+      window.open(contactUrl, '_blank', 'noopener');
+    };
+  }
 
   if (
     !$menuSettingsMusicLabel ||
@@ -952,7 +962,8 @@ function scheduleMenuLayoutSync() {
 function syncMainMenuLayout() {
   if (!$menuOverlay || !$menuMain) return;
 
-  const viewportWidth = S.gameW || window.innerWidth || document.documentElement.clientWidth;
+  const viewportWidth =
+    S.gameW || window.innerWidth || document.documentElement.clientWidth;
   const isNarrowScreen = viewportWidth <= NARROW_MENU_BREAKPOINT;
   const canShowKeeper =
     currentScreen === 'main' &&
