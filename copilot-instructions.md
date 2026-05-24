@@ -130,3 +130,13 @@
 ## Development
 
 - Do not start a dev server to check pages in the browser — suppose that it is already running at `http://localhost:8080/`
+
+## Commit Messages
+
+- Write commit messages in English.
+- Use a short, single-line subject without a trailing period.
+- Match the existing project style: imperative present-tense verbs such as `Add`, `Fix`, `Implement`, `Adjust`, `Move`, `Remove`, `Polish`, `Refactor`, `Style`, `Increase`, or `Set`.
+- Prefer a plain imperative subject for small, focused changes, e.g. `Adjust mobile main menu width and landscape layout`.
+- Use `feat:` for new player-facing functionality and `fix:` for bug fixes when the type is clear, e.g. `feat: add elastic beam run perk` or `fix: keep authors back button above credits`.
+- Use `style:` for visual-only UI/CSS changes and `chore:` for maintenance, config, balance, or copy-only tweaks.
+- Keep the wording specific to the changed behavior or UI area; avoid generic messages like `Update files`, `Fix bugs`, or `Minor changes`.
