@@ -129,7 +129,10 @@
 
 ## Development
 
-- Do not start a dev server to check pages in the browser — suppose that it is already running at `http://localhost:8080/`
+- Do not start a local/dev server for verification.
+- Assume the user already has the project served at `http://localhost:8080/`.
+- For browser/page checks, use only the already-running `http://localhost:8080/` server.
+- If `http://localhost:8080/` is unavailable, skip the browser/server verification and mention that it was skipped; do not run `npm start`, `http-server`, `npx http-server`, or try another port.
 
 ## Commit Messages
 
