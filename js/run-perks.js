@@ -282,7 +282,10 @@ export function resetRunPerks(state = S) {
   state.perkPickerOpen = false;
   state.perkPickerOffer = [];
   state.oldMapRevealUntil = 0;
-  state.beamMotionBonusHalfAngle = 0;
+  state.beamElasticSide = 0;
+  state.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
+  state.BEAM_LEFT_ANGLE = state.beamAngle - state.BEAM_HALF_ANGLE;
+  state.BEAM_RIGHT_ANGLE = state.beamAngle + state.BEAM_HALF_ANGLE;
 }
 
 export function checkRunXpLevelUp() {

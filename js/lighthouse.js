@@ -5,9 +5,7 @@ import {
   BEAM_ROTATE_SPEED,
   LAMP_FULL_ANGLE,
   LAMP_MIN_ANGLE,
-  LAMP_BURNOUT_TIME,
   LAMP_FLICKER_START,
-  PERK_ELASTIC_BEAM_EXPAND_SPEED,
   PERK_ELASTIC_BEAM_SHRINK_SPEED,
   MOB_SPAWN_RING,
   LIGHTHOUSE_WIDTH,
@@ -42,19 +40,104 @@ export function buildGlow() {
 
 function updateBeamRotation(delta) {
   const rotateSpeed = BEAM_ROTATE_SPEED * (S.beamRotateMult || 1);
-  let moving = false;
-  if (S.keys['KeyA'] || S.keys['ArrowLeft']) {
-    S.beamAngle -= rotateSpeed * delta;
-    moving = true;
+  const left = !!(S.keys['KeyA'] || S.keys['ArrowLeft']);
+  const right = !!(S.keys['KeyD'] || S.keys['ArrowRight']);
+  const dir = Number(right) - Number(left);
+  const deltaAngle = dir * rotateSpeed * delta;
+  if (!Number.isFinite(S.beamAngle)) {
+    S.beamAngle = -Math.PI / 2;
   }
-  if (S.keys['KeyD'] || S.keys['ArrowRight']) {
-    S.beamAngle += rotateSpeed * delta;
-    moving = true;
-  }
-  return moving;
+  S.beamAngle += deltaAngle;
+  return { dir, deltaAngle };
 }
 
-function updateLamp(delta, isBeamMoving) {
+function syncBeamEdgesToBase(halfAngle) {
+  S.BEAM_LEFT_ANGLE = S.beamAngle - halfAngle;
+  S.BEAM_RIGHT_ANGLE = S.beamAngle + halfAngle;
+  S.BEAM_HALF_ANGLE = halfAngle;
+  S.beamElasticSide = 0;
+}
+
+function setBeamEdges(leftAngle, rightAngle) {
+  S.BEAM_LEFT_ANGLE = leftAngle;
+  S.BEAM_RIGHT_ANGLE = rightAngle;
+  S.BEAM_HALF_ANGLE = Math.max(0.001, (rightAngle - leftAngle) / 2);
+}
+
+export function getBeamEdgeAngles() {
+  if (
+    !Number.isFinite(S.BEAM_LEFT_ANGLE) ||
+    !Number.isFinite(S.BEAM_RIGHT_ANGLE)
+  ) {
+    syncBeamEdgesToBase(S.BEAM_HALF_ANGLE || LAMP_FULL_ANGLE);
+  }
+  return {
+    left: S.BEAM_LEFT_ANGLE,
+    right: S.BEAM_RIGHT_ANGLE,
+  };
+}
+
+function updateElasticBeamEdges(halfAngle, rotation, delta) {
+  const maxElasticWidth = getElasticBeamHalfAngleBonus() * 2;
+  if (maxElasticWidth <= 0) {
+    syncBeamEdgesToBase(halfAngle);
+    return;
+  }
+
+  const baseWidth = halfAngle * 2;
+  const maxWidth = baseWidth + maxElasticWidth;
+  const baseLeft = S.beamAngle - halfAngle;
+  const baseRight = S.beamAngle + halfAngle;
+  const previous = getBeamEdgeAngles();
+  let left = previous.left;
+  let right = previous.right;
+
+  if (rotation.dir > 0 && rotation.deltaAngle > 0) {
+    right += rotation.deltaAngle;
+    if (right < baseRight) right = baseRight;
+    if (left > baseLeft) left = baseLeft;
+    if (right - left > maxWidth) left = right - maxWidth;
+    S.beamElasticSide = 1;
+  } else if (rotation.dir < 0 && rotation.deltaAngle < 0) {
+    left += rotation.deltaAngle;
+    if (left > baseLeft) left = baseLeft;
+    if (right < baseRight) right = baseRight;
+    if (right - left > maxWidth) right = left + maxWidth;
+    S.beamElasticSide = -1;
+  } else {
+    const width = Math.max(baseWidth, right - left);
+    if (width <= baseWidth + 0.0001) {
+      syncBeamEdgesToBase(halfAngle);
+      return;
+    }
+
+    const shrinkStep = Math.min(
+      1,
+      Math.max(0, PERK_ELASTIC_BEAM_SHRINK_SPEED * delta),
+    );
+    const nextWidth = baseWidth + (width - baseWidth) * (1 - shrinkStep);
+
+    if (S.beamElasticSide > 0) {
+      right = previous.right;
+      left = right - nextWidth;
+    } else if (S.beamElasticSide < 0) {
+      left = previous.left;
+      right = left + nextWidth;
+    } else {
+      syncBeamEdgesToBase(halfAngle);
+      return;
+    }
+
+    if (nextWidth <= baseWidth + 0.0001) {
+      syncBeamEdgesToBase(halfAngle);
+      return;
+    }
+  }
+
+  setBeamEdges(left, right);
+}
+
+function updateLamp(delta, rotation) {
   const lampCap = getEffectiveLampBurnoutMs();
   if (S.lampRestoreFramesLeft > 0) {
     S.lampRestoreFramesLeft = Math.max(0, S.lampRestoreFramesLeft - delta);
@@ -79,16 +162,7 @@ function updateLamp(delta, isBeamMoving) {
   const fullAngle = LAMP_FULL_ANGLE * beamMult;
   let halfAngle = fullAngle - (fullAngle - LAMP_MIN_ANGLE) * burnout;
   halfAngle = Math.min(halfAngle, getMaxBeamHalfAngle());
-  const motionTarget = isBeamMoving ? getElasticBeamHalfAngleBonus() : 0;
-  const stretchSpeed = isBeamMoving
-    ? PERK_ELASTIC_BEAM_EXPAND_SPEED
-    : PERK_ELASTIC_BEAM_SHRINK_SPEED;
-  const stretchStep = Math.min(1, Math.max(0, stretchSpeed * delta));
-  const motionBonus = S.beamMotionBonusHalfAngle || 0;
-  S.beamMotionBonusHalfAngle =
-    motionBonus + (motionTarget - motionBonus) * stretchStep;
-  halfAngle += S.beamMotionBonusHalfAngle;
-  S.BEAM_HALF_ANGLE = halfAngle;
+  updateElasticBeamEdges(halfAngle, rotation, delta);
 
   if (burnout > LAMP_FLICKER_START) {
     const flickerIntensity =
@@ -106,8 +180,8 @@ function updateLamp(delta, isBeamMoving) {
 }
 
 export function updateLighthouse(delta) {
-  const isBeamMoving = updateBeamRotation(delta);
-  updateLamp(delta, isBeamMoving);
+  const rotation = updateBeamRotation(delta);
+  updateLamp(delta, rotation);
 }
 
 export function isInBeam(x, y) {
@@ -115,10 +189,11 @@ export function isInBeam(x, y) {
   const dx = x - (S.lhX + convergence.x);
   const dy = y - (S.lhY + convergence.y);
   let angle = Math.atan2(dy, dx);
-  let diff = angle - S.beamAngle;
-  while (diff > Math.PI) diff -= Math.PI * 2;
-  while (diff < -Math.PI) diff += Math.PI * 2;
-  return Math.abs(diff) < S.BEAM_HALF_ANGLE;
+  const { left, right } = getBeamEdgeAngles();
+  const center = (left + right) / 2;
+  while (angle - center > Math.PI) angle -= Math.PI * 2;
+  while (angle - center < -Math.PI) angle += Math.PI * 2;
+  return angle > left && angle < right;
 }
 
 export function checkRockCollision(x, y) {
@@ -166,16 +241,17 @@ export function updateDebugBeam() {
   S.debugGfx.lineTo(ox, oy);
 
   // Beam cone edges
+  const { left, right } = getBeamEdgeAngles();
   S.debugGfx.lineStyle(2, 0xffff00, 0.7);
   S.debugGfx.moveTo(ox, oy);
   S.debugGfx.lineTo(
-    ox + Math.cos(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
-    oy + Math.sin(S.beamAngle - S.BEAM_HALF_ANGLE) * bLen,
+    ox + Math.cos(left) * bLen,
+    oy + Math.sin(left) * bLen,
   );
   S.debugGfx.moveTo(ox, oy);
   S.debugGfx.lineTo(
-    ox + Math.cos(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
-    oy + Math.sin(S.beamAngle + S.BEAM_HALF_ANGLE) * bLen,
+    ox + Math.cos(right) * bLen,
+    oy + Math.sin(right) * bLen,
   );
 
   // Beam center line

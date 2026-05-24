@@ -6,7 +6,7 @@ import {
   BEAM_VISUAL_NARROW_ANGLE,
 } from './config.js';
 import S from './state.js';
-import { getBeamConvergencePoint } from './lighthouse.js';
+import { getBeamConvergencePoint, getBeamEdgeAngles } from './lighthouse.js';
 
 const PHOSPHOR_TRAIL_MAX_AGE = 180;
 const PHOSPHOR_TRAIL_BASE_RADIUS = 18;
@@ -52,10 +52,6 @@ export function buildDarkness(parent) {
 export function updateDarkness() {
   const { w, h } = getDarknessLogicalSize();
   const bLen = Math.max(w, h) * 2;
-  const visualHalfAngle = Math.max(
-    0.001,
-    S.BEAM_HALF_ANGLE - BEAM_VISUAL_NARROW_ANGLE,
-  );
   // Маяк всегда в центре RT. Точка схождения луча — на радиусе от центра.
   const cxLH = w / 2;
   const cyLH = h / 2;
@@ -74,16 +70,23 @@ export function updateDarkness() {
   S.app.renderer.render(S.darkFill, { renderTexture: S.darkRT, clear: true });
 
   // Стираем конус луча + круг у основания маяка (с учётом мерцания лампы)
+  const beamEdges = getBeamEdgeAngles();
+  const visualLeft = beamEdges.left + BEAM_VISUAL_NARROW_ANGLE;
+  const visualRight = beamEdges.right - BEAM_VISUAL_NARROW_ANGLE;
+  const beamCenter = (beamEdges.left + beamEdges.right) / 2;
+  const left = visualLeft < visualRight ? visualLeft : beamCenter;
+  const right = visualLeft < visualRight ? visualRight : beamCenter;
+
   S.beamErase.clear();
   S.beamErase.beginFill(0xffffff, S.lampFlicker);
   S.beamErase.moveTo(cx, cy);
   S.beamErase.lineTo(
-    cx + Math.cos(S.beamAngle - visualHalfAngle) * bLen,
-    cy + Math.sin(S.beamAngle - visualHalfAngle) * bLen,
+    cx + Math.cos(left) * bLen,
+    cy + Math.sin(left) * bLen,
   );
   S.beamErase.lineTo(
-    cx + Math.cos(S.beamAngle + visualHalfAngle) * bLen,
-    cy + Math.sin(S.beamAngle + visualHalfAngle) * bLen,
+    cx + Math.cos(right) * bLen,
+    cy + Math.sin(right) * bLen,
   );
   S.beamErase.closePath();
   S.beamErase.endFill();

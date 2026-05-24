@@ -78,6 +78,8 @@ const State = {
   // Beam
   beamAngle: -Math.PI / 2,
   BEAM_HALF_ANGLE: LAMP_FULL_ANGLE,
+  BEAM_LEFT_ANGLE: -Math.PI / 2 - LAMP_FULL_ANGLE,
+  BEAM_RIGHT_ANGLE: -Math.PI / 2 + LAMP_FULL_ANGLE,
   BEAM_ORIGIN_OFFSET_X: BEAM_ORIGIN_OFFSET_X_DEFAULT,
   BEAM_ORIGIN_OFFSET_Y: BEAM_ORIGIN_OFFSET_Y_DEFAULT,
   LH_GLOW_RADIUS: LH_GLOW_RADIUS_DEFAULT,
@@ -138,7 +140,7 @@ const State = {
   lampFlicker: 1,
   lampBurnoutMs: LAMP_BURNOUT_TIME,
   beamRotateMult: 1,
-  beamMotionBonusHalfAngle: 0,
+  beamElasticSide: 0,
 
   // Hearts / Lives System
   heartsMax: 5,
@@ -242,11 +244,13 @@ const State = {
     this.heartsMax = 5;
     this.lampBurnoutMs = LAMP_BURNOUT_TIME;
     this.beamRotateMult = 1;
-    this.beamMotionBonusHalfAngle = 0;
     this.heartsRemaining = this.heartsMax;
     this.lastEnemyType = null;
     this.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
     this.beamAngle = -Math.PI / 2;
+    this.BEAM_LEFT_ANGLE = this.beamAngle - LAMP_FULL_ANGLE;
+    this.BEAM_RIGHT_ANGLE = this.beamAngle + LAMP_FULL_ANGLE;
+    this.beamElasticSide = 0;
     this.gameSessionActive = false;
     this.gameOver = false;
     this.gameOverPending = false;
