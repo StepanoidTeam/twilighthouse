@@ -1,4 +1,4 @@
-import { playClickSound } from './sound.js';
+import { playClickSound, playSound } from './sound.js';
 import S from './state.js';
 import {
   PERK_ICONS,
@@ -23,7 +23,61 @@ const {
   $perkPickCards,
 } = globalThis;
 
+const PERK_PICK_CONFIRM_DELAY_MS = 140;
+
 let perkKeyHandler = null;
+let selectedPerkIndex = 0;
+let perkPickConfirming = false;
+let perkPickConfirmTimer = null;
+
+function getFirstSelectableIndex(visible = getPerkPickerVisibleIds()) {
+  return visible.findIndex((perkId) => canSelectPerkInPicker(perkId));
+}
+
+function ensureSelectedPerkIndex() {
+  const visible = getPerkPickerVisibleIds();
+  if (
+    visible[selectedPerkIndex] &&
+    canSelectPerkInPicker(visible[selectedPerkIndex])
+  ) {
+    return selectedPerkIndex;
+  }
+  selectedPerkIndex = getFirstSelectableIndex(visible);
+  return selectedPerkIndex;
+}
+
+function syncSelectedPerkCard() {
+  if (!$perkPickCards) return;
+  const activeIndex = ensureSelectedPerkIndex();
+  $perkPickCards.querySelectorAll('.perk-card').forEach((card) => {
+    const index = Number(card.dataset.perkIndex);
+    card.classList.toggle('perk-card--selected', index === activeIndex);
+  });
+}
+
+function movePerkSelection(dir) {
+  if (perkPickConfirming) return;
+  const visible = getPerkPickerVisibleIds();
+  const selectableIndexes = visible
+    .map((perkId, index) => canSelectPerkInPicker(perkId) ? index : -1)
+    .filter((index) => index >= 0);
+  if (!selectableIndexes.length) return;
+
+  const currentPos = selectableIndexes.indexOf(selectedPerkIndex);
+  const nextPos = currentPos < 0
+    ? (dir > 0 ? 0 : selectableIndexes.length - 1)
+    : (currentPos + dir + selectableIndexes.length) % selectableIndexes.length;
+
+  selectedPerkIndex = selectableIndexes[nextPos];
+  syncSelectedPerkCard();
+  playSound('audio/menu-select.mp3', 0.35);
+}
+
+function getSelectedPerkId() {
+  const visible = getPerkPickerVisibleIds();
+  const index = ensureSelectedPerkIndex();
+  return index >= 0 ? visible[index] : null;
+}
 
 function renderLevelBullets(container, level, maxLevel) {
   container.replaceChildren();
@@ -109,24 +163,62 @@ function renderPerkCards() {
     }
 
     if (!maxed) {
-      card.addEventListener('pointerdown', () => selectPerk(perkId));
+      card.addEventListener('pointerdown', () => {
+        selectedPerkIndex = index;
+        syncSelectedPerkCard();
+        selectPerk(perkId);
+      });
     }
     $perkPickCards.appendChild(card);
   });
+  syncSelectedPerkCard();
 }
 
 function selectPerk(perkId) {
-  if (!S.perkPickerOpen || !canSelectPerkInPicker(perkId)) return;
+  if (
+    perkPickConfirming ||
+    !S.perkPickerOpen ||
+    !canSelectPerkInPicker(perkId)
+  ) {
+    return;
+  }
+  perkPickConfirming = true;
   playClickSound();
-  applyPerk(perkId);
-  closePerkPicker();
-  checkRunXpLevelUp();
+
+  const card = Array.from($perkPickCards?.querySelectorAll('.perk-card') || [])
+    .find((el) => el.dataset.perkId === perkId);
+  card?.classList.add('perk-card--selected', 'perk-card--choosing');
+
+  perkPickConfirmTimer = window.setTimeout(() => {
+    perkPickConfirmTimer = null;
+    if (!S.perkPickerOpen || !canSelectPerkInPicker(perkId)) {
+      perkPickConfirming = false;
+      return;
+    }
+    applyPerk(perkId);
+    closePerkPicker();
+    checkRunXpLevelUp();
+  }, PERK_PICK_CONFIRM_DELAY_MS);
 }
 
 function onPerkKeyDown(e) {
   if (!S.perkPickerOpen) return;
   const visible = getPerkPickerVisibleIds();
   const key = e.key;
+  const code = e.code;
+
+  if (
+    code === 'ArrowLeft' ||
+    code === 'KeyA' ||
+    code === 'ArrowRight' ||
+    code === 'KeyD'
+  ) {
+    e.preventDefault();
+    S.keys[code] = false;
+    movePerkSelection(code === 'ArrowLeft' || code === 'KeyA' ? -1 : 1);
+    return;
+  }
+
   if (key >= '1' && key <= '9') {
     const idx = Number(key) - 1;
     const perkId = visible[idx];
@@ -142,12 +234,13 @@ function onPerkKeyDown(e) {
       e.preventDefault();
       selectPerk(perkId);
     }
+    return;
   }
-  if (key === 'Enter') {
-    const firstAvailable = visible.find((id) => canSelectPerkInPicker(id));
-    if (firstAvailable) {
+  if (code === 'Enter' || code === 'KeyE') {
+    const perkId = getSelectedPerkId();
+    if (perkId && canSelectPerkInPicker(perkId)) {
       e.preventDefault();
-      selectPerk(firstAvailable);
+      selectPerk(perkId);
     }
   }
 }
@@ -159,6 +252,8 @@ export function openPerkPicker() {
     if (!S.perkPickerOffer.length) return;
   }
   S.perkPickerOpen = true;
+  selectedPerkIndex = getFirstSelectableIndex();
+  perkPickConfirming = false;
   if ($perkPickTitle) $perkPickTitle.textContent = t('perk.pick.title');
   if ($perkPickLevel) {
     $perkPickLevel.textContent = t('perk.pick.level', { n: getRunLevel() });
@@ -173,6 +268,11 @@ export function openPerkPicker() {
 }
 
 export function closePerkPicker() {
+  if (perkPickConfirmTimer) {
+    clearTimeout(perkPickConfirmTimer);
+    perkPickConfirmTimer = null;
+  }
+  perkPickConfirming = false;
   S.perkPickerOpen = false;
   S.perkPickerOffer = [];
   if ($screenPerkPick) $screenPerkPick.hidden = true;
