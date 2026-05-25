@@ -46,6 +46,8 @@ const {
   $resultMenuLabel,
   $resultSplash,
   $screenGameOver,
+  $screenEndPrelude,
+  $screenEndPreludeText,
   $achievementToastLayer,
   $exitConfirmMsg,
   $exitConfirmLabel,
@@ -162,6 +164,9 @@ let resultRevealTimer = null;
 let resultRevealPending = false;
 let resultRevealPointerHandler = null;
 const $resultContent = $screenGameOver?.querySelector('.screen-result-content');
+const END_PRELUDE_DURATION_MS = 1450;
+let endPreludeTimer = null;
+let endPreludeResolve = null;
 
 function setIfChanged(key, $el, value) {
   if (hudCache[key] === value) return;
@@ -320,6 +325,48 @@ function detachResultRevealPointerHandler() {
   resultRevealPointerHandler = null;
 }
 
+function finishEndPrelude() {
+  if (endPreludeTimer) {
+    clearTimeout(endPreludeTimer);
+    endPreludeTimer = null;
+  }
+
+  if ($screenEndPrelude) {
+    $screenEndPrelude.classList.remove('is-visible');
+    $screenEndPrelude.hidden = true;
+  }
+
+  S.resultPreludeActive = false;
+
+  const resolve = endPreludeResolve;
+  endPreludeResolve = null;
+  if (resolve) resolve();
+}
+
+function showEndPrelude(kind) {
+  finishEndPrelude();
+
+  if (!$screenEndPrelude || !$screenEndPreludeText) {
+    return Promise.resolve();
+  }
+
+  S.resultPreludeActive = true;
+  $screenEndPreludeText.textContent =
+    kind === 'victory' ? t('endPrelude.victory') : t('endPrelude.defeat');
+  $screenEndPrelude.hidden = false;
+  $screenEndPrelude.classList.remove('is-visible');
+
+  void $screenEndPrelude.offsetWidth;
+  $screenEndPrelude.classList.add('is-visible');
+
+  return new Promise((resolve) => {
+    endPreludeResolve = resolve;
+    endPreludeTimer = window.setTimeout(() => {
+      finishEndPrelude();
+    }, END_PRELUDE_DURATION_MS);
+  });
+}
+
 function revealResultContentNow() {
   if (!resultRevealPending) return false;
 
@@ -364,6 +411,7 @@ export function fastForwardResultReveal() {
 }
 
 export function resetResultRevealState() {
+  finishEndPrelude();
   resultRevealPending = false;
   clearResultRevealTimer();
   detachResultRevealPointerHandler();
@@ -684,8 +732,9 @@ async function showGameOverScreen({
   reason,
   statsItems = [],
 }) {
-  S.gameOver = true;
   resetResultRevealState();
+  S.gameOver = true;
+  await showEndPrelude(S.gameWon ? 'victory' : 'defeat');
   if (playFail) playFailSound();
 
   if (reason) trackGameEnd(reason, S);

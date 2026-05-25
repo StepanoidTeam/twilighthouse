@@ -411,6 +411,8 @@ function bindEvents() {
 
     // Game over screen
     if (S.gameOver && !isMenuVisible()) {
+      if (S.resultPreludeActive) return;
+
       if (fastForwardResultReveal()) {
         return;
       }

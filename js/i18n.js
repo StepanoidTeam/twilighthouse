@@ -231,6 +231,9 @@ Photopea — image editor
     'exit.confirm': '⏸️ Exit to menu?',
     'exit.settings': '⚙️ Settings',
 
+    'endPrelude.victory': 'Victory',
+    'endPrelude.defeat': 'Defeat',
+
     'gameOver.title': 'Game Over',
     'gameOver.boats': '💀 A smuggler boat sank!',
     'gameOver.mermaids': '🧜‍♀️ Mermaids captured the lighthouse!',
@@ -553,6 +556,9 @@ Photopea — 图像编辑器
     'overlay.pressToPlayAgain': '点击再玩',
     'exit.confirm': '⏸️ 退出到菜单？',
     'exit.settings': '⚙️ 设置',
+
+    'endPrelude.victory': '胜利',
+    'endPrelude.defeat': '失败',
 
     'gameOver.title': '游戏结束',
     'gameOver.boats': '💀 一艘走私船沉没了！',
@@ -878,6 +884,9 @@ Photopea — image editor
     'overlay.pressToPlayAgain': 'Нажмите, чтобы сыграть снова',
     'exit.confirm': '⏸️ Выйти в меню?',
     'exit.settings': '⚙️ Настройки',
+
+    'endPrelude.victory': 'Победа',
+    'endPrelude.defeat': 'Поражение',
 
     'gameOver.title': 'Game Over',
     'gameOver.boats': '💀 Лодка контрабандистов утонула!',

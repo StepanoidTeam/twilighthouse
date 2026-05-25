@@ -88,6 +88,7 @@ const State = {
   gameSessionActive: false,
   gameOver: false,
   gameOverPending: false,
+  resultPreludeActive: false,
   gameWon: false,
   exitConfirm: false,
   gameOverTimeoutId: null,
@@ -254,6 +255,7 @@ const State = {
     this.gameSessionActive = false;
     this.gameOver = false;
     this.gameOverPending = false;
+    this.resultPreludeActive = false;
     this.gameWon = false;
     this.exitConfirm = false;
     this.keys = {};

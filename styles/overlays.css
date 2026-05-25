@@ -1,3 +1,54 @@
+/* ===== Victory / defeat prelude ===== */
+.screen-end-prelude {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(0, 0, 0, 0.58);
+  pointer-events: none;
+}
+
+.screen-end-prelude-text {
+  color: #fff;
+  font-family: var(--font-menu);
+  font-size: clamp(54px, 11vw, 130px);
+  font-weight: 800;
+  line-height: 0.95;
+  letter-spacing: 0;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 0 22px #000,
+    0 5px 18px #000;
+  opacity: 0;
+  transform: scale(1.18);
+}
+
+.screen-end-prelude.is-visible .screen-end-prelude-text {
+  animation: end-prelude-message 1350ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes end-prelude-message {
+  0% {
+    opacity: 0;
+    transform: scale(1.18);
+  }
+
+  28%,
+  78% {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  100% {
+    opacity: 0;
+    transform: scale(0.98);
+  }
+}
+
 /* ===== Game over / Win screen ===== */
 .screen-result {
   gap: 16px;
