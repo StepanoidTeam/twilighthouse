@@ -52,7 +52,9 @@ const {
   $menuTutorialSkip,
   $menuTutorialSkipLabel,
   $menuSettingsLangLabel,
-  $menuSettingsLangBtn,
+  $menuSettingsLangPrev,
+  $menuSettingsLangValue,
+  $menuSettingsLangNext,
   $menuSettingsContactBtn,
   $menuSettingsMusicLabel,
   $menuSettingsMusicInput,
@@ -262,7 +264,6 @@ function hideOverlayScreens() {
 function hideMainItems() {
   if ($menuMain) $menuMain.hidden = true;
   if ($menuHint) $menuHint.hidden = true;
-  if ($menuOverlay) $menuOverlay.classList.remove('menu-overlay--show-keeper');
   hideDiscordLink();
 }
 
@@ -453,6 +454,7 @@ function showTutorial() {
     prevScreen === 'tutorial' && tutorialState ? tutorialState.index : 0;
   hideOverlayScreens();
   currentScreen = 'tutorial';
+  scheduleMenuLayoutSync();
 
   if (!$menuTutorial || !$menuTutorialShell) return;
 
@@ -630,6 +632,7 @@ async function showLeaderboard() {
   showBackBtn();
   hideOverlayScreens();
   currentScreen = 'leaderboard';
+  scheduleMenuLayoutSync();
   if ($menuLeaderboard) $menuLeaderboard.hidden = false;
   await renderLeaderboardScreen({
     container: $menuLeaderboard,
@@ -643,6 +646,7 @@ function showAchievements() {
   showBackBtn();
   hideOverlayScreens();
   currentScreen = 'achievements';
+  scheduleMenuLayoutSync();
   if ($menuAchievements) $menuAchievements.hidden = false;
   renderAchievementsScreen({
     container: $menuAchievements,
@@ -661,6 +665,7 @@ function showShop() {
   showBackBtn();
   hideOverlayScreens();
   currentScreen = 'shop';
+  scheduleMenuLayoutSync();
   if ($menuShop) $menuShop.hidden = false;
   renderShopScreen({
     container: $menuShop,
@@ -674,6 +679,7 @@ function showSettings() {
   showBackBtn();
   hideOverlayScreens();
   currentScreen = 'settings';
+  scheduleMenuLayoutSync();
   if (!$menuSettings) return;
 
   $menuSettings.hidden = false;
@@ -688,13 +694,28 @@ function showSettings() {
     langs.findIndex((lang) => lang.code === getLanguage()),
   );
 
-  if (!$menuSettingsLangLabel || !$menuSettingsLangBtn) return;
-  $menuSettingsLangBtn.textContent = `◀ ${langs[langIdx].label} ▶`;
-  $menuSettingsLangBtn.onclick = () => {
+  if (
+    !$menuSettingsLangLabel ||
+    !$menuSettingsLangPrev ||
+    !$menuSettingsLangValue ||
+    !$menuSettingsLangNext
+  )
+    return;
+
+  function renderSettingsLanguage() {
+    $menuSettingsLangValue.textContent = langs[langIdx].label;
+  }
+
+  function pageSettingsLanguage(direction) {
     playMenuClick();
-    langIdx = (langIdx + 1) % langs.length;
+    langIdx = (langIdx + direction + langs.length) % langs.length;
     setLanguage(langs[langIdx].code);
-  };
+    renderSettingsLanguage();
+  }
+
+  renderSettingsLanguage();
+  $menuSettingsLangPrev.onclick = () => pageSettingsLanguage(-1);
+  $menuSettingsLangNext.onclick = () => pageSettingsLanguage(1);
 
   if ($menuSettingsContactBtn) {
     $menuSettingsContactBtn.onclick = () => {
@@ -715,6 +736,14 @@ function showSettings() {
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
   let lastMusicVolume = initialMusic > 0 ? initialMusic : 0.5;
 
+  function syncSettingsRangeFill(input) {
+    const min = Number(input.min || 0);
+    const max = Number(input.max || 100);
+    const value = Number(input.value || 0);
+    const percent = ((value - min) / (max - min || 1)) * 100;
+    input.style.setProperty('--menu-range-value', `${percent}%`);
+  }
+
   function renderMusicMuteLabel(value) {
     $menuSettingsMusicMute.textContent = t(
       value <= 0 ? 'settings.unmute' : 'settings.mute',
@@ -724,6 +753,7 @@ function showSettings() {
   function applyMusicVolume(val) {
     if (val > 0) lastMusicVolume = val;
     $menuSettingsMusicInput.value = String(Math.round(val * 100));
+    syncSettingsRangeFill($menuSettingsMusicInput);
     $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
     renderMusicMuteLabel(val);
     S.musicVolume = val;
@@ -736,6 +766,7 @@ function showSettings() {
   }
 
   $menuSettingsMusicInput.value = String(Math.round(initialMusic * 100));
+  syncSettingsRangeFill($menuSettingsMusicInput);
   $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
   renderMusicMuteLabel(initialMusic);
 
@@ -772,6 +803,7 @@ function showSettings() {
   function applySfxVolume(val) {
     if (val > 0) lastSfxVolume = val;
     $menuSettingsSfxInput.value = String(Math.round(val * 100));
+    syncSettingsRangeFill($menuSettingsSfxInput);
     $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
     renderSfxMuteLabel(val);
     S.sfxVolume = val;
@@ -784,6 +816,7 @@ function showSettings() {
   }
 
   $menuSettingsSfxInput.value = String(Math.round(initialSfx * 100));
+  syncSettingsRangeFill($menuSettingsSfxInput);
   $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
   renderSfxMuteLabel(initialSfx);
 
@@ -877,6 +910,7 @@ async function showAuthors() {
   showBackBtn();
   hideOverlayScreens();
   currentScreen = 'authors';
+  scheduleMenuLayoutSync();
   if (!$menuAuthors) return;
 
   $menuAuthors.hidden = false;
@@ -965,12 +999,16 @@ function syncMainMenuLayout() {
   const viewportWidth =
     S.gameW || window.innerWidth || document.documentElement.clientWidth;
   const isNarrowScreen = viewportWidth <= NARROW_MENU_BREAKPOINT;
+  const isSubScreen = currentScreen !== null && currentScreen !== 'main';
+  const mainMenuWidth = $menuMain.getBoundingClientRect().width;
   const canShowKeeper =
-    currentScreen === 'main' &&
     isNarrowScreen &&
-    !$menuMain.hidden &&
-    $menuMain.getBoundingClientRect().width > 0 &&
-    $menuMain.getBoundingClientRect().width <= viewportWidth / 2;
+    (isSubScreen ||
+      (currentScreen === 'main' &&
+        !$menuMain.hidden &&
+        mainMenuWidth > 0 &&
+        mainMenuWidth <= viewportWidth / 2));
 
+  $menuOverlay.classList.toggle('menu-overlay--subscreen', isSubScreen);
   $menuOverlay.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
 }

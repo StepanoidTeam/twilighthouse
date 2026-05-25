@@ -561,33 +561,51 @@
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title" data-i18n="settings.title"></h2>
-        <div class="menu-card menu-settings blur-bg">
+        <div class="menu-card menu-settings-card blur-bg">
           <!-- Language row -->
-          <div class="menu-setting-row">
+          <div class="menu-setting-row menu-setting-row--language">
             <span
               id="$menuSettingsLangLabel"
               class="menu-setting-label"
               data-i18n="settings.language"
             ></span>
-            <button
-              id="$menuSettingsLangBtn"
-              type="button"
-              class="menu-setting-toggle"
-            ></button>
+            <div class="menu-setting-language-actions">
+              <button
+                id="$menuSettingsLangPrev"
+                type="button"
+                class="menu-setting-arrow"
+                aria-label="Previous language"
+              >
+                ◀
+              </button>
+              <span
+                id="$menuSettingsLangValue"
+                class="menu-setting-language-value"
+              ></span>
+              <button
+                id="$menuSettingsLangNext"
+                type="button"
+                class="menu-setting-arrow"
+                aria-label="Next language"
+              >
+                ▶
+              </button>
+              <div class="menu-setting-contact">
+                <span
+                  id="$menuSettingsContactLabel"
+                  class="menu-setting-contact-label"
+                  data-i18n="settings.languageHelp"
+                ></span>
+                <button
+                  id="$menuSettingsContactBtn"
+                  type="button"
+                  class="menu-setting-contact-btn"
+                  data-i18n="settings.contactUs"
+                ></button>
+              </div>
+            </div>
           </div>
-          <div class="menu-setting-row">
-            <span
-              id="$menuSettingsContactLabel"
-              class="menu-setting-label"
-              data-i18n="settings.languageHelp"
-            ></span>
-            <button
-              id="$menuSettingsContactBtn"
-              type="button"
-              class="menu-setting-toggle"
-              data-i18n="settings.contactUs"
-            ></button>
-          </div>
+          <hr class="menu-setting-divider" />
           <!-- Music row -->
           <div class="menu-setting-row menu-setting-row--slider">
             <span
@@ -614,6 +632,7 @@
               ></button>
             </div>
           </div>
+          <hr class="menu-setting-divider" />
           <!-- SFX row -->
           <div class="menu-setting-row menu-setting-row--slider">
             <span
@@ -637,8 +656,12 @@
               ></button>
             </div>
           </div>
+          <hr class="menu-setting-divider" />
           <!-- Display Name row -->
-          <div class="menu-setting-row menu-setting-row--name">
+          <form
+            id="$menuDisplayNameForm"
+            class="menu-setting-row menu-setting-row--slider"
+          >
             <span
               id="$menuSettingsNameLabel"
               class="menu-setting-label"
@@ -649,34 +672,33 @@
               class="menu-setting-note"
               hidden
             ></span>
-            <form id="$menuDisplayNameForm" class="menu-setting-name-group">
-              <div class="flex-row" style="gap: 10px">
-                <input
-                  id="$menuDisplayNameInput"
-                  type="text"
-                  name="displayName"
-                  class="menu-setting-name-input"
-                  maxlength="30"
-                  autocomplete="nickname"
-                  data-i18n-placeholder="settings.displayNamePlaceholder"
-                />
-                <div class="menu-setting-name-actions">
-                  <button
-                    id="$menuDisplayNameSave"
-                    type="submit"
-                    class="menu-setting-name-save"
-                    data-i18n="settings.displayNameSave"
-                  ></button>
-                  <span
-                    id="$menuDisplayNameStatus"
-                    class="menu-setting-name-status"
-                  ></span>
-                </div>
-              </div>
 
-              <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
-            </form>
-          </div>
+            <div class="menu-setting-name-line">
+              <input
+                id="$menuDisplayNameInput"
+                type="text"
+                name="displayName"
+                class="menu-setting-name-input"
+                maxlength="30"
+                autocomplete="nickname"
+                data-i18n-placeholder="settings.displayNamePlaceholder"
+              />
+              <div class="menu-setting-name-actions">
+                <button
+                  id="$menuDisplayNameSave"
+                  type="submit"
+                  class="menu-setting-name-save"
+                  data-i18n="settings.displayNameSave"
+                ></button>
+                <span
+                  id="$menuDisplayNameStatus"
+                  class="menu-setting-name-status"
+                ></span>
+              </div>
+            </div>
+
+            <p id="$menuDisplayNameHint" class="menu-setting-name-hint"></p>
+          </form>
         </div>
       </div>
       <p class="menu-hint hidden-mobile">
