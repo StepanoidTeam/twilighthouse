@@ -1,5 +1,12 @@
 // ===== Meta economy: wallet, nights survived, shop unlocks (localStorage) =====
-import { BOAT_CARGO_TYPES, LAMP_BURNOUT_TIME, LAMP_OIL_RESERVE_BONUS, SPARE_GENERATOR_START_CHARGE } from './config.js';
+import {
+  BOAT_CARGO_TYPES,
+  KEEPER_XP_BASE,
+  KEEPER_XP_GROWTH,
+  LAMP_BURNOUT_TIME,
+  LAMP_OIL_RESERVE_BONUS,
+  SPARE_GENERATOR_START_CHARGE,
+} from './config.js';
 import { db } from '../firebase.init.js';
 import { doc, getDoc, setDoc, serverTimestamp } from '../firebase.js';
 import { currentUser, onAuthChange } from './auth.js';
@@ -8,6 +15,7 @@ import {
   recordAchievementRunMetrics,
 } from './achievements.js';
 import { getResourceBonusMult } from './run-perks.js';
+import { levelFromTotalXp } from './xp-curve.js';
 
 const STORAGE_KEY_PREFIX = 'lighthouse_meta_v1';
 /** @deprecated Global key — migrated to per-uid storage; cleared on sign-out */
@@ -292,7 +300,9 @@ function queueMetaServerSync(meta, updatedAtMs) {
 
 /** @returns {MetaState} */
 export function loadMeta() {
-  return loadMetaForUid(currentUser?.uid);
+  const meta = loadMetaForUid(currentUser?.uid);
+  recordPlayerLevelAchievement(meta);
+  return meta;
 }
 
 /** @param {MetaState} meta */
@@ -514,6 +524,20 @@ function addPrice(price, meta, multiplier = 1) {
   }
 }
 
+function getPlayerLevelFromMeta(meta) {
+  return levelFromTotalXp(
+    meta?.totalXp || 0,
+    KEEPER_XP_BASE,
+    KEEPER_XP_GROWTH,
+  );
+}
+
+function recordPlayerLevelAchievement(meta) {
+  recordAchievementRunMetrics({
+    player: { level: getPlayerLevelFromMeta(meta) },
+  });
+}
+
 /** @param {import('./state.js').default} S */
 export function commitRunToMeta(S) {
   if (!S.gameSessionActive) return;
@@ -536,6 +560,7 @@ export function commitRunToMeta(S) {
   recordAchievementRunMetrics({
     cargo: S.deliveredCargo,
     beam: { maxMultiLitStreakMs: S.beamMultiLitBestMs },
+    player: { level: getPlayerLevelFromMeta(meta) },
   });
   if (S.gameWon) {
     meta.nightsWon += 1;

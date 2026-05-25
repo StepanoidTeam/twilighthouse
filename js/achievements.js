@@ -23,6 +23,15 @@ export const ACHIEVEMENT_DEFS = [
     rules: [{ type: 'event', event: 'run.won', step: 1 }],
   },
   {
+    id: 'seasoned_keeper',
+    icon: '⭐',
+    titleKey: 'achievements.items.seasoned_keeper.title',
+    descKey: 'achievements.items.seasoned_keeper.desc',
+    target: 10,
+    points: 25,
+    rules: [{ type: 'run_max', metric: 'player.level' }],
+  },
+  {
     id: 'one_of_us',
     icon: '🚤',
     titleKey: 'achievements.items.one_of_us.title',
