@@ -66,7 +66,10 @@ import { registerBrowserTools } from './browser-tools.js';
 import { commitRunToMeta, applyMetaToRunState } from './meta-progress.js';
 import { getLeaderboardPlayerLevel } from './player-level.js';
 import { resetRunPerks } from './run-perks.js';
-import { initRunPerksUi, refreshPerkPickerOnDebugChange } from './run-perks-ui.js';
+import {
+  initRunPerksUi,
+  refreshPerkPickerOnDebugChange,
+} from './run-perks-ui.js';
 import { updateOldMapReveal, cleanupOldMap } from './old-map.js';
 import { onAchievementUnlocked } from './achievements.js';
 
@@ -105,6 +108,7 @@ const BOOT_TEXTURE_ASSETS = [
   'sprites/icons/compass.png',
   'sprites/icons/wheel.png',
   'sprites/icons/chest.png',
+  'sprites/icons/authors.png',
   'sprites/icons/map.png',
   // Game-over / win splash backgrounds
   'sprites/wasted/iceberg.png',
@@ -846,7 +850,8 @@ renderBootLoaderText();
 onLanguageChange(renderBootLoaderText);
 onLanguageChange(() => {
   if (bootLoaderState.status !== 'loading' || !$bootLoaderTip) return;
-  if (bootTipIndex >= 0) renderBootTip({ animate: false, forceIndex: bootTipIndex });
+  if (bootTipIndex >= 0)
+    renderBootTip({ animate: false, forceIndex: bootTipIndex });
   else renderBootTip({ animate: false });
 });
 onLanguageChange(applyI18nToDOM);
