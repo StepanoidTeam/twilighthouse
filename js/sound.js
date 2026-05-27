@@ -8,6 +8,7 @@ const MUSIC_PLAYLIST = [
   'music/1-techno-salt.mp3',
   'music/2-twilight-house.mp3',
   'music/3-silent-MARK-light.mp3',
+  'music/4-salt-road-afterglow.mp3',
 ];
 const MUSIC_TRACK_STORAGE_KEY = 'lighthouse_music_track_index';
 const BOOT_AUDIO_ASSETS = Array.from(
