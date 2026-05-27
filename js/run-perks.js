@@ -25,7 +25,11 @@ import {
 import { xpForStep } from './xp-curve.js';
 import S from './state.js';
 import { spawnTooltip, updateHUD } from './ui.js';
-import { triggerOldMapReveal } from './old-map.js';
+import {
+  isOldMapRevealActive,
+  resetOldMapReveal,
+  triggerOldMapReveal,
+} from './old-map.js';
 import { spawnOccultRockLamps, spawnRandomIcebergs } from './rocks.js';
 import { t } from './i18n.js';
 
@@ -236,7 +240,7 @@ export function getResourceBonusMult() {
 }
 
 export function isOldMapActive() {
-  return (S.oldMapRevealUntil || 0) > performance.now();
+  return isOldMapRevealActive();
 }
 
 function recomputeMultipliers() {
@@ -281,7 +285,7 @@ export function resetRunPerks(state = S) {
   state.runPoliceSpeedMult = 1;
   state.perkPickerOpen = false;
   state.perkPickerOffer = [];
-  state.oldMapRevealUntil = 0;
+  resetOldMapReveal();
   state.beamElasticSide = 0;
   state.BEAM_HALF_ANGLE = LAMP_FULL_ANGLE;
   state.BEAM_LEFT_ANGLE = state.beamAngle - state.BEAM_HALF_ANGLE;

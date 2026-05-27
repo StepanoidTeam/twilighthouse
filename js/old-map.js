@@ -16,6 +16,7 @@ const INDICATOR_STYLE = new PIXI.TextStyle({
 
 /** @type {PIXI.Container[]} */
 let indicators = [];
+let oldMapRevealUntil = 0;
 
 function destroyIndicators() {
   for (const c of indicators) {
@@ -87,13 +88,39 @@ function makeIndicator(icon) {
   return container;
 }
 
+function isTimedRevealActive() {
+  return oldMapRevealUntil > performance.now();
+}
+
+function syncIndicatorsActive() {
+  if (
+    S.oldMapIndicatorsActive &&
+    oldMapRevealUntil &&
+    !isTimedRevealActive()
+  ) {
+    oldMapRevealUntil = 0;
+    S.oldMapIndicatorsActive = false;
+  }
+  return S.oldMapIndicatorsActive;
+}
+
 /** @param {number} durationMs */
 export function triggerOldMapReveal(durationMs) {
-  S.oldMapRevealUntil = performance.now() + durationMs;
+  oldMapRevealUntil = performance.now() + durationMs;
+  S.oldMapIndicatorsActive = true;
+}
+
+export function isOldMapRevealActive() {
+  return isTimedRevealActive();
+}
+
+export function resetOldMapReveal() {
+  oldMapRevealUntil = 0;
+  S.oldMapIndicatorsActive = false;
 }
 
 export function updateOldMapReveal() {
-  const active = (S.oldMapRevealUntil || 0) > performance.now();
+  const active = syncIndicatorsActive();
   if (!active) {
     destroyIndicators();
     if (S.oldMapLayer) S.oldMapLayer.visible = false;
@@ -138,5 +165,5 @@ export function cleanupOldMap() {
     S.oldMapLayer.destroy({ children: true });
     S.oldMapLayer = null;
   }
-  S.oldMapRevealUntil = 0;
+  resetOldMapReveal();
 }

@@ -157,7 +157,7 @@ const State = {
   runPoliceSpeedMult: 1,
   perkPickerOpen: false,
   perkPickerOffer: [],
-  oldMapRevealUntil: 0,
+  oldMapIndicatorsActive: false,
   lampOilReserve: 0,
   spareGeneratorCharge: 0,
   occultRockLamps: [],
@@ -282,7 +282,7 @@ const State = {
     this.runPoliceSpeedMult = 1;
     this.perkPickerOpen = false;
     this.perkPickerOffer = [];
-    this.oldMapRevealUntil = 0;
+    this.oldMapIndicatorsActive = false;
     this.lampOilReserve = 0;
     this.spareGeneratorCharge = 0;
     this.occultRockLamps = [];
