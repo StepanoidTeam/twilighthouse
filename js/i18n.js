@@ -71,7 +71,8 @@ Photopea — image editor
 `,
 
     // Hints
-    'hint.main': '↑↓ / W S — navigate  •  Enter / E — select  •  Q — back',
+    'hint.navigate': 'navigate',
+    'hint.select': 'select',
     'hint.back': 'back',
     'hint.intro': '◀ ▶ — pages  •  Esc — skip',
     'btn.back': 'Back',
@@ -197,8 +198,7 @@ Photopea — image editor
     'howtoplay.title': 'How to Play',
     'howtoplay.prev': 'Prev',
     'howtoplay.next': 'Next',
-    'howtoplay.finish': 'Play',
-    'howtoplay.skip': 'Skip',
+    'howtoplay.skip': 'Close',
     'howtoplay.items': [
       {
         video: 'tutorial-vids/smugglers.mp4',
@@ -411,7 +411,8 @@ Photopea — 图像编辑器
 🌊 感谢游玩！🌊
 `,
 
-    'hint.main': '↑↓ / W S — 移动  •  Enter / E — 选择  •  Q — 返回',
+    'hint.navigate': '移动',
+    'hint.select': '选择',
     'hint.back': '返回',
     'hint.intro': '◀ ▶ — 翻页  •  Esc — 跳过',
     'btn.back': '返回',
@@ -467,8 +468,7 @@ Photopea — 图像编辑器
     'shop.items.guiding_signal.name': '引导信号',
     'shop.items.guiding_signal.desc': '走私船在黑暗中更能保持航向。',
     'shop.items.contraband_route.name': '走私航线',
-    'shop.items.contraband_route.desc':
-      '连续救船后，有机会获得额外稀有资源。',
+    'shop.items.contraband_route.desc': '连续救船后，有机会获得额外稀有资源。',
     'shop.items.alarm_bell.name': '警报钟',
     'shop.items.alarm_bell.desc': '每晚首个美人鱼会被短暂标记。',
     'shop.items.phosphor_water.name': '磷光海水',
@@ -525,8 +525,7 @@ Photopea — 图像编辑器
     'howtoplay.title': '教程',
     'howtoplay.prev': '上页',
     'howtoplay.next': '下页',
-    'howtoplay.finish': '开始',
-    'howtoplay.skip': '跳过',
+    'howtoplay.skip': '关闭',
     'howtoplay.items': [
       {
         video: 'tutorial-vids/smugglers.mp4',
@@ -731,7 +730,8 @@ Photopea — image editor
 🌊 Спасибо за игру! 🌊
 `,
 
-    'hint.main': '↑↓ / W S — навигация  •  Enter / E — выбор  •  Q — назад',
+    'hint.navigate': 'навигация',
+    'hint.select': 'выбор',
     'hint.back': 'назад',
     'hint.intro': '◀ ▶ — страницы  •  Esc — пропустить',
     'btn.back': 'Назад',
@@ -852,8 +852,7 @@ Photopea — image editor
     'howtoplay.title': 'Как играть',
     'howtoplay.prev': 'Назад',
     'howtoplay.next': 'Дальше',
-    'howtoplay.finish': 'Играть',
-    'howtoplay.skip': 'Пропустить',
+    'howtoplay.skip': 'Закрыть',
     'howtoplay.items': [
       {
         video: 'tutorial-vids/smugglers.mp4',

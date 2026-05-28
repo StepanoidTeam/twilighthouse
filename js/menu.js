@@ -381,10 +381,7 @@ function handleMenuKey(e) {
       goToStep(tutorialState.index - 1);
     } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
       e.preventDefault();
-      if (tutorialState.index >= tutorialState.items.length - 1) {
-        playMenuClick();
-        finishTutorial();
-      } else {
+      if (tutorialState.index < tutorialState.items.length - 1) {
         goToStep(tutorialState.index + 1);
       }
     } else if (isBackKey(e.code)) {
@@ -543,19 +540,12 @@ function showTutorial() {
     goToStep(tutorialState.index - 1);
   };
   $nextBtn.onclick = () => {
+    if (tutorialState.index >= tutorialState.items.length - 1) return;
     playMenuClick();
-    if (tutorialState.index >= tutorialState.items.length - 1) {
-      finishTutorial();
-    } else {
-      goToStep(tutorialState.index + 1);
-    }
+    goToStep(tutorialState.index + 1);
   };
 
   renderTutorialStep();
-}
-
-function finishTutorial() {
-  requestStartGame();
 }
 
 function goToStep(nextIndex) {
@@ -599,16 +589,16 @@ function renderTutorialStep() {
 
   const isLast = index === items.length - 1;
   $prevBtn.disabled = index === 0;
-  $nextBtn.disabled = false;
-  $nextBtn.classList.toggle('howtoplay-nav-btn--finish', isLast);
+  $nextBtn.disabled = isLast;
+  $nextBtn.hidden = false;
+  $nextBtn.classList.remove('howtoplay-nav-btn--finish');
 
   $prevBtn.querySelector('.howtoplay-nav-label').textContent =
     t('howtoplay.prev');
-  $nextBtn.querySelector('.howtoplay-nav-label').textContent = t(
-    isLast ? 'howtoplay.finish' : 'howtoplay.next',
-  );
+  $nextBtn.querySelector('.howtoplay-nav-label').textContent =
+    t('howtoplay.next');
   const $nextArrow = $nextBtn.querySelector('.howtoplay-nav-arrow');
-  if ($nextArrow) $nextArrow.textContent = isLast ? '▶▶' : '▶';
+  if ($nextArrow) $nextArrow.textContent = '▶';
 
   for (let i = 0; i < $dotEls.length; i++) {
     $dotEls[i].classList.toggle('is-active', i === index);

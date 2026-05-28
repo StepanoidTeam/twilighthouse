@@ -193,7 +193,9 @@
 
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  flex-wrap: wrap;
 
   padding: 20px;
   transform: translateX(-50%);
@@ -202,12 +204,30 @@
   text-align: center;
 
   .hint-text {
-    font-size: 30px;
-    color: #f7e3c2;
+    font-size: 23px;
+    color: var(--color-main-menu-text);
     line-height: 1;
     padding-bottom: 5px;
     text-shadow: 2px 2px BLACK;
   }
+}
+
+.menu-hint-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.menu-hint-separator {
+  color: var(--color-menu-selected);
+  /* font-size: 23px; */
+  /* line-height: 1; */
+  text-shadow: 2px 2px black;
+}
+
+.menu-hint--main {
+  width: min(96vw, 920px);
 }
 
 .menu-sub {
@@ -313,45 +333,80 @@
   backdrop-filter: blur(7px);
 }
 
-/* Let the tutorial card grow wider so the square video can be maxed out. */
-.menu-tutorial .menu-screen-shell {
-  width: min(96vw, 1100px);
+.menu-tutorial.menu-screen {
+  z-index: 3;
+  justify-content: flex-start;
+  align-items: stretch;
+  min-height: 100vh;
+  padding: 0;
+  overflow: hidden;
+  color: var(--color-main-menu-text);
+  background: #0f202e;
+  isolation: isolate;
 }
 
-/* ===== Skip button (top-left on tutorial screen) ===== */
+.menu-tutorial::before,
+.menu-tutorial::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.menu-tutorial::before {
+  z-index: 0;
+  background-image: url('../sprites/bg-loader-screen.png');
+  background-position: right center;
+  background-repeat: no-repeat;
+  background-size: auto 100%;
+  mask-image: linear-gradient(90deg, transparent 0%, black 52%);
+}
+
+.menu-tutorial::after {
+  z-index: 1;
+  background:
+    linear-gradient(180deg, rgba(1, 5, 10, 0.44), rgba(1, 5, 10, 0.7)),
+    radial-gradient(circle at 78% 70%, rgba(247, 70, 38, 0.1), transparent 30%),
+    repeating-linear-gradient(
+      0deg,
+      rgba(255, 255, 255, 0.024) 0,
+      rgba(255, 255, 255, 0.024) 1px,
+      transparent 1px,
+      transparent 4px
+    );
+  box-shadow: inset 0 0 0 16px rgba(1, 6, 12, 0.38);
+}
+
+.menu-tutorial .menu-screen-shell {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 100vh;
+  padding: 34px 56px 112px;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 12px;
+}
+
+.menu-tutorial .menu-screen-title {
+  position: static;
+  color: #ead7b6;
+  font-size: clamp(1.9rem, 4vh, 3rem);
+  line-height: 0.95;
+  text-align: center;
+  text-transform: uppercase;
+  text-shadow:
+    0 4px 0 rgba(21, 31, 42, 0.62),
+    0 22px 42px rgba(0, 0, 0, 0.48);
+}
+
 .skip-btn {
   position: fixed;
   top: var(--size-edge-gap);
   left: var(--size-edge-gap);
   z-index: 2;
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  padding: 10px 16px;
-  border: 1px solid #2a3f5f;
-  border-radius: 20px;
-  background: rgba(10, 20, 40, 0.75);
-  color: var(--color-text);
-  font-family: inherit;
-  font-size: 15px;
-  font-weight: 600;
-  cursor: pointer;
-  backdrop-filter: blur(4px);
-  transition:
-    background var(--duration-ui),
-    border-color var(--duration-ui),
-    transform var(--duration-press);
-  user-select: none;
-  -webkit-tap-highlight-color: transparent;
-}
-
-.skip-btn:hover {
-  background: rgba(30, 50, 80, 0.9);
-  border-color: #5599cc;
-}
-
-.skip-btn:active {
-  transform: translateY(1px);
 }
 
 .hotkey2 {
@@ -379,67 +434,87 @@
 
 /* ===== How to Play (carousel) ===== */
 .menu-howtoplay {
-  /* Reserve room for: title (~50px), screen padding (top 9vh + bottom 96px),
-     card padding (44px), header (~70px), controls (~52px) and the gaps. */
-  --howtoplay-reserved: calc(9vh + 96px + 50px + 44px + 70px + 52px + 48px);
-
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-  max-height: calc(100vh - 9vh - 96px - 80px);
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  -webkit-overflow-scrolling: touch;
+  display: grid;
+  width: 100%;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: auto;
+  margin-top: 0;
+  padding: 0;
+  border: 0;
+  background: transparent;
+  box-shadow: none;
+  backdrop-filter: none;
+  grid-template-columns: minmax(0, 1fr);
+  grid-template-rows: auto minmax(0, 1fr);
+  grid-template-areas:
+    'copy'
+    'video';
+  gap: 14px;
+  align-self: center;
+  overflow: visible;
 }
 
 .howtoplay-step-header {
   display: flex;
   flex-direction: column;
+  grid-area: copy;
+  justify-content: flex-start;
   align-items: center;
+  min-height: 0;
+  gap: 8px;
+  padding-top: 0;
   text-align: center;
-  gap: 4px;
-  padding-bottom: 4px;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 0;
 }
 
 .howtoplay-step-counter {
-  color: var(--color-menu-muted);
-  font-size: 13px;
+  color: #f04a2e;
+  font-size: 16px;
+  font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.55);
 }
 
 .howtoplay-step-title {
   margin: 0;
-  color: var(--color-main-menu-text);
+  color: #ead7b6;
   font-family: var(--font-menu);
-  font-size: clamp(1.3rem, 2.4vw, 1.7rem);
-  font-weight: 600;
+  font-size: clamp(1.55rem, 4vh, 2.7rem);
+  font-weight: 800;
   letter-spacing: 0.05em;
   text-transform: uppercase;
-  text-shadow: 0 2px 12px rgba(0, 0, 0, 0.45);
-  line-height: 1.1;
+  text-shadow:
+    0 4px 0 rgba(21, 31, 42, 0.62),
+    0 22px 42px rgba(0, 0, 0, 0.48);
+  line-height: 0.95;
 }
 
 .howtoplay-step-text {
   margin: 0;
-  color: #d5e3f3;
-  font-size: clamp(0.9rem, 1.6vw, 1rem);
-  line-height: 1.4;
-  max-width: 56ch;
+  max-width: min(64ch, 86vw);
+  color: #d7c29d;
+  font-family: var(--font-handwritten);
+  font-size: clamp(1.5rem, 3vh, 2.15rem);
+  line-height: 1;
+  text-shadow: 0 2px 10px rgba(0, 0, 0, 0.64);
 }
 
 .howtoplay-video-wrap {
   position: relative;
+  grid-area: video;
   align-self: center;
-  /* Square video — pick the largest size that fits both width and height. */
-  width: min(100%, calc(100vh - var(--howtoplay-reserved)));
+  justify-self: center;
+  width: min(calc(100vw - 112px), max(360px, calc(100vh - 310px)));
+  max-width: 880px;
   aspect-ratio: 1 / 1;
-  border-radius: 14px;
+  border-radius: 10px;
   overflow: hidden;
   background: #000;
   box-shadow:
-    0 12px 40px rgba(0, 0, 0, 0.45),
+    0 26px 70px rgba(0, 0, 0, 0.5),
+    0 0 0 1px rgba(234, 215, 182, 0.18),
     inset 0 0 0 1px rgba(255, 255, 255, 0.06);
 }
 
@@ -451,20 +526,44 @@
 }
 
 .howtoplay-controls {
-  display: flex;
+  display: grid;
+  position: fixed;
+  z-index: 2;
+  left: 56px;
+  right: 56px;
+  bottom: 28px;
+  grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
-  justify-content: space-between;
-  gap: 12px;
+  gap: 18px;
+  width: min(calc(100vw - 112px), max(360px, calc(100vh - 310px)));
+  justify-self: center;
+  min-width: 0;
+}
+
+.howtoplay-nav-btn--prev {
+  justify-self: start;
+}
+
+.howtoplay-nav-btn--next {
+  justify-self: end;
+}
+
+.mask-btn {
+  mask-image: url(/sprites/menu-button-black.png);
+  mask-size: 100% 100%;
 }
 
 .howtoplay-nav-btn {
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  min-width: 160px;
+  min-height: 54px;
   padding: 10px 18px;
   border: 1px solid var(--color-menu-border);
   border-radius: 12px;
-  background: var(--color-menu-button);
+  background: var(--color-menu-border);
+
   color: var(--color-main-menu-text);
   font-family: var(--font-menu);
   font-size: 18px;
@@ -476,6 +575,10 @@
     transform var(--duration-menu) ease,
     background var(--duration-menu) ease,
     opacity var(--duration-menu) ease;
+}
+
+.howtoplay-nav-btn .hotkey {
+  flex: 0 0 auto;
 }
 
 .howtoplay-nav-btn:hover:not(:disabled) {
@@ -508,29 +611,157 @@
 .howtoplay-dots {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: 10px;
+  min-width: 120px;
 }
 
 .howtoplay-dot {
-  width: 10px;
-  height: 10px;
+  display: inline-flex;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 0;
-  border-radius: 50%;
-  background: rgba(255, 255, 255, 0.25);
+  align-items: center;
+  justify-content: center;
+  color: rgba(234, 215, 182, 0.62);
+  background: transparent;
+  font-size: 24px;
+  line-height: 1;
   cursor: pointer;
   transition:
-    background var(--duration-menu) ease,
+    color var(--duration-menu) ease,
     transform var(--duration-menu) ease;
 }
 
+.howtoplay-dot::before {
+  content: '◎';
+}
+
 .howtoplay-dot:hover {
-  background: rgba(255, 255, 255, 0.55);
+  color: var(--color-main-menu-text);
 }
 
 .howtoplay-dot.is-active {
-  background: var(--color-menu-selected);
-  transform: scale(1.25);
+  color: var(--color-menu-selected);
+  transform: scale(1.12);
+}
+
+.howtoplay-dot.is-active::before {
+  content: '◉';
+}
+
+@media (max-height: 760px) {
+  .menu-tutorial .menu-screen-shell {
+    padding: 22px 42px 96px;
+  }
+
+  .menu-tutorial .menu-screen-title {
+    font-size: clamp(1.5rem, 4.5vh, 2.35rem);
+  }
+
+  .menu-howtoplay {
+    flex: 1 1 auto;
+    height: auto;
+    gap: 10px;
+  }
+
+  .howtoplay-step-header {
+    gap: 6px;
+    padding-top: 0;
+  }
+
+  .howtoplay-step-title {
+    font-size: clamp(1.25rem, 4.8vh, 2rem);
+  }
+
+  .howtoplay-step-text {
+    font-size: clamp(1.2rem, 3.8vh, 1.7rem);
+  }
+
+  .howtoplay-video-wrap {
+    width: min(calc(100vw - 84px), max(300px, calc(100vh - 250px)));
+  }
+
+  .howtoplay-controls {
+    left: 42px;
+    right: 42px;
+    bottom: 20px;
+  }
+}
+
+@media (max-width: 900px) {
+  .menu-tutorial.menu-screen {
+    overflow-y: auto;
+  }
+
+  .menu-tutorial::before {
+    background-size: cover;
+    mask-image: linear-gradient(180deg, black 0%, transparent 86%);
+    opacity: 0.55;
+  }
+
+  .menu-tutorial .menu-screen-shell {
+    height: auto;
+    min-height: 100vh;
+    padding: 68px 22px 118px;
+    align-items: center;
+    justify-content: flex-start;
+  }
+
+  .menu-tutorial .menu-screen-title {
+    position: static;
+    width: min(100%, 560px);
+    font-size: clamp(2rem, 10vw, 3rem);
+    text-align: center;
+  }
+
+  .menu-howtoplay {
+    width: min(100%, 680px);
+    flex: 1 1 auto;
+    height: auto;
+    grid-template-columns: 1fr;
+    grid-template-rows: auto minmax(0, 1fr);
+    grid-template-areas:
+      'copy'
+      'video';
+    gap: 18px;
+  }
+
+  .howtoplay-step-header {
+    align-items: center;
+    gap: 10px;
+    padding-top: 0;
+    text-align: center;
+  }
+
+  .howtoplay-step-title {
+    font-size: clamp(1.7rem, 8vw, 2.45rem);
+  }
+
+  .howtoplay-step-text {
+    max-width: 28ch;
+    font-size: clamp(1.45rem, 6.8vw, 2rem);
+  }
+
+  .howtoplay-video-wrap {
+    width: min(100%, max(240px, calc(100vh - 360px)));
+    max-width: 680px;
+  }
+
+  .howtoplay-controls {
+    left: 22px;
+    right: 22px;
+    bottom: 22px;
+  }
+
+  .howtoplay-nav-btn {
+    min-width: 0;
+  }
+
+  .howtoplay-dots {
+    min-width: 82px;
+  }
 }
 
 @media (max-width: 400px) {
@@ -1187,9 +1418,9 @@
   min-width: 36px;
   height: 36px;
   font-size: 23px;
-  text-transform: uppercase;
+  /* text-transform: uppercase; */
   color: #000000;
-  background: #f7e3c2;
+  background: var(--color-main-menu-text);
   border-radius: 4px;
   corner-shape: bevel;
   align-items: center;
@@ -1225,6 +1456,20 @@
     padding: 14px;
     border-color: #000000;
   }
+}
+
+.hotkey2 {
+  padding: 4px;
+  border-radius: 5px;
+  border: 2px solid var(--color-main-menu-text);
+  color: var(--color-main-menu-text);
+  background: none;
+  font-size: 20px;
+  font-family: var(--font-ui);
+  font-weight: 600;
+  line-height: 15px;
+  box-shadow: 1px 1px 1px 0px #52493094;
+  text-shadow: 1px 1px #52493094;
 }
 
 .cutout {

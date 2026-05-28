@@ -310,7 +310,7 @@
           <button
             type="button"
             id="$menuBtnStart"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="start"
           >
             <img
@@ -323,7 +323,7 @@
           <button
             type="button"
             id="$menuBtnShop"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="shop"
           >
             <img
@@ -336,7 +336,7 @@
           <button
             type="button"
             id="$menuBtnLeaderboard"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="leaderboard"
           >
             <img
@@ -352,7 +352,7 @@
           <button
             type="button"
             id="$menuBtnAchievements"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="achievements"
           >
             <img
@@ -368,7 +368,7 @@
           <button
             type="button"
             id="$menuBtnSettings"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="settings"
           >
             <img
@@ -384,7 +384,7 @@
           <button
             type="button"
             id="$menuBtnAuthors"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="authors"
           >
             <img
@@ -397,7 +397,7 @@
           <button
             type="button"
             id="$menuBtnTutorial"
-            class="menu-btn menu-main-btn blur-bg"
+            class="menu-btn mask-btn menu-main-btn blur-bg"
             data-action="tutorial"
           >
             <img
@@ -524,11 +524,28 @@
           </article>
         </template>
       </div>
-      <p
-        id="$menuHint"
-        class="menu-hint hidden-mobile"
-        data-i18n="hint.main"
-      ></p>
+
+      <p id="$menuHint" class="menu-hint menu-hint--main hidden-mobile">
+        <span class="menu-hint-action">
+          <span class="hotkey">↑</span>
+          <span class="hotkey">↓</span>
+          <span class="hotkey">W</span>
+          <span class="hotkey">S</span>
+          <span class="hint-text" data-i18n="hint.navigate"></span>
+        </span>
+        <span class="menu-hint-separator">●</span>
+        <span class="menu-hint-action">
+          <span class="hotkey">⏎</span>
+          <span class="hotkey">E</span>
+          <span class="hint-text" data-i18n="hint.select"></span>
+        </span>
+        <span class="menu-hint-separator">●</span>
+        <span class="menu-hint-action">
+          <span class="hotkey">Q</span>
+          <span class="hotkey">esc</span>
+          <span class="hint-text" data-i18n="hint.back"></span>
+        </span>
+      </p>
     </div>
 
     <section
@@ -559,9 +576,10 @@
           <div class="howtoplay-controls">
             <button
               type="button"
-              class="menu-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
+              class="menu-btn mask-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
             >
-              <span class="howtoplay-nav-arrow">◀</span>
+              <span class="hotkey hidden-mobile">←</span>
+              <span class="hotkey hidden-mobile">A</span>
               <span class="howtoplay-nav-label"></span>
             </button>
 
@@ -569,10 +587,11 @@
 
             <button
               type="button"
-              class="menu-btn howtoplay-nav-btn howtoplay-nav-btn--next"
+              class="menu-btn mask-btn howtoplay-nav-btn howtoplay-nav-btn--next"
             >
               <span class="howtoplay-nav-label"></span>
-              <span class="howtoplay-nav-arrow">▶</span>
+              <span class="hotkey hidden-mobile">D</span>
+              <span class="hotkey hidden-mobile">→</span>
             </button>
           </div>
         </div>
@@ -580,12 +599,12 @@
       <button
         id="$menuTutorialSkip"
         type="button"
-        class="menu-btn skip-btn blur-bg"
+        class="menu-btn mask-btn howtoplay-nav-btn skip-btn"
       >
+        <span class="hotkey hidden-mobile">esc</span>
+        <span class="hotkey hidden-mobile">Q</span>
         <span id="$menuTutorialSkipLabel" class="skip-btn-label"></span>
-        <span class="hotkey2 hidden-mobile">esc</span>
       </button>
-      <p class="menu-hint hidden-mobile" data-i18n="hint.intro"></p>
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
       <div class="menu-screen-shell">
@@ -861,7 +880,11 @@
     </section>
 
     <!-- ===== Back button (shown on menu sub-screens) ===== -->
-    <button type="button" id="$backBtn" class="menu-btn back-btn blur-bg">
+    <button
+      type="button"
+      id="$backBtn"
+      class="menu-btn mask-btn back-btn blur-bg"
+    >
       <span class="back-btn-arrow">←</span
       ><span class="back-btn-label" data-i18n="btn.back"></span>
 
