@@ -112,7 +112,7 @@
   bottom: 80px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  /* gap: 14px; */
   width: min(420px, max(280px, 50vw));
 }
 
@@ -855,28 +855,7 @@
 .menu-setting-name-save {
   min-width: 220px;
   min-height: 72px;
-  padding: 12px 28px;
-  background: rgba(10, 55, 85, 0.92);
-  border: 1px solid rgba(95, 132, 173, 0.62);
-  border-radius: 10px;
-  color: var(--color-main-menu-text);
-  font: inherit;
-  font-family: var(--font-menu);
-  font-weight: 700;
   font-size: clamp(1.45rem, 2.8vw, 2rem);
-  line-height: 1;
-  text-transform: uppercase;
-  cursor: pointer;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.28);
-
-  &:hover:not(:disabled) {
-    background: rgba(15, 78, 118, 0.96);
-  }
-
-  &:disabled {
-    opacity: 0.5;
-    cursor: default;
-  }
 }
 
 .menu-setting-name-status {
@@ -905,19 +884,8 @@
 }
 
 .menu-setting-toggle {
-  border: 1px solid rgba(255, 221, 68, 0.25);
-  border-radius: 12px;
   min-height: 72px;
-  padding: 12px 26px;
-  background: rgba(15, 33, 54, 0.85);
-  color: var(--color-menu-accent);
-  font: inherit;
-  font-family: var(--font-menu);
   font-size: clamp(1.65rem, 3vw, 2.4rem);
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 .menu-setting-language-actions {
@@ -948,28 +916,10 @@
 }
 
 .menu-setting-arrow {
-  display: flex;
+  min-width: 0;
   min-height: 72px;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid rgba(255, 221, 68, 0.25);
-  background: rgba(15, 33, 54, 0.85);
-  color: var(--color-menu-text);
-  font: inherit;
-  font-family: var(--font-menu);
+  padding: 0;
   font-size: clamp(1.7rem, 3vw, 2.25rem);
-  font-weight: 700;
-  line-height: 1;
-  cursor: pointer;
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
-}
-
-.menu-setting-arrow:first-child {
-  border-radius: 999px 0 0 999px;
-}
-
-.menu-setting-arrow:last-of-type {
-  border-radius: 0 999px 999px 0;
 }
 
 .menu-setting-contact {
@@ -983,14 +933,10 @@
 }
 
 .menu-setting-contact-btn {
-  border: 0;
-  padding: 0;
-  background: transparent;
-  color: var(--color-menu-accent);
-  font: inherit;
-  font-weight: 700;
-  text-decoration: underline;
-  cursor: pointer;
+  min-width: 120px;
+  min-height: 42px;
+  padding: 8px 16px;
+  font-size: 16px;
 }
 
 .menu-slider {
