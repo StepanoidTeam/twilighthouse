@@ -15,15 +15,39 @@
 
   <body>
     <div id="$bootLoader" class="boot-loader">
-      <div class="boot-loader-panel flex-col blur-bg">
-        <h1 id="$bootLoaderTitle" class="boot-loader-title">TWILIGHTHOUSE</h1>
-        <p id="$bootLoaderText" class="boot-loader-text">Loading…</p>
-        <p id="$bootLoaderAsset" class="boot-loader-asset">Texture - ...</p>
+      <img
+        class="boot-loader-bg"
+        src="sprites/bg-loader-screen.png"
+        alt=""
+        aria-hidden="true"
+      />
+      <div class="boot-loader-panel flex-col">
+        <div class="boot-loader-copy">
+          <h1 id="$bootLoaderTitle" class="boot-loader-title">TWILIGHTHOUSE</h1>
+          <p id="$bootLoaderText" class="boot-loader-text">Loading…</p>
+        </div>
         <div class="boot-loader-bar" aria-hidden="true">
           <div id="$bootLoaderBarFill" class="boot-loader-bar-fill"></div>
           <p id="$bootLoaderPercent" class="boot-loader-percent">0%</p>
         </div>
-        <p id="$bootLoaderTip" class="boot-loader-tip" aria-live="polite"></p>
+        <p id="$bootLoaderAsset" class="boot-loader-asset">Texture - ...</p>
+        <div class="boot-loader-tip-box">
+          <img
+            class="boot-loader-tip-icon icon-sepia"
+            src="sprites/icons/lamp.png"
+            alt=""
+            aria-hidden="true"
+          />
+          <span class="boot-loader-tip-divider" aria-hidden="true"></span>
+          <div class="boot-loader-tip-content">
+            <span id="$bootLoaderTipLabel" class="boot-loader-tip-label"></span>
+            <p
+              id="$bootLoaderTip"
+              class="boot-loader-tip"
+              aria-live="polite"
+            ></p>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -365,7 +389,7 @@
           >
             <img
               class="menu-main-btn-icon"
-              src="sprites/icons/authors.png"
+              src="sprites/icons/ink-bottle.png"
               alt=""
               aria-hidden="true"
             /><span class="menu-main-btn-label" data-i18n="menu.authors"></span>

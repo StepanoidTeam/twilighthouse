@@ -70,3 +70,7 @@ svg[aria-hidden='true'] {
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
+
+.icon-sepia {
+  filter: brightness(0.5) sepia(1) brightness(1.5);
+}

@@ -144,7 +144,7 @@ Photopea — image editor
 
     // Boot loader
     'boot.title': 'TWILIGHTHOUSE',
-    'boot.loading': 'Loading twilighthouse assets…',
+    'boot.loading': 'Preparing the lighthouse for the night watch…',
     'boot.progress': 'Loading assets {loaded}/{total}',
     'boot.ready': 'Ready',
     'boot.failed': 'Failed to load game assets',
@@ -152,6 +152,7 @@ Photopea — image editor
     'boot.audio': 'Sound',
     'boot.video': 'Video',
     'boot.finalizing': 'Finalizing startup…',
+    'boot.tipLabel': "Keeper's tip",
     'boot.tips': [
       '🔦 Don’t keep the beam in one place for too long — threats come from every side.',
       '🧜 If a mermaid disappears into darkness, it doesn’t mean she has swum away.',
@@ -474,7 +475,7 @@ Photopea — 图像编辑器
     'shop.items.phosphor_water.desc': '敌人离开光束后短暂留痕。',
 
     'boot.title': 'TWILIGHTHOUSE',
-    'boot.loading': '正在加载 twilighthouse 资源…',
+    'boot.loading': '正在为夜间值守准备灯塔…',
     'boot.progress': '正在加载资源 {loaded}/{total}',
     'boot.ready': '就绪',
     'boot.failed': '游戏资源加载失败',
@@ -482,6 +483,7 @@ Photopea — 图像编辑器
     'boot.audio': '音效',
     'boot.video': '视频',
     'boot.finalizing': '正在完成启动…',
+    'boot.tipLabel': '守灯人的建议',
     'boot.tips': [
       '🔦 不要把光束长时间停在一个地方 - 威胁会从四面八方出现。',
       '🧜 如果美人鱼消失在黑暗中，这不代表她已经游走了。',
@@ -800,7 +802,7 @@ Photopea — image editor
       'Враги ненадолго оставляют светящийся след после выхода из луча.',
 
     'boot.title': 'Маяк',
-    'boot.loading': 'Загрузка игровых ресурсов…',
+    'boot.loading': 'Подготавливаем маяк к ночной смене…',
     'boot.progress': 'Загружаем ресурсы {loaded}/{total}',
     'boot.ready': 'Готово',
     'boot.failed': 'Не удалось загрузить ресурсы игры',
@@ -808,6 +810,7 @@ Photopea — image editor
     'boot.audio': 'Звук',
     'boot.video': 'Видео',
     'boot.finalizing': 'Завершаем запуск…',
+    'boot.tipLabel': 'Совет старого смотрителя',
     'boot.tips': [
       '🔦 Не держи луч на одном месте слишком долго — угрозы приходят с разных сторон.',
       '🧜 Если русалка исчезла во тьме — это не значит, что она уплыла.',

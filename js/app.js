@@ -89,6 +89,7 @@ const {
   $bootLoaderTitle,
   $bootLoaderText,
   $bootLoaderTip,
+  $bootLoaderTipLabel,
   $bootLoaderAsset,
   $bootLoaderBarFill,
   $bootLoaderPercent,
@@ -108,7 +109,7 @@ const BOOT_TEXTURE_ASSETS = [
   'sprites/icons/compass.png',
   'sprites/icons/wheel.png',
   'sprites/icons/chest.png',
-  'sprites/icons/authors.png',
+  'sprites/icons/ink-bottle.png',
   'sprites/icons/map.png',
   // Game-over / win splash backgrounds
   'sprites/wasted/iceberg.png',
@@ -234,12 +235,13 @@ function getBootAssetLabel(asset) {
 
 function renderBootLoaderText() {
   if ($bootLoaderTitle) $bootLoaderTitle.textContent = t('boot.title');
+  if ($bootLoaderTipLabel) $bootLoaderTipLabel.textContent = t('boot.tipLabel');
   if ($bootLoaderText) {
     if (bootLoaderState.status === 'failed') {
       $bootLoaderText.textContent = t('boot.failed');
     } else if (bootLoaderState.status === 'ready') {
       $bootLoaderText.textContent = t('boot.ready');
-    } else if (bootLoaderState.total > 0 && bootLoaderState.loaded > 0) {
+    } else if (bootLoaderState.total > 0) {
       $bootLoaderText.textContent = t('boot.progress', {
         loaded: bootLoaderState.loaded,
         total: bootLoaderState.total,
