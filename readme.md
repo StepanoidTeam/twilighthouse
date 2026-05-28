@@ -1,5 +1,17 @@
 ## LIGHTHOUSE
 
+### dev demo
+
+https://stepanoidteam.github.io/twilighthouse/
+
+### Itch.io version
+
+https://bobanko.itch.io/twilighthouse
+
+### LD page
+
+https://ldjam.com/events/ludum-dare/59/twilighthouse
+
 _A survival signal game made for Ludum Dare 59 — Theme: Signal_
 
 Congratulations, you got the job as lighthouse keeper. Your real responsibilities: help smugglers deliver their "medicine", blind sea monsters, and make sure the cops stay in the dark.
