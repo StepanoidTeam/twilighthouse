@@ -357,8 +357,8 @@
   text-align: left;
   text-transform: uppercase;
   text-shadow:
-    0 5px 0 rgba(21, 31, 42, 0.62),
-    0 22px 42px rgba(0, 0, 0, 0.5);
+    0 5px 0 rgba(21, 31, 42, 1.62),
+    0 2px 10px rgba(0, 0, 0, 0.5);
 }
 
 .menu-settings-card {
