@@ -359,6 +359,8 @@
   left: 64px;
   bottom: 28px;
   z-index: 2;
+  width: min(calc(100vw - 128px), 880px);
+  justify-content: flex-start;
   transform: none;
   padding: 0;
 }
@@ -808,12 +810,40 @@
 }
 
 .menu-setting-row {
+  position: relative;
   display: grid;
   grid-template-columns: 1fr 1fr;
   align-items: center;
   width: 100%;
   box-sizing: border-box;
   padding: 22px 0;
+}
+
+.menu-setting-row::before {
+  content: '';
+  position: absolute;
+  left: -18px;
+  top: 22px;
+  bottom: 22px;
+  width: 3px;
+  background: transparent;
+  transition: background var(--duration-menu) ease;
+}
+
+.menu-setting-row.is-selected::before {
+  background: var(--color-menu-selected);
+}
+
+.menu-setting-row.is-selected .menu-setting-label,
+.menu-setting-row.is-selected .menu-setting-language-value,
+.menu-setting-row.is-selected .menu-slider-value,
+.menu-setting-row.is-selected .menu-setting-name-input {
+  color: var(--color-menu-selected);
+}
+
+.menu-setting-row.is-selected .menu-setting-desc,
+.menu-setting-row.is-selected .menu-setting-name-hint {
+  color: rgba(214, 190, 160, 0.86);
 }
 
 .menu-setting-divider {
@@ -1337,6 +1367,7 @@
   .menu-settings > .menu-hint {
     left: 18px;
     bottom: 24px;
+    width: calc(100vw - 36px);
   }
 
   .menu-setting-name-line {

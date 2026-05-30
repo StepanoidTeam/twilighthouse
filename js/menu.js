@@ -28,7 +28,7 @@ import {
 } from './i18n.js';
 
 const {
-  $menuOverlay,
+  $menuMain,
   $menuBg,
   $menuBgMan,
   $menuMain,
@@ -74,6 +74,9 @@ const {
 let menuApp = null;
 let $$menuItems = [];
 let selectedIndex = 0;
+let settingsItems = [];
+let selectedSettingsIndex = 0;
+let selectedSettingsKey = 'language';
 let currentScreen = 'main'; // 'main' | 'shop' | 'leaderboard' | 'achievements' | 'settings' | 'authors' | 'tutorial' | null (game)
 let $creditsScroll = null;
 let onStartGame = null;
@@ -253,9 +256,123 @@ function updateSelection() {
   }
 }
 
+function renderMenuHint($hint, actions) {
+  if (!$hint) return;
+  $hint.replaceChildren();
+
+  actions.forEach((action, index) => {
+    if (index > 0) {
+      const $separator = document.createElement('span');
+      $separator.className = 'menu-hint-separator';
+      $separator.textContent = '●';
+      $hint.append($separator);
+    }
+
+    const $action = document.createElement('span');
+    $action.className = 'menu-hint-action';
+
+    action.keys.forEach((key) => {
+      const $key = document.createElement('span');
+      $key.className = 'hotkey';
+      $key.textContent = key;
+      $action.append($key);
+    });
+
+    const $text = document.createElement('span');
+    $text.className = 'hint-text';
+    $text.textContent = t(action.labelKey);
+    $action.append($text);
+    $hint.append($action);
+  });
+}
+
+function renderBackOnlyHint($screen) {
+  renderMenuHint($screen?.querySelector('.menu-hint'), [
+    { keys: ['Q', 'esc'], labelKey: 'hint.back' },
+  ]);
+}
+
+function renderMainHint() {
+  renderMenuHint($menuHint, [
+    { keys: ['↑', '↓', 'W', 'S'], labelKey: 'hint.navigate' },
+    { keys: ['⏎', 'E'], labelKey: 'hint.select' },
+  ]);
+}
+
+function renderSettingsHint() {
+  renderMenuHint($menuSettings?.querySelector(':scope > .menu-hint'), [
+    { keys: ['↑', '↓', 'W', 'S'], labelKey: 'hint.navigate' },
+    { keys: ['←', '→', 'A', 'D'], labelKey: 'hint.change' },
+    { keys: ['⏎', 'E'], labelKey: 'hint.edit' },
+    { keys: ['Q', 'esc'], labelKey: 'hint.back' },
+  ]);
+}
+
+function updateSettingsSelection() {
+  for (let i = 0; i < settingsItems.length; i++) {
+    const { row } = settingsItems[i];
+    const isSelected = i === selectedSettingsIndex;
+    row.classList.toggle('is-selected', isSelected);
+    row.setAttribute('aria-current', isSelected ? 'true' : 'false');
+  }
+}
+
+function selectSettingsIndex(index) {
+  if (!settingsItems.length) return;
+  selectedSettingsIndex = (index + settingsItems.length) % settingsItems.length;
+  selectedSettingsKey = settingsItems[selectedSettingsIndex]?.key;
+  updateSettingsSelection();
+}
+
+function initSettingsNavigation(items) {
+  settingsItems = items.filter(({ row }) => row && !row.hidden);
+  if (!settingsItems.length) return;
+
+  const selectedByKeyIndex = settingsItems.findIndex(
+    ({ key }) => key === selectedSettingsKey,
+  );
+  selectedSettingsIndex =
+    selectedByKeyIndex >= 0
+      ? selectedByKeyIndex
+      : Math.min(selectedSettingsIndex, settingsItems.length - 1);
+  selectedSettingsKey = settingsItems[selectedSettingsIndex]?.key;
+  updateSettingsSelection();
+
+  settingsItems.forEach(({ row }, index) => {
+    row.onpointerover = () => {
+      if (selectedSettingsIndex === index) return;
+      selectedSettingsIndex = index;
+      selectedSettingsKey = settingsItems[index]?.key;
+      updateSettingsSelection();
+      playMenuSelect();
+    };
+    row.onclick = () => {
+      selectedSettingsIndex = index;
+      selectedSettingsKey = settingsItems[index]?.key;
+      updateSettingsSelection();
+    };
+  });
+}
+
+function changeSelectedSetting(direction) {
+  const item = settingsItems[selectedSettingsIndex];
+  if (!item?.change) return;
+  selectedSettingsKey = item.key;
+  item.change(direction);
+}
+
+function activateSelectedSetting() {
+  const item = settingsItems[selectedSettingsIndex];
+  if (!item?.activate) return false;
+  selectedSettingsKey = item.key;
+  item.activate();
+  return true;
+}
+
 function hideOverlayScreens() {
   stopCreditsAnimation();
   clearTutorialState();
+  settingsItems = [];
   if ($menuSettings) $menuSettings.hidden = true;
   if ($menuLeaderboard) $menuLeaderboard.hidden = true;
   if ($menuAchievements) $menuAchievements.hidden = true;
@@ -282,6 +399,7 @@ function showMainMenu() {
   hideBackBtn();
   currentScreen = 'main';
   updateSelection();
+  renderMainHint();
   scheduleMenuLayoutSync();
 }
 
@@ -324,7 +442,7 @@ export async function buildMenu(app, startGameCb) {
   initAuthWidget();
   startBgManMotion();
   initBackBtn();
-  $menuOverlay.hidden = false;
+  $menuMain.hidden = false;
   showMainMenu();
   currentScreen = 'main';
 
@@ -335,7 +453,7 @@ export async function buildMenu(app, startGameCb) {
 
   if (!i18nBound) {
     onLanguageChange(() => {
-      if (!$menuOverlay) return;
+      if (!$menuMain) return;
 
       applyI18nToDOM();
       updateSelection();
@@ -355,14 +473,17 @@ export async function buildMenu(app, startGameCb) {
 }
 
 function handleMenuKey(e) {
-  if (!$menuOverlay || $menuOverlay.hidden) return;
+  if (!$menuMain || $menuMain.hidden) return;
 
   ensureMenuAmbient();
 
   const ae = document.activeElement;
+  const isInput = ae?.tagName === 'INPUT';
+  const isTypingInput =
+    isInput && !(currentScreen === 'settings' && ae.type === 'range');
   if (
     ae &&
-    (ae.tagName === 'INPUT' ||
+    (isTypingInput ||
       ae.tagName === 'TEXTAREA' ||
       ae.isContentEditable ||
       ae.closest('.auth-modal-backdrop'))
@@ -383,6 +504,35 @@ function handleMenuKey(e) {
     } else if (isConfirmKey(e.code)) {
       playMenuClick();
       activateMenuItem();
+    }
+  } else if (currentScreen === 'settings') {
+    if (e.code === 'ArrowUp' || e.code === 'KeyW') {
+      e.preventDefault();
+      selectSettingsIndex(selectedSettingsIndex - 1);
+      playMenuSelect();
+    } else if (e.code === 'ArrowDown' || e.code === 'KeyS') {
+      e.preventDefault();
+      selectSettingsIndex(selectedSettingsIndex + 1);
+      playMenuSelect();
+    } else if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+      e.preventDefault();
+      changeSelectedSetting(-1);
+    } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+      e.preventDefault();
+      changeSelectedSetting(1);
+    } else if (isConfirmKey(e.code)) {
+      if (activateSelectedSetting()) {
+        e.preventDefault();
+        playMenuClick();
+      }
+    } else if (isBackKey(e.code)) {
+      playMenuClick();
+      if (openedFromGame) {
+        openedFromGame = false;
+        hideMenu();
+      } else {
+        showMainMenu();
+      }
     }
   } else if (currentScreen === 'tutorial' && tutorialState) {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
@@ -633,6 +783,7 @@ async function showLeaderboard() {
   currentScreen = 'leaderboard';
   scheduleMenuLayoutSync();
   if ($menuLeaderboard) $menuLeaderboard.hidden = false;
+  renderBackOnlyHint($menuLeaderboard);
   await renderLeaderboardScreen({
     container: $menuLeaderboard,
     isActive: () => currentScreen === 'leaderboard',
@@ -647,6 +798,7 @@ function showAchievements() {
   currentScreen = 'achievements';
   scheduleMenuLayoutSync();
   if ($menuAchievements) $menuAchievements.hidden = false;
+  renderBackOnlyHint($menuAchievements);
   renderAchievementsScreen({
     container: $menuAchievements,
     isActive: () => currentScreen === 'achievements',
@@ -666,6 +818,7 @@ function showShop() {
   currentScreen = 'shop';
   scheduleMenuLayoutSync();
   if ($menuShop) $menuShop.hidden = false;
+  renderBackOnlyHint($menuShop);
   renderShopScreen({
     container: $menuShop,
     isActive: () => currentScreen === 'shop',
@@ -682,6 +835,7 @@ function showSettings() {
   if (!$menuSettings) return;
 
   $menuSettings.hidden = false;
+  renderSettingsHint();
 
   const langs = [
     { code: 'en', label: t('lang.english') },
@@ -707,9 +861,10 @@ function showSettings() {
 
   function pageSettingsLanguage(direction) {
     playMenuClick();
+    selectedSettingsKey = 'language';
     langIdx = (langIdx + direction + langs.length) % langs.length;
-    setLanguage(langs[langIdx].code);
     renderSettingsLanguage();
+    setLanguage(langs[langIdx].code);
   }
 
   renderSettingsLanguage();
@@ -762,6 +917,15 @@ function showSettings() {
     applyMusicVolume(Number($menuSettingsMusicInput.value) / 100);
   };
 
+  function changeMusicVolume(direction) {
+    playMenuClick();
+    const currentValue = Number.isFinite(S.musicVolume)
+      ? S.musicVolume
+      : initialMusic;
+    const nextValue = Math.max(0, Math.min(1, currentValue + direction * 0.05));
+    applyMusicVolume(nextValue);
+  }
+
   if (
     !$menuSettingsSfxLabel ||
     !$menuSettingsSfxInput ||
@@ -791,6 +955,15 @@ function showSettings() {
   $menuSettingsSfxInput.oninput = () => {
     applySfxVolume(Number($menuSettingsSfxInput.value) / 100);
   };
+
+  function changeSfxVolume(direction) {
+    playMenuClick();
+    const currentValue = Number.isFinite(S.sfxVolume)
+      ? S.sfxVolume
+      : initialSfx;
+    const nextValue = Math.max(0, Math.min(1, currentValue + direction * 0.05));
+    applySfxVolume(nextValue);
+  }
 
   // ===== Display Name =====
   if (!$menuSettingsNameLabel || !$menuSettingsNameNote) return;
@@ -858,11 +1031,7 @@ function showSettings() {
 
       const name = $menuDisplayNameInput.value.trim();
       if (!name) {
-        setDisplayNameSaveState(
-          'is-error',
-          'settings.displayNameEmpty',
-          false,
-        );
+        setDisplayNameSaveState('is-error', 'settings.displayNameEmpty', false);
         return;
       }
       if (name.length > 30) {
@@ -873,11 +1042,7 @@ function showSettings() {
         );
         return;
       }
-      setDisplayNameSaveState(
-        'is-saving',
-        'settings.displayNameSaving',
-        true,
-      );
+      setDisplayNameSaveState('is-saving', 'settings.displayNameSaving', true);
       try {
         await updateDisplayName(name);
 
@@ -893,6 +1058,7 @@ function showSettings() {
           'settings.displayNameSaved',
           false,
         );
+        $menuDisplayNameInput.blur();
         displayNameSaveResetTimer = setTimeout(() => {
           if (
             displayNameSaveState.state === 'is-success' &&
@@ -904,14 +1070,39 @@ function showSettings() {
         console.log(`👤 Display name saved: ${name}`);
       } catch (e) {
         console.warn('Display name update failed', e);
-        setDisplayNameSaveState(
-          'is-error',
-          'settings.displayNameError',
-          false,
-        );
+        setDisplayNameSaveState('is-error', 'settings.displayNameError', false);
       }
     };
   }
+
+  initSettingsNavigation([
+    {
+      key: 'language',
+      row: $menuSettingsLangLabel.closest('.menu-setting-row'),
+      change: pageSettingsLanguage,
+    },
+    {
+      key: 'music',
+      row: $menuSettingsMusicLabel.closest('.menu-setting-row'),
+      change: changeMusicVolume,
+    },
+    {
+      key: 'sfx',
+      row: $menuSettingsSfxLabel.closest('.menu-setting-row'),
+      change: changeSfxVolume,
+    },
+    {
+      key: 'name',
+      row:
+        $menuDisplayNameForm && !$menuDisplayNameForm.hidden
+          ? $menuDisplayNameForm
+          : null,
+      activate: () => {
+        $menuDisplayNameInput?.focus();
+        $menuDisplayNameInput?.select();
+      },
+    },
+  ]);
 }
 
 // ===== Authors =====
@@ -924,6 +1115,7 @@ async function showAuthors() {
   if (!$menuAuthors) return;
 
   $menuAuthors.hidden = false;
+  renderBackOnlyHint($menuAuthors);
 
   renderAuthorsScreen({
     container: $menuAuthors,
@@ -952,7 +1144,7 @@ function hideDiscordLink() {
 }
 
 function hideMenu() {
-  if ($menuOverlay) $menuOverlay.hidden = true;
+  if ($menuMain) $menuMain.hidden = true;
   stopBgManMotion();
   hideOverlayScreens();
   hideBackBtn();
@@ -962,8 +1154,8 @@ function hideMenu() {
 }
 
 export function showMenu() {
-  if (!$menuOverlay) return;
-  $menuOverlay.hidden = false;
+  if (!$menuMain) return;
+  $menuMain.hidden = false;
   startBgManMotion();
   selectedIndex = 0;
   showMainMenu();
@@ -972,23 +1164,23 @@ export function showMenu() {
 }
 
 export function showSettingsFromGame() {
-  if (!$menuOverlay) return;
+  if (!$menuMain) return;
   openedFromGame = true;
-  $menuOverlay.hidden = false;
+  $menuMain.hidden = false;
   startBgManMotion();
   repositionMenu();
   showSettings();
 }
 
 export function isMenuVisible() {
-  return Boolean($menuOverlay && !$menuOverlay.hidden);
+  return Boolean($menuMain && !$menuMain.hidden);
 }
 
 export function repositionMenu() {
-  if (!$menuOverlay) return;
+  if (!$menuMain) return;
 
-  $menuOverlay.style.setProperty('--menu-vw', `${S.gameW}px`);
-  $menuOverlay.style.setProperty('--menu-vh', `${S.gameH}px`);
+  $menuMain.style.setProperty('--menu-vw', `${S.gameW}px`);
+  $menuMain.style.setProperty('--menu-vh', `${S.gameH}px`);
   scheduleMenuLayoutSync();
 }
 
@@ -1004,7 +1196,7 @@ function scheduleMenuLayoutSync() {
 }
 
 function syncMainMenuLayout() {
-  if (!$menuOverlay || !$menuMain) return;
+  if (!$menuMain || !$menuMain) return;
 
   const viewportWidth =
     S.gameW || window.innerWidth || document.documentElement.clientWidth;
@@ -1019,6 +1211,6 @@ function syncMainMenuLayout() {
         mainMenuWidth > 0 &&
         mainMenuWidth <= viewportWidth / 2));
 
-  $menuOverlay.classList.toggle('menu-overlay--subscreen', isSubScreen);
-  $menuOverlay.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
+  $menuMain.classList.toggle('menu-overlay--subscreen', isSubScreen);
+  $menuMain.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
 }

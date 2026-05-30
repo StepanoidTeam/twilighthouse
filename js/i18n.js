@@ -73,6 +73,8 @@ Photopea — image editor
     // Hints
     'hint.navigate': 'navigate',
     'hint.select': 'select',
+    'hint.change': 'change',
+    'hint.edit': 'edit',
     'hint.back': 'back',
     'hint.intro': '◀ ▶ — pages  •  Esc — skip',
     'btn.back': 'Back',
@@ -415,6 +417,8 @@ Photopea — 图像编辑器
 
     'hint.navigate': '移动',
     'hint.select': '选择',
+    'hint.change': '更改',
+    'hint.edit': '编辑',
     'hint.back': '返回',
     'hint.intro': '◀ ▶ — 翻页  •  Esc — 跳过',
     'btn.back': '返回',
@@ -736,6 +740,8 @@ Photopea — image editor
 
     'hint.navigate': 'навигация',
     'hint.select': 'выбор',
+    'hint.change': 'изменить',
+    'hint.edit': 'ввод',
     'hint.back': 'назад',
     'hint.intro': '◀ ▶ — страницы  •  Esc — пропустить',
     'btn.back': 'Назад',
