@@ -12,6 +12,8 @@ import {
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
 
+let selectedShopItemId = null;
+
 function cloneTemplateFirstElement(id) {
   const template = document.getElementById(id);
   const first = template?.content?.firstElementChild;
@@ -53,6 +55,66 @@ function renderWallet($row, meta) {
   }
 }
 
+function renderShopTitle($title) {
+  const icon = document.createElement('span');
+  icon.className = 'menu-screen-title-icon';
+  icon.textContent = '⚓';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'menu-screen-title-text';
+  text.textContent = t('shop.title');
+
+  const rule = document.createElement('span');
+  rule.className = 'menu-screen-title-rule';
+  rule.setAttribute('aria-hidden', 'true');
+
+  $title.replaceChildren(icon, text, rule);
+}
+
+function renderHotkeyButton($button, hotkey, label) {
+  const hotkeyEl = document.createElement('span');
+  hotkeyEl.className = 'hotkey';
+  hotkeyEl.textContent = hotkey;
+
+  const labelEl = document.createElement('span');
+  labelEl.className = 'shop-reset-confirm-label';
+  labelEl.textContent = label;
+
+  $button.setAttribute('aria-label', label);
+  $button.replaceChildren(hotkeyEl, labelEl);
+}
+
+function getInitialSelectedItemId(meta) {
+  if (
+    selectedShopItemId &&
+    SHOP_ITEMS.some((item) => item.id === selectedShopItemId)
+  ) {
+    return selectedShopItemId;
+  }
+
+  const firstAffordable = SHOP_ITEMS.find((item) => {
+    return !isShopItemMaxed(meta, item) && canAfford(item.price, meta);
+  });
+  return firstAffordable?.id || SHOP_ITEMS[0]?.id || null;
+}
+
+function syncSelectedShopCard($grid, scroll = false) {
+  const cards = Array.from($grid.querySelectorAll('.shop-item-card'));
+  for (const card of cards) {
+    const isSelected = card.dataset.itemId === selectedShopItemId;
+    card.classList.toggle('shop-item-card--selected', isSelected);
+    card.setAttribute('aria-selected', isSelected ? 'true' : 'false');
+    if (isSelected && scroll) {
+      card.scrollIntoView({
+        behavior: 'smooth',
+        block: 'nearest',
+        inline: 'center',
+      });
+    }
+  }
+}
+
 /**
  * @param {HTMLElement} $grid
  * @param {ReturnType<typeof loadMeta>} meta
@@ -60,7 +122,7 @@ function renderWallet($row, meta) {
  */
 function renderGrid($grid, meta, onBought) {
   $grid.replaceChildren();
-  let featuredSet = false;
+  selectedShopItemId = getInitialSelectedItemId(meta);
   for (const item of SHOP_ITEMS) {
     const level = getShopItemLevel(meta, item);
     const maxed = isShopItemMaxed(meta, item);
@@ -68,6 +130,8 @@ function renderGrid($grid, meta, onBought) {
 
     const card = cloneTemplateFirstElement('$shopItemCardTemplate');
     if (!(card instanceof HTMLElement)) continue;
+    card.dataset.itemId = item.id;
+    card.setAttribute('role', 'option');
 
     const h = card.querySelector('.shop-item-title');
     const levelRow = card.querySelector('.shop-item-level-row');
@@ -112,18 +176,20 @@ function renderGrid($grid, meta, onBought) {
     } else {
       btn.disabled = false;
       btn.textContent = level > 0 ? t('shop.upgrade') : t('shop.buy');
-      if (!featuredSet) {
-        card.classList.add('shop-item-card--featured');
-        featuredSet = true;
-      }
     }
 
     $grid.appendChild(card);
   }
+  syncSelectedShopCard($grid);
 
   $grid.onclick = (e) => {
     const tEl = e.target;
     if (!(tEl instanceof HTMLElement)) return;
+    const card = tEl.closest('.shop-item-card');
+    if (card instanceof HTMLElement && card.dataset.itemId) {
+      selectedShopItemId = card.dataset.itemId;
+      syncSelectedShopCard($grid);
+    }
     const btn = tEl.closest('.shop-buy-btn');
     if (!btn || btn.disabled) return;
     const itemId = btn.dataset.itemId;
@@ -134,6 +200,38 @@ function renderGrid($grid, meta, onBought) {
       onBought();
     }
   };
+}
+
+export function moveSelectedShopItem(container, direction) {
+  const $grid = container?.querySelector('.shop-grid');
+  if (!($grid instanceof HTMLElement)) return false;
+
+  const cards = Array.from($grid.querySelectorAll('.shop-item-card'));
+  if (cards.length === 0) return false;
+
+  const currentIndex = cards.findIndex(
+    (card) => card.dataset.itemId === selectedShopItemId,
+  );
+  const nextIndex =
+    currentIndex < 0
+      ? 0
+      : (currentIndex + direction + cards.length) % cards.length;
+
+  selectedShopItemId = cards[nextIndex].dataset.itemId || null;
+  syncSelectedShopCard($grid, true);
+  return true;
+}
+
+export function activateSelectedShopItem(container) {
+  const $grid = container?.querySelector('.shop-grid');
+  if (!($grid instanceof HTMLElement)) return false;
+
+  const selectedCard = $grid.querySelector('.shop-item-card--selected');
+  const btn = selectedCard?.querySelector('.shop-buy-btn');
+  if (!(btn instanceof HTMLButtonElement) || btn.disabled) return false;
+
+  btn.click();
+  return true;
 }
 
 /**
@@ -157,7 +255,9 @@ export function renderShopScreen({ container, isActive }) {
 
   if (!$title || !$walletRow || !$grid || !$resetBtn) return;
 
-  $title.textContent = t('shop.title');
+  $grid.setAttribute('role', 'listbox');
+  $grid.setAttribute('aria-label', t('shop.stockTitle'));
+  renderShopTitle($title);
   if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
   if ($stockTitle) $stockTitle.textContent = t('shop.stockTitle');
   if ($infoTitle) $infoTitle.textContent = t('shop.infoTitle');
@@ -169,8 +269,12 @@ export function renderShopScreen({ container, isActive }) {
     $resetBtn.textContent = t('shop.reset');
     $resetBtn.disabled = !hasShopPurchases(meta);
     if ($resetConfirmText) $resetConfirmText.textContent = t('shop.resetConfirm');
-    if ($resetConfirmCancel) $resetConfirmCancel.textContent = t('shop.resetCancel');
-    if ($resetConfirmApply) $resetConfirmApply.textContent = t('shop.resetApply');
+    if ($resetConfirmCancel) {
+      renderHotkeyButton($resetConfirmCancel, 'Q', t('shop.resetCancel'));
+    }
+    if ($resetConfirmApply) {
+      renderHotkeyButton($resetConfirmApply, 'E', t('shop.resetApply'));
+    }
     renderWallet($walletRow, meta);
     renderGrid($grid, meta, paint);
   }

@@ -13,7 +13,11 @@ import {
   syncCurrentUserLeaderboardDisplayName,
 } from './leaderboard.js';
 import { renderAchievementsScreen } from './achievements-screen.js';
-import { renderShopScreen } from './shop-screen.js';
+import {
+  activateSelectedShopItem,
+  moveSelectedShopItem,
+  renderShopScreen,
+} from './shop-screen.js';
 import { initAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
@@ -386,14 +390,21 @@ function hideOverlayScreens() {
 }
 
 function hideMainItems() {
+  if ($menuRoot) {
+    $menuRoot.classList.add('menu-overlay--main-hidden');
+    $menuRoot.classList.remove('menu-overlay--show-keeper');
+  }
   if ($menuMain) $menuMain.hidden = true;
   if ($menuHint) $menuHint.hidden = true;
+  stopBgManMotion();
   hideDiscordLink();
 }
 
 function showMainItems() {
+  if ($menuRoot) $menuRoot.classList.remove('menu-overlay--main-hidden');
   if ($menuMain) $menuMain.hidden = false;
   if ($menuHint) $menuHint.hidden = false;
+  startBgManMotion();
   showDiscordLink();
 }
 
@@ -495,6 +506,8 @@ function handleMenuKey(e) {
     return;
   }
 
+  if (currentScreen === 'shop' && handleShopResetConfirmKey(e)) return;
+
   if (currentScreen === 'main') {
     const n = MAIN_MENU_ACTIONS.length;
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
@@ -508,6 +521,20 @@ function handleMenuKey(e) {
     } else if (isConfirmKey(e.code)) {
       playMenuClick();
       activateMenuItem();
+    }
+  } else if (currentScreen === 'shop') {
+    if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
+      e.preventDefault();
+      if (moveSelectedShopItem($menuShop, -1)) playMenuSelect();
+    } else if (e.code === 'ArrowRight' || e.code === 'KeyD') {
+      e.preventDefault();
+      if (moveSelectedShopItem($menuShop, 1)) playMenuSelect();
+    } else if (isConfirmKey(e.code)) {
+      e.preventDefault();
+      activateSelectedShopItem($menuShop);
+    } else if (isBackKey(e.code)) {
+      playMenuClick();
+      showMainMenu();
     }
   } else if (currentScreen === 'settings') {
     if (e.code === 'ArrowUp' || e.code === 'KeyW') {
@@ -560,6 +587,30 @@ function handleMenuKey(e) {
       showMainMenu();
     }
   }
+}
+
+function handleShopResetConfirmKey(e) {
+  const $resetConfirm = $menuShop?.querySelector('.shop-reset-confirm');
+  if (!($resetConfirm instanceof HTMLElement) || $resetConfirm.hidden) {
+    return false;
+  }
+
+  if (isConfirmKey(e.code)) {
+    e.preventDefault();
+    const $apply = $resetConfirm.querySelector('.shop-reset-confirm-apply');
+    if ($apply instanceof HTMLButtonElement) $apply.click();
+    return true;
+  }
+
+  if (isBackKey(e.code)) {
+    e.preventDefault();
+    playMenuClick();
+    const $cancel = $resetConfirm.querySelector('.shop-reset-confirm-cancel');
+    if ($cancel instanceof HTMLButtonElement) $cancel.click();
+    return true;
+  }
+
+  return false;
 }
 
 function activateMenuItem() {
@@ -802,7 +853,6 @@ function showAchievements() {
   currentScreen = 'achievements';
   scheduleMenuLayoutSync();
   if ($menuAchievements) $menuAchievements.hidden = false;
-  renderBackOnlyHint($menuAchievements);
   renderAchievementsScreen({
     container: $menuAchievements,
     isActive: () => currentScreen === 'achievements',
@@ -1137,7 +1187,6 @@ async function showAuthors() {
   if (!$menuAuthors) return;
 
   $menuAuthors.hidden = false;
-  renderBackOnlyHint($menuAuthors);
 
   renderAuthorsScreen({
     container: $menuAuthors,
@@ -1227,11 +1276,10 @@ function syncMainMenuLayout() {
   const mainMenuWidth = $menuMain.getBoundingClientRect().width;
   const canShowKeeper =
     isNarrowScreen &&
-    (isSubScreen ||
-      (currentScreen === 'main' &&
-        !$menuMain.hidden &&
-        mainMenuWidth > 0 &&
-        mainMenuWidth <= viewportWidth / 2));
+    currentScreen === 'main' &&
+    !$menuMain.hidden &&
+    mainMenuWidth > 0 &&
+    mainMenuWidth <= viewportWidth / 2;
 
   $menuRoot.classList.toggle('menu-overlay--subscreen', isSubScreen);
   $menuRoot.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
