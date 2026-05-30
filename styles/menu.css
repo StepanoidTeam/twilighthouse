@@ -581,7 +581,7 @@
 }
 
 .mask-btn {
-  mask-image: url(/sprites/menu-button-black.png);
+  mask-image: url(../sprites/menu-button-black.png);
   mask-size: 100% 100%;
 }
 
