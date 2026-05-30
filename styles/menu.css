@@ -76,34 +76,51 @@
   top: 34px;
   left: 28px;
   z-index: 2;
+  display: flex;
+  width: min(420px, max(280px, 50vw));
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
   pointer-events: none;
 
-  .menu-title-logo {
+  .menu-title-anchor {
     display: block;
-    width: min(420px, max(280px, 50vw));
+    width: min(320px, 86%);
     height: auto;
     filter: drop-shadow(0 4px 12px rgba(0, 0, 0, 0.55));
   }
 
-  .menu-title-logo-svg-text {
-    position: absolute;
-
-    inset: 0;
-    fill: var(--color-main-menu-text);
+  .menu-title-text {
+    display: inline-block;
+    margin: 0;
+    width: auto;
+    color: #ead7b6;
+    font-family: var(--font-menu);
+    font-size: var(--menu-title-font-size, 64px);
+    font-weight: 800;
+    line-height: 1.2em;
+    letter-spacing: 0.02em;
+    text-align: center;
+    /* white-space: nowrap; */
+    text-shadow:
+      0 4px 0 rgb(0 52 84),
+      0 0px 8px rgb(5 24 42);
     text-transform: uppercase;
-    font-size: 20px;
-    /* debug */
-    background: #ff000045;
   }
 }
 
 .menu-overlay--subscreen .menu-title {
   top: var(--size-edge-gap);
   left: 118px;
+  width: min(320px, calc(100vw - 148px));
 }
 
-.menu-overlay--subscreen .menu-title-logo {
-  width: min(320px, calc(100vw - 148px));
+.menu-overlay--subscreen .menu-title-anchor {
+  width: min(240px, 82%);
+}
+
+.menu-overlay--subscreen .menu-title-text {
+  font-size: 52px;
 }
 
 .menu-main {
@@ -125,7 +142,7 @@
   padding-left: 36px;
   border: none;
   border-radius: 15px;
-  background: #002f50d9;
+  background: #002f50;
 
   text-align: left;
   line-height: 1;
@@ -168,10 +185,11 @@
   display: block;
   min-width: 0;
 
-  opacity: 0.8;
-
   font-size: 30px;
-  line-height: 1em;
+  line-height: normal;
+
+  mask-image: url(/sprites/mask-dirt-text.png);
+  mask-size: auto 100%;
 }
 
 .menu-main-btn:hover,
@@ -259,11 +277,15 @@
 }
 
 .menu-screen-title {
+  mask-image: url(/sprites/mask-dirt-text.png);
+  mask-size: auto 100%;
+
   color: #fff;
   font-size: clamp(1.75rem, 3vw, 2.15rem);
   font-family: var(--font-menu);
   font-weight: 800;
   letter-spacing: 0.05em;
+  line-height: normal;
   text-align: center;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
 }
@@ -331,7 +353,6 @@
   font-family: var(--font-menu);
   font-size: clamp(4rem, 7vw, 7rem);
   font-weight: 800;
-  line-height: 0.9;
   letter-spacing: 0.02em;
   text-align: left;
   text-transform: uppercase;
@@ -426,7 +447,7 @@
   position: static;
   color: #ead7b6;
   font-size: clamp(1.9rem, 4vh, 3rem);
-  line-height: 0.95;
+
   text-align: center;
   text-transform: uppercase;
   text-shadow:
@@ -581,8 +602,17 @@
 }
 
 .mask-btn {
-  mask-image: url(../sprites/menu-button-black.png);
-  mask-size: 100% 100%;
+  /* old */
+  /* mask-image: url(../sprites/menu-button-black.png);
+  mask-size: 100% 100%; */
+
+  /* beta */
+  mask-image:
+    url(../sprites/mask-dirt-text.png), url(../sprites/menu-button-black.png);
+  mask-size:
+    auto 100%,
+    100% 100%;
+  mask-composite: intersect;
 }
 
 .howtoplay-nav-btn {
@@ -1231,19 +1261,29 @@
   .menu-title {
     top: 16px;
     left: 16px;
+    width: min(380px, 75vw);
   }
 
-  .menu-title-logo {
-    width: min(380px, 75vw);
+  .menu-title-anchor {
+    width: min(270px, 84%);
+  }
+
+  .menu-title-text {
+    font-size: var(--menu-title-font-size, 58px);
   }
 
   .menu-overlay--subscreen .menu-title {
     top: var(--size-edge-gap-mobile);
     left: 92px;
+    width: min(240px, calc(100vw - 108px));
   }
 
-  .menu-overlay--subscreen .menu-title-logo {
-    width: min(240px, calc(100vw - 108px));
+  .menu-overlay--subscreen .menu-title-anchor {
+    width: min(170px, 82%);
+  }
+
+  .menu-overlay--subscreen .menu-title-text {
+    font-size: 38px;
   }
 
   .menu-main {
