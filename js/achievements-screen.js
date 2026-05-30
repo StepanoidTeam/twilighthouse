@@ -50,6 +50,23 @@ function getUnlockedAchievementPoints(progress) {
   return total;
 }
 
+function renderAchievementsTitle($title) {
+  const icon = document.createElement('span');
+  icon.className = 'menu-screen-title-icon';
+  icon.textContent = '🏅';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'menu-screen-title-text';
+  text.textContent = t('achievements.title');
+
+  const rule = document.createElement('span');
+  rule.className = 'menu-screen-title-rule';
+  rule.setAttribute('aria-hidden', 'true');
+
+  $title.replaceChildren(icon, text, rule);
+}
+
 function createAchievementCard(def, progress) {
   const target = Math.max(1, Math.floor(Number(def.target)) || 1);
   const value = Math.max(0, Math.floor(Number(progress)) || 0);
@@ -124,7 +141,7 @@ export function renderAchievementsScreen({ container, isActive }) {
   )
     return;
 
-  $title.textContent = t('achievements.title');
+  renderAchievementsTitle($title);
   $subtitle.textContent = t('achievements.subtitle');
 
   const progress = loadAchievementProgress();

@@ -155,100 +155,225 @@
   position: fixed;
   inset: 0;
   z-index: 4;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-rows: minmax(122px, 0.72fr) auto minmax(72px, 0.5fr);
   align-items: center;
-  justify-content: center;
-  gap: 28px;
-  padding: 24px;
-  background: rgba(10, 16, 32, 0.88);
+  justify-items: center;
+  gap: clamp(20px, 3vh, 34px);
+  overflow-y: auto;
+  padding: clamp(22px, 4vh, 54px) clamp(20px, 6vw, 112px);
+  background:
+    radial-gradient(circle at 88% 18%, rgba(199, 83, 37, 0.2), transparent 22%),
+    linear-gradient(90deg, rgba(3, 7, 14, 0.96) 0%, rgba(6, 12, 20, 0.9) 52%, rgba(9, 17, 28, 0.8) 100%),
+    url('../sprites/bg-loader-screen.png') right center / cover no-repeat;
+  isolation: isolate;
+}
+
+.screen-perk-pick::before,
+.screen-perk-pick::after {
+  content: '';
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+}
+
+.screen-perk-pick::before {
+  z-index: -2;
+  background:
+    linear-gradient(180deg, rgba(0, 0, 0, 0.24), rgba(0, 0, 0, 0.72)),
+    url('../sprites/bg-loader-screen.png') right center / cover no-repeat;
+  filter: saturate(0.55) brightness(0.34) contrast(1.16);
+}
+
+.screen-perk-pick::after {
+  z-index: -1;
+  background:
+    radial-gradient(circle at 50% 48%, transparent 0 34%, rgba(0, 0, 0, 0.35) 74%),
+    repeating-linear-gradient(0deg, rgba(255, 255, 255, 0.018) 0 1px, transparent 1px 4px);
+  mix-blend-mode: screen;
+  opacity: 0.72;
 }
 
 .perk-pick-copy {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
+  align-self: end;
+  gap: 10px;
 }
 
 .perk-pick-title {
   margin: 0;
-  font-family: var(--font-ui);
-  font-size: clamp(22px, 4vw, 34px);
-  font-weight: bold;
-  color: #e8dcff;
+  font-family: var(--font-menu);
+  font-size: clamp(38px, 6.2vw, 82px);
+  font-weight: 800;
+  line-height: 0.95;
+  color: #d8c0a1;
+  letter-spacing: 0.04em;
   text-align: center;
-  text-shadow: 0 0 8px #000;
+  text-shadow:
+    0 4px 0 rgba(0, 0, 0, 0.56),
+    0 0 18px rgba(155, 87, 51, 0.2);
+  text-transform: uppercase;
 }
 
 .perk-pick-level {
+  position: relative;
   margin: 0;
-  font-family: var(--font-ui);
-  font-size: clamp(16px, 2.8vw, 22px);
-  color: #9fd2ff;
+  padding-top: 18px;
+  font-family: var(--font-menu);
+  font-size: clamp(17px, 1.8vw, 24px);
+  font-weight: 500;
+  color: #aa8f77;
+  letter-spacing: 0.2em;
   text-align: center;
   text-shadow: 0 0 8px #000;
+  text-transform: uppercase;
+}
+
+.perk-pick-level::before {
+  content: '';
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  width: 156px;
+  height: 4px;
+  transform: translateX(-50%);
+  background: linear-gradient(90deg, transparent, #8f1e19 16% 84%, transparent);
+  box-shadow: 0 0 10px rgba(226, 33, 24, 0.52);
 }
 
 .perk-pick-cards {
   display: grid;
   grid-template-columns: repeat(3, 1fr);
-  gap: 16px;
-  max-width: 720px;
+  gap: clamp(18px, 3.2vw, 44px);
+  max-width: 1200px;
   width: 100%;
 }
 
 .perk-pick-cards--debug {
-  grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-  max-width: 960px;
+  display: flex;
+  grid-template-columns: none;
+  justify-content: flex-start;
+  max-width: 1200px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding: 2px 2px 14px;
+  scroll-snap-type: x proximity;
+  scrollbar-color: rgba(178, 42, 35, 0.82) rgba(60, 43, 32, 0.42);
+  scrollbar-width: thin;
+}
+
+.perk-pick-cards--debug::-webkit-scrollbar {
+  height: 9px;
+}
+
+.perk-pick-cards--debug::-webkit-scrollbar-track {
+  border: 1px solid rgba(128, 98, 72, 0.18);
+  border-radius: 999px;
+  background: rgba(8, 14, 18, 0.48);
+}
+
+.perk-pick-cards--debug::-webkit-scrollbar-thumb {
+  border: 2px solid rgba(8, 14, 18, 0.78);
+  border-radius: 999px;
+  background: linear-gradient(90deg, #7c1d18, #d72820, #7c1d18);
+}
+
+.perk-pick-cards--debug::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(90deg, #9e241d, #f0473c, #9e241d);
 }
 
 .perk-card {
+  position: relative;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 8px;
-  padding: 18px 16px;
-  background: rgba(10, 30, 50, 0.9);
-  border: 1.5px solid #8866cc;
-  border-radius: 10px;
+  min-height: clamp(288px, 38vh, 430px);
+  gap: clamp(10px, 1.6vh, 18px);
+  overflow: hidden;
+  padding: clamp(28px, 3.2vw, 42px) clamp(18px, 2.7vw, 36px) clamp(24px, 3vw, 34px);
+  border: 1px solid rgba(154, 125, 96, 0.42);
+  border-radius: 2px;
+  background:
+    linear-gradient(180deg, rgba(12, 20, 25, 0.9), rgba(7, 12, 15, 0.92)),
+    rgba(12, 17, 20, 0.92);
+  clip-path: polygon(18px 0, calc(100% - 18px) 0, 100% 18px, 100% calc(100% - 18px), calc(100% - 18px) 100%, 18px 100%, 0 calc(100% - 18px), 0 18px);
   cursor: pointer;
-  color: #d8dce8;
-  font-family: var(--font-ui);
+  color: #c9b49a;
+  font-family: var(--font-menu);
   text-align: center;
+  box-shadow:
+    inset 0 0 0 1px rgba(255, 219, 172, 0.04),
+    inset 0 -55px 80px rgba(0, 0, 0, 0.26);
   transition:
     border-color 0.15s ease,
     transform 0.15s ease,
     box-shadow 0.15s ease;
 }
 
+.perk-card::before {
+  content: '';
+  position: absolute;
+  inset: 7px;
+  border: 1px solid rgba(154, 125, 96, 0.16);
+  clip-path: inherit;
+  pointer-events: none;
+}
+
+.perk-card::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background:
+    radial-gradient(circle at 18% 12%, rgba(214, 177, 130, 0.08), transparent 25%),
+    repeating-linear-gradient(112deg, transparent 0 7px, rgba(255, 255, 255, 0.018) 7px 8px);
+  opacity: 0.6;
+  pointer-events: none;
+}
+
 .perk-card:hover,
 .perk-card:focus-visible {
-  border-color: #c49bff;
+  border-color: rgba(214, 177, 130, 0.76);
   transform: translateY(-2px);
-  box-shadow: 0 0 20px rgba(140, 100, 255, 0.35);
+  box-shadow:
+    0 0 18px rgba(166, 118, 72, 0.2),
+    inset 0 -55px 80px rgba(0, 0, 0, 0.26);
   outline: none;
 }
 
+.perk-card--selected:hover,
+.perk-card--selected:focus-visible {
+  border-color: #e12e25;
+  box-shadow:
+    0 0 0 1px rgba(193, 32, 27, 0.64),
+    0 0 28px rgba(223, 36, 29, 0.58),
+    inset 0 0 18px rgba(207, 31, 27, 0.22),
+    inset 0 -55px 80px rgba(0, 0, 0, 0.26);
+}
+
 .perk-card--selected {
-  border-color: var(--color-menu-accent);
+  border-color: #e12e25;
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 2px rgba(255, 221, 68, 0.22),
-    0 0 24px rgba(255, 221, 68, 0.42);
+    0 0 0 1px rgba(193, 32, 27, 0.64),
+    0 0 28px rgba(223, 36, 29, 0.58),
+    inset 0 0 18px rgba(207, 31, 27, 0.22),
+    inset 0 -55px 80px rgba(0, 0, 0, 0.26);
 }
 
 .perk-card--selected .perk-card-title,
 .perk-card--selected .perk-card-hotkey {
-  color: var(--color-menu-accent);
+  color: #e54a3f;
 }
 
 .perk-card--choosing {
-  border-color: var(--color-menu-accent);
+  border-color: #ff473d;
   transform: translateY(-2px);
   box-shadow:
-    0 0 0 2px rgba(255, 221, 68, 0.28),
-    0 0 28px rgba(255, 221, 68, 0.5);
+    0 0 0 1px rgba(255, 71, 61, 0.76),
+    0 0 34px rgba(255, 53, 42, 0.7),
+    inset 0 0 22px rgba(207, 31, 27, 0.28);
 }
 
 .perk-card--maxed {
@@ -257,70 +382,180 @@
   cursor: default;
 }
 
+.perk-pick-cards--debug .perk-card {
+  flex: 0 0 clamp(280px, 26vw, 360px);
+  width: clamp(280px, 26vw, 360px);
+  scroll-snap-align: start;
+}
+
 .perk-card-title {
   margin: 0;
-  font-size: 1rem;
-  font-weight: bold;
-  color: #f0e8ff;
-  letter-spacing: 0.03em;
+  min-height: 2.1em;
+  font-size: clamp(20px, 2.15vw, 29px);
+  font-weight: 700;
+  line-height: 1.05;
+  color: #bfa78d;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
 }
 
 .perk-card-level-row {
   display: flex;
-  gap: 4px;
+  gap: 9px;
   justify-content: center;
-  min-height: 1.1em;
+  min-height: 16px;
 }
 
 .perk-level-dot {
-  font-size: 0.8rem;
-  color: rgba(180, 200, 220, 0.35);
+  font-size: 0.74rem;
+  color: rgba(155, 143, 129, 0.36);
   line-height: 1;
 }
 
 .perk-level-dot--filled {
-  color: #c49bff;
+  color: #ad8cce;
+}
+
+.perk-card--selected .perk-level-dot--filled {
+  color: #d72820;
+  text-shadow: 0 0 10px rgba(215, 40, 32, 0.7);
 }
 
 .perk-card-icon {
-  font-size: 3rem;
-  line-height: 1;
   display: block;
-  margin: 4px 0;
+  margin: clamp(10px, 2vh, 20px) 0 clamp(8px, 1.4vh, 14px);
+  font-size: clamp(48px, 7vw, 78px);
+  line-height: 1;
+  filter: grayscale(1) sepia(0.38) brightness(0.82);
+  opacity: 0.82;
 }
 
 .perk-card-desc {
+  max-width: 300px;
   margin: 0;
-  font-size: 0.82rem;
-  font-weight: normal;
-  line-height: 1.35;
-  color: #a8b8c8;
+  font-family: var(--font-menu);
+  font-size: clamp(16px, 1.35vw, 22px);
+  font-weight: 300;
+  line-height: 1.38;
+  color: #b79f87;
 }
 
 .perk-card-stack {
-  font-size: 12px;
-  font-weight: bold;
-  color: #c49bff;
+  margin-top: auto;
+  font-size: clamp(14px, 1.2vw, 18px);
+  font-weight: 700;
+  color: #ad8cce;
   text-transform: uppercase;
-  letter-spacing: 0.5px;
+  letter-spacing: 0.18em;
 }
 
 .perk-card-hotkey {
-  font-size: 12px;
-  color: #6688aa;
   margin-top: auto;
+  font-size: clamp(16px, 1.5vw, 22px);
+  color: rgba(166, 133, 105, 0.6);
+  line-height: 1;
+}
+
+.perk-card-stack + .perk-card-hotkey {
+  margin-top: 4px;
+}
+
+.perk-pick-reroll {
+  display: inline-flex;
+  align-items: center;
+  align-self: start;
+  gap: 18px;
+  border: 0;
+  background: transparent;
+  color: #9d8370;
+  font-family: var(--font-menu);
+  font-size: clamp(16px, 1.45vw, 24px);
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  cursor: pointer;
+  transition:
+    color var(--duration-ui) ease,
+    transform var(--duration-ui) ease;
+}
+
+.perk-pick-reroll:hover,
+.perk-pick-reroll:focus-visible {
+  color: #d2b48f;
+  transform: translateY(-1px);
+  outline: none;
+}
+
+.perk-pick-reroll-key {
+  display: grid;
+  place-items: center;
+  width: 46px;
+  height: 46px;
+  border: 1px solid rgba(181, 145, 111, 0.62);
+  border-radius: 4px;
+  background: rgba(12, 16, 18, 0.72);
+  color: #d7bea0;
+  box-shadow:
+    inset 0 0 0 2px rgba(0, 0, 0, 0.34),
+    0 0 12px rgba(0, 0, 0, 0.35);
 }
 
 @media (max-width: 600px) {
+  .screen-perk-pick {
+    grid-template-rows: auto auto auto;
+    justify-content: stretch;
+    padding: 20px 14px;
+  }
+
   .perk-pick-cards {
-    grid-template-columns: repeat(3, 1fr);
-    gap: 10px;
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
+
   .perk-card {
-    padding: 12px 8px;
+    min-height: 230px;
+    padding: 22px 18px;
   }
+
   .perk-card-icon {
-    font-size: 2rem;
+    margin: 4px 0;
+    font-size: 46px;
+  }
+
+  .perk-card-title {
+    min-height: 0;
+  }
+
+  .perk-card-desc {
+    font-size: 16px;
+  }
+}
+
+@media (max-height: 720px) and (min-width: 601px) {
+  .screen-perk-pick {
+    grid-template-rows: minmax(92px, 0.55fr) auto minmax(54px, 0.28fr);
+    gap: 16px;
+    padding-top: 22px;
+    padding-bottom: 18px;
+  }
+
+  .perk-card {
+    min-height: 282px;
+    padding-top: 24px;
+    padding-bottom: 20px;
+    gap: 8px;
+  }
+
+  .perk-card-icon {
+    margin: 4px 0;
+  }
+
+  .perk-card-desc {
+    font-size: 17px;
+  }
+
+  .perk-pick-reroll-key {
+    width: 38px;
+    height: 38px;
   }
 }
 

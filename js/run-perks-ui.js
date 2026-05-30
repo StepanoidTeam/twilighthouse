@@ -21,6 +21,7 @@ const {
   $perkPickTitle,
   $perkPickLevel,
   $perkPickCards,
+  $perkPickReroll,
 } = globalThis;
 
 const PERK_PICK_CONFIRM_DELAY_MS = 140;
@@ -99,6 +100,12 @@ function renderPerkCards() {
 
   // Toggle grid class for debug mode (more than 3 columns)
   $perkPickCards.classList.toggle('perk-pick-cards--debug', !!S.debugMode);
+  if ($perkPickReroll) {
+    $perkPickReroll.hidden = !!S.debugMode;
+    $perkPickReroll.disabled = !!S.debugMode;
+    const label = $perkPickReroll.querySelector('.perk-pick-reroll-label');
+    if (label) label.textContent = t('perk.pick.reroll');
+  }
 
   getPerkPickerVisibleIds().forEach((perkId, index) => {
     const stack = getPerkStack(perkId);
@@ -144,7 +151,7 @@ function renderPerkCards() {
     else if (index === 9) hotkey.textContent = '0';
     else hotkey.hidden = true;
 
-    card.append(title, levelRow, icon, desc, hotkey);
+    card.append(title, levelRow, icon, desc);
 
     // Stack / maxed label
     if (maxed) {
@@ -161,6 +168,7 @@ function renderPerkCards() {
       stackEl.textContent = t('perk.stack', { n: stack + 1 });
       card.appendChild(stackEl);
     }
+    card.appendChild(hotkey);
 
     if (!maxed) {
       card.addEventListener('pointerdown', () => {
@@ -172,6 +180,14 @@ function renderPerkCards() {
     $perkPickCards.appendChild(card);
   });
   syncSelectedPerkCard();
+}
+
+function rerollPerkOffer() {
+  if (perkPickConfirming || !S.perkPickerOpen || S.debugMode) return;
+  rollPerkPickerOffer();
+  selectedPerkIndex = getFirstSelectableIndex();
+  renderPerkCards();
+  playSound('audio/menu-select.mp3', 0.35);
 }
 
 function selectPerk(perkId) {
@@ -216,6 +232,11 @@ function onPerkKeyDown(e) {
     e.preventDefault();
     S.keys[code] = false;
     movePerkSelection(code === 'ArrowLeft' || code === 'KeyA' ? -1 : 1);
+    return;
+  }
+  if (code === 'KeyR') {
+    e.preventDefault();
+    rerollPerkOffer();
     return;
   }
 
@@ -263,6 +284,9 @@ export function openPerkPicker() {
   if (!perkKeyHandler) {
     perkKeyHandler = onPerkKeyDown;
     window.addEventListener('keydown', perkKeyHandler);
+  }
+  if ($perkPickReroll) {
+    $perkPickReroll.onclick = rerollPerkOffer;
   }
   updateHUD();
 }

@@ -95,7 +95,8 @@ let displayNameSaveState = {
 let displayNameSaveResetTimer = 0;
 
 // ===== Assets =====
-const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
+const MENU_BG_FILE = 'sprites/bg-loader-screen.png';
+const MENU_BG_IMAGE = `url("${MENU_BG_FILE}")`;
 const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.png';
 const NARROW_MENU_BREAKPOINT = 720;
 const MENU_TITLE_STYLE_KEYS = {
@@ -146,7 +147,7 @@ function playMenuClick() {
 // ===== DOM Helpers =====
 function initMenu() {
   if ($menuBg) {
-    $menuBg.style.backgroundImage = `url("${MENU_BG_FILE}")`;
+    $menuBg.style.backgroundImage = MENU_BG_IMAGE;
   }
   if ($menuBgMan) {
     $menuBgMan.src = MENU_BG_MAN_FILE;

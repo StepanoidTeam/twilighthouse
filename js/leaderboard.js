@@ -234,6 +234,23 @@ function createLeaderboardHeader() {
   return $header;
 }
 
+function renderLeaderboardTitle($title) {
+  const icon = document.createElement('span');
+  icon.className = 'menu-screen-title-icon';
+  icon.textContent = '🏆';
+  icon.setAttribute('aria-hidden', 'true');
+
+  const text = document.createElement('span');
+  text.className = 'menu-screen-title-text';
+  text.textContent = t('leaderboard.title');
+
+  const rule = document.createElement('span');
+  rule.className = 'menu-screen-title-rule';
+  rule.setAttribute('aria-hidden', 'true');
+
+  $title.replaceChildren(icon, text, rule);
+}
+
 function createLeaderboardRow(entry, myUid) {
   const isMe = myUid && entry.uid === myUid;
   const medal =
@@ -299,7 +316,7 @@ export async function renderLeaderboardScreen({ container, isActive }) {
     return;
   }
 
-  $title.textContent = t('leaderboard.title');
+  renderLeaderboardTitle($title);
   $subtitle.textContent = t('leaderboard.subtitle');
 
   $loading.textContent = t('leaderboard.loading');

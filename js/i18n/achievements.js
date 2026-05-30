@@ -1,6 +1,6 @@
 export const ACHIEVEMENTS_I18N = {
   en: {
-    'achievements.title': '🏅 Achievements',
+    'achievements.title': 'Achievements',
     'achievements.subtitle': 'Long-term milestones for your runs',
     'achievements.progress': '{value}/{target}',
     'achievements.complete': 'Completed',
@@ -48,7 +48,7 @@ export const ACHIEVEMENTS_I18N = {
       'Keep 3 targets in your beam at the same time for 1 second.',
   },
   zh: {
-    'achievements.title': '🏅 成就',
+    'achievements.title': '成就',
     'achievements.subtitle': '长期目标，贯穿每一局',
     'achievements.progress': '{value}/{target}',
     'achievements.complete': '已完成',
@@ -91,7 +91,7 @@ export const ACHIEVEMENTS_I18N = {
     'achievements.items.see_all.desc': '让 3 个目标同时在光束中停留 1 秒。',
   },
   ru: {
-    'achievements.title': '🏅 Ачивки',
+    'achievements.title': 'Ачивки',
     'achievements.subtitle': 'Долгие цели на все забеги',
     'achievements.progress': '{value}/{target}',
     'achievements.complete': 'Выполнено',

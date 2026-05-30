@@ -32,7 +32,7 @@ function renderLevelIndicator($row, level, maxLevel) {
 
 function formatPriceLine(price) {
   return Object.entries(price)
-    .map(([emoji, n]) => `${emoji}×${n}`)
+    .map(([emoji, n]) => `${emoji} x ${n}`)
     .join('  ');
 }
 
@@ -60,6 +60,7 @@ function renderWallet($row, meta) {
  */
 function renderGrid($grid, meta, onBought) {
   $grid.replaceChildren();
+  let featuredSet = false;
   for (const item of SHOP_ITEMS) {
     const level = getShopItemLevel(meta, item);
     const maxed = isShopItemMaxed(meta, item);
@@ -111,6 +112,10 @@ function renderGrid($grid, meta, onBought) {
     } else {
       btn.disabled = false;
       btn.textContent = level > 0 ? t('shop.upgrade') : t('shop.buy');
+      if (!featuredSet) {
+        card.classList.add('shop-item-card--featured');
+        featuredSet = true;
+      }
     }
 
     $grid.appendChild(card);
@@ -140,6 +145,9 @@ export function renderShopScreen({ container, isActive }) {
   const $title = container.querySelector('.menu-screen-title');
   const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
+  const $stockTitle = container.querySelector('.shop-stock-title');
+  const $infoTitle = container.querySelector('.shop-info-title');
+  const $infoText = container.querySelector('.shop-info-text');
   const $resetBtn = container.querySelector('.shop-reset-btn');
   const $resetConfirm = container.querySelector('.shop-reset-confirm');
   const $resetConfirmText = container.querySelector('.shop-reset-confirm-text');
@@ -151,6 +159,9 @@ export function renderShopScreen({ container, isActive }) {
 
   $title.textContent = t('shop.title');
   if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
+  if ($stockTitle) $stockTitle.textContent = t('shop.stockTitle');
+  if ($infoTitle) $infoTitle.textContent = t('shop.infoTitle');
+  if ($infoText) $infoText.textContent = t('shop.infoText');
 
   function paint() {
     if (typeof isActive === 'function' && !isActive()) return;

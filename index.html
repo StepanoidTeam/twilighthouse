@@ -98,8 +98,11 @@
 
       <!-- ===== Level goal banner (mid-screen, transient) ===== -->
       <div id="$levelBanner" class="level-banner" hidden>
-        <p class="level-banner-title" id="$levelBannerTitle"></p>
-        <p class="level-banner-subtitle" id="$levelBannerSubtitle"></p>
+        <p class="level-banner-title mask-dirt" id="$levelBannerTitle"></p>
+        <p
+          class="level-banner-subtitle mask-dirt"
+          id="$levelBannerSubtitle"
+        ></p>
       </div>
 
       <!-- ===== Debug controls ===== -->
@@ -210,7 +213,7 @@
           <span class="result-btn-label" id="$resultRestartLabel"></span>
         </button>
         <button type="button" id="$btnResultMenu" class="result-btn blur-bg">
-          <span class="result-btn-key hidden-mobile">Esc</span>
+          <span class="result-btn-key hidden-mobile">esc</span>
           <span class="result-btn-label" id="$resultMenuLabel"></span>
         </button>
       </div>
@@ -233,10 +236,14 @@
     <!-- ===== Perk pick (run XP milestone) ===== -->
     <div id="$screenPerkPick" class="screen-perk-pick blur-bg" hidden>
       <div class="perk-pick-copy">
-        <h2 class="perk-pick-title" id="$perkPickTitle"></h2>
+        <h2 class="perk-pick-title mask-dirt" id="$perkPickTitle"></h2>
         <p class="perk-pick-level" id="$perkPickLevel"></p>
       </div>
       <div class="perk-pick-cards" id="$perkPickCards"></div>
+      <button type="button" class="perk-pick-reroll" id="$perkPickReroll">
+        <span class="perk-pick-reroll-key">R</span>
+        <span class="perk-pick-reroll-label"></span>
+      </button>
     </div>
 
     <!-- ===== Exit confirm screen ===== -->
@@ -549,7 +556,7 @@
         <div class="menu-card menu-howtoplay blur-bg">
           <div class="howtoplay-step-header">
             <span class="howtoplay-step-counter"></span>
-            <h3 class="howtoplay-step-title"></h3>
+            <h3 class="howtoplay-step-title mask-dirt"></h3>
             <p class="howtoplay-step-text"></p>
           </div>
 
@@ -606,7 +613,7 @@
             <div class="menu-setting-copy">
               <span
                 id="$menuSettingsLangLabel"
-                class="menu-setting-label"
+                class="menu-setting-label mask-dirt"
                 data-i18n="settings.language"
               ></span>
               <span
@@ -660,7 +667,7 @@
             <div class="menu-setting-copy">
               <span
                 id="$menuSettingsMusicLabel"
-                class="menu-setting-label"
+                class="menu-setting-label mask-dirt"
                 data-i18n="settings.music"
               ></span>
               <span
@@ -688,7 +695,7 @@
             <div class="menu-setting-copy">
               <span
                 id="$menuSettingsSfxLabel"
-                class="menu-setting-label"
+                class="menu-setting-label mask-dirt"
                 data-i18n="settings.sfx"
               ></span>
               <span
@@ -716,7 +723,7 @@
             <div class="menu-setting-copy">
               <span
                 id="$menuSettingsNameLabel"
-                class="menu-setting-label"
+                class="menu-setting-label mask-dirt"
                 data-i18n="settings.displayName"
               ></span>
               <span
@@ -840,6 +847,9 @@
         <div class="menu-card blur-bg shop-card-wrap">
           <p class="shop-wallet-label menu-state-label"></p>
           <div class="shop-wallet-row"></div>
+          <div class="shop-stock-head">
+            <p class="shop-stock-title"></p>
+          </div>
           <button type="button" class="shop-reset-btn blur-bg"></button>
           <div class="shop-reset-confirm" hidden>
             <div class="shop-reset-confirm-backdrop"></div>
@@ -862,6 +872,13 @@
             </div>
           </div>
           <div class="shop-grid"></div>
+          <aside class="shop-info-box">
+            <span class="shop-info-icon">i</span>
+            <div class="shop-info-copy">
+              <h3 class="shop-info-title"></h3>
+              <p class="shop-info-text"></p>
+            </div>
+          </aside>
         </div>
         <p class="menu-hint hidden-mobile">
           <span class="hotkey">esc</span>

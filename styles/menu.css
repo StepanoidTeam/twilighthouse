@@ -42,11 +42,10 @@
 }
 
 .menu-overlay-bg {
+  background-color: #03070e;
   background-position: center;
   background-repeat: no-repeat;
   background-size: cover;
-
-  background-position-x: right;
 }
 .menu-authors-bg {
   background-position: right center;
@@ -631,12 +630,16 @@
   font-size: 18px;
   font-weight: 500;
   letter-spacing: 0.06em;
-  text-transform: uppercase;
+
   cursor: pointer;
   transition:
     transform var(--duration-menu) ease,
     background var(--duration-menu) ease,
     opacity var(--duration-menu) ease;
+
+  .back-btn-label {
+    text-transform: uppercase;
+  }
 }
 
 .howtoplay-nav-btn .hotkey {
