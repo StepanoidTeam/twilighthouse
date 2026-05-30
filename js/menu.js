@@ -59,18 +59,15 @@ const {
   $menuSettingsMusicLabel,
   $menuSettingsMusicInput,
   $menuSettingsMusicValue,
-  $menuSettingsMusicMute,
   $menuSettingsSfxLabel,
   $menuSettingsSfxInput,
   $menuSettingsSfxValue,
-  $menuSettingsSfxMute,
   $menuSettingsNameLabel,
   $menuSettingsNameNote,
   $menuDisplayNameForm,
   $menuDisplayNameInput,
   $menuDisplayNameHint,
   $menuDisplayNameSave,
-  $menuDisplayNameStatus,
 } = globalThis;
 
 // ===== Menu State =====
@@ -87,6 +84,12 @@ let bgManMotion = null;
 let bgManMotionKeyframes = null;
 let openedFromGame = false; // true when settings opened mid-game via exit-confirm popup
 let menuLayoutSyncFrame = 0;
+let displayNameSaveState = {
+  state: null,
+  labelKey: 'settings.displayNameSave',
+  disabled: false,
+};
+let displayNameSaveResetTimer = 0;
 
 // ===== Assets =====
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
@@ -304,6 +307,12 @@ function showBackBtn() {
 
 function hideBackBtn() {
   backBtnEl.classList.remove('is-visible');
+}
+
+function clearDisplayNameSaveResetTimer() {
+  if (!displayNameSaveResetTimer) return;
+  clearTimeout(displayNameSaveResetTimer);
+  displayNameSaveResetTimer = 0;
 }
 
 // ===== Lifecycle =====
@@ -718,13 +727,11 @@ function showSettings() {
   if (
     !$menuSettingsMusicLabel ||
     !$menuSettingsMusicInput ||
-    !$menuSettingsMusicValue ||
-    !$menuSettingsMusicMute
+    !$menuSettingsMusicValue
   )
     return;
 
   const initialMusic = S.musicVolume != null ? S.musicVolume : 0.5;
-  let lastMusicVolume = initialMusic > 0 ? initialMusic : 0.5;
 
   function syncSettingsRangeFill(input) {
     const min = Number(input.min || 0);
@@ -734,18 +741,10 @@ function showSettings() {
     input.style.setProperty('--menu-range-value', `${percent}%`);
   }
 
-  function renderMusicMuteLabel(value) {
-    $menuSettingsMusicMute.textContent = t(
-      value <= 0 ? 'settings.unmute' : 'settings.mute',
-    );
-  }
-
   function applyMusicVolume(val) {
-    if (val > 0) lastMusicVolume = val;
     $menuSettingsMusicInput.value = String(Math.round(val * 100));
     syncSettingsRangeFill($menuSettingsMusicInput);
     $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
-    renderMusicMuteLabel(val);
     S.musicVolume = val;
     if (S.musicSound) {
       void syncLoopingAudio(S.musicSound, MUSIC_VOLUME * val);
@@ -758,44 +757,24 @@ function showSettings() {
   $menuSettingsMusicInput.value = String(Math.round(initialMusic * 100));
   syncSettingsRangeFill($menuSettingsMusicInput);
   $menuSettingsMusicValue.textContent = `${$menuSettingsMusicInput.value}%`;
-  renderMusicMuteLabel(initialMusic);
 
   $menuSettingsMusicInput.oninput = () => {
     applyMusicVolume(Number($menuSettingsMusicInput.value) / 100);
   };
 
-  $menuSettingsMusicMute.onclick = () => {
-    playMenuClick();
-    if (S.musicVolume <= 0) {
-      applyMusicVolume(lastMusicVolume > 0 ? lastMusicVolume : 0.5);
-    } else {
-      applyMusicVolume(0);
-    }
-  };
-
   if (
     !$menuSettingsSfxLabel ||
     !$menuSettingsSfxInput ||
-    !$menuSettingsSfxValue ||
-    !$menuSettingsSfxMute
+    !$menuSettingsSfxValue
   )
     return;
 
   const initialSfx = S.sfxVolume != null ? S.sfxVolume : 1;
-  let lastSfxVolume = initialSfx > 0 ? initialSfx : 1;
-
-  function renderSfxMuteLabel(value) {
-    $menuSettingsSfxMute.textContent = t(
-      value <= 0 ? 'settings.unmute' : 'settings.mute',
-    );
-  }
 
   function applySfxVolume(val) {
-    if (val > 0) lastSfxVolume = val;
     $menuSettingsSfxInput.value = String(Math.round(val * 100));
     syncSettingsRangeFill($menuSettingsSfxInput);
     $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
-    renderSfxMuteLabel(val);
     S.sfxVolume = val;
     if (S.wavesSound) {
       void syncLoopingAudio(S.wavesSound, WAVES_VOLUME * val);
@@ -808,19 +787,9 @@ function showSettings() {
   $menuSettingsSfxInput.value = String(Math.round(initialSfx * 100));
   syncSettingsRangeFill($menuSettingsSfxInput);
   $menuSettingsSfxValue.textContent = `${$menuSettingsSfxInput.value}%`;
-  renderSfxMuteLabel(initialSfx);
 
   $menuSettingsSfxInput.oninput = () => {
     applySfxVolume(Number($menuSettingsSfxInput.value) / 100);
-  };
-
-  $menuSettingsSfxMute.onclick = () => {
-    playMenuClick();
-    if (S.sfxVolume <= 0) {
-      applySfxVolume(lastSfxVolume > 0 ? lastSfxVolume : 1);
-    } else {
-      applySfxVolume(0);
-    }
   };
 
   // ===== Display Name =====
@@ -836,8 +805,7 @@ function showSettings() {
       !$menuDisplayNameForm ||
       !$menuDisplayNameInput ||
       !$menuDisplayNameHint ||
-      !$menuDisplayNameSave ||
-      !$menuDisplayNameStatus
+      !$menuDisplayNameSave
     ) {
       return;
     }
@@ -849,26 +817,67 @@ function showSettings() {
     $menuDisplayNameForm.hidden = false;
     $menuDisplayNameInput.value = currentName;
 
-    $menuDisplayNameStatus.textContent = '';
-    $menuDisplayNameStatus.className = 'menu-setting-name-status';
+    function setDisplayNameSaveState(
+      state,
+      labelKey = 'settings.displayNameSave',
+      disabled = false,
+    ) {
+      displayNameSaveState = {
+        state,
+        labelKey,
+        disabled,
+      };
+      $menuDisplayNameSave.classList.remove(
+        'is-saving',
+        'is-success',
+        'is-error',
+      );
+      if (state) $menuDisplayNameSave.classList.add(state);
+      $menuDisplayNameSave.textContent = t(labelKey);
+      $menuDisplayNameSave.disabled = disabled;
+    }
+
+    function resetDisplayNameSaveState() {
+      clearDisplayNameSaveResetTimer();
+      setDisplayNameSaveState(null, 'settings.displayNameSave', false);
+    }
+
+    setDisplayNameSaveState(
+      displayNameSaveState.state,
+      displayNameSaveState.labelKey,
+      displayNameSaveState.disabled,
+    );
+    $menuDisplayNameInput.oninput = () => {
+      if (!$menuDisplayNameSave.disabled) resetDisplayNameSaveState();
+    };
 
     $menuDisplayNameForm.onsubmit = async (e) => {
       e.preventDefault();
+      if ($menuDisplayNameSave.disabled) return;
+      clearDisplayNameSaveResetTimer();
 
       const name = $menuDisplayNameInput.value.trim();
       if (!name) {
-        $menuDisplayNameStatus.textContent = t('settings.displayNameEmpty');
-        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
+        setDisplayNameSaveState(
+          'is-error',
+          'settings.displayNameEmpty',
+          false,
+        );
         return;
       }
       if (name.length > 30) {
-        $menuDisplayNameStatus.textContent = t('settings.displayNameTooLong');
-        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
+        setDisplayNameSaveState(
+          'is-error',
+          'settings.displayNameTooLong',
+          false,
+        );
         return;
       }
-      $menuDisplayNameSave.disabled = true;
-      $menuDisplayNameStatus.textContent = t('settings.displayNameSaving');
-      $menuDisplayNameStatus.className = 'menu-setting-name-status';
+      setDisplayNameSaveState(
+        'is-saving',
+        'settings.displayNameSaving',
+        true,
+      );
       try {
         await updateDisplayName(name);
 
@@ -879,16 +888,27 @@ function showSettings() {
           console.info('Leaderboard displayName sync skipped or unchanged');
         }
 
-        $menuDisplayNameStatus.textContent = t('settings.displayNameSaved');
-        $menuDisplayNameStatus.className =
-          'menu-setting-name-status is-success';
+        setDisplayNameSaveState(
+          'is-success',
+          'settings.displayNameSaved',
+          false,
+        );
+        displayNameSaveResetTimer = setTimeout(() => {
+          if (
+            displayNameSaveState.state === 'is-success' &&
+            displayNameSaveState.labelKey === 'settings.displayNameSaved'
+          ) {
+            resetDisplayNameSaveState();
+          }
+        }, 2000);
         console.log(`👤 Display name saved: ${name}`);
       } catch (e) {
         console.warn('Display name update failed', e);
-        $menuDisplayNameStatus.textContent = t('settings.displayNameError');
-        $menuDisplayNameStatus.className = 'menu-setting-name-status is-error';
-      } finally {
-        $menuDisplayNameSave.disabled = false;
+        setDisplayNameSaveState(
+          'is-error',
+          'settings.displayNameError',
+          false,
+        );
       }
     };
   }

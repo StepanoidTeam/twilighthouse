@@ -197,19 +197,11 @@
         <div class="screen-result-stats" id="$resultStats" hidden></div>
       </div>
       <div class="screen-result-actions">
-        <button
-          type="button"
-          id="$btnResultRestart"
-          class="menu-btn result-btn blur-bg"
-        >
+        <button type="button" id="$btnResultRestart" class="result-btn blur-bg">
           <span class="result-btn-key hidden-mobile">E</span>
           <span class="result-btn-label" id="$resultRestartLabel"></span>
         </button>
-        <button
-          type="button"
-          id="$btnResultMenu"
-          class="menu-btn result-btn blur-bg"
-        >
+        <button type="button" id="$btnResultMenu" class="result-btn blur-bg">
           <span class="result-btn-key hidden-mobile">Esc</span>
           <span class="result-btn-label" id="$resultMenuLabel"></span>
         </button>
@@ -246,7 +238,7 @@
         <button
           type="button"
           id="$btnExitConfirm"
-          class="menu-btn mask-btn result-btn pause-menu-btn"
+          class="mask-btn result-btn pause-"
         >
           <span class="result-btn-key hidden-mobile">E</span>
           <span class="result-btn-label" id="$exitConfirmLabel"></span>
@@ -254,14 +246,14 @@
         <button
           type="button"
           id="$btnExitSettings"
-          class="menu-btn mask-btn result-btn pause-menu-btn"
+          class="mask-btn result-btn pause-"
         >
           <span class="result-btn-label" id="$exitSettingsLabel"></span>
         </button>
         <button
           type="button"
           id="$btnExitResume"
-          class="menu-btn mask-btn result-btn pause-menu-btn"
+          class="mask-btn result-btn pause-"
         >
           <span class="result-btn-key hidden-mobile">Esc</span>
           <span class="result-btn-label" id="$exitResumeLabel"></span>
@@ -310,7 +302,7 @@
           <button
             type="button"
             id="$menuBtnStart"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="start"
           >
             <img
@@ -323,7 +315,7 @@
           <button
             type="button"
             id="$menuBtnShop"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="shop"
           >
             <img
@@ -336,7 +328,7 @@
           <button
             type="button"
             id="$menuBtnLeaderboard"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="leaderboard"
           >
             <img
@@ -352,7 +344,7 @@
           <button
             type="button"
             id="$menuBtnAchievements"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="achievements"
           >
             <img
@@ -368,7 +360,7 @@
           <button
             type="button"
             id="$menuBtnSettings"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="settings"
           >
             <img
@@ -384,7 +376,7 @@
           <button
             type="button"
             id="$menuBtnAuthors"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="authors"
           >
             <img
@@ -397,7 +389,7 @@
           <button
             type="button"
             id="$menuBtnTutorial"
-            class="menu-btn mask-btn menu-main-btn blur-bg"
+            class="mask-btn menu-main-btn blur-bg"
             data-action="tutorial"
           >
             <img
@@ -414,12 +406,12 @@
           <!-- ===== Auth widget (top-right, main menu only) ===== -->
           <div id="$authWidget" class="auth-widget">
             <button
-              class="menu-btn auth-widget-btn auth-widget-btn--signin blur-bg"
+              class="auth-widget-btn auth-widget-btn--signin blur-bg"
             ></button>
             <div class="auth-widget-user blur-bg" style="display: none">
               <span class="auth-widget-name"></span>
               <button
-                class="menu-btn auth-widget-btn auth-widget-btn--signout blur-bg"
+                class="auth-widget-btn auth-widget-btn--signout blur-bg"
               ></button>
             </div>
           </div>
@@ -504,7 +496,7 @@
             <span class="shop-item-icon"></span>
             <p class="shop-item-desc"></p>
             <p class="shop-item-price"></p>
-            <button type="button" class="menu-btn shop-buy-btn"></button>
+            <button type="button" class="shop-buy-btn"></button>
           </article>
         </template>
 
@@ -576,7 +568,7 @@
           <div class="howtoplay-controls">
             <button
               type="button"
-              class="menu-btn mask-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
+              class="mask-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
             >
               <span class="hotkey hidden-mobile">←</span>
               <span class="hotkey hidden-mobile">A</span>
@@ -587,7 +579,7 @@
 
             <button
               type="button"
-              class="menu-btn mask-btn howtoplay-nav-btn howtoplay-nav-btn--next"
+              class="mask-btn howtoplay-nav-btn howtoplay-nav-btn--next"
             >
               <span class="howtoplay-nav-label"></span>
               <span class="hotkey hidden-mobile">D</span>
@@ -599,7 +591,7 @@
       <button
         id="$menuTutorialSkip"
         type="button"
-        class="menu-btn mask-btn howtoplay-nav-btn skip-btn"
+        class="mask-btn howtoplay-nav-btn skip-btn"
       >
         <span class="hotkey hidden-mobile">esc</span>
         <span class="hotkey hidden-mobile">Q</span>
@@ -612,19 +604,27 @@
         <div class="menu-card menu-settings-card blur-bg">
           <!-- Language row -->
           <div class="menu-setting-row menu-setting-row--language">
-            <span
-              id="$menuSettingsLangLabel"
-              class="menu-setting-label"
-              data-i18n="settings.language"
-            ></span>
+            <div class="menu-setting-copy">
+              <span
+                id="$menuSettingsLangLabel"
+                class="menu-setting-label"
+                data-i18n="settings.language"
+              ></span>
+              <span
+                class="menu-setting-desc"
+                data-i18n="settings.languageDesc"
+              ></span>
+            </div>
             <div class="menu-setting-language-actions">
               <button
                 id="$menuSettingsLangPrev"
                 type="button"
-                class="menu-btn mask-btn howtoplay-nav-btn menu-setting-arrow"
+                class="lang-btn"
                 aria-label="Previous language"
               >
-                ◀
+                <svg viewBox="0 0 24 24">
+                  <use href="./sprites/arrow_back.svg"></use>
+                </svg>
               </button>
               <span
                 id="$menuSettingsLangValue"
@@ -633,12 +633,14 @@
               <button
                 id="$menuSettingsLangNext"
                 type="button"
-                class="menu-btn mask-btn howtoplay-nav-btn menu-setting-arrow"
+                class="lang-btn"
                 aria-label="Next language"
               >
-                ▶
+                <svg viewBox="0 0 24 24">
+                  <use href="./sprites/arrow_forward.svg"></use>
+                </svg>
               </button>
-              <div class="menu-setting-contact">
+              <div class="menu-setting-contact" hidden>
                 <span
                   id="$menuSettingsContactLabel"
                   class="menu-setting-contact-label"
@@ -647,7 +649,7 @@
                 <button
                   id="$menuSettingsContactBtn"
                   type="button"
-                  class="menu-btn mask-btn howtoplay-nav-btn menu-setting-contact-btn"
+                  class="mask-btn howtoplay-nav-btn menu-setting-contact-btn"
                   data-i18n="settings.contactUs"
                 ></button>
               </div>
@@ -656,11 +658,17 @@
           <hr class="menu-setting-divider" />
           <!-- Music row -->
           <div class="menu-setting-row menu-setting-row--slider">
-            <span
-              id="$menuSettingsMusicLabel"
-              class="menu-setting-label"
-              data-i18n="settings.music"
-            ></span>
+            <div class="menu-setting-copy">
+              <span
+                id="$menuSettingsMusicLabel"
+                class="menu-setting-label"
+                data-i18n="settings.music"
+              ></span>
+              <span
+                class="menu-setting-desc"
+                data-i18n="settings.musicDesc"
+              ></span>
+            </div>
             <div class="menu-slider">
               <input
                 id="$menuSettingsMusicInput"
@@ -673,21 +681,22 @@
                 id="$menuSettingsMusicValue"
                 class="menu-slider-value"
               ></span>
-              <button
-                id="$menuSettingsMusicMute"
-                type="button"
-                class="menu-btn mask-btn howtoplay-nav-btn menu-setting-toggle menu-slider-toggle"
-              ></button>
             </div>
           </div>
           <hr class="menu-setting-divider" />
           <!-- SFX row -->
           <div class="menu-setting-row menu-setting-row--slider">
-            <span
-              id="$menuSettingsSfxLabel"
-              class="menu-setting-label"
-              data-i18n="settings.sfx"
-            ></span>
+            <div class="menu-setting-copy">
+              <span
+                id="$menuSettingsSfxLabel"
+                class="menu-setting-label"
+                data-i18n="settings.sfx"
+              ></span>
+              <span
+                class="menu-setting-desc"
+                data-i18n="settings.sfxDesc"
+              ></span>
+            </div>
             <div class="menu-slider">
               <input
                 id="$menuSettingsSfxInput"
@@ -697,11 +706,6 @@
                 step="1"
               />
               <span id="$menuSettingsSfxValue" class="menu-slider-value"></span>
-              <button
-                id="$menuSettingsSfxMute"
-                type="button"
-                class="menu-btn mask-btn howtoplay-nav-btn menu-setting-toggle menu-slider-toggle"
-              ></button>
             </div>
           </div>
           <hr class="menu-setting-divider" />
@@ -710,11 +714,17 @@
             id="$menuDisplayNameForm"
             class="menu-setting-row menu-setting-row--slider"
           >
-            <span
-              id="$menuSettingsNameLabel"
-              class="menu-setting-label"
-              data-i18n="settings.displayName"
-            ></span>
+            <div class="menu-setting-copy">
+              <span
+                id="$menuSettingsNameLabel"
+                class="menu-setting-label"
+                data-i18n="settings.displayName"
+              ></span>
+              <span
+                class="menu-setting-desc"
+                data-i18n="settings.displayNameDesc"
+              ></span>
+            </div>
             <span
               id="$menuSettingsNameNote"
               class="menu-setting-note"
@@ -735,13 +745,9 @@
                 <button
                   id="$menuDisplayNameSave"
                   type="submit"
-                  class="menu-btn mask-btn howtoplay-nav-btn menu-setting-name-save"
-                  data-i18n="settings.displayNameSave"
+                  class="mask-btn howtoplay-nav-btn menu-setting-name-save"
+                  aria-live="polite"
                 ></button>
-                <span
-                  id="$menuDisplayNameStatus"
-                  class="menu-setting-name-status"
-                ></span>
               </div>
             </div>
 
@@ -835,10 +841,7 @@
         <div class="menu-card blur-bg shop-card-wrap">
           <p class="shop-wallet-label menu-state-label"></p>
           <div class="shop-wallet-row"></div>
-          <button
-            type="button"
-            class="menu-btn shop-reset-btn blur-bg"
-          ></button>
+          <button type="button" class="shop-reset-btn blur-bg"></button>
           <div class="shop-reset-confirm" hidden>
             <div class="shop-reset-confirm-backdrop"></div>
             <div
@@ -850,11 +853,11 @@
               <div class="shop-reset-confirm-actions">
                 <button
                   type="button"
-                  class="menu-btn shop-reset-confirm-cancel blur-bg"
+                  class="shop-reset-confirm-cancel blur-bg"
                 ></button>
                 <button
                   type="button"
-                  class="menu-btn shop-reset-confirm-apply blur-bg"
+                  class="shop-reset-confirm-apply blur-bg"
                 ></button>
               </div>
             </div>
@@ -883,7 +886,7 @@
     <button
       type="button"
       id="$backBtn"
-      class="menu-btn mask-btn howtoplay-nav-btn back-btn"
+      class="mask-btn howtoplay-nav-btn back-btn"
     >
       <span class="back-btn-arrow">←</span>
       <span class="hotkey hidden-mobile">Q</span>
