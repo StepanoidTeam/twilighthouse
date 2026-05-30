@@ -28,7 +28,7 @@ import {
 } from './i18n.js';
 
 const {
-  $menuMain,
+  $menuRoot,
   $menuBg,
   $menuBgMan,
   $menuMain,
@@ -442,7 +442,7 @@ export async function buildMenu(app, startGameCb) {
   initAuthWidget();
   startBgManMotion();
   initBackBtn();
-  $menuMain.hidden = false;
+  $menuRoot.hidden = false;
   showMainMenu();
   currentScreen = 'main';
 
@@ -453,7 +453,7 @@ export async function buildMenu(app, startGameCb) {
 
   if (!i18nBound) {
     onLanguageChange(() => {
-      if (!$menuMain) return;
+      if (!$menuRoot) return;
 
       applyI18nToDOM();
       updateSelection();
@@ -473,7 +473,7 @@ export async function buildMenu(app, startGameCb) {
 }
 
 function handleMenuKey(e) {
-  if (!$menuMain || $menuMain.hidden) return;
+  if (!$menuRoot || $menuRoot.hidden) return;
 
   ensureMenuAmbient();
 
@@ -1144,7 +1144,7 @@ function hideDiscordLink() {
 }
 
 function hideMenu() {
-  if ($menuMain) $menuMain.hidden = true;
+  if ($menuRoot) $menuRoot.hidden = true;
   stopBgManMotion();
   hideOverlayScreens();
   hideBackBtn();
@@ -1154,8 +1154,8 @@ function hideMenu() {
 }
 
 export function showMenu() {
-  if (!$menuMain) return;
-  $menuMain.hidden = false;
+  if (!$menuRoot) return;
+  $menuRoot.hidden = false;
   startBgManMotion();
   selectedIndex = 0;
   showMainMenu();
@@ -1164,23 +1164,23 @@ export function showMenu() {
 }
 
 export function showSettingsFromGame() {
-  if (!$menuMain) return;
+  if (!$menuRoot) return;
   openedFromGame = true;
-  $menuMain.hidden = false;
+  $menuRoot.hidden = false;
   startBgManMotion();
   repositionMenu();
   showSettings();
 }
 
 export function isMenuVisible() {
-  return Boolean($menuMain && !$menuMain.hidden);
+  return Boolean($menuRoot && !$menuRoot.hidden);
 }
 
 export function repositionMenu() {
-  if (!$menuMain) return;
+  if (!$menuRoot) return;
 
-  $menuMain.style.setProperty('--menu-vw', `${S.gameW}px`);
-  $menuMain.style.setProperty('--menu-vh', `${S.gameH}px`);
+  $menuRoot.style.setProperty('--menu-vw', `${S.gameW}px`);
+  $menuRoot.style.setProperty('--menu-vh', `${S.gameH}px`);
   scheduleMenuLayoutSync();
 }
 
@@ -1196,7 +1196,7 @@ function scheduleMenuLayoutSync() {
 }
 
 function syncMainMenuLayout() {
-  if (!$menuMain || !$menuMain) return;
+  if (!$menuRoot || !$menuMain) return;
 
   const viewportWidth =
     S.gameW || window.innerWidth || document.documentElement.clientWidth;
@@ -1211,6 +1211,6 @@ function syncMainMenuLayout() {
         mainMenuWidth > 0 &&
         mainMenuWidth <= viewportWidth / 2));
 
-  $menuMain.classList.toggle('menu-overlay--subscreen', isSubScreen);
-  $menuMain.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
+  $menuRoot.classList.toggle('menu-overlay--subscreen', isSubScreen);
+  $menuRoot.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
 }

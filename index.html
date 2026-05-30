@@ -232,37 +232,41 @@
     </div>
 
     <!-- ===== Exit confirm screen ===== -->
-    <div id="$screenExitConfirm" class="screen-exit-confirm blur-bg" hidden>
-      <p class="exit-confirm-msg" id="$exitConfirmMsg"></p>
-      <div class="exit-confirm-actions">
-        <button
-          type="button"
-          id="$btnExitConfirm"
-          class="mask-btn result-btn pause-"
-        >
-          <span class="result-btn-key hidden-mobile">E</span>
-          <span class="result-btn-label" id="$exitConfirmLabel"></span>
-        </button>
-        <button
-          type="button"
-          id="$btnExitSettings"
-          class="mask-btn result-btn pause-"
-        >
-          <span class="result-btn-label" id="$exitSettingsLabel"></span>
-        </button>
-        <button
-          type="button"
-          id="$btnExitResume"
-          class="mask-btn result-btn pause-"
-        >
-          <span class="result-btn-key hidden-mobile">Esc</span>
-          <span class="result-btn-label" id="$exitResumeLabel"></span>
-        </button>
+    <div id="$screenExitConfirm" class="screen-exit-confirm" hidden>
+      <div class="exit-confirm-shell">
+        <h2 class="exit-confirm-msg" id="$exitConfirmMsg"></h2>
+        <div class="exit-confirm-actions">
+          <button
+            type="button"
+            id="$btnExitConfirm"
+            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+          >
+            <span class="hotkey hidden-mobile">E</span>
+            <span class="hotkey hidden-mobile">⏎</span>
+            <span class="result-btn-label" id="$exitConfirmLabel"></span>
+          </button>
+          <button
+            type="button"
+            id="$btnExitSettings"
+            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+          >
+            <span class="result-btn-label" id="$exitSettingsLabel"></span>
+          </button>
+          <button
+            type="button"
+            id="$btnExitResume"
+            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+          >
+            <span class="hotkey hidden-mobile">esc</span>
+            <span class="hotkey hidden-mobile">Q</span>
+            <span class="result-btn-label" id="$exitResumeLabel"></span>
+          </button>
+        </div>
       </div>
     </div>
 
-    <!-- ===== Menu overlay ===== -->
-    <div id="$menuMain" class="menu-overlay" hidden>
+    <!-- ===== Menu root ===== -->
+    <div id="$menuRoot" class="menu-overlay" hidden>
       <div id="$menuBg" class="menu-overlay-bg"></div>
       <img
         id="$menuBgMan"
