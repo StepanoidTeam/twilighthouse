@@ -98,6 +98,9 @@ let displayNameSaveResetTimer = 0;
 const MENU_BG_FILE = 'sprites/mainmenu-bg.png';
 const MENU_BG_MAN_FILE = 'sprites/mainmenu-man2.png';
 const NARROW_MENU_BREAKPOINT = 720;
+const MENU_TITLE_STYLE_KEYS = {
+  '--menu-title-font-size': 'menu.title.fontSize',
+};
 
 // ===== Main Menu Items =====
 const MAIN_MENU_ACTIONS = [
@@ -269,7 +272,7 @@ function renderMenuHint($hint, actions) {
     }
 
     const $action = document.createElement('span');
-    $action.className = 'menu-hint-action';
+    $action.classList.add('menu-hint-action', 'mask-dirt');
 
     action.keys.forEach((key) => {
       const $key = document.createElement('span');
@@ -986,6 +989,7 @@ function showSettings() {
     const isAnon = currentUser.isAnonymous === true;
     const currentName =
       (currentUser.displayName && currentUser.displayName.trim()) || '';
+    let displayNameEditInitialValue = currentName;
 
     $menuDisplayNameForm.hidden = false;
     $menuDisplayNameInput.value = currentName;
@@ -1015,11 +1019,26 @@ function showSettings() {
       setDisplayNameSaveState(null, 'settings.displayNameSave', false);
     }
 
+    function cancelDisplayNameEdit() {
+      $menuDisplayNameInput.value = displayNameEditInitialValue;
+      resetDisplayNameSaveState();
+      $menuDisplayNameInput.blur();
+    }
+
     setDisplayNameSaveState(
       displayNameSaveState.state,
       displayNameSaveState.labelKey,
       displayNameSaveState.disabled,
     );
+    $menuDisplayNameInput.onfocus = () => {
+      displayNameEditInitialValue = $menuDisplayNameInput.value;
+    };
+    $menuDisplayNameInput.onkeydown = (e) => {
+      if (e.code !== 'Escape') return;
+      e.preventDefault();
+      e.stopPropagation();
+      cancelDisplayNameEdit();
+    };
     $menuDisplayNameInput.oninput = () => {
       if (!$menuDisplayNameSave.disabled) resetDisplayNameSaveState();
     };
@@ -1058,6 +1077,8 @@ function showSettings() {
           'settings.displayNameSaved',
           false,
         );
+        displayNameEditInitialValue = name;
+        $menuDisplayNameInput.value = name;
         $menuDisplayNameInput.blur();
         displayNameSaveResetTimer = setTimeout(() => {
           if (
@@ -1213,4 +1234,13 @@ function syncMainMenuLayout() {
 
   $menuRoot.classList.toggle('menu-overlay--subscreen', isSubScreen);
   $menuRoot.classList.toggle('menu-overlay--show-keeper', canShowKeeper);
+  syncMenuTitleLocaleStyles();
+}
+
+function syncMenuTitleLocaleStyles() {
+  if (!$menuRoot) return;
+
+  for (const [property, key] of Object.entries(MENU_TITLE_STYLE_KEYS)) {
+    $menuRoot.style.setProperty(property, t(key));
+  }
 }

@@ -103,8 +103,7 @@ const {
   $volControls,
 } = globalThis;
 const BOOT_TEXTURE_ASSETS = [
-  'sprites/mainmenu.PNG',
-  'sprites/title-logo.png',
+  'sprites/logo-anchor.png',
   'sprites/icons/lighthouse.png',
   'sprites/icons/compass.png',
   'sprites/icons/wheel.png',

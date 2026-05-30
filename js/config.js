@@ -184,7 +184,6 @@ const SPRITE_FILES = {
   boat1: 'sprites/boat/1.png',
   boat2: 'sprites/boat/2.png',
   boat3: 'sprites/boat/3.png',
-  button: 'sprites/button.png',
   lighthouse: 'sprites/lighthouse3.png',
   rock1: 'sprites/icerock/rock1.png',
   rock2: 'sprites/icerock/rock2.png',

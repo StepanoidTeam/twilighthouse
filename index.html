@@ -23,11 +23,16 @@
       />
       <div class="boot-loader-panel flex-col">
         <div class="boot-loader-copy">
-          <h1 id="$bootLoaderTitle" class="boot-loader-title">TWILIGHTHOUSE</h1>
+          <h1 id="$bootLoaderTitle" class="boot-loader-title mask-dirt">
+            TWILIGHTHOUSE
+          </h1>
           <p id="$bootLoaderText" class="boot-loader-text">Loading…</p>
         </div>
         <div class="boot-loader-bar" aria-hidden="true">
-          <div id="$bootLoaderBarFill" class="boot-loader-bar-fill"></div>
+          <div
+            id="$bootLoaderBarFill"
+            class="boot-loader-bar-fill mask-dirt"
+          ></div>
           <p id="$bootLoaderPercent" class="boot-loader-percent">0%</p>
         </div>
         <p id="$bootLoaderAsset" class="boot-loader-asset">Texture - ...</p>
@@ -40,7 +45,10 @@
           />
           <span class="boot-loader-tip-divider" aria-hidden="true"></span>
           <div class="boot-loader-tip-content">
-            <span id="$bootLoaderTipLabel" class="boot-loader-tip-label"></span>
+            <span
+              id="$bootLoaderTipLabel"
+              class="boot-loader-tip-label mask-dirt"
+            ></span>
             <p
               id="$bootLoaderTip"
               class="boot-loader-tip"
@@ -279,27 +287,14 @@
       <div class="menu-overlay-panel">
         <div class="menu-title">
           <img
-            class="menu-title-logo"
-            src="sprites/title-logo.png"
-            alt="TWILIGHTHOUSE"
-            aria-hidden="false"
+            class="menu-title-anchor"
+            src="sprites/logo-anchor.png"
+            alt=""
+            aria-hidden="true"
           />
-
-          <svg class="menu-title-logo-svg-text" viewBox="0 0 420 252" hidden>
-            <defs>
-              <path id="arc" d="M 0 222 Q 210 200 420 222" />
-            </defs>
-            <text>
-              <textPath
-                href="#arc"
-                startOffset="20%"
-                dominant-baseline="middle"
-              >
-                Deliver at Any Cost
-                <!-- доставь любой ценой -->
-              </textPath>
-            </text>
-          </svg>
+          <h1 class="menu-title-text mask-dirt" data-i18n="boot.title">
+            the TWILIGHTHOUSE
+          </h1>
         </div>
 
         <div id="$menuMain" class="menu-main">
@@ -522,7 +517,7 @@
       </div>
 
       <p id="$menuHint" class="menu-hint menu-hint--main hidden-mobile">
-        <span class="menu-hint-action">
+        <span class="menu-hint-action mask-dirt">
           <span class="hotkey">↑</span>
           <span class="hotkey">↓</span>
           <span class="hotkey">W</span>
@@ -530,13 +525,13 @@
           <span class="hint-text" data-i18n="hint.navigate"></span>
         </span>
         <span class="menu-hint-separator">●</span>
-        <span class="menu-hint-action">
+        <span class="menu-hint-action mask-dirt">
           <span class="hotkey">⏎</span>
           <span class="hotkey">E</span>
           <span class="hint-text" data-i18n="hint.select"></span>
         </span>
         <span class="menu-hint-separator">●</span>
-        <span class="menu-hint-action">
+        <span class="menu-hint-action mask-dirt">
           <span class="hotkey">Q</span>
           <span class="hotkey">esc</span>
           <span class="hint-text" data-i18n="hint.back"></span>

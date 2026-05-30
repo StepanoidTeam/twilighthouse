@@ -146,7 +146,8 @@ Photopea — image editor
       'Enemies leave a glowing trace for a short time after leaving the beam.',
 
     // Boot loader
-    'boot.title': 'TWILIGHTHOUSE',
+    'boot.title': 'THE TWILIGHTHOUSE',
+    'menu.title.fontSize': '64px',
     'boot.loading': 'Preparing the lighthouse for the night watch…',
     'boot.progress': 'Loading assets {loaded}/{total}',
     'boot.ready': 'Ready',
@@ -480,7 +481,8 @@ Photopea — 图像编辑器
     'shop.items.phosphor_water.name': '磷光海水',
     'shop.items.phosphor_water.desc': '敌人离开光束后短暂留痕。',
 
-    'boot.title': 'TWILIGHTHOUSE',
+    'boot.title': '暮光塔',
+    'menu.title.fontSize': '132px',
     'boot.loading': '正在为夜间值守准备灯塔…',
     'boot.progress': '正在加载资源 {loaded}/{total}',
     'boot.ready': '就绪',
@@ -812,6 +814,7 @@ Photopea — image editor
       'Враги ненадолго оставляют светящийся след после выхода из луча.',
 
     'boot.title': 'Маяк',
+    'menu.title.fontSize': '132px',
     'boot.loading': 'Подготавливаем маяк к ночной смене…',
     'boot.progress': 'Загружаем ресурсы {loaded}/{total}',
     'boot.ready': 'Готово',
