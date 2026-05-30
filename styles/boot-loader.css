@@ -83,7 +83,7 @@
   font-family: var(--font-menu);
   font-size: 64px;
   font-weight: 800;
-  line-height: 0.9;
+  line-height: 1.2;
   letter-spacing: 0.02em;
   text-transform: uppercase;
   text-shadow:
@@ -117,8 +117,8 @@
   box-shadow:
     0 8px 24px rgba(0, 0, 0, 0.3),
     inset 0 0 0 1px rgba(255, 255, 255, 0.04);
-  mask-image: url(../sprites/progress-mask.png);
-  mask-size: 100% 100%;
+  mask-image: url(../sprites/mask-progress.png);
+  mask-size: auto 100%;
 
   align-items: center;
   justify-content: center;
