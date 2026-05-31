@@ -4,12 +4,14 @@
 // Скачиваем как blob и держим object URL — это работает даже когда сервер
 // отдаёт `Cache-Control: no-cache` (см. `http-server -c-1`).
 
-export const TUTORIAL_VIDEO_ASSETS = [
-  'tutorial-vids/smugglers.mp4',
-  'tutorial-vids/cops.mp4',
-  'tutorial-vids/kraken.mp4',
-  'tutorial-vids/mermaid.mp4',
+export const TUTORIAL_STEPS = [
+  { id: 'mermaids', video: 'tutorial-vids/mermaid.mp4' },
+  { id: 'smugglers', video: 'tutorial-vids/smugglers.mp4' },
+  { id: 'cops', video: 'tutorial-vids/cops.mp4' },
+  { id: 'kraken', video: 'tutorial-vids/kraken.mp4' },
 ];
+
+export const TUTORIAL_VIDEO_ASSETS = TUTORIAL_STEPS.map((step) => step.video);
 
 const objectUrlByPath = new Map();
 

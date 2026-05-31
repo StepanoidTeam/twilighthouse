@@ -208,28 +208,23 @@ Photopea — image editor
     'howtoplay.prev': 'Prev',
     'howtoplay.next': 'Next',
     'howtoplay.skip': 'Close',
-    'howtoplay.items': [
-      {
-        video: 'tutorial-vids/smugglers.mp4',
-        title: 'Smugglers',
-        text: 'Lit boats find the harbor safe. Help the smugglers.',
-      },
-      {
-        video: 'tutorial-vids/cops.mp4',
-        title: 'Cops',
-        text: "Don't light the cops. Sink them before they reach the lighthouse.",
-      },
-      {
-        video: 'tutorial-vids/mermaid.mp4',
-        title: 'Mermaids',
-        text: 'SCARE MERMAIDS AWAY!',
-      },
-      {
-        video: 'tutorial-vids/kraken.mp4',
-        title: 'Kraken',
-        text: 'Repel the kraken with your beam.',
-      },
-    ],
+    'howtoplay.lesson.title': 'Lesson {n}',
+    'howtoplay.mermaids.title': 'Mermaids',
+    'howtoplay.mermaids.text': 'SCARE MERMAIDS AWAY!',
+    'howtoplay.mermaids.levelSub':
+      'Scare off mermaids before they reach the lighthouse',
+    'howtoplay.smugglers.title': 'Smugglers',
+    'howtoplay.smugglers.text':
+      'Lit boats find the harbor safe. Help the smugglers.',
+    'howtoplay.smugglers.levelSub':
+      'Guide smuggler boats into the harbor safely',
+    'howtoplay.cops.title': 'Cops',
+    'howtoplay.cops.text':
+      "Don't light the cops. Sink them before they reach the lighthouse.",
+    'howtoplay.cops.levelSub':
+      'Sink the cops before they reach the lighthouse',
+    'howtoplay.kraken.title': 'Kraken',
+    'howtoplay.kraken.text': 'Repel the kraken with your beam.',
 
     // Game over / overlay
     'overlay.restart': 'Restart',
@@ -330,12 +325,6 @@ Photopea — image editor
     'goal.repelled_mermaids.one': 'Repel {n} mermaid',
     'goal.repelled_mermaids.other': 'Repel {n} mermaids',
 
-    'level.l1.title': 'Lesson 1',
-    'level.l1.sub': 'Guide smuggler boats into the harbor safely',
-    'level.l2.title': 'Lesson 2',
-    'level.l2.sub': 'Sink the cops before they reach the lighthouse',
-    'level.l3.title': 'Lesson 3',
-    'level.l3.sub': 'Scare off mermaids before they reach the lighthouse',
     'level.freeplay.title': 'Night Watch',
     'level.freeplay.sub': 'Hold out until dawn',
     // Auth modal
@@ -544,28 +533,18 @@ Photopea — 图像编辑器
     'howtoplay.prev': '上页',
     'howtoplay.next': '下页',
     'howtoplay.skip': '关闭',
-    'howtoplay.items': [
-      {
-        video: 'tutorial-vids/smugglers.mp4',
-        title: '走私船',
-        text: '照亮走私船，引它们安全进港。',
-      },
-      {
-        video: 'tutorial-vids/cops.mp4',
-        title: '警船',
-        text: '别照亮警船。它们到达灯塔前先击沉。',
-      },
-      {
-        video: 'tutorial-vids/mermaid.mp4',
-        title: '美人鱼',
-        text: '把美人鱼吓退！',
-      },
-      {
-        video: 'tutorial-vids/kraken.mp4',
-        title: '克拉肯',
-        text: '用光束击退克拉肯。',
-      },
-    ],
+    'howtoplay.lesson.title': '教学 {n}',
+    'howtoplay.mermaids.title': '美人鱼',
+    'howtoplay.mermaids.text': '把美人鱼吓退！',
+    'howtoplay.mermaids.levelSub': '美人鱼到达灯塔前吓退',
+    'howtoplay.smugglers.title': '走私船',
+    'howtoplay.smugglers.text': '照亮走私船，引它们安全进港。',
+    'howtoplay.smugglers.levelSub': '引走私船安全进港',
+    'howtoplay.cops.title': '警船',
+    'howtoplay.cops.text': '别照亮警船。它们到达灯塔前先击沉。',
+    'howtoplay.cops.levelSub': '警船到达灯塔前击沉',
+    'howtoplay.kraken.title': '克拉肯',
+    'howtoplay.kraken.text': '用光束击退克拉肯。',
 
     'overlay.restart': '重开',
     'overlay.toMenu': '菜单',
@@ -660,12 +639,6 @@ Photopea — 图像编辑器
     'goal.repelled_mermaids.one': '击退 {n} 位美人鱼',
     'goal.repelled_mermaids.other': '击退 {n} 位美人鱼',
 
-    'level.l1.title': '教学 1',
-    'level.l1.sub': '引走私船安全进港',
-    'level.l2.title': '教学 2',
-    'level.l2.sub': '警船到达灯塔前击沉',
-    'level.l3.title': '教学 3',
-    'level.l3.sub': '美人鱼到达灯塔前吓退',
     'level.freeplay.title': '守夜',
     'level.freeplay.sub': '坚持到黎明',
 
@@ -881,28 +854,21 @@ Photopea — image editor
     'howtoplay.prev': 'Назад',
     'howtoplay.next': 'Дальше',
     'howtoplay.skip': 'Закрыть',
-    'howtoplay.items': [
-      {
-        video: 'tutorial-vids/smugglers.mp4',
-        title: 'Контрабандисты',
-        text: 'Освещённые лодки доходят до бухты. Помоги контрабандистам.',
-      },
-      {
-        video: 'tutorial-vids/cops.mp4',
-        title: 'Копы',
-        text: 'Не свети на копов. Потопи их до маяка.',
-      },
-      {
-        video: 'tutorial-vids/mermaid.mp4',
-        title: 'Русалки',
-        text: 'ОТПУГИВАЙ РУСАЛОК!',
-      },
-      {
-        video: 'tutorial-vids/kraken.mp4',
-        title: 'Кракен',
-        text: 'Отгоняй кракена лучом маяка.',
-      },
-    ],
+    'howtoplay.lesson.title': 'Урок {n}',
+    'howtoplay.mermaids.title': 'Русалки',
+    'howtoplay.mermaids.text': 'ОТПУГИВАЙ РУСАЛОК!',
+    'howtoplay.mermaids.levelSub':
+      'Отпугни русалок, прежде чем они доберутся до маяка',
+    'howtoplay.smugglers.title': 'Контрабандисты',
+    'howtoplay.smugglers.text':
+      'Освещённые лодки доходят до бухты. Помоги контрабандистам.',
+    'howtoplay.smugglers.levelSub':
+      'Проводи лодки контрабандистов в гавань целыми',
+    'howtoplay.cops.title': 'Копы',
+    'howtoplay.cops.text': 'Не свети на копов. Потопи их до маяка.',
+    'howtoplay.cops.levelSub': 'Топи копов, пока они не добрались до маяка',
+    'howtoplay.kraken.title': 'Кракен',
+    'howtoplay.kraken.text': 'Отгоняй кракена лучом маяка.',
     'lang.english': 'English',
     'lang.chinese': '简体中文',
 
@@ -1008,12 +974,6 @@ Photopea — image editor
     'goal.repelled_mermaids.few': 'Отгони {n} русалки',
     'goal.repelled_mermaids.many': 'Отгони {n} русалок',
 
-    'level.l1.title': 'Урок 1',
-    'level.l1.sub': 'Проводи лодки контрабандистов в гавань целыми',
-    'level.l2.title': 'Урок 2',
-    'level.l2.sub': 'Топи копов, пока они не добрались до маяка',
-    'level.l3.title': 'Урок 3',
-    'level.l3.sub': 'Отпугни русалок, прежде чем они доберутся до маяка',
     'level.freeplay.title': 'Дозор',
     'level.freeplay.sub': 'Продержись до рассвета',
     'auth.signIn': 'Вход',

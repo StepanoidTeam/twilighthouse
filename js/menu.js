@@ -22,7 +22,7 @@ import { initAuthWidget } from './auth-ui.js';
 import { currentUser, isSignedInReal, updateDisplayName } from './auth.js';
 import { renderAuthorsScreen, destroyAuthorsScreen } from './authors-screen.js';
 import { showIntro } from './intro.js';
-import { getTutorialVideoSrc } from './tutorial-videos.js';
+import { getTutorialVideoSrc, TUTORIAL_STEPS } from './tutorial-videos.js';
 import {
   t,
   getLanguage,
@@ -669,8 +669,8 @@ function showTutorial() {
 
   if (!$menuTutorial || !$menuTutorialShell) return;
 
-  const items = t('howtoplay.items');
-  if (!Array.isArray(items) || items.length === 0) return;
+  const items = getHowToPlayItems();
+  if (items.length === 0) return;
 
   const startIndex = Math.min(savedIndex, items.length - 1);
 
@@ -760,6 +760,15 @@ function showTutorial() {
   };
 
   renderTutorialStep();
+}
+
+function getHowToPlayItems() {
+  return TUTORIAL_STEPS.map((step) => ({
+    id: step.id,
+    video: step.video,
+    title: t(`howtoplay.${step.id}.title`),
+    text: t(`howtoplay.${step.id}.text`),
+  }));
 }
 
 function goToStep(nextIndex) {

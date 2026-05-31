@@ -17,20 +17,20 @@ import {
 // подцели достигли своих порогов. После туториала игра переходит в freeplay:
 // уровней и целей больше нет, мобы спавнятся бесконечно по весам ниже.
 const SCRIPTED_LEVELS = [
-  // L1 (интерактивный туториал #1): проведи 3 лодки контрабандистов.
+  // L1 (интерактивный туториал #1): отпугни русалок.
   {
-    introKey: 'level.l1',
+    tutorialId: 'mermaids',
+    goal: { repelled_mermaids: 3 },
+  },
+  // L2 (интерактивный туториал #2): проведи 3 лодки контрабандистов.
+  {
+    tutorialId: 'smugglers',
     goal: { delivered_boats: 3 },
   },
-  // L2 (интерактивный туториал #2): потопи 1 лодку копов.
+  // L3 (интерактивный туториал #3): потопи 1 лодку копов.
   {
-    introKey: 'level.l2',
+    tutorialId: 'cops',
     goal: { sunk_cops: 1 },
-  },
-  // L3 (интерактивный туториал #3): отпугни русалок.
-  {
-    introKey: 'level.l3',
-    goal: { repelled_mermaids: 3 },
   },
 ];
 
@@ -194,8 +194,8 @@ function applyLevel(index, { showBanner } = { showBanner: true }) {
 
   if (showBanner) {
     showLevelBanner({
-      titleKey: `${def.introKey}.title`,
-      subtitleKey: `${def.introKey}.sub`,
+      titleKey: 'howtoplay.lesson.title',
+      subtitleKey: `howtoplay.${def.tutorialId}.levelSub`,
       params: { ...(def.introParams || {}), n: index + 1 },
     });
   }
@@ -212,8 +212,8 @@ function showLevelIntro(index = S.levelIndex) {
   const def = getLevelDef(index);
   if (!def || !S.gameSessionActive || S.levelIndex !== index) return;
   showLevelBanner({
-    titleKey: `${def.introKey}.title`,
-    subtitleKey: `${def.introKey}.sub`,
+    titleKey: 'howtoplay.lesson.title',
+    subtitleKey: `howtoplay.${def.tutorialId}.levelSub`,
     params: { ...(def.introParams || {}), n: index + 1 },
   });
 }
