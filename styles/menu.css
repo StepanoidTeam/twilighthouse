@@ -192,12 +192,8 @@
 .menu-main-btn-label {
   display: block;
   min-width: 0;
-
   font-size: 30px;
   line-height: normal;
-
-  mask-image: url(../sprites/mask-dirt-text.png);
-  mask-size: auto 100%;
 }
 
 .menu-main-btn:hover,
@@ -285,9 +281,6 @@
 }
 
 .menu-screen-title {
-  mask-image: url(../sprites/mask-dirt-text.png);
-  mask-size: auto 100%;
-
   color: #fff;
   font-size: clamp(1.75rem, 3vw, 2.15rem);
   font-family: var(--font-menu);
@@ -561,11 +554,6 @@
 }
 
 .mask-btn {
-  /* old */
-  /* mask-image: url(../sprites/menu-button-black.png);
-  mask-size: 100% 100%; */
-
-  /* beta */
   mask-image:
     url(../sprites/mask-dirt-text.png), url(../sprites/menu-button-black.png);
   mask-size:
