@@ -196,7 +196,7 @@
   font-size: 30px;
   line-height: normal;
 
-  mask-image: url(/sprites/mask-dirt-text.png);
+  mask-image: url(../sprites/mask-dirt-text.png);
   mask-size: auto 100%;
 }
 
@@ -285,7 +285,7 @@
 }
 
 .menu-screen-title {
-  mask-image: url(/sprites/mask-dirt-text.png);
+  mask-image: url(../sprites/mask-dirt-text.png);
   mask-size: auto 100%;
 
   color: #fff;
