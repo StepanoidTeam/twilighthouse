@@ -199,6 +199,19 @@ const EMOJI_SPRITE_FILES = {
   '🧨': 'sprites/emojis/🧨.png',
   '🥃': 'sprites/emojis/🥃.png',
   '🛢️': 'sprites/emojis/🛢️.png',
+  '🛥️': 'sprites/emojis/🛥️.png',
+  '💀': 'sprites/emojis/💀.png',
+  '🚨': 'sprites/emojis/🚨.png',
+  '🧜‍♀️': 'sprites/emojis/🧜‍♀️.png',
+  '🦑': 'sprites/emojis/🦑.png',
+  '⭐': 'sprites/emojis/⭐.png',
+  '⏰': 'sprites/emojis/⏰.png',
+  '☠️': 'sprites/emojis/☠️.png',
+  '❤️': 'sprites/emojis/❤️.png',
+  '💔': 'sprites/emojis/💔.png',
+  '🙈': 'sprites/emojis/🙈.png',
+  '❔': 'sprites/emojis/❔.png',
+  '‼️': 'sprites/emojis/‼️.png',
 };
 
 const ROCK_TEX_KEYS = ['rock1', 'rock2', 'rock3', 'rock4', 'rock5'];
