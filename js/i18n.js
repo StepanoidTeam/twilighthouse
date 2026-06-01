@@ -221,8 +221,7 @@ Photopea — image editor
     'howtoplay.cops.title': 'Cops',
     'howtoplay.cops.text':
       "Don't light the cops. Sink them before they reach the lighthouse.",
-    'howtoplay.cops.levelSub':
-      'Sink the cops before they reach the lighthouse',
+    'howtoplay.cops.levelSub': 'Sink the cops before they reach the lighthouse',
     'howtoplay.kraken.title': 'Kraken',
     'howtoplay.kraken.text': 'Repel the kraken with your beam.',
 
@@ -284,6 +283,7 @@ Photopea — image editor
     'perk.xpGain': '+{n} XP',
     'perk.pick.title': 'Choose a perk',
     'perk.pick.level': 'Level {n}',
+    'perk.pick.select': 'Select',
     'perk.pick.reroll': 'Reroll',
     'perk.stack': 'Level {n}',
     'perk.better_oil.title': 'Better oil',
@@ -600,6 +600,7 @@ Photopea — 图像编辑器
     'perk.xpGain': '+{n} 经验',
     'perk.pick.title': '选择加成',
     'perk.pick.level': '等级 {n}',
+    'perk.pick.select': '选择',
     'perk.pick.reroll': '重掷',
     'perk.stack': '等级 {n}',
     'perk.better_oil.title': '更好的灯油',
@@ -929,7 +930,8 @@ Photopea — image editor
     'perk.xpGain': '+{n} опыта',
     'perk.pick.title': 'Выбери перк',
     'perk.pick.level': 'Уровень {n}',
-    'perk.pick.reroll': 'Переролл',
+    'perk.pick.select': 'Выбрать',
+    'perk.pick.reroll': 'Реролл',
     'perk.stack': 'Уровень {n}',
     'perk.better_oil.title': 'Лучшее масло',
     'perk.better_oil.desc': 'Лампа горит дольше.',

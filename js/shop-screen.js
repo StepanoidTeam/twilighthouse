@@ -12,6 +12,7 @@ import {
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
 import { appendPriceNodes, setEmojiContent } from './emoji-sprites.js';
+import { setItemArtContent } from './item-art.js';
 
 let selectedShopItemId = null;
 
@@ -145,7 +146,7 @@ function renderGrid($grid, meta, onBought) {
 
     // Large icon
     if (iconEl) {
-      setEmojiContent(iconEl, item.icon || '');
+      setItemArtContent(iconEl, item.id, item.icon || '');
     }
 
     if (desc) {
@@ -238,7 +239,6 @@ export function renderShopScreen({ container, isActive }) {
   const $title = container.querySelector('.menu-screen-title');
   const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
-  const $stockTitle = container.querySelector('.shop-stock-title');
   const $infoTitle = container.querySelector('.shop-info-title');
   const $infoText = container.querySelector('.shop-info-text');
   const $resetBtn = container.querySelector('.shop-reset-btn');
@@ -254,7 +254,6 @@ export function renderShopScreen({ container, isActive }) {
   $grid.setAttribute('aria-label', t('shop.stockTitle'));
   renderShopTitle($title);
   if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
-  if ($stockTitle) $stockTitle.textContent = t('shop.stockTitle');
   if ($infoTitle) $infoTitle.textContent = t('shop.infoTitle');
   if ($infoText) $infoText.textContent = t('shop.infoText');
 

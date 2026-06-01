@@ -15,13 +15,14 @@ import {
 } from './run-perks.js';
 import { updateHUD } from './ui.js';
 import { t, onLanguageChange } from './i18n.js';
-import { setEmojiContent } from './emoji-sprites.js';
+import { setItemArtContent } from './item-art.js';
 
 const {
   $screenPerkPick,
   $perkPickTitle,
   $perkPickLevel,
   $perkPickCards,
+  $perkPickSelect,
   $perkPickReroll,
 } = globalThis;
 
@@ -107,6 +108,11 @@ function renderPerkCards() {
     const label = $perkPickReroll.querySelector('.perk-pick-reroll-label');
     if (label) label.textContent = t('perk.pick.reroll');
   }
+  if ($perkPickSelect) {
+    const label = $perkPickSelect.querySelector('.perk-pick-select-label');
+    if (label) label.textContent = t('perk.pick.select');
+    $perkPickSelect.disabled = getSelectedPerkId() == null;
+  }
 
   getPerkPickerVisibleIds().forEach((perkId, index) => {
     const stack = getPerkStack(perkId);
@@ -138,7 +144,7 @@ function renderPerkCards() {
     // Large icon
     const icon = document.createElement('span');
     icon.className = 'perk-card-icon';
-    setEmojiContent(icon, PERK_ICONS[perkId] || '✨');
+    setItemArtContent(icon, perkId, PERK_ICONS[perkId] || '✨');
 
     // Description
     const desc = document.createElement('p');
@@ -147,28 +153,13 @@ function renderPerkCards() {
 
     // Hotkey hint
     const hotkey = document.createElement('span');
-    hotkey.className = 'perk-card-hotkey hidden-mobile';
+    hotkey.className = 'perk-key perk-card-hotkey hidden-mobile';
     if (index < 9) hotkey.textContent = String(index + 1);
     else if (index === 9) hotkey.textContent = '0';
     else hotkey.hidden = true;
 
     card.append(title, levelRow, icon, desc);
 
-    // Stack / maxed label
-    if (maxed) {
-      const maxEl = document.createElement('span');
-      maxEl.className = 'perk-card-stack';
-      maxEl.textContent =
-        blockReason === 'fullHealth'
-          ? t('perk.fullHealth')
-          : t('perk.maxed');
-      card.appendChild(maxEl);
-    } else if (stack > 0) {
-      const stackEl = document.createElement('span');
-      stackEl.className = 'perk-card-stack';
-      stackEl.textContent = t('perk.stack', { n: stack + 1 });
-      card.appendChild(stackEl);
-    }
     card.appendChild(hotkey);
 
     if (!maxed) {
@@ -216,6 +207,13 @@ function selectPerk(perkId) {
     closePerkPicker();
     checkRunXpLevelUp();
   }, PERK_PICK_CONFIRM_DELAY_MS);
+}
+
+function selectCurrentPerk() {
+  const perkId = getSelectedPerkId();
+  if (perkId && canSelectPerkInPicker(perkId)) {
+    selectPerk(perkId);
+  }
 }
 
 function onPerkKeyDown(e) {
@@ -288,6 +286,9 @@ export function openPerkPicker() {
   }
   if ($perkPickReroll) {
     $perkPickReroll.onclick = rerollPerkOffer;
+  }
+  if ($perkPickSelect) {
+    $perkPickSelect.onclick = selectCurrentPerk;
   }
   updateHUD();
 }

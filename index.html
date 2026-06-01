@@ -240,10 +240,16 @@
         <p class="perk-pick-level" id="$perkPickLevel"></p>
       </div>
       <div class="perk-pick-cards" id="$perkPickCards"></div>
-      <button type="button" class="perk-pick-reroll" id="$perkPickReroll">
-        <span class="perk-pick-reroll-key">R</span>
-        <span class="perk-pick-reroll-label"></span>
-      </button>
+      <div class="perk-pick-actions">
+        <button type="button" class="perk-pick-action perk-pick-select" id="$perkPickSelect">
+          <span class="perk-key perk-pick-select-key">E</span>
+          <span class="perk-pick-select-label"></span>
+        </button>
+        <button type="button" class="perk-pick-action perk-pick-reroll" id="$perkPickReroll">
+          <span class="perk-key perk-pick-reroll-key">R</span>
+          <span class="perk-pick-reroll-label"></span>
+        </button>
+      </div>
     </div>
 
     <!-- ===== Exit confirm screen ===== -->
@@ -845,12 +851,11 @@
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title mask-dirt"></h2>
         <div class="menu-card blur-bg shop-card-wrap">
-          <p class="shop-wallet-label menu-state-label"></p>
-          <div class="shop-wallet-row"></div>
-          <div class="shop-stock-head">
-            <p class="shop-stock-title"></p>
+          <div class="shop-wallet-bar">
+            <p class="shop-wallet-label menu-state-label"></p>
+            <div class="shop-wallet-row"></div>
+            <button type="button" class="shop-reset-btn blur-bg"></button>
           </div>
-          <button type="button" class="shop-reset-btn blur-bg"></button>
           <div class="shop-reset-confirm" hidden>
             <div class="shop-reset-confirm-backdrop"></div>
             <div
