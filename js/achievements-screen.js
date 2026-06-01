@@ -6,6 +6,7 @@ import {
 } from './achievements.js';
 import { t } from './i18n.js';
 import S from './state.js';
+import { setEmojiContent } from './emoji-sprites.js';
 
 const FILTER_STORAGE_KEY = 'lighthouse_achievements_hide_completed_v1';
 
@@ -85,7 +86,7 @@ function createAchievementCard(def, progress) {
   const $debug = $card.querySelector('.achievement-debug-controls');
 
   $card.classList.toggle('is-complete', done);
-  if ($icon) $icon.textContent = def.icon;
+  if ($icon) setEmojiContent($icon, def.icon);
   if ($title) $title.textContent = t(def.titleKey);
   if ($desc) $desc.textContent = t(def.descKey);
   if ($fill) $fill.style.width = `${Math.round(ratio * 100)}%`;

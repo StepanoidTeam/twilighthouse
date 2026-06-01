@@ -40,3 +40,11 @@ body {
   width: 100%;
   height: 100%;
 }
+
+.emoji-sprite {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  object-fit: contain;
+  vertical-align: -0.12em;
+}

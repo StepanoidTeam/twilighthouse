@@ -311,6 +311,11 @@
   filter: grayscale(0.2) sepia(0.18) brightness(0.95);
 }
 
+.achievement-card-icon .emoji-sprite {
+  width: 1em;
+  height: 1em;
+}
+
 .achievement-card-main {
   display: flex;
   min-width: 0;

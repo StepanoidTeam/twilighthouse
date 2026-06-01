@@ -430,6 +430,11 @@
   opacity: 0.82;
 }
 
+.perk-card-icon .emoji-sprite {
+  width: 1em;
+  height: 1em;
+}
+
 .perk-card-desc {
   max-width: 300px;
   margin: 0;
@@ -969,6 +974,11 @@
   font-size: 26px;
   background: rgba(130, 245, 207, 0.18);
   border: 1px solid rgba(130, 245, 207, 0.35);
+}
+
+.achievement-toast-icon .emoji-sprite {
+  width: 1em;
+  height: 1em;
 }
 
 .achievement-toast-body {

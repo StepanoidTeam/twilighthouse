@@ -4,6 +4,7 @@ import {
   PIXI,
   C,
   SPRITE_FILES,
+  EMOJI_SPRITE_FILES,
   NIGHT_DURATION_MS,
   computeWorldScale,
 } from './config.js';
@@ -72,6 +73,10 @@ import {
 } from './run-perks-ui.js';
 import { updateOldMapReveal, cleanupOldMap } from './old-map.js';
 import { onAchievementUnlocked } from './achievements.js';
+import {
+  getEmojiTextureKey,
+  setTextWithEmojiSprites,
+} from './emoji-sprites.js';
 
 import './ip-tracker.js';
 
@@ -121,6 +126,7 @@ let bootLoaderState = {
   loaded: 0,
   total:
     Object.keys(SPRITE_FILES).length +
+    Object.keys(EMOJI_SPRITE_FILES).length +
     BOOT_TEXTURE_ASSETS.length +
     BOOT_AUDIO_ASSETS.length +
     TUTORIAL_VIDEO_ASSETS.length,
@@ -175,7 +181,7 @@ function renderBootTip({ animate = true, forceIndex = null } = {}) {
   const nextTip = bootTipsShuffled[nextIndex];
 
   if (!animate) {
-    $bootLoaderTip.textContent = nextTip;
+    setTextWithEmojiSprites($bootLoaderTip, nextTip);
     $bootLoaderTip.hidden = false;
     $bootLoaderTip.classList.add('is-visible');
     return;
@@ -184,7 +190,7 @@ function renderBootTip({ animate = true, forceIndex = null } = {}) {
   $bootLoaderTip.classList.remove('is-visible');
   window.clearTimeout(bootTipFadeTimeoutId);
   bootTipFadeTimeoutId = window.setTimeout(() => {
-    $bootLoaderTip.textContent = nextTip;
+    setTextWithEmojiSprites($bootLoaderTip, nextTip);
     $bootLoaderTip.hidden = false;
     requestAnimationFrame(() => {
       $bootLoaderTip.classList.add('is-visible');
@@ -685,6 +691,13 @@ async function loadTextures() {
     setBootLoaderProgress(loaded, total, { kind: 'texture', path });
     S.textures[name] = await PIXI.Assets.load(path);
     loaded = index + 1;
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
+  }
+
+  for (const [emoji, path] of Object.entries(EMOJI_SPRITE_FILES)) {
+    setBootLoaderProgress(loaded, total, { kind: 'texture', path });
+    S.textures[getEmojiTextureKey(emoji)] = await PIXI.Assets.load(path);
+    loaded += 1;
     setBootLoaderProgress(loaded, total, { kind: 'texture', path });
   }
 

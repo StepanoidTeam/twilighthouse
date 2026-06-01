@@ -205,6 +205,11 @@
     text-align: center;
   }
 
+  .screen-result-stat-icon .emoji-sprite {
+    width: 1.2em;
+    height: 1.2em;
+  }
+
   .screen-result-stat-label {
     min-width: 0;
     overflow-wrap: anywhere;

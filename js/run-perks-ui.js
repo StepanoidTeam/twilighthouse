@@ -15,6 +15,7 @@ import {
 } from './run-perks.js';
 import { updateHUD } from './ui.js';
 import { t, onLanguageChange } from './i18n.js';
+import { setEmojiContent } from './emoji-sprites.js';
 
 const {
   $screenPerkPick,
@@ -137,7 +138,7 @@ function renderPerkCards() {
     // Large icon
     const icon = document.createElement('span');
     icon.className = 'perk-card-icon';
-    icon.textContent = PERK_ICONS[perkId] || '✨';
+    setEmojiContent(icon, PERK_ICONS[perkId] || '✨');
 
     // Description
     const desc = document.createElement('p');

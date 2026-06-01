@@ -123,6 +123,11 @@
   filter: grayscale(0.25) sepia(0.18) brightness(0.9);
 }
 
+.menu-shop .shop-wallet-emoji .emoji-sprite {
+  width: 1.35em;
+  height: 1.35em;
+}
+
 .menu-shop .shop-wallet-count {
   font-variant-numeric: tabular-nums;
   font-weight: 600;
@@ -390,6 +395,17 @@
   line-height: 1.2;
   filter: grayscale(1) sepia(0.38) brightness(0.82);
   opacity: 0.86;
+}
+
+.menu-shop .shop-item-icon .emoji-sprite {
+  width: 1em;
+  height: 1em;
+}
+
+.menu-shop .emoji-price-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
 }
 
 .menu-shop .shop-item-desc {

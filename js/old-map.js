@@ -1,6 +1,7 @@
 import { PIXI } from './config.js';
 import { isInBeam } from './lighthouse.js';
 import S from './state.js';
+import { createPixiEmojiText } from './emoji-sprites.js';
 
 const INDICATOR_MARGIN = 34;
 const INDICATOR_STYLE = new PIXI.TextStyle({
@@ -80,8 +81,10 @@ function makeIndicator(icon) {
   const layer = ensureIndicatorLayer();
   if (!layer) return null;
   const container = new PIXI.Container();
-  const txt = new PIXI.Text(icon, INDICATOR_STYLE);
-  txt.anchor.set(0.5);
+  const txt = createPixiEmojiText(icon, INDICATOR_STYLE, S.textures, {
+    emojiSize: 32,
+  });
+  txt.pivot.set(txt.contentWidth / 2, txt.contentHeight / 2);
   container.addChild(txt);
   layer.addChild(container);
   indicators.push(container);

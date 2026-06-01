@@ -11,6 +11,7 @@ import {
 } from './meta-progress.js';
 import { t } from './i18n.js';
 import { playClickSound } from './sound.js';
+import { appendPriceNodes, setEmojiContent } from './emoji-sprites.js';
 
 let selectedShopItemId = null;
 
@@ -32,12 +33,6 @@ function renderLevelIndicator($row, level, maxLevel) {
   }
 }
 
-function formatPriceLine(price) {
-  return Object.entries(price)
-    .map(([emoji, n]) => `${emoji} x ${n}`)
-    .join('  ');
-}
-
 function renderWallet($row, meta) {
   $row.replaceChildren();
   for (const emoji of BOAT_CARGO_TYPES) {
@@ -47,7 +42,7 @@ function renderWallet($row, meta) {
 
     const emojiEl = chip.querySelector('.shop-wallet-emoji');
     const countEl = chip.querySelector('.shop-wallet-count');
-    if (emojiEl) emojiEl.textContent = emoji;
+    if (emojiEl) setEmojiContent(emojiEl, emoji);
     if (countEl) countEl.textContent = String(n);
 
     chip.title = t(`cargo.${emoji}`);
@@ -150,7 +145,7 @@ function renderGrid($grid, meta, onBought) {
 
     // Large icon
     if (iconEl) {
-      iconEl.textContent = item.icon || '';
+      setEmojiContent(iconEl, item.icon || '');
     }
 
     if (desc) {
@@ -161,7 +156,7 @@ function renderGrid($grid, meta, onBought) {
         nextBonus: Math.min((level + 1) * 10, (item.maxLevel || 1) * 10),
       });
     }
-    if (price) price.textContent = formatPriceLine(item.price);
+    if (price) appendPriceNodes(price, item.price);
 
     btn.dataset.itemId = item.id;
 

@@ -28,6 +28,12 @@ import { levels } from './levels.js';
 import { t } from './i18n.js';
 import { formatSurvivalTime } from './leaderboard.js';
 import { trackGameEnd } from './analytics.js';
+import {
+  createEmojiImage,
+  createPixiEmojiText,
+  getEmojiHtml,
+  setTextWithEmojiSprites,
+} from './emoji-sprites.js';
 
 const {
   $btnLeft,
@@ -76,8 +82,8 @@ export function playCrashSound() {
 }
 
 export function spawnTooltip(x, y, text, style) {
-  const txt = new PIXI.Text(text, style);
-  txt.anchor.set(0.5);
+  const txt = createPixiEmojiText(text, style, S.textures);
+  txt.pivot.set(txt.contentWidth / 2, txt.contentHeight / 2);
   txt.position.set(x, y);
   S.tooltipLayer.addChild(txt);
   S.tooltips.push({ txt, age: 0 });
@@ -99,11 +105,13 @@ export function updateTooltips(delta) {
 
 export function createCargoLabel(cargoText) {
   const container = new PIXI.Container();
-  const txt = new PIXI.Text(cargoText, CARGO_LABEL_STYLE);
-  txt.anchor.set(0.5, 0.5);
+  const txt = createPixiEmojiText(cargoText, CARGO_LABEL_STYLE, S.textures, {
+    emojiSize: 18,
+  });
+  txt.pivot.set(txt.contentWidth / 2, txt.contentHeight / 2);
   const pad = 7;
-  const w = txt.width + pad * 2;
-  const h = txt.height + pad * 2;
+  const w = txt.contentWidth + pad * 2;
+  const h = txt.contentHeight + pad * 2;
   const bg = new PIXI.Graphics();
   bg.beginFill(0x071420, 0.88);
   bg.lineStyle(1.5, 0x44cc88, 1);
@@ -195,11 +203,11 @@ function formatLampPowerHtml() {
   let out = '';
   for (let i = 0; i < slots; i++) {
     if (i < spent) {
-      out += `<span class="hud-lamp-power hud-lamp-power--spent">💡</span>`;
+      out += `<span class="hud-lamp-power hud-lamp-power--spent">${getEmojiHtml('💡')}</span>`;
     } else if (atMinimum && i === slots - 1) {
       out += `<span class="hud-lamp-power hud-lamp-power--minimum">🔦</span>`;
     } else {
-      out += `<span class="hud-lamp-power">💡</span>`;
+      out += `<span class="hud-lamp-power">${getEmojiHtml('💡')}</span>`;
     }
   }
   return out;
@@ -450,7 +458,7 @@ function createAchievementToastElement(payload) {
   const desc = toast.querySelector('.achievement-toast-desc');
   const points = toast.querySelector('.achievement-toast-points');
 
-  if (icon) icon.textContent = payload.icon || '🏅';
+  if (icon) icon.replaceChildren(createEmojiImage(payload.icon || '🏅'));
   if (eyebrow) eyebrow.textContent = t('achievements.toast.unlocked');
   if (title) title.textContent = payload.titleKey ? t(payload.titleKey) : '';
   if (desc) desc.textContent = payload.descKey ? t(payload.descKey) : '';
@@ -742,7 +750,7 @@ async function showGameOverScreen({
   $gameContainer.hidden = true;
 
   $resultTitle.textContent = title;
-  $resultReason.textContent = reasonText;
+  setTextWithEmojiSprites($resultReason, reasonText);
   $resultReason.hidden = !reasonText;
   $resultRestartLabel.textContent = t('overlay.restart');
   $resultMenuLabel.textContent = t('overlay.toMenu');
@@ -869,7 +877,7 @@ function createResultStatRow({ icon, label, value }) {
   const text = stat.querySelector('.screen-result-stat-label');
   const valueEl = stat.querySelector('.screen-result-stat-value');
 
-  if (iconEl) iconEl.textContent = icon;
+  if (iconEl) iconEl.replaceChildren(createEmojiImage(icon));
   if (text) text.textContent = label;
   if (valueEl) valueEl.textContent = String(value);
 
