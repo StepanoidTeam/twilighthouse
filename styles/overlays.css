@@ -215,6 +215,15 @@
     overflow-wrap: anywhere;
   }
 
+  .screen-result-stat--compact {
+    grid-template-columns: 42px minmax(2ch, max-content);
+    justify-content: center;
+  }
+
+  .screen-result-stat--compact .screen-result-stat-label {
+    display: none;
+  }
+
   .screen-result-stat-value {
     color: #ffe3a8;
     font-size: 1.15em;

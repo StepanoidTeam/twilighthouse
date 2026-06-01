@@ -792,7 +792,7 @@ function getRunStatsItems() {
       value: stats.sunkCops || 0,
     },
     {
-      icon: '🧜',
+      icon: '🧜‍♀️',
       label: t('resultStats.repelledMermaids'),
       value: stats.repelledMermaids || 0,
     },
@@ -833,11 +833,16 @@ function getRunStatsItems() {
 
 function getCollectedCargoItems() {
   const deliveredCargo = S.deliveredCargo || {};
-  return BOAT_CARGO_TYPES.map((type) => ({
-    icon: type,
-    label: t(`cargo.${type}`),
-    value: Math.max(0, Math.floor(deliveredCargo[type] || 0)),
-  }));
+  return BOAT_CARGO_TYPES.map((type) => {
+    const amount = Math.max(0, Math.floor(deliveredCargo[type] || 0));
+    if (amount <= 0) return null;
+    return {
+      icon: type,
+      label: '',
+      value: `+${amount}`,
+      compact: true,
+    };
+  }).filter(Boolean);
 }
 
 function renderResultStats(items) {
@@ -869,9 +874,10 @@ function renderResultStats(items) {
   $resultStats.hidden = renderedPanels === 0;
 }
 
-function createResultStatRow({ icon, label, value }) {
+function createResultStatRow({ icon, label, value, compact }) {
   const stat = cloneTemplateFirstElement('$resultStatsRowTemplate');
   if (!(stat instanceof HTMLElement)) return null;
+  stat.classList.toggle('screen-result-stat--compact', !!compact);
 
   const iconEl = stat.querySelector('.screen-result-stat-icon');
   const text = stat.querySelector('.screen-result-stat-label');
