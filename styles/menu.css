@@ -631,16 +631,13 @@
 
 .howtoplay-dot {
   display: inline-flex;
-  width: 28px;
-  height: 28px;
   padding: 0;
   border: 0;
   align-items: center;
   justify-content: center;
   color: rgba(234, 215, 182, 0.62);
   background: transparent;
-  font-size: 24px;
-  line-height: 1;
+  font-size: 40px;
   cursor: pointer;
   transition:
     color var(--duration-menu) ease,
