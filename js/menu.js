@@ -88,8 +88,9 @@ let keyHandlerBound = false;
 let i18nBound = false;
 let bgManMotion = null;
 let bgManMotionKeyframes = null;
-let openedFromGame = false; // true when settings opened mid-game via exit-confirm popup
+let openedFromGame = false; // true when settings opened from the in-game pause popup
 let menuLayoutSyncFrame = 0;
+let onSettingsBackToGame = null;
 let displayNameSaveState = {
   state: null,
   labelKey: 'settings.displayNameSave',
@@ -435,8 +436,11 @@ function showMainMenu() {
 
 function navigateBackFromMenu() {
   if (openedFromGame) {
+    const onBack = onSettingsBackToGame;
     openedFromGame = false;
+    onSettingsBackToGame = null;
     hideMenu();
+    if (typeof onBack === 'function') onBack();
   } else {
     showMainMenu();
   }
@@ -1212,6 +1216,7 @@ function hideMenu() {
   hideOverlayScreens();
   currentScreen = null;
   openedFromGame = false;
+  onSettingsBackToGame = null;
   hideDiscordLink();
 }
 
@@ -1225,9 +1230,10 @@ export function showMenu() {
   repositionMenu();
 }
 
-export function showSettingsFromGame() {
+export function showSettingsFromGame({ onBack } = {}) {
   if (!$menuRoot) return;
   openedFromGame = true;
+  onSettingsBackToGame = typeof onBack === 'function' ? onBack : null;
   $menuRoot.hidden = false;
   startBgManMotion();
   repositionMenu();

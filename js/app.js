@@ -826,7 +826,7 @@ async function init() {
   $btnExitSettings.addEventListener('pointerdown', () => {
     playClickSound();
     hideExitConfirm();
-    showSettingsFromGame();
+    showSettingsFromGame({ onBack: showExitConfirm });
   });
 
   bindEvents();
