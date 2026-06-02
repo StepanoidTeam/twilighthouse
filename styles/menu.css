@@ -594,7 +594,7 @@
   flex: 0 0 auto;
 }
 
-.howtoplay-nav-btn:hover:not(:disabled) {
+.howtoplay-nav-btn:not(.result-btn):hover:not(:disabled) {
   background: var(--color-menu-selected);
   transform: translateY(-1px);
 }
@@ -604,14 +604,14 @@
   cursor: not-allowed;
 }
 
-.howtoplay-nav-btn--finish {
+.howtoplay-nav-btn--finish:not(.result-btn) {
   background: var(--color-menu-selected);
   border-color: var(--color-menu-accent);
   color: var(--color-main-menu-text);
   box-shadow: 0 4px 16px rgba(249, 51, 32, 0.35);
 }
 
-.howtoplay-nav-btn--finish:hover:not(:disabled) {
+.howtoplay-nav-btn--finish:not(.result-btn):hover:not(:disabled) {
   background: #ff5c45;
   transform: translateY(-1px);
 }

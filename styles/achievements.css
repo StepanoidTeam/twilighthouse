@@ -207,7 +207,7 @@
   gap: 12px;
   overflow-x: hidden;
   overflow-y: auto;
-  padding-right: 8px;
+  padding: 12px;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
   scrollbar-color: rgba(178, 42, 35, 0.82) rgba(60, 43, 32, 0.42);
@@ -279,14 +279,29 @@
   pointer-events: none;
 }
 
-.achievement-card:hover,
-.achievement-card.is-complete {
+.achievement-card:hover {
   border-color: #e12e25;
   transform: translateY(-1px);
   box-shadow:
     0 0 0 1px rgba(193, 32, 27, 0.48),
     0 0 18px rgba(223, 36, 29, 0.36),
     inset 0 0 16px rgba(207, 31, 27, 0.16);
+}
+
+.achievement-card.is-complete {
+  border-color: rgba(193, 163, 96, 0.62);
+  box-shadow:
+    0 0 0 1px rgba(193, 163, 96, 0.24),
+    inset 0 0 14px rgba(193, 163, 96, 0.08);
+}
+
+.achievement-card.is-complete:hover {
+  border-color: rgba(222, 190, 112, 0.78);
+  transform: translateY(-1px);
+  box-shadow:
+    0 0 0 1px rgba(193, 163, 96, 0.32),
+    0 0 18px rgba(193, 163, 96, 0.18),
+    inset 0 0 16px rgba(193, 163, 96, 0.1);
 }
 
 .achievement-card:not(.is-complete) {
@@ -356,6 +371,10 @@
   grid-template-columns: minmax(120px, 1fr) max-content;
   align-items: center;
   gap: 14px;
+}
+
+.achievement-card.is-complete .achievement-card-progress {
+  display: none;
 }
 
 .achievement-card-track {

@@ -45,7 +45,6 @@ const {
   $menuBtnAuthors,
   $menuBtnTutorial,
   $discordLink,
-  $backBtn,
   $menuSettings,
   $menuLeaderboard,
   $menuAchievements,
@@ -84,7 +83,7 @@ let selectedSettingsKey = 'language';
 let currentScreen = 'main'; // 'main' | 'shop' | 'leaderboard' | 'achievements' | 'settings' | 'authors' | 'tutorial' | null (game)
 let $creditsScroll = null;
 let onStartGame = null;
-let backBtnEl = null;
+let backButtonsBound = false;
 let keyHandlerBound = false;
 let i18nBound = false;
 let bgManMotion = null;
@@ -158,6 +157,7 @@ function initMenu() {
   }
 
   initMenuButtons();
+  initBackButtons();
   updateSelection();
 }
 
@@ -253,6 +253,22 @@ function initMenuButtons() {
       activateMenuItem();
     });
   }
+}
+
+function initBackButtons() {
+  if (backButtonsBound || !$menuRoot) return;
+  $menuRoot.addEventListener('click', (e) => {
+    const target = e.target;
+    if (!(target instanceof HTMLElement)) return;
+    const $button = target.closest('.back-btn');
+    if (!($button instanceof HTMLButtonElement)) return;
+
+    e.preventDefault();
+    e.stopPropagation();
+    playMenuClick();
+    navigateBackFromMenu();
+  });
+  backButtonsBound = true;
 }
 
 function updateSelection() {
@@ -411,35 +427,19 @@ function showMainItems() {
 function showMainMenu() {
   hideOverlayScreens();
   showMainItems();
-  hideBackBtn();
   currentScreen = 'main';
   updateSelection();
   renderMainHint();
   scheduleMenuLayoutSync();
 }
 
-// ===== HTML Back Button =====
-function initBackBtn() {
-  backBtnEl = $backBtn;
-  backBtnEl.addEventListener('click', (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    playMenuClick();
-    if (openedFromGame) {
-      openedFromGame = false;
-      hideMenu();
-    } else {
-      showMainMenu();
-    }
-  });
-}
-
-function showBackBtn() {
-  backBtnEl.classList.add('is-visible');
-}
-
-function hideBackBtn() {
-  backBtnEl.classList.remove('is-visible');
+function navigateBackFromMenu() {
+  if (openedFromGame) {
+    openedFromGame = false;
+    hideMenu();
+  } else {
+    showMainMenu();
+  }
 }
 
 function clearDisplayNameSaveResetTimer() {
@@ -456,7 +456,6 @@ export async function buildMenu(app, startGameCb) {
   initMenu();
   initAuthWidget();
   startBgManMotion();
-  initBackBtn();
   $menuRoot.hidden = false;
   showMainMenu();
   currentScreen = 'main';
@@ -558,12 +557,7 @@ function handleMenuKey(e) {
       }
     } else if (isBackKey(e.code)) {
       playMenuClick();
-      if (openedFromGame) {
-        openedFromGame = false;
-        hideMenu();
-      } else {
-        showMainMenu();
-      }
+      navigateBackFromMenu();
     }
   } else if (currentScreen === 'tutorial' && tutorialState) {
     if (e.code === 'ArrowLeft' || e.code === 'KeyA') {
@@ -580,12 +574,7 @@ function handleMenuKey(e) {
     }
   } else if (isBackKey(e.code)) {
     playMenuClick();
-    if (openedFromGame) {
-      openedFromGame = false;
-      hideMenu();
-    } else {
-      showMainMenu();
-    }
+    navigateBackFromMenu();
   }
 }
 
@@ -659,7 +648,6 @@ function hideTutorialScreen() {
 
 function showTutorial() {
   hideMainItems();
-  hideBackBtn();
   const prevScreen = currentScreen;
   const savedIndex =
     prevScreen === 'tutorial' && tutorialState ? tutorialState.index : 0;
@@ -842,7 +830,6 @@ function clearTutorialState() {
 // ===== Leaderboard =====
 async function showLeaderboard() {
   hideMainItems();
-  showBackBtn();
   hideOverlayScreens();
   currentScreen = 'leaderboard';
   scheduleMenuLayoutSync();
@@ -857,7 +844,6 @@ async function showLeaderboard() {
 // ===== Achievements =====
 function showAchievements() {
   hideMainItems();
-  showBackBtn();
   hideOverlayScreens();
   currentScreen = 'achievements';
   scheduleMenuLayoutSync();
@@ -876,7 +862,6 @@ export async function openLeaderboard() {
 // ===== Shop =====
 function showShop() {
   hideMainItems();
-  showBackBtn();
   hideOverlayScreens();
   currentScreen = 'shop';
   scheduleMenuLayoutSync();
@@ -891,7 +876,6 @@ function showShop() {
 // ===== Settings =====
 function showSettings() {
   hideMainItems();
-  showBackBtn();
   hideOverlayScreens();
   currentScreen = 'settings';
   scheduleMenuLayoutSync();
@@ -1189,7 +1173,6 @@ function showSettings() {
 // ===== Authors =====
 async function showAuthors() {
   hideMainItems();
-  showBackBtn();
   hideOverlayScreens();
   currentScreen = 'authors';
   scheduleMenuLayoutSync();
@@ -1227,7 +1210,6 @@ function hideMenu() {
   if ($menuRoot) $menuRoot.hidden = true;
   stopBgManMotion();
   hideOverlayScreens();
-  hideBackBtn();
   currentScreen = null;
   openedFromGame = false;
   hideDiscordLink();

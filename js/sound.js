@@ -78,7 +78,12 @@ function clampVolume(value) {
   return Math.max(0, Math.min(1, value));
 }
 
-function loadStoredMusicTrackIndex() {
+function normalizeMusicTrackIndex(index) {
+  const count = MUSIC_PLAYLIST.length;
+  return ((index % count) + count) % count;
+}
+
+function readStoredMusicTrackIndex() {
   try {
     const raw = localStorage.getItem(MUSIC_TRACK_STORAGE_KEY);
     const index = Number.parseInt(raw, 10);
@@ -86,7 +91,16 @@ function loadStoredMusicTrackIndex() {
       return index;
     }
   } catch (_) {}
-  return 0;
+  return null;
+}
+
+function loadStoredMusicTrackIndex() {
+  const storedIndex = readStoredMusicTrackIndex();
+  const index = storedIndex == null ? 0 : normalizeMusicTrackIndex(storedIndex + 1);
+  try {
+    localStorage.setItem(MUSIC_TRACK_STORAGE_KEY, String(index));
+  } catch (_) {}
+  return index;
 }
 
 function saveMusicTrackIndex() {
@@ -96,8 +110,7 @@ function saveMusicTrackIndex() {
 }
 
 function setMusicTrackIndex(index) {
-  const count = MUSIC_PLAYLIST.length;
-  musicTrackIndex = ((index % count) + count) % count;
+  musicTrackIndex = normalizeMusicTrackIndex(index);
   saveMusicTrackIndex();
 }
 

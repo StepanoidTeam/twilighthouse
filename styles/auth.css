@@ -232,20 +232,8 @@
   position: fixed;
   top: var(--size-edge-gap);
   left: var(--size-edge-gap);
-  z-index: 3;
-}
-
-.back-btn:not(.is-visible) {
-  display: none;
-}
-
-.back-btn.is-visible {
+  z-index: 4;
   display: inline-flex;
-}
-
-.back-btn-arrow {
-  font-size: 18px;
-  line-height: 1;
 }
 
 /* ===== Discord link (bottom-right, shown on menu) ===== */

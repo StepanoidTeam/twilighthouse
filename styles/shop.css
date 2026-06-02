@@ -146,9 +146,9 @@
   flex: 0 0 auto;
 }
 
-.menu-shop .shop-reset-btn,
-.menu-shop .shop-reset-confirm-cancel,
-.menu-shop .shop-reset-confirm-apply {
+.menu-shop .shop-reset-btn:not(.result-btn),
+.menu-shop .shop-reset-confirm-cancel:not(.result-btn),
+.menu-shop .shop-reset-confirm-apply:not(.result-btn) {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -177,17 +177,17 @@
   color: #577a89;
 }
 
-.menu-shop .shop-reset-btn:hover:not(:disabled),
-.menu-shop .shop-reset-confirm-cancel:hover,
-.menu-shop .shop-reset-confirm-apply:hover {
+.menu-shop .shop-reset-btn:not(.result-btn):hover:not(:disabled),
+.menu-shop .shop-reset-confirm-cancel:not(.result-btn):hover,
+.menu-shop .shop-reset-confirm-apply:not(.result-btn):hover {
   color: #d2b48f;
   border-color: rgba(213, 172, 130, 0.82);
   box-shadow: 0 0 14px rgba(166, 118, 72, 0.2);
 }
 
-.menu-shop .shop-reset-btn:active:not(:disabled),
-.menu-shop .shop-reset-confirm-cancel:active,
-.menu-shop .shop-reset-confirm-apply:active {
+.menu-shop .shop-reset-btn:not(.result-btn):active:not(:disabled),
+.menu-shop .shop-reset-confirm-cancel:not(.result-btn):active,
+.menu-shop .shop-reset-confirm-apply:not(.result-btn):active {
   transform: translateY(1px);
 }
 

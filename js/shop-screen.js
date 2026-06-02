@@ -70,11 +70,15 @@ function renderShopTitle($title) {
 
 function renderHotkeyButton($button, hotkey, label) {
   const hotkeyEl = document.createElement('span');
-  hotkeyEl.className = 'hotkey';
+  hotkeyEl.className = $button.classList.contains('result-btn')
+    ? 'result-btn-key hotkey'
+    : 'hotkey';
   hotkeyEl.textContent = hotkey;
 
   const labelEl = document.createElement('span');
-  labelEl.className = 'shop-reset-confirm-label';
+  labelEl.className = $button.classList.contains('result-btn')
+    ? 'result-btn-label shop-reset-confirm-label'
+    : 'shop-reset-confirm-label';
   labelEl.textContent = label;
 
   $button.setAttribute('aria-label', label);
@@ -237,13 +241,9 @@ export function renderShopScreen({ container, isActive }) {
   if (!container) return;
 
   const $title = container.querySelector('.menu-screen-title');
-  const $walletLabel = container.querySelector('.shop-wallet-label');
   const $walletRow = container.querySelector('.shop-wallet-row');
-  const $infoTitle = container.querySelector('.shop-info-title');
-  const $infoText = container.querySelector('.shop-info-text');
   const $resetBtn = container.querySelector('.shop-reset-btn');
   const $resetConfirm = container.querySelector('.shop-reset-confirm');
-  const $resetConfirmText = container.querySelector('.shop-reset-confirm-text');
   const $resetConfirmCancel = container.querySelector('.shop-reset-confirm-cancel');
   const $resetConfirmApply = container.querySelector('.shop-reset-confirm-apply');
   const $grid = container.querySelector('.shop-grid');
@@ -253,16 +253,12 @@ export function renderShopScreen({ container, isActive }) {
   $grid.setAttribute('role', 'listbox');
   $grid.setAttribute('aria-label', t('shop.stockTitle'));
   renderShopTitle($title);
-  if ($walletLabel) $walletLabel.textContent = t('shop.wallet');
-  if ($infoTitle) $infoTitle.textContent = t('shop.infoTitle');
-  if ($infoText) $infoText.textContent = t('shop.infoText');
 
   function paint() {
     if (typeof isActive === 'function' && !isActive()) return;
     const meta = loadMeta();
     $resetBtn.textContent = t('shop.reset');
     $resetBtn.disabled = !hasShopPurchases(meta);
-    if ($resetConfirmText) $resetConfirmText.textContent = t('shop.resetConfirm');
     if ($resetConfirmCancel) {
       renderHotkeyButton($resetConfirmCancel, 'Q', t('shop.resetCancel'));
     }

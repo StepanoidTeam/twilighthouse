@@ -78,6 +78,8 @@
             <div id="$hudNightFill" class="hud-night-fill"></div>
           </div>
         </div>
+      </div>
+      <div class="hud-bottom-cluster">
         <div
           class="hud-xp"
           id="$hudXp"
@@ -260,26 +262,26 @@
           <button
             type="button"
             id="$btnExitConfirm"
-            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+            class="result-btn blur-bg howtoplay-nav-btn exit-confirm-btn"
           >
-            <span class="hotkey hidden-mobile">E</span>
-            <span class="hotkey hidden-mobile">⏎</span>
+            <span class="result-btn-key hotkey hidden-mobile">E</span>
+            <span class="result-btn-key hotkey hidden-mobile">⏎</span>
             <span class="result-btn-label" id="$exitConfirmLabel"></span>
           </button>
           <button
             type="button"
             id="$btnExitSettings"
-            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+            class="result-btn blur-bg howtoplay-nav-btn exit-confirm-btn"
           >
             <span class="result-btn-label" id="$exitSettingsLabel"></span>
           </button>
           <button
             type="button"
             id="$btnExitResume"
-            class="mask-btn howtoplay-nav-btn exit-confirm-btn"
+            class="result-btn blur-bg howtoplay-nav-btn exit-confirm-btn"
           >
-            <span class="hotkey hidden-mobile">esc</span>
-            <span class="hotkey hidden-mobile">Q</span>
+            <span class="result-btn-key hotkey hidden-mobile">esc</span>
+            <span class="result-btn-key hotkey hidden-mobile">Q</span>
             <span class="result-btn-label" id="$exitResumeLabel"></span>
           </button>
         </div>
@@ -566,6 +568,15 @@
       class="menu-tutorial menu-screen fullscreen"
       hidden
     >
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div id="$menuTutorialShell" class="menu-screen-shell">
         <h2 class="menu-screen-title mask-dirt"></h2>
         <div class="menu-card menu-howtoplay blur-bg">
@@ -589,22 +600,22 @@
           <div class="howtoplay-controls">
             <button
               type="button"
-              class="mask-btn howtoplay-nav-btn howtoplay-nav-btn--prev"
+              class="result-btn blur-bg howtoplay-nav-btn howtoplay-nav-btn--prev"
             >
-              <span class="hotkey hidden-mobile">←</span>
-              <span class="hotkey hidden-mobile">A</span>
-              <span class="howtoplay-nav-label"></span>
+              <span class="result-btn-key hotkey hidden-mobile">←</span>
+              <span class="result-btn-key hotkey hidden-mobile">A</span>
+              <span class="result-btn-label howtoplay-nav-label"></span>
             </button>
 
             <div class="howtoplay-dots mask-dirt"></div>
 
             <button
               type="button"
-              class="mask-btn howtoplay-nav-btn howtoplay-nav-btn--next"
+              class="result-btn blur-bg howtoplay-nav-btn howtoplay-nav-btn--next"
             >
-              <span class="howtoplay-nav-label"></span>
-              <span class="hotkey hidden-mobile">D</span>
-              <span class="hotkey hidden-mobile">→</span>
+              <span class="result-btn-label howtoplay-nav-label"></span>
+              <span class="result-btn-key hotkey hidden-mobile">D</span>
+              <span class="result-btn-key hotkey hidden-mobile">→</span>
             </button>
           </div>
         </div>
@@ -612,14 +623,23 @@
       <button
         id="$menuTutorialSkip"
         type="button"
-        class="mask-btn howtoplay-nav-btn skip-btn"
+        class="result-btn blur-bg howtoplay-nav-btn skip-btn"
       >
-        <span class="hotkey hidden-mobile">esc</span>
-        <span class="hotkey hidden-mobile">Q</span>
-        <span id="$menuTutorialSkipLabel" class="skip-btn-label"></span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span id="$menuTutorialSkipLabel" class="result-btn-label skip-btn-label"></span>
       </button>
     </section>
     <section id="$menuSettings" class="menu-settings fullscreen" hidden>
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div class="menu-screen-shell">
         <h2
           class="menu-screen-title mask-dirt"
@@ -673,7 +693,7 @@
                 <button
                   id="$menuSettingsContactBtn"
                   type="button"
-                  class="mask-btn howtoplay-nav-btn menu-setting-contact-btn"
+                  class="result-btn blur-bg howtoplay-nav-btn menu-setting-contact-btn"
                   data-i18n="settings.contactUs"
                 ></button>
               </div>
@@ -769,7 +789,7 @@
                 <button
                   id="$menuDisplayNameSave"
                   type="submit"
-                  class="mask-btn howtoplay-nav-btn menu-setting-name-save"
+                  class="result-btn blur-bg howtoplay-nav-btn menu-setting-name-save"
                   aria-live="polite"
                 ></button>
               </div>
@@ -792,6 +812,15 @@
       class="menu-leaderboard blur fullscreen"
       hidden
     >
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title mask-dirt"></h2>
         <p class="menu-screen-subtitle"></p>
@@ -810,6 +839,15 @@
       class="menu-achievements menu-screen fullscreen"
       hidden
     >
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title mask-dirt"></h2>
         <p class="menu-screen-subtitle"></p>
@@ -848,13 +886,22 @@
       class="menu-shop menu-leaderboard blur fullscreen"
       hidden
     >
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div class="menu-screen-shell">
         <h2 class="menu-screen-title mask-dirt"></h2>
         <div class="menu-card blur-bg shop-card-wrap">
           <div class="shop-wallet-bar">
-            <p class="shop-wallet-label menu-state-label"></p>
+            <p class="shop-wallet-label menu-state-label" data-i18n="shop.wallet"></p>
             <div class="shop-wallet-row"></div>
-            <button type="button" class="shop-reset-btn blur-bg"></button>
+            <button type="button" class="result-btn blur-bg shop-reset-btn"></button>
           </div>
           <div class="shop-reset-confirm" hidden>
             <div class="shop-reset-confirm-backdrop"></div>
@@ -863,15 +910,15 @@
               role="dialog"
               aria-modal="true"
             >
-              <p class="shop-reset-confirm-text"></p>
+              <p class="shop-reset-confirm-text" data-i18n="shop.resetConfirm"></p>
               <div class="shop-reset-confirm-actions">
                 <button
                   type="button"
-                  class="shop-reset-confirm-cancel blur-bg"
+                  class="result-btn blur-bg shop-reset-confirm-cancel"
                 ></button>
                 <button
                   type="button"
-                  class="shop-reset-confirm-apply blur-bg"
+                  class="result-btn blur-bg shop-reset-confirm-apply"
                 ></button>
               </div>
             </div>
@@ -880,8 +927,8 @@
           <aside class="shop-info-box">
             <span class="shop-info-icon">i</span>
             <div class="shop-info-copy">
-              <h3 class="shop-info-title"></h3>
-              <p class="shop-info-text"></p>
+              <h3 class="shop-info-title" data-i18n="shop.infoTitle"></h3>
+              <p class="shop-info-text" data-i18n="shop.infoText"></p>
             </div>
           </aside>
         </div>
@@ -895,6 +942,15 @@
     </section>
 
     <section id="$menuAuthors" class="menu-authors" hidden>
+      <button
+        type="button"
+        class="result-btn blur-bg howtoplay-nav-btn back-btn"
+      >
+        <span aria-hidden="true">←</span>
+        <span class="result-btn-key hotkey hidden-mobile">Q</span>
+        <span class="result-btn-key hotkey hidden-mobile">esc</span>
+        <span class="result-btn-label back-btn-label" data-i18n="btn.back"></span>
+      </button>
       <div class="menu-authors-bg"></div>
       <div class="menu-authors-dim"></div>
       <div class="menu-authors-blackout"></div>
@@ -902,18 +958,6 @@
         <pre class="menu-authors-text"></pre>
       </div>
     </section>
-
-    <!-- ===== Back button (shown on menu sub-screens) ===== -->
-    <button
-      type="button"
-      id="$backBtn"
-      class="mask-btn howtoplay-nav-btn back-btn"
-    >
-      <span class="back-btn-arrow">←</span>
-      <span class="hotkey hidden-mobile">Q</span>
-      <span class="hotkey hidden-mobile">esc</span>
-      <span class="back-btn-label" data-i18n="btn.back"></span>
-    </button>
 
     <!-- ===== Auth modal ===== -->
     <div id="$authModal" class="auth-modal-backdrop blur-bg">
