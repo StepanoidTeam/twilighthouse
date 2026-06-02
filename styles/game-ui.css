@@ -924,9 +924,12 @@
 
 .hud-lamp-power {
   display: inline-block;
+  opacity: var(--lamp-opacity, 1);
+  filter: grayscale(var(--lamp-gray, 0%));
   transform: translateY(0);
   transition:
-    opacity 160ms ease,
+    opacity 220ms linear,
+    filter 220ms linear,
     transform 160ms ease;
 }
 
@@ -935,13 +938,8 @@
 }
 
 .hud-lamp-power--spent {
-  opacity: 0.28;
-  filter: grayscale(70%);
-}
-
-.hud-lamp-power--minimum {
-  opacity: 0.8;
-  filter: grayscale(20%);
+  opacity: var(--lamp-opacity, 0.22);
+  filter: grayscale(var(--lamp-gray, 72%));
 }
 
 .achievement-toast-layer {

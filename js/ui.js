@@ -13,6 +13,8 @@ import {
   getRunPerkXpThreshold,
   getEffectiveLampBurnoutMs,
   getRunLevel,
+  PERK_ICONS,
+  PERK_IDS,
 } from './run-perks.js';
 import {
   CRASH_VOLUME,
@@ -31,9 +33,9 @@ import { trackGameEnd } from './analytics.js';
 import {
   createEmojiImage,
   createPixiEmojiText,
-  getEmojiHtml,
   setTextWithEmojiSprites,
 } from './emoji-sprites.js';
+import { createItemArt } from './item-art.js';
 
 const {
   $btnLeft,
@@ -189,28 +191,38 @@ function setIfChanged(key, $el, value) {
 
 function updateLampHud() {
   if (!$hudLamps) return;
-  setIfChanged('lamps', $hudLamps, formatLampPowerHtml());
-}
-
-function formatLampPowerHtml() {
   const slots = 5;
   const cap = getEffectiveLampBurnoutMs();
   const burnout =
     S.lampTimer < 0 ? 0 : Math.max(0, Math.min(1, S.lampTimer / cap));
-  const lit = Math.max(1, Math.ceil((1 - burnout) * slots));
-  const spent = slots - lit;
-  const atMinimum = burnout >= 1;
-  let out = '';
-  for (let i = 0; i < slots; i++) {
-    if (i < spent) {
-      out += `<span class="hud-lamp-power hud-lamp-power--spent">${getEmojiHtml('💡')}</span>`;
-    } else if (atMinimum && i === slots - 1) {
-      out += `<span class="hud-lamp-power hud-lamp-power--minimum">🔦</span>`;
-    } else {
-      out += `<span class="hud-lamp-power">${getEmojiHtml('💡')}</span>`;
-    }
+  const burnedSlots = burnout * slots;
+
+  for (const node of Array.from($hudLamps.childNodes)) {
+    if (node.nodeType !== Node.TEXT_NODE) continue;
+    node.remove();
   }
-  return out;
+
+  while ($hudLamps.children.length < slots) {
+    const lamp = document.createElement('span');
+    lamp.className = 'hud-lamp-power';
+    lamp.appendChild(createEmojiImage('💡'));
+    $hudLamps.appendChild(lamp);
+  }
+  while ($hudLamps.children.length > slots) {
+    $hudLamps.lastElementChild?.remove();
+  }
+
+  for (let i = 0; i < slots; i++) {
+    const lamp = $hudLamps.children[i];
+    if (!(lamp instanceof HTMLElement)) continue;
+
+    const level = 1 - Math.max(0, Math.min(1, burnedSlots - i));
+    const opacity = (0.32 + level * 0.68).toFixed(2);
+    const gray = Math.round((1 - level) * 72);
+    lamp.style.setProperty('--lamp-opacity', opacity);
+    lamp.style.setProperty('--lamp-gray', `${gray}%`);
+    lamp.classList.toggle('hud-lamp-power--spent', level <= 0);
+  }
 }
 
 function updateRunXpProgress() {
@@ -777,44 +789,72 @@ function getRunStatsItems() {
   const stats = S.runStats || {};
   return [
     {
+      section: 'review',
       icon: '🛥️',
-      label: t('resultStats.deliveredBoats'),
-      value: stats.deliveredBoats || S.score || 0,
+      title: t('resultReview.smugglers.title'),
+      rows: [
+        {
+          label: t('resultReview.smugglers.reached'),
+          value: stats.deliveredBoats || S.score || 0,
+          tone: 'positive',
+        },
+        {
+          label: t('resultReview.smugglers.sunk'),
+          value: stats.smugglersSunk || 0,
+          tone: 'negative',
+        },
+      ],
     },
     {
-      icon: '💀',
-      label: t('resultStats.smugglersSunk'),
-      value: stats.smugglersSunk || 0,
-    },
-    {
+      section: 'review',
       icon: '🚔',
-      label: t('resultStats.sunkCops'),
-      value: stats.sunkCops || 0,
+      title: t('resultReview.cops.title'),
+      rows: [
+        {
+          label: t('resultReview.cops.sunk'),
+          value: stats.sunkCops || 0,
+          tone: 'positive',
+        },
+        {
+          label: t('resultReview.cops.reached'),
+          value: stats.copsArrived || S.policeArrived || 0,
+          tone: 'negative',
+        },
+      ],
     },
     {
+      section: 'review',
       icon: '🧜‍♀️',
-      label: t('resultStats.repelledMermaids'),
-      value: stats.repelledMermaids || 0,
+      title: t('resultReview.mermaids.title'),
+      rows: [
+        {
+          label: t('resultReview.mermaids.repelled'),
+          value: stats.repelledMermaids || 0,
+          tone: 'positive',
+        },
+        {
+          label: t('resultReview.mermaids.attacked'),
+          value: stats.mermaidsArrived || S.mermaidsArrived || 0,
+          tone: 'negative',
+        },
+      ],
     },
     {
+      section: 'review',
       icon: '🦑',
-      label: t('resultStats.repelledKraken'),
-      value: stats.repelledKraken || 0,
-    },
-    {
-      icon: '🚨',
-      label: t('resultStats.copsArrived'),
-      value: stats.copsArrived || S.policeArrived || 0,
-    },
-    {
-      icon: '💀',
-      label: t('resultStats.mermaidsArrived'),
-      value: stats.mermaidsArrived || S.mermaidsArrived || 0,
-    },
-    {
-      icon: '🦑',
-      label: t('resultStats.krakensArrived'),
-      value: stats.krakensArrived || S.krakensArrived || 0,
+      title: t('resultReview.kraken.title'),
+      rows: [
+        {
+          label: t('resultReview.kraken.banished'),
+          value: stats.repelledKraken || 0,
+          tone: 'positive',
+        },
+        {
+          label: t('resultReview.kraken.destroyed'),
+          value: stats.krakensArrived || S.krakensArrived || 0,
+          tone: 'negative',
+        },
+      ],
     },
     {
       section: 'time',
@@ -845,17 +885,48 @@ function getCollectedCargoItems() {
   }).filter(Boolean);
 }
 
+function getCollectedPerkItems() {
+  const stacks = S.runPerkStacks || {};
+  return PERK_IDS.map((perkId) => {
+    const count = Math.max(0, Math.floor(stacks[perkId] || 0));
+    if (count <= 0) return null;
+    return {
+      id: perkId,
+      icon: PERK_ICONS[perkId] || '✨',
+      title: t(`perk.${perkId}.title`),
+      count,
+    };
+  }).filter(Boolean);
+}
+
 function renderResultStats(items) {
   if (!$resultStats) return;
   $resultStats.replaceChildren();
 
   const cargoItems = getCollectedCargoItems();
+  const perkItems = getCollectedPerkItems();
   const timeItems = items.filter((item) => item.section === 'time');
-  const runItems = items.filter((item) => item.section !== 'time');
+  const runItems = items.filter((item) => item.section === 'review');
   const sections = [
-    { key: 'time', title: t('win.statTime'), items: timeItems },
+    {
+      key: 'time',
+      title: '',
+      items: timeItems,
+      render: renderResultTimePanel,
+    },
     { key: 'cargo', title: t('resultStats.cargoTitle'), items: cargoItems },
-    { key: 'review', title: t('resultStats.title'), items: runItems },
+    {
+      key: 'perks',
+      title: t('resultStats.perksTitle'),
+      items: perkItems,
+      render: renderResultPerksPanel,
+    },
+    {
+      key: 'review',
+      title: t('resultStats.title'),
+      items: runItems,
+      render: renderResultReviewPanel,
+    },
   ].filter((section) => section.items.length > 0);
 
   let renderedPanels = 0;
@@ -863,9 +934,18 @@ function renderResultStats(items) {
     const panel = createResultStatsPanel(section.title, section.key);
     if (!(panel instanceof HTMLElement)) continue;
 
-    for (const item of section.items) {
-      const row = createResultStatRow(item);
-      if (row) panel.appendChild(row);
+    if (typeof section.render === 'function') {
+      section.render(panel, section.items);
+    } else {
+      const compactItems = section.items.filter((item) => item.compact);
+      if (compactItems.length === section.items.length) {
+        renderResultCompactStatsPanel(panel, compactItems);
+      } else {
+        for (const item of section.items) {
+          const row = createResultStatRow(item);
+          if (row) panel.appendChild(row);
+        }
+      }
     }
 
     $resultStats.appendChild(panel);
@@ -874,7 +954,84 @@ function renderResultStats(items) {
   $resultStats.hidden = renderedPanels === 0;
 }
 
-function createResultStatRow({ icon, label, value, compact }) {
+function renderResultCompactStatsPanel(panel, items) {
+  const list = document.createElement('div');
+  list.className = 'screen-result-compact-list';
+
+  for (const item of items) {
+    const row = createResultStatRow({ ...item, hideLabel: true });
+    if (row) list.appendChild(row);
+  }
+
+  panel.appendChild(list);
+}
+
+function renderResultTimePanel(panel, items) {
+  for (const item of items) {
+    const row = createResultStatRow({ ...item, hideLabel: true });
+    if (row) panel.appendChild(row);
+  }
+}
+
+function renderResultPerksPanel(panel, items) {
+  const list = document.createElement('div');
+  list.className = 'screen-result-perks-list';
+
+  for (const item of items) {
+    const perk = document.createElement('div');
+    perk.className = 'screen-result-perk';
+
+    const icon = document.createElement('span');
+    icon.className = 'screen-result-perk-icon';
+    icon.appendChild(createItemArt(item.id, item.icon));
+
+    const title = document.createElement('span');
+    title.className = 'screen-result-perk-title';
+    title.textContent =
+      item.count > 1 ? `${item.title} x${item.count}` : item.title;
+
+    perk.append(icon, title);
+    list.appendChild(perk);
+  }
+
+  panel.appendChild(list);
+}
+
+function renderResultReviewPanel(panel, items) {
+  const list = document.createElement('div');
+  list.className = 'screen-result-review-list';
+
+  for (const item of items) {
+    const row = document.createElement('div');
+    row.className = 'screen-result-review-item';
+
+    const icon = document.createElement('span');
+    icon.className = 'screen-result-review-icon';
+    icon.appendChild(createEmojiImage(item.icon));
+
+    const values = document.createElement('span');
+    values.className = 'screen-result-review-values';
+
+    const title = document.createElement('span');
+    title.className = 'screen-result-review-title';
+    title.textContent = item.title || '';
+
+    for (const result of item.rows || []) {
+      const value = document.createElement('span');
+      value.className = `screen-result-review-value screen-result-review-value--${result.tone}`;
+      value.textContent = `${result.label}: ${Math.max(0, Math.floor(result.value || 0))}`;
+      values.appendChild(value);
+    }
+
+    values.prepend(title);
+    row.append(icon, values);
+    list.appendChild(row);
+  }
+
+  panel.appendChild(list);
+}
+
+function createResultStatRow({ icon, label, value, compact, hideLabel }) {
   const stat = cloneTemplateFirstElement('$resultStatsRowTemplate');
   if (!(stat instanceof HTMLElement)) return null;
   stat.classList.toggle('screen-result-stat--compact', !!compact);
@@ -884,7 +1041,10 @@ function createResultStatRow({ icon, label, value, compact }) {
   const valueEl = stat.querySelector('.screen-result-stat-value');
 
   if (iconEl) iconEl.replaceChildren(createEmojiImage(icon));
-  if (text) text.textContent = label;
+  if (text) {
+    if (hideLabel) text.remove();
+    else text.textContent = label;
+  }
   if (valueEl) valueEl.textContent = String(value);
 
   return stat;
@@ -899,7 +1059,10 @@ function createResultStatsPanel(titleText, sectionKey) {
   }
 
   const title = panel.querySelector('.screen-result-stats-title');
-  if (title) title.textContent = titleText;
+  if (title) {
+    if (titleText) title.textContent = titleText;
+    else title.remove();
+  }
 
   return panel;
 }
