@@ -868,7 +868,13 @@ function getRunStatsItems() {
       label: t('win.statTime'),
       value: formatSurvivalTime(S.runSurvivalMs),
     },
-  ];
+  ].map((item) => {
+    if (item.section !== 'review') return item;
+    const rows = (item.rows || []).filter((row) => {
+      return Math.max(0, Math.floor(row.value || 0)) > 0;
+    });
+    return rows.length > 0 ? { ...item, rows } : null;
+  }).filter(Boolean);
 }
 
 function getCollectedCargoItems() {
@@ -916,16 +922,16 @@ function renderResultStats(items) {
     },
     { key: 'cargo', title: t('resultStats.cargoTitle'), items: cargoItems },
     {
-      key: 'perks',
-      title: t('resultStats.perksTitle'),
-      items: perkItems,
-      render: renderResultPerksPanel,
-    },
-    {
       key: 'review',
       title: t('resultStats.title'),
       items: runItems,
       render: renderResultReviewPanel,
+    },
+    {
+      key: 'perks',
+      title: t('resultStats.perksTitle'),
+      items: perkItems,
+      render: renderResultPerksPanel,
     },
   ].filter((section) => section.items.length > 0);
 
