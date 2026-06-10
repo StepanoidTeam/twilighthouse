@@ -200,6 +200,7 @@ const EMOJI_SPRITE_FILES = {
   '🥃': 'sprites/emojis/🥃.png',
   '🛢️': 'sprites/emojis/🛢️.png',
   '🛥️': 'sprites/emojis/🛥️.png',
+  '🚔': 'sprites/emojis/police.png',
   '💀': 'sprites/emojis/💀.png',
   '🚨': 'sprites/emojis/🚨.png',
   '🧜‍♀️': 'sprites/emojis/🧜‍♀️.png',

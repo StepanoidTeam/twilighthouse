@@ -115,6 +115,12 @@
     margin: 0;
   }
 
+  .screen-result-msg .emoji-sprite {
+    width: 1.15em;
+    height: 1.15em;
+    vertical-align: -0.18em;
+  }
+
   .screen-result-stats {
     display: flex;
     flex-direction: column;
@@ -201,16 +207,20 @@
     border-bottom: 1px solid rgba(218, 171, 111, 0.2);
   }
 
-  .screen-result-stat:last-child {
+  /* .screen-result-stat:last-child {
     border-bottom: 0;
-  }
+  } */
 
   .screen-result-stat-icon {
+    display: grid;
+    place-items: center;
     font-size: 1.35em;
+    line-height: 0;
     text-align: center;
   }
 
   .screen-result-stat-icon .emoji-sprite {
+    display: block;
     width: 1.2em;
     height: 1.2em;
   }
@@ -232,10 +242,12 @@
   }
 
   .screen-result-stat--compact .screen-result-stat-icon {
+    place-items: center;
     font-size: 1rem;
   }
 
   .screen-result-stat--compact .screen-result-stat-icon .emoji-sprite {
+    display: block;
     width: 64px;
     height: 64px;
   }
@@ -260,6 +272,7 @@
   }
 
   .screen-result-stats-panel--time .screen-result-stat-icon .emoji-sprite {
+    display: block;
     width: 56px;
     height: 56px;
   }

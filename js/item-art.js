@@ -13,6 +13,7 @@ export const ITEM_ART_BY_NAME = {
   contraband_route: 'sprites/items/boat.png',
   alarm_bell: 'sprites/items/bell.png',
   phosphor_water: 'sprites/items/wave.png',
+  new_icebergs: 'sprites/emojis/iceberg.png',
 
   better_oil: 'sprites/items/fuel.png',
   brighter_beam: 'sprites/items/lamp.png',

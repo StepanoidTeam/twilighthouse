@@ -258,17 +258,16 @@ function initMenuButtons() {
 
 function initBackButtons() {
   if (backButtonsBound || !$menuRoot) return;
-  $menuRoot.addEventListener('click', (e) => {
-    const target = e.target;
-    if (!(target instanceof HTMLElement)) return;
-    const $button = target.closest('.back-btn');
-    if (!($button instanceof HTMLButtonElement)) return;
-
-    e.preventDefault();
-    e.stopPropagation();
-    playMenuClick();
-    navigateBackFromMenu();
-  });
+  const $buttons = document.querySelectorAll('.back-btn');
+  for (const $button of $buttons) {
+    if (!($button instanceof HTMLButtonElement)) continue;
+    $button.addEventListener('click', (e) => {
+      e.preventDefault();
+      e.stopPropagation();
+      playMenuClick();
+      navigateBackFromMenu();
+    });
+  }
   backButtonsBound = true;
 }
 
