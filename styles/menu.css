@@ -471,6 +471,7 @@
   padding-top: 0;
   text-align: center;
   border-bottom: 0;
+  margin-bottom: 15px;
 }
 
 .howtoplay-step-counter {
@@ -536,7 +537,7 @@
   z-index: 2;
   left: 56px;
   right: 56px;
-  bottom: 28px;
+  bottom: 20px;
   grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
   align-items: center;
   gap: 18px;
@@ -1529,7 +1530,8 @@
 }
 
 .hotkey2 {
-  padding: 4px 8px;
+  padding: 0px;
+  margin-top: 10px;
   border-radius: 5px;
   border: 2px solid #e9d8ad;
   color: #e9d8ad;

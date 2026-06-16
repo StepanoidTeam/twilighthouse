@@ -185,6 +185,10 @@
     transform var(--duration-ui);
 }
 
+.menu-leaderboard-row:first-child {
+  margin-top: 1px;
+}
+
 .menu-leaderboard-row::after {
   content: '';
   position: absolute;

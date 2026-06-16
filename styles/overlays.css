@@ -579,7 +579,7 @@
     width: min(100%, 420px);
     flex-direction: column;
     align-items: stretch;
-    gap: 0;
+    gap: 5px;
   }
 
   .exit-confirm-btn {

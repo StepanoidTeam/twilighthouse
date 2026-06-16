@@ -1,6 +1,6 @@
 # gamedesigners
 
-@nuclme
+@noki_a
 @stepastepa
 @adriaaaaana
 @bobanko
@@ -9,7 +9,7 @@
 
 @claude
 @bobanko
-@nuclme
+@noki_a
 
 # concept artists
 
