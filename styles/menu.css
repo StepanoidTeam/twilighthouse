@@ -467,7 +467,7 @@
   justify-content: flex-start;
   align-items: center;
   min-height: 0;
-  gap: 8px;
+  gap: 4px;
   padding-top: 0;
   text-align: center;
   border-bottom: 0;
@@ -476,7 +476,7 @@
 
 .howtoplay-step-counter {
   color: #f04a2e;
-  font-size: 16px;
+  font-size: 20px;
   font-weight: 700;
   letter-spacing: 0.12em;
   text-transform: uppercase;
@@ -505,6 +505,19 @@
   font-size: clamp(1.5rem, 3vh, 2.15rem);
   line-height: 1;
   text-shadow: 0 2px 10px rgba(0, 0, 0, 0.64);
+}
+
+/* .howtoplay-step-header.is-mermaids {
+  margin-bottom: 24px;
+} */
+
+.howtoplay-step-header.is-mermaids .howtoplay-step-title {
+  font-size: clamp(1.9rem, 4.6vh, 3rem);
+}
+
+.howtoplay-step-header.is-mermaids .howtoplay-step-text {
+  font-size: clamp(1.75rem, 3.35vh, 2.35rem);
+  line-height: 1.08;
 }
 
 .howtoplay-video-wrap {

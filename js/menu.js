@@ -684,6 +684,9 @@ function showTutorial() {
   }
 
   const $title = $menuTutorialShell.querySelector('.menu-screen-title');
+  const $stepHeader = $menuTutorialShell.querySelector(
+    '.howtoplay-step-header',
+  );
   const $stepCounter = $menuTutorialShell.querySelector(
     '.howtoplay-step-counter',
   );
@@ -696,6 +699,7 @@ function showTutorial() {
 
   if (
     !($title instanceof HTMLElement) ||
+    !($stepHeader instanceof HTMLElement) ||
     !($stepCounter instanceof HTMLElement) ||
     !($stepTitle instanceof HTMLElement) ||
     !($stepText instanceof HTMLElement) ||
@@ -731,6 +735,7 @@ function showTutorial() {
   tutorialState = {
     index: startIndex,
     items,
+    $stepHeader,
     $stepCounter,
     $stepTitle,
     $stepText,
@@ -777,6 +782,7 @@ function renderTutorialStep() {
   const {
     index,
     items,
+    $stepHeader,
     $stepCounter,
     $stepTitle,
     $stepText,
@@ -787,6 +793,8 @@ function renderTutorialStep() {
   } = tutorialState;
 
   const item = items[index];
+
+  $stepHeader.classList.toggle('is-mermaids', item.id === 'mermaids');
 
   $stepCounter.textContent = `${index + 1} / ${items.length}`;
   $stepTitle.textContent = item.title || '';
